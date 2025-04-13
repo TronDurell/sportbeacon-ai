@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SportBeacon AI Components
 
 A suite of AI-powered tools for sports analytics, player insights, and game management.
@@ -124,3 +125,6 @@ print(f"Performance Trends: {trends}")
 ## License
 
 MIT License 
+=======
+# sportbeacon-ai
+>>>>>>> 7d54d1e021c29d45614c1094a09bc40019eb550d
