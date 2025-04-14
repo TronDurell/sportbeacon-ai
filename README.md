@@ -1,4 +1,47 @@
 <<<<<<< HEAD
+# 🏅 SportBeacon AI
+
+**SportBeacon AI** is an AI-powered platform for sports analytics, athlete development, and game management. It combines machine learning, real-time data tracking, and interactive components to provide players, coaches, and fans with smart insights and immersive tools.
+
+---
+
+## 🚀 Features at a Glance
+
+- 📊 **Player Insight Engine**  
+  Understand athlete performance using trend detection, skill breakdowns, and growth metrics.
+
+- 🧠 **AI-Enhanced Social Feed**  
+  Auto-analyzes workouts or recipes in video posts, recommends local stores, and personalizes feed results.
+
+- 📍 **Immersive Map System (3D & AR)**  
+  Explore live sports events, venues, teams, and players using 3D or AR view with real-time overlays.
+
+- 🧰 **Real-Time Drill Logger**  
+  Coaches and players can log and view drills with performance summaries.
+
+- 🛠️ **Role-Based Admin Tools**  
+  Role-specific access for players, coaches, scouts, and admins.
+
+- 💬 **Smart Feed AI Assistant**  
+  Summarizes posts, tags content, and scores relevance for user timelines.
+
+---
+
+## 📦 Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/IronDurell/sportbeacon-ai.git
+cd sportbeacon-ai
+
+# Install Python backend requirements
+pip install -r requirements.txt
+
+# Install frontend dependencies (from /frontend folder)
+cd frontend
+npm install
+
+
 # SportBeacon AI Components
 
 A suite of AI-powered tools for sports analytics, player insights, and game management.
@@ -112,7 +155,15 @@ top_skills = engine.identify_top_skills(normalized_stats)
 
 print(f"Top Skills: {top_skills}")
 print(f"Performance Trends: {trends}")
-```
+Roadmap Preview
+Feature	Status
+Player Insights Engine	✅ Complete
+Role-Based Auth & Access	✅ Complete
+Drill Logger	✅ Complete
+Social Feed AI Analysis	✅ Complete
+Immersive Map + AR	🚧 In Progress
+Scout/Coach Dashboard	🔜 Planned
+Reward System	🔜 Planned```
 
 ## Contributing
 
@@ -121,7 +172,8 @@ print(f"Performance Trends: {trends}")
 3. Commit your changes
 4. Push to the branch
 5. Create a Pull Request
-
+Built by Antron TronDurell Snider @CultureHustling Twitter/X
+With tools like: Firebase, OpenAI, Google Maps API, Unreal Engine, Next.js
 ## License
 
 MIT License 
