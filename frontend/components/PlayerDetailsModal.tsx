@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Modal,
     Box,
@@ -10,7 +10,8 @@ import {
     ListItem,
     ListItemText,
     Chip,
-    Button
+    Button,
+    Alert
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
@@ -49,6 +50,8 @@ export const PlayerDetailsModal: React.FC<PlayerDetailsModalProps> = ({
     player,
     drillHistory
 }) => {
+    const [error, setError] = useState<string | null>(null);
+
     const performanceData = {
         labels: drillHistory.map(drill => new Date(drill.completedAt).toLocaleDateString()),
         datasets: [
@@ -80,6 +83,15 @@ export const PlayerDetailsModal: React.FC<PlayerDetailsModalProps> = ({
         }
     };
 
+    const handleAction = async () => {
+        try {
+            // Simulate an action that might fail
+            throw new Error('An error occurred while processing your request.');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+        }
+    };
+
     return (
         <Modal
             open={open}
@@ -99,6 +111,11 @@ export const PlayerDetailsModal: React.FC<PlayerDetailsModalProps> = ({
                 maxHeight: '90vh',
                 overflow: 'auto'
             }}>
+                {error && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Alert>
+                )}
                 <IconButton
                     onClick={onClose}
                     sx={{ position: 'absolute', right: 8, top: 8 }}

@@ -1,130 +1,189 @@
-<<<<<<< HEAD
-# SportBeacon AI Components
+# SportBeacon AI 🏆
 
-A suite of AI-powered tools for sports analytics, player insights, and game management.
+[![Build Status](https://github.com/TronDurell/sportbeacon-ai/actions/workflows/main.yml/badge.svg)](https://github.com/TronDurell/sportbeacon-ai/actions)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.0-blue)](https://reactjs.org/)
+[![Firebase](https://img.shields.io/badge/Firebase-10.0-orange)](https://firebase.google.com/)
 
-## Installation
+SportBeacon AI is a next-generation sports analytics platform that combines AI-powered insights with social features to help athletes improve their performance and monetize their skills.
 
+## 🌟 Features
+
+### Player Analytics
+- **AI Video Analysis**: Automated skill assessment and technique breakdown
+- **Performance Tracking**: Track progress with detailed metrics and insights
+- **Custom Drills**: AI-generated training recommendations
+
+### Social & Monetization
+- **Creator Dashboard**: Track earnings, views, and engagement
+- **Tipping System**: Receive tips from fans and supporters
+- **Badge System**: Earn badges and unlock multipliers
+- **Referral Program**: Multi-tier referral system with rewards
+
+### Technical Features
+- **OpenGraph Integration**: Dynamic player cards for social sharing
+- **PDF Report Generation**: Detailed performance reports with charts
+- **Weekly Email Summaries**: Automated performance updates
+- **Role-Based Access**: Coach and player-specific views
+
+## 🚀 Getting Started
+
+### Prerequisites
 ```bash
-pip install -r requirements.txt
+node >= 18.0.0
+npm >= 9.0.0
 ```
 
-## Components
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/TronDurell/sportbeacon-ai.git
 
-### 1. Player Insight Engine (`ai/player_insight.py`)
+# Install dependencies
+cd sportbeacon-ai
+npm install
 
-Analyzes player statistics to generate insights about performance, skills, and trends.
+# Set up environment variables
+cp .env.example .env.local
 
-```python
-from ai.player_insight import PlayerInsightEngine
-
-# Initialize the engine
-engine = PlayerInsightEngine()
-
-# Generate player report
-player_stats = load_player_data()  # Your data loading function
-report = engine.generate_player_report(player_stats)
-
-# Access specific insights
-top_skills = report['top_skills']
-growth_areas = report['growth_areas']
-recent_trends = report['recent_trends']
-win_rate = report['win_rate']
+# Start development server
+npm run dev
 ```
 
-Features:
-- Data normalization using StandardScaler
-- Trend analysis with rolling averages
-- Top skills identification
-- Growth areas detection
-- Win rate calculation
-- Comprehensive player reports
+## 🏗️ Architecture
 
-### 2. FastAPI Backend (`backend/api.py`)
+### Frontend
+- Next.js with TypeScript
+- Material-UI for components
+- Framer Motion for animations
+- React-PDF for report generation
 
-RESTful API endpoints for accessing player analytics and insights.
+### Backend
+- Firebase Cloud Functions
+- Firestore for data storage
+- SendGrid for email delivery
+- Vercel for OpenGraph image generation
 
-#### Endpoints:
+## 📊 Data Models
 
-**GET /api/players/top-winners**
-```python
-# Get top 5 players by win rate in the last 30 days
-GET /api/players/top-winners?time_period_days=30&limit=5
-
-# Response format:
-[
-    {
-        "player_id": 1,
-        "player_name": "Player_1",
-        "win_rate": 75.0,
-        "games_played": 20,
-        "avg_points": 22.5,
-        "avg_assists": 6.3,
-        "avg_rebounds": 8.1
-    },
-    ...
-]
+### Player Profile
+```typescript
+interface PlayerProfile {
+  id: string;
+  name: string;
+  badge: {
+    tier: 'Bronze' | 'Silver' | 'Gold';
+    progress: number;
+  };
+  stats: {
+    totalTips: number;
+    weeklyViews: number;
+    shareCount: number;
+  };
+  preferences: {
+    profilePublic: boolean;
+    receiveWeeklyEmail: boolean;
+  };
+}
 ```
 
-## Project Structure
-
-```
-/sportbeacon-ai
-├── /ai
-│   ├── player_insight.py      # Player analytics engine
-│   ├── matchmaking_engine.py  # Game matchmaking algorithm
-│   ├── highlight_generator.py # Auto-tagging system
-│   ├── scheduler_bot.py       # Scheduling assistant
-│   └── coach_assistant.py     # LangChain-based chatbot
-├── /data
-│   ├── player_profiles.json   # Player data
-│   └── sample_games.csv       # Game statistics
-├── /backend
-│   └── api.py                 # FastAPI endpoints
-├── /frontend
-│   └── ui_components.jsx      # React components
-└── README.md
+### Assessment Data
+```typescript
+interface Assessment {
+  playerId: string;
+  timestamp: Date;
+  metrics: {
+    technique: number;
+    speed: number;
+    accuracy: number;
+    consistency: number;
+  };
+  aiInsights: string[];
+  recommendedDrills: string[];
+}
 ```
 
-## Usage Examples
+## 🔒 Security
 
-### Player Insight Analysis
+- Role-based access control for features
+- Profile visibility controls
+- Firebase Authentication
+- Secure API endpoints
 
-```python
-from ai.player_insight import PlayerInsightEngine
-import pandas as pd
+## 📱 Mobile Responsiveness
 
-# Initialize the engine
-engine = PlayerInsightEngine()
+The platform is fully responsive with:
+- Adaptive layouts
+- Touch-friendly controls
+- Optimized video playback
+- Mobile-first design approach
 
-# Load player statistics
-player_stats = pd.DataFrame({
-    'points': [20, 25, 18, 30, 22],
-    'assists': [5, 7, 4, 8, 6],
-    'rebounds': [8, 10, 7, 12, 9],
-    'game_date': ['2023-01-01', '2023-01-03', '2023-01-05', '2023-01-07', '2023-01-09']
-})
-
-# Generate insights
-normalized_stats = engine.normalize_stats(player_stats)
-trends = engine.calculate_player_trends(normalized_stats)
-top_skills = engine.identify_top_skills(normalized_stats)
-
-print(f"Top Skills: {top_skills}")
-print(f"Performance Trends: {trends}")
-```
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## License
+## 📄 License
 
-MIT License 
-=======
-# sportbeacon-ai
->>>>>>> 7d54d1e021c29d45614c1094a09bc40019eb550d
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Team
+
+- [@TronDurell](https://github.com/TronDurell) - Lead Developer
+- Additional contributors welcome!
+
+## 🙏 Acknowledgments
+
+- [Vercel](https://vercel.com) for hosting and OpenGraph support
+- [Firebase](https://firebase.google.com) for backend infrastructure
+- [Material-UI](https://mui.com) for UI components
+
+### 🧠 AI Module Overview
+- `player_insight.py`: Analyzes stats to detect top skills and trends
+- `highlight_tagging_engine.py`: Auto-tags events like hot streaks or clutch plays using configurable scores
+- `coach_assistant.py`: Evaluates player/team performance based on strategic goals
+- `highlight_generator.py`: Suggests highlight-worthy events from matches
+
+#### Leaderboard Module
+The `useLeaderboard` hook ranks players by win rate, assists, and points, providing a dynamic leaderboard for competitive analysis.
+
+Example usage:
+```jsx
+const { players, loading } = useLeaderboard();
+```
+
+### 🧪 API Endpoints
+- `GET /api/posts`: Retrieve a list of posts
+- `GET /api/insights`: Fetch insights generated by the AI
+- `GET /api/player/:id/timeline`: Get the timeline of a specific player
+- `GET /api/venues/:id/stats`: Retrieve statistics for a specific venue
+
+Example curl commands:
+```
+curl -X GET http://localhost:3000/api/posts
+curl -X GET http://localhost:3000/api/insights
+curl -X GET http://localhost:3000/api/player/123/timeline
+curl -X GET http://localhost:3000/api/venues/456/stats
+```
+
+### 🧠 API Module Overview
+
+#### ARStatOverlay
+The `ARStatOverlay` component displays live player statistics in an augmented reality overlay. It uses the `usePlayerStats` hook to fetch and display data such as player name, win rate, and trend.
+
+Example usage:
+```jsx
+<ARStatOverlay venueId="12345" />
+```
+
+#### usePlayerStats
+The `usePlayerStats` hook fetches player statistics from Firestore based on a given venue ID. It returns the data along with loading and error states.
+
+Example usage:
+```jsx
+const { data, loading, error } = usePlayerStats('12345');
+``` 

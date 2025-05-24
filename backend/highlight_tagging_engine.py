@@ -2,6 +2,7 @@ from typing import List, Dict, Optional
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import uuid
+import json
 
 @dataclass
 class GameContext:
@@ -44,13 +45,30 @@ class HighlightTag:
     related_actions: List[PlayerAction]
 
 class HighlightTaggingEngine:
-    def __init__(self):
+    def __init__(self, config_path='backend/config/taggingConfig.json'):
+        # Load configuration from JSON
+        with open(config_path, 'r') as config_file:
+            config = json.load(config_file)
+
         # Configuration thresholds
-        self.clutch_threshold_secs = 120  # Final 2 mins
-        self.hot_streak_window_secs = 120  # 2 mins for hot streaks
-        self.momentum_run_threshold = 10  # 10-0 run
-        self.defensive_impact_threshold = 2  # 2+ defensive plays
-        
+        self.clutch_threshold_secs = config.get('clutch_threshold_secs', 30)
+        self.hot_streak_window_secs = config.get('hot_streak_window_secs', 120)
+        self.momentum_run_threshold = config.get('momentum_run_threshold', 10)
+        self.defensive_impact_threshold = config.get('defensive_impact_threshold', 3)
+
+        # Impact scores with defaults
+        self.impact_scores = {
+            "three_pointer": config.get("three_pointer", 3),
+            "two_pointer": config.get("two_pointer", 2),
+            "block": config.get("block", 1),
+            "steal": config.get("steal", 1),
+            "clutch_bonus": config.get("clutch_bonus", 5),
+            "streak_bonus": config.get("streak_bonus", 5),
+            "momentum_bonus": config.get("momentum_bonus", 5),
+            "close_game_bonus": config.get("close_game_bonus", 5),
+            "fourth_quarter_bonus": config.get("fourth_quarter_bonus", 5)
+        }
+
         # Tracking state
         self.team_scoring_runs = {}  # Track team scoring runs
         self.player_shot_streaks = {}  # Track player shooting streaks
@@ -270,4 +288,41 @@ class HighlightTaggingEngine:
                 }
                 for action in highlight.related_actions
             ]
-        } 
+        }
+
+    def _calculate_impact_score(self, event, game_context, streak_info=None, momentum_info=None):
+        """Calculate impact score with enhanced context."""
+        base_score = 50
+
+        # Basic scoring impact
+        event_type_scores = {
+            "3PT": self.impact_scores['three_pointer'],
+            "2PT": self.impact_scores['two_pointer'],
+            "Block": self.impact_scores['block'],
+            "Steal": self.impact_scores['steal']
+        }
+        base_score += event_type_scores.get(event["event_type"], 0)
+
+        # Clutch situation bonus
+        if self._is_clutch_situation(event):
+            base_score += self.impact_scores['clutch_bonus']
+
+        # Streak bonus
+        if streak_info:
+            streak_bonus = min(self.impact_scores['streak_bonus'], streak_info["points"] * 2)
+            base_score += streak_bonus
+
+        # Momentum shift bonus
+        if momentum_info:
+            shift_bonus = min(self.impact_scores['momentum_bonus'], momentum_info["shift_magnitude"] * 2)
+            base_score += shift_bonus
+
+        # Close game bonus
+        if abs(game_context["score_differential"]) <= 5:
+            base_score += self.impact_scores['close_game_bonus']
+
+        # Game situation bonuses
+        if game_context.get("quarter", 1) >= 4:  # Fourth quarter or OT
+            base_score += self.impact_scores['fourth_quarter_bonus']
+
+        return min(100, base_score) 

@@ -212,8 +212,11 @@ export const TrainerView = () => {
 
     // Render loading states
     const renderLoading = () => (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-            <CircularProgress />
+        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="200px">
+            <CircularProgress size={60} thickness={5} />
+            <Typography variant="h6" color="textSecondary" sx={{ mt: 2 }}>
+                Loading data, please wait...
+            </Typography>
         </Box>
     );
 
