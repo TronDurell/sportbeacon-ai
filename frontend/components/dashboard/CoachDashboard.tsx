@@ -1,7 +1,11 @@
 import { useGameInsights } from '@/hooks/useGameInsights';
+import { analyzeDrillTrends } from '@/hooks/useAIInsights';
+import { Typography } from '@mui/material';
 
 export default function CoachDashboard() {
   const { insights, loading, error } = useGameInsights('someGameId');
+  const drillLogs = []; // This should be replaced with actual drill logs data
+  const aiFocus = analyzeDrillTrends(drillLogs);
 
   if (loading) return <div>Loading game insights...</div>;
   if (error) return <div>Error loading game insights: {error}</div>;
@@ -20,6 +24,7 @@ export default function CoachDashboard() {
           </div>
         ))}
       </div>
+      <Typography variant="h6">AI Focus Suggestion: {aiFocus}</Typography>
     </div>
   );
 } 

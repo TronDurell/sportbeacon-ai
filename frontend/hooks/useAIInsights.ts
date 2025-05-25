@@ -78,4 +78,22 @@ export const useAIInsights = () => {
   }, []);
 
   return insights;
-}; 
+};
+
+export function analyzeDrillTrends(drillLogs: any[]) {
+  // Analyze drill logs to determine focus areas
+  // Example logic: if a player consistently underperforms in stamina drills, suggest more stamina training
+  const focusRecommendations = drillLogs.map(log => {
+    if (log.type === 'stamina' && log.performance < 50) {
+      return 'Needs more stamina drills';
+    }
+    return 'Balanced performance';
+  });
+  return focusRecommendations;
+}
+
+export function summarizePlayerGrowth(playerData: any) {
+  // Logic to auto-summarize player growth
+  // Example: "Player has improved speed by 8 points over the last 2 weeks."
+  return `Player has improved ${playerData.metric} by ${playerData.increase} points over the last ${playerData.timeFrame}.`;
+} 
