@@ -1,0 +1,18 @@
+sport: soccer
+skills:
+  - name: passing
+    metrics:
+      - accuracy
+      - speed
+  - name: shooting
+    metrics:
+      - power
+      - precision
+  - name: dribbling
+    metrics:
+      - control
+      - agility
+logic:
+  plateau: "repeat drill with variation"
+  improvement: "advance to next level drill"
+  decline: "focus on fundamentals" 

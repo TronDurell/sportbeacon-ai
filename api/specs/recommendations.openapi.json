@@ -1,0 +1,98 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Recommendations API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/recommendations": {
+      "get": {
+        "summary": "Get training recommendations",
+        "parameters": [
+          {
+            "name": "player_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sport",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius_km",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of training recommendations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "recommendation": { "type": "string" },
+                      "reason": { "type": "string" },
+                      "confidence": { "type": "number" },
+                      "goal": { "type": "string" },
+                      "venue": {
+                        "type": "object",
+                        "properties": {
+                          "venue_id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "type": { "type": "string", "enum": ["gym", "court", "trail", "pool", "field", "lake"] },
+                          "surface": { "type": "string" },
+                          "coordinates": {
+                            "type": "object",
+                            "properties": {
+                              "lat": { "type": "number" },
+                              "lng": { "type": "number" }
+                            }
+                          },
+                          "amenities": {
+                            "type": "array",
+                            "items": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} 

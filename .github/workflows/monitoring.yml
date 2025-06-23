@@ -1,0 +1,284 @@
+name: Monitoring & Health Checks
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes
+  workflow_dispatch:  # Manual trigger
+  repository_dispatch:
+    types: [health-check]
+
+env:
+  PRODUCTION_URL: https://sportbeacon.ai
+  STAGING_URL: https://staging.sportbeacon.ai
+  API_HEALTH_ENDPOINT: /api/health
+  GRAFANA_URL: https://grafana.sportbeacon.ai
+
+jobs:
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Health Check - Production API
+      id: prod-health
+      run: |
+        echo "Checking production API health..."
+        response=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.PRODUCTION_URL }}${{ env.API_HEALTH_ENDPOINT }})
+        if [ "$response" = "200" ]; then
+          echo "✅ Production API is healthy (HTTP $response)"
+          echo "status=healthy" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Production API health check failed (HTTP $response)"
+          echo "status=unhealthy" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+    - name: Health Check - Staging API
+      id: staging-health
+      run: |
+        echo "Checking staging API health..."
+        response=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.STAGING_URL }}${{ env.API_HEALTH_ENDPOINT }})
+        if [ "$response" = "200" ]; then
+          echo "✅ Staging API is healthy (HTTP $response)"
+          echo "status=healthy" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Staging API health check failed (HTTP $response)"
+          echo "status=unhealthy" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+    - name: Response Time Check
+      run: |
+        echo "Checking API response times..."
+        
+        # Production response time
+        prod_time=$(curl -s -o /dev/null -w "%{time_total}" ${{ env.PRODUCTION_URL }}${{ env.API_HEALTH_ENDPOINT }})
+        echo "Production response time: ${prod_time}s"
+        
+        # Staging response time
+        staging_time=$(curl -s -o /dev/null -w "%{time_total}" ${{ env.STAGING_URL }}${{ env.API_HEALTH_ENDPOINT }})
+        echo "Staging response time: ${staging_time}s"
+        
+        # Alert if response time > 2 seconds
+        if (( $(echo "$prod_time > 2" | bc -l) )); then
+          echo "⚠️ Production response time is slow: ${prod_time}s"
+        fi
+        
+        if (( $(echo "$staging_time > 2" | bc -l) )); then
+          echo "⚠️ Staging response time is slow: ${staging_time}s"
+        fi
+
+  resource-monitoring:
+    name: Resource Monitoring
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    timeout-minutes: 10
+    
+    steps:
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+        
+    - name: Configure kubectl for production
+      run: |
+        echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > kubeconfig-prod
+        export KUBECONFIG=kubeconfig-prod
+        
+    - name: Check Kubernetes resources
+      run: |
+        export KUBECONFIG=kubeconfig-prod
+        
+        echo "=== Pod Status ==="
+        kubectl get pods -n sportbeacon-ai
+        
+        echo "=== Resource Usage ==="
+        kubectl top pods -n sportbeacon-ai
+        
+        echo "=== Service Status ==="
+        kubectl get services -n sportbeacon-ai
+        
+        echo "=== HPA Status ==="
+        kubectl get hpa -n sportbeacon-ai
+        
+    - name: Check database connections
+      run: |
+        export KUBECONFIG=kubeconfig-prod
+        
+        # Check PostgreSQL connections
+        echo "=== Database Connections ==="
+        kubectl exec -n sportbeacon-ai deployment/sportbeacon-postgres -- psql -U sportbeacon -d sportbeacon -c "SELECT count(*) as active_connections FROM pg_stat_activity WHERE state = 'active';"
+        
+    - name: Check Redis health
+      run: |
+        export KUBECONFIG=kubeconfig-prod
+        
+        # Check Redis cluster health
+        echo "=== Redis Health ==="
+        kubectl exec -n sportbeacon-ai deployment/sportbeacon-redis -- redis-cli ping
+        kubectl exec -n sportbeacon-ai deployment/sportbeacon-redis -- redis-cli info replication
+
+  alerting:
+    name: Alerting
+    runs-on: ubuntu-latest
+    needs: [health-check, resource-monitoring]
+    if: always() && (needs.health-check.result == 'failure' || needs.resource-monitoring.result == 'failure')
+    
+    steps:
+    - name: Send Slack Alert
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        text: |
+          🚨 SportBeaconAI Health Check Failed
+          
+          **Environment:** ${{ github.ref_name }}
+          **Workflow:** ${{ github.workflow }}
+          **Run:** ${{ github.run_id }}
+          
+          Please check the logs and take action if needed.
+          
+          <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        
+    - name: Create Issue for Critical Failure
+      if: needs.health-check.result == 'failure'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const issue = await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `🚨 Critical: Production Health Check Failed - ${new Date().toISOString()}`,
+            body: `
+              ## Health Check Failure
+              
+              **Time:** ${new Date().toISOString()}
+              **Workflow:** ${context.workflow}
+              **Run:** ${context.runId}
+              
+              ### Immediate Actions Required:
+              1. Check production logs
+              2. Verify database connectivity
+              3. Check Kubernetes pod status
+              4. Review recent deployments
+              
+              ### Links:
+              - [Workflow Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+              - [Production Dashboard](${{ env.GRAFANA_URL }})
+              
+              ### Rollback if needed:
+              \`\`\`bash
+              ./scripts/rollback.sh --version=previous
+              \`\`\`
+            `,
+            labels: ['critical', 'health-check', 'production']
+          });
+          
+          console.log(`Created issue: ${issue.data.html_url}`);
+
+  metrics-collection:
+    name: Metrics Collection
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+    - name: Collect API Metrics
+      run: |
+        echo "Collecting API metrics..."
+        
+        # Production metrics
+        prod_metrics=$(curl -s ${{ env.PRODUCTION_URL }}/api/metrics 2>/dev/null || echo "{}")
+        echo "production_metrics=$prod_metrics" >> $GITHUB_ENV
+        
+        # Staging metrics
+        staging_metrics=$(curl -s ${{ env.STAGING_URL }}/api/metrics 2>/dev/null || echo "{}")
+        echo "staging_metrics=$staging_metrics" >> $GITHUB_ENV
+        
+    - name: Update Status Page
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Read current status
+          let status = {
+            timestamp: new Date().toISOString(),
+            production: {
+              status: 'operational',
+              response_time: 0,
+              uptime: 99.9
+            },
+            staging: {
+              status: 'operational',
+              response_time: 0,
+              uptime: 99.9
+            }
+          };
+          
+          // Update with actual metrics if available
+          if (process.env.production_metrics && process.env.production_metrics !== '{}') {
+            try {
+              const metrics = JSON.parse(process.env.production_metrics);
+              status.production.response_time = metrics.response_time || 0;
+              status.production.uptime = metrics.uptime || 99.9;
+            } catch (e) {
+              console.log('Failed to parse production metrics');
+            }
+          }
+          
+          if (process.env.staging_metrics && process.env.staging_metrics !== '{}') {
+            try {
+              const metrics = JSON.parse(process.env.staging_metrics);
+              status.staging.response_time = metrics.response_time || 0;
+              status.staging.uptime = metrics.uptime || 99.9;
+            } catch (e) {
+              console.log('Failed to parse staging metrics');
+            }
+          }
+          
+          // Write status file
+          fs.writeFileSync('status.json', JSON.stringify(status, null, 2));
+          
+    - name: Commit Status Update
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add status.json
+        git commit -m "Update system status - $(date)" || exit 0
+        git push
+
+  performance-test:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install Artillery
+      run: npm install -g artillery
+      
+    - name: Run Load Test
+      run: |
+        echo "Running performance test..."
+        artillery run tests/load-test.yml
+        
+    - name: Upload Performance Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-report
+        path: artillery-report.json 
