@@ -51,6 +51,8 @@ import {
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import { api } from '../../services/api';
+import InlineTooltip from '../InlineTooltip';
+import ConflictRationaleBanner from '../ConflictRationaleBanner';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -76,6 +78,14 @@ const AnalyticsDashboard: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d');
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [error, setError] = useState<string | null>(null);
+  const [showConflictBanner, setShowConflictBanner] = useState(true);
+
+  // Mock coach status data
+  const coachStatus = [
+    { name: 'Coach Smith', status: 'active', lastActive: 'Today' },
+    { name: 'Coach Lee', status: 'inactive', lastActive: '3 days ago' },
+    { name: 'Coach Patel', status: 'pending', lastActive: '-' },
+  ];
 
   useEffect(() => {
     loadAnalytics();
@@ -250,6 +260,7 @@ const AnalyticsDashboard: React.FC = () => {
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
           Analytics Dashboard
+          <InlineTooltip title="Admins/Coaches only." />
         </Typography>
         <Box display="flex" gap={2}>
           <FormControl size="small">
@@ -283,6 +294,14 @@ const AnalyticsDashboard: React.FC = () => {
           </FormControl>
         </Box>
       </Box>
+
+      {/* Conflict Rationale Banner for Rule Conflicts */}
+      {showConflictBanner && (
+        <ConflictRationaleBanner
+          message="Conflict due to prior reservation. Please reschedule."
+          onClose={() => setShowConflictBanner(false)}
+        />
+      )}
 
       {/* Key Metrics */}
       <Grid container spacing={3} mb={3}>
@@ -378,7 +397,7 @@ const AnalyticsDashboard: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Region Distribution
+                Region Distribution <InlineTooltip title="Distribution of users and federations by region." />
               </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data.regionDistribution}>
@@ -400,7 +419,7 @@ const AnalyticsDashboard: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Sport Distribution
+                Sport Distribution <InlineTooltip title="Number of conflicts by sport." />
               </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -430,7 +449,7 @@ const AnalyticsDashboard: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Conflict Resolution Trends
+                Conflict Resolution Trends <InlineTooltip title="Daily report of new and resolved conflicts." />
               </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={data.conflictTrends}>
@@ -452,7 +471,7 @@ const AnalyticsDashboard: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Region Performance
+                Region Performance <InlineTooltip title="Radar chart of region strength, competition, and infrastructure." />
               </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={data.regionStats}>
@@ -485,7 +504,7 @@ const AnalyticsDashboard: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Top Federation Performance
+                Top Federation Performance <InlineTooltip title="Resolution rate and performance of top federations." />
               </Typography>
               <TableContainer component={Paper}>
                 <Table>
@@ -526,6 +545,42 @@ const AnalyticsDashboard: React.FC = () => {
                             size="small"
                           />
                         </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+        {/* Coach Status Widget */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Coach Status <InlineTooltip title="Current status and last activity of coaches." />
+              </Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Coach</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Last Active</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {coachStatus.map((coach, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{coach.name}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={coach.status.charAt(0).toUpperCase() + coach.status.slice(1)}
+                            color={coach.status === 'active' ? 'success' : coach.status === 'inactive' ? 'default' : 'warning'}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>{coach.lastActive}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

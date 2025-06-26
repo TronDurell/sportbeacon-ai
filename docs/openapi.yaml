@@ -1,0 +1,96 @@
+openapi: 3.0.3
+info:
+  title: SportBeaconAI API
+  version: 1.0.0
+  description: API for SportBeaconAI platform, including booking, venue, and AI endpoints.
+servers:
+  - url: /api
+paths:
+  /venues/close-for-weather:
+    post:
+      summary: Close a venue due to weather
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                venueId:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Venue closed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  venueId:
+                    type: string
+                  reason:
+                    type: string
+                  status:
+                    type: string
+  /venues/close-for-event:
+    post:
+      summary: Close a venue due to event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                venueId:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Venue closed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  venueId:
+                    type: string
+                  reason:
+                    type: string
+                  status:
+                    type: string
+  /booking/suggest-reschedule:
+    post:
+      summary: Suggest reschedule slots for a booking conflict
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                conflict:
+                  type: object
+                teamAvailability:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Suggested slots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      type: string 

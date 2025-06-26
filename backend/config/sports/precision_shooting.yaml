@@ -1,0 +1,26 @@
+sport: precision_shooting
+skills:
+  - name: stance
+    metrics:
+      - stability
+      - consistency
+  - name: grip
+    metrics:
+      - pressure
+      - consistency
+  - name: sight_picture
+    metrics:
+      - alignment
+      - focus
+  - name: trigger_control
+    metrics:
+      - smoothness
+      - timing
+  - name: breathing
+    metrics:
+      - rhythm
+      - control
+logic:
+  plateau: "focus on breathing and trigger control"
+  improvement: "advance to longer distances or smaller targets"
+  decline: "return to fundamentals - stance and grip" 

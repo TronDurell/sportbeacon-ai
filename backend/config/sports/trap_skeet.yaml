@@ -1,0 +1,204 @@
+sport: trap_skeet
+display_name: "Trap & Skeet"
+description: "Clay target shooting with focus on mounting, swinging, and leading targets"
+
+skills:
+  - name: mounting
+    description: "Proper shotgun mounting technique"
+    metrics:
+      - consistency
+      - speed
+      - comfort
+    importance: 0.25
+    coaching_tips:
+      - "Consistent mount every time"
+      - "Check weld position"
+      - "Proper shoulder placement"
+      - "Natural point of aim"
+
+  - name: swinging
+    description: "Smooth gun movement and swing"
+    metrics:
+      - smoothness
+      - speed
+      - consistency
+    importance: 0.25
+    coaching_tips:
+      - "Smooth, fluid motion"
+      - "Lead with the barrel"
+      - "Follow through completely"
+      - "No stopping or jerking"
+
+  - name: leading
+    description: "Proper lead calculation and timing"
+    metrics:
+      - calculation
+      - timing
+      - consistency
+    importance: 0.20
+    coaching_tips:
+      - "Calculate proper lead"
+      - "Maintain lead through shot"
+      - "Account for target speed"
+      - "Practice different angles"
+
+  - name: follow_through
+    description: "Complete follow-through after shot"
+    metrics:
+      - completion
+      - consistency
+      - timing
+    importance: 0.15
+    coaching_tips:
+      - "Continue swing after shot"
+      - "Don't stop at target"
+      - "Complete the motion"
+      - "Watch target break"
+
+  - name: mental_game
+    description: "Mental focus and confidence"
+    metrics:
+      - focus
+      - confidence
+      - composure
+    importance: 0.15
+    coaching_tips:
+      - "Stay focused on target"
+      - "Maintain confidence"
+      - "Don't dwell on misses"
+      - "Positive self-talk"
+
+drills:
+  - name: dry_mounting
+    description: "Practice mounting without ammunition"
+    duration: "15-30 minutes"
+    difficulty: "beginner"
+    equipment: ["unloaded_shotgun", "mirror"]
+    
+  - name: swing_practice
+    description: "Practice smooth swinging motion"
+    duration: "20-40 minutes"
+    difficulty: "beginner"
+    equipment: ["unloaded_shotgun", "swing_trainer"]
+    
+  - name: lead_calculation
+    description: "Practice calculating proper lead"
+    duration: "30-60 minutes"
+    difficulty: "intermediate"
+    equipment: ["shotgun", "ammunition", "clay_targets"]
+    
+  - name: station_practice
+    description: "Practice specific stations"
+    duration: "45-90 minutes"
+    difficulty: "intermediate"
+    equipment: ["shotgun", "ammunition", "clay_targets"]
+    
+  - name: competition_simulation
+    description: "Full round simulation"
+    duration: "60-120 minutes"
+    difficulty: "advanced"
+    equipment: ["shotgun", "ammunition", "clay_targets", "scorecard"]
+
+safety_rules:
+  - "Always treat every firearm as if it is loaded"
+  - "Never point the muzzle at anything you don't intend to shoot"
+  - "Keep your finger off the trigger until ready to shoot"
+  - "Be sure of your target and what is beyond it"
+  - "Wear appropriate eye and ear protection"
+  - "Follow all range rules and commands"
+  - "Keep action open when not shooting"
+  - "Only load when on station"
+
+equipment_requirements:
+  - "Shotgun in good working condition"
+  - "Appropriate ammunition (shot size 7.5-9)"
+  - "Eye protection (ANSI Z87.1 rated)"
+  - "Hearing protection (NRR 25+ dB)"
+  - "Proper shooting vest or jacket"
+  - "Cleaning kit"
+  - "First aid kit"
+
+performance_levels:
+  beginner:
+    accuracy_target: "50% hit rate"
+    focus_areas: ["basic_safety", "mounting", "swinging", "basic_leading"]
+    
+  intermediate:
+    accuracy_target: "75% hit rate"
+    focus_areas: ["lead_calculation", "follow_through", "station_specific"]
+    
+  advanced:
+    accuracy_target: "85% hit rate"
+    focus_areas: ["mental_game", "competition_preparation", "advanced_techniques"]
+    
+  expert:
+    accuracy_target: "95% hit rate"
+    focus_areas: ["mental_toughness", "pressure_performance", "teaching_others"]
+
+coaching_logic:
+  plateau: "practice mounting and swing consistency"
+  improvement: "work on lead calculation and timing"
+  decline: "return to basic mounting and swing fundamentals"
+  
+  common_mistakes:
+    - "Inconsistent mounting"
+    - "Stopping swing at target"
+    - "Insufficient lead"
+    - "Poor follow-through"
+    - "Mental distractions"
+    
+  correction_strategies:
+    - "Dry mounting practice"
+    - "Smooth swing drills"
+    - "Lead calculation practice"
+    - "Complete follow-through"
+    - "Mental preparation"
+
+competition_formats:
+  - name: "American Trap"
+    description: "Targets thrown away from shooter"
+    stations: 5
+    targets_per_round: 25
+    variations: ["singles", "handicap", "doubles"]
+    
+  - name: "American Skeet"
+    description: "Targets thrown from two houses"
+    stations: 8
+    targets_per_round: 25
+    variations: ["singles", "doubles"]
+    
+  - name: "Sporting Clays"
+    description: "Varied target presentations"
+    stations: 10-15
+    targets_per_round: 50-100
+    variations: ["5_stand", "super_sporting"]
+    
+  - name: "International"
+    description: "Olympic-style clay shooting"
+    formats: ["trap", "skeet", "double_trap"]
+
+target_presentations:
+  - name: "Straight Away"
+    description: "Target flying directly away"
+    lead: "0-1 foot"
+    difficulty: "easy"
+    
+  - name: "Crossing"
+    description: "Target crossing from side to side"
+    lead: "2-4 feet"
+    difficulty: "medium"
+    
+  - name: "Incoming"
+    description: "Target flying toward shooter"
+    lead: "0-6 inches"
+    difficulty: "medium"
+    
+  - name: "Quartering"
+    description: "Target at 45-degree angle"
+    lead: "1-3 feet"
+    difficulty: "hard"
+    
+  - name: "Rising"
+    description: "Target rising as it flies"
+    lead: "1-2 feet"
+    difficulty: "hard" 

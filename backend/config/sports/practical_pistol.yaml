@@ -1,0 +1,220 @@
+sport: practical_pistol
+display_name: "Practical Pistol"
+description: "Dynamic pistol shooting with emphasis on speed, accuracy, and movement"
+
+skills:
+  - name: drawing
+    description: "Fast and efficient draw from holster"
+    metrics:
+      - speed
+      - consistency
+      - safety
+    importance: 0.20
+    coaching_tips:
+      - "Smooth, efficient motion"
+      - "Consistent grip acquisition"
+      - "Clear holster safely"
+      - "Present to target quickly"
+
+  - name: reloading
+    description: "Fast and efficient reloading technique"
+    metrics:
+      - speed
+      - efficiency
+      - consistency
+    importance: 0.15
+    coaching_tips:
+      - "Retain empty magazine"
+      - "Efficient magazine changes"
+      - "Minimize movement"
+      - "Practice both hands"
+
+  - name: movement
+    description: "Efficient movement between positions"
+    metrics:
+      - speed
+      - efficiency
+      - balance
+    importance: 0.15
+    coaching_tips:
+      - "Stay balanced while moving"
+      - "Efficient footwork"
+      - "Maintain readiness"
+      - "Smooth transitions"
+
+  - name: target_transitions
+    description: "Quick and accurate target transitions"
+    metrics:
+      - speed
+      - accuracy
+      - efficiency
+    importance: 0.20
+    coaching_tips:
+      - "Efficient target acquisition"
+      - "Proper sight alignment"
+      - "Quick target switching"
+      - "Maintain accuracy"
+
+  - name: stage_planning
+    description: "Strategic stage planning and execution"
+    metrics:
+      - efficiency
+      - execution
+      - adaptability
+    importance: 0.15
+    coaching_tips:
+      - "Plan your stage"
+      - "Visualize your run"
+      - "Adapt to conditions"
+      - "Execute efficiently"
+
+  - name: recoil_control
+    description: "Proper recoil management and follow-up shots"
+    metrics:
+      - control
+      - speed
+      - accuracy
+    importance: 0.15
+    coaching_tips:
+      - "Proper grip pressure"
+      - "Follow-through"
+      - "Quick sight recovery"
+      - "Controlled pairs"
+
+drills:
+  - name: dry_draw_practice
+    description: "Practice drawing without ammunition"
+    duration: "15-30 minutes"
+    difficulty: "beginner"
+    equipment: ["unloaded_pistol", "holster", "snap_caps"]
+    
+  - name: reload_practice
+    description: "Practice reloading techniques"
+    duration: "20-40 minutes"
+    difficulty: "beginner"
+    equipment: ["unloaded_pistol", "magazines", "magazine_pouches"]
+    
+  - name: movement_drills
+    description: "Practice moving and shooting"
+    duration: "30-60 minutes"
+    difficulty: "intermediate"
+    equipment: ["pistol", "ammunition", "targets", "barriers"]
+    
+  - name: target_transition_drills
+    description: "Practice switching between targets"
+    duration: "25-45 minutes"
+    difficulty: "intermediate"
+    equipment: ["pistol", "ammunition", "multiple_targets"]
+    
+  - name: stage_simulation
+    description: "Full stage practice"
+    duration: "45-90 minutes"
+    difficulty: "advanced"
+    equipment: ["pistol", "ammunition", "targets", "props", "timer"]
+
+safety_rules:
+  - "Always treat every firearm as if it is loaded"
+  - "Never point the muzzle at anything you don't intend to shoot"
+  - "Keep your finger off the trigger until ready to shoot"
+  - "Be sure of your target and what is beyond it"
+  - "Wear appropriate eye and ear protection"
+  - "Follow all range rules and commands"
+  - "Keep finger off trigger during movement"
+  - "Maintain muzzle awareness at all times"
+  - "Use proper holster retention"
+
+equipment_requirements:
+  - "Pistol in good working condition"
+  - "Appropriate ammunition"
+  - "Eye protection (ANSI Z87.1 rated)"
+  - "Hearing protection (NRR 25+ dB)"
+  - "Proper holster and belt"
+  - "Magazine pouches"
+  - "Cleaning kit"
+  - "First aid kit"
+
+performance_levels:
+  beginner:
+    accuracy_target: "All shots in A-zone at 10 yards"
+    focus_areas: ["basic_safety", "drawing", "reloading", "basic_movement"]
+    
+  intermediate:
+    accuracy_target: "All shots in A-zone at 15 yards"
+    focus_areas: ["target_transitions", "movement_efficiency", "stage_planning"]
+    
+  advanced:
+    accuracy_target: "All shots in A-zone at 25 yards"
+    focus_areas: ["speed_accuracy", "advanced_techniques", "competition_preparation"]
+    
+  expert:
+    accuracy_target: "All shots in A-zone at any distance"
+    focus_areas: ["mental_toughness", "pressure_performance", "teaching_others"]
+
+coaching_logic:
+  plateau: "focus on movement efficiency and target transitions"
+  improvement: "work on stage planning and execution speed"
+  decline: "return to basic drawing and reloading fundamentals"
+  
+  common_mistakes:
+    - "Rushing the draw"
+    - "Poor reload technique"
+    - "Inefficient movement"
+    - "Slow target transitions"
+    - "Poor stage planning"
+    
+  correction_strategies:
+    - "Slow, deliberate practice"
+    - "Efficient technique development"
+    - "Movement optimization"
+    - "Target transition practice"
+    - "Stage visualization"
+
+competition_formats:
+  - name: "USPSA"
+    description: "United States Practical Shooting Association"
+    divisions: ["Open", "Limited", "Production", "Carry Optics", "Single Stack"]
+    scoring: ["hit_factor", "time_plus_penalties"]
+    
+  - name: "IDPA"
+    description: "International Defensive Pistol Association"
+    divisions: ["Stock Service Pistol", "Enhanced Service Pistol", "Custom Defensive Pistol"]
+    scoring: ["time_plus_penalties"]
+    
+  - name: "IPSC"
+    description: "International Practical Shooting Confederation"
+    divisions: ["Open", "Standard", "Production", "Classic", "Revolver"]
+    scoring: ["hit_factor"]
+
+stage_types:
+  - name: "Speed Stage"
+    description: "Emphasis on speed and accuracy"
+    focus: ["drawing", "target_transitions", "reloading"]
+    
+  - name: "Field Course"
+    description: "Multiple positions and targets"
+    focus: ["movement", "stage_planning", "target_transitions"]
+    
+  - name: "Standards"
+    description: "Fixed time or round count"
+    focus: ["accuracy", "consistency", "technique"]
+    
+  - name: "Classifiers"
+    description: "Standardized stages for classification"
+    focus: ["all_skills", "consistency", "performance"]
+
+scoring_zones:
+  - name: "A-Zone"
+    points: 5
+    description: "Center mass area"
+    
+  - name: "B-Zone"
+    points: 3
+    description: "Outer body area"
+    
+  - name: "C-Zone"
+    points: 1
+    description: "Head area"
+    
+  - name: "D-Zone"
+    points: 0
+    description: "Miss or no-shoot hit" 

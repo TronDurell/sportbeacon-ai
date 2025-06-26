@@ -356,6 +356,72 @@ export const sportRules: Record<string, SportRule> = {
     teamSize: 1,
     hasPositions: false,
     seasonType: 'continuous'
+  },
+
+  precision_shooting: {
+    name: 'precision_shooting',
+    displayName: 'Precision Shooting',
+    primaryStats: ['accuracy', 'group_size', 'consistency', 'sight_alignment'],
+    secondaryStats: ['trigger_control', 'breathing_rhythm', 'stance_stability', 'follow_through'],
+    scoringMetrics: ['bullseye_hits', 'group_precision', 'distance_accuracy'],
+    performanceIndicators: ['steady_hands', 'focus', 'patience', 'technique'],
+    drillCategories: ['stance', 'grip', 'sight_picture', 'trigger_control', 'breathing'],
+    achievementTypes: ['bullseye_master', 'consistency_king', 'distance_shooter', 'precision_expert'],
+    colorScheme: {
+      primary: '#8e44ad',
+      secondary: '#7d3c98',
+      accent: '#e74c3c'
+    },
+    icon: '🎯',
+    unitSystem: 'imperial',
+    timeFormat: 'seconds',
+    teamSize: 1,
+    hasPositions: false,
+    seasonType: 'continuous'
+  },
+
+  trap_skeet: {
+    name: 'trap_skeet',
+    displayName: 'Trap & Skeet',
+    primaryStats: ['hits', 'misses', 'mounting_speed', 'swing_smoothness'],
+    secondaryStats: ['lead_calculation', 'follow_through', 'mental_focus', 'confidence'],
+    scoringMetrics: ['hit_percentage', 'consecutive_hits', 'station_performance'],
+    performanceIndicators: ['reaction_time', 'coordination', 'timing', 'mental_strength'],
+    drillCategories: ['mounting', 'swinging', 'leading', 'follow_through', 'mental_game'],
+    achievementTypes: ['perfect_round', 'speed_shooter', 'mental_master', 'consistency_king'],
+    colorScheme: {
+      primary: '#27ae60',
+      secondary: '#229954',
+      accent: '#f39c12'
+    },
+    icon: '🔫',
+    unitSystem: 'imperial',
+    timeFormat: 'seconds',
+    teamSize: 1,
+    hasPositions: false,
+    seasonType: 'tournament'
+  },
+
+  practical_pistol: {
+    name: 'practical_pistol',
+    displayName: 'Practical Pistol',
+    primaryStats: ['draw_speed', 'reload_speed', 'target_transitions', 'accuracy'],
+    secondaryStats: ['movement_efficiency', 'stage_planning', 'recoil_control', 'sight_picture'],
+    scoringMetrics: ['hit_factor', 'stage_time', 'accuracy_percentage', 'power_factor'],
+    performanceIndicators: ['speed', 'accuracy', 'efficiency', 'mental_focus'],
+    drillCategories: ['drawing', 'reloading', 'movement', 'target_transitions', 'stage_planning'],
+    achievementTypes: ['speed_demon', 'accuracy_master', 'stage_planner', 'all_around_shooter'],
+    colorScheme: {
+      primary: '#e67e22',
+      secondary: '#d35400',
+      accent: '#3498db'
+    },
+    icon: '🔫',
+    unitSystem: 'imperial',
+    timeFormat: 'seconds',
+    teamSize: 1,
+    hasPositions: false,
+    seasonType: 'tournament'
   }
 };
 
