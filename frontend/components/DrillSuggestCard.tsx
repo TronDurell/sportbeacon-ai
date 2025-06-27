@@ -6,13 +6,15 @@ export default function DrillSuggestCard({ stats }) {
   const drills = useDrillSuggestions(stats);
 
   return (
-    <Card sx={{ mb: 2, p: 2 }}>
-      <Typography variant="h6">Try These Drills:</Typography>
-      <ul>
-        {drills.map((drill, index) => (
-          <li key={index}>{drill.name}</li>
-        ))}
-      </ul>
-    </Card>
+    <div className="w-full" role="region" aria-label="Drill suggest card" tabIndex={0}>
+      <Card sx={{ mb: 2, p: 2 }}>
+        <Typography variant="h6">Try These Drills:</Typography>
+        <ul>
+          {drills.map((drill, index) => (
+            <li key={index}>{drill.name}</li>
+          ))}
+        </ul>
+      </Card>
+    </div>
   );
 } 

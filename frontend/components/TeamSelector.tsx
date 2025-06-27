@@ -19,10 +19,12 @@ export default function TeamSelector({ onSelect }: { onSelect: (teamId: string) 
   if (loading) return <Typography>Loading teams...</Typography>;
 
   return (
-    <Select onChange={(e) => onSelect(e.target.value)}>
-      {teams.map((team) => (
-        <MenuItem key={team.id} value={team.id}>{team.name}</MenuItem>
-      ))}
-    </Select>
+    <div className="w-full" role="region" aria-label="Team selector" tabIndex={0}>
+      <Select onChange={(e) => onSelect(e.target.value)}>
+        {teams.map((team) => (
+          <MenuItem key={team.id} value={team.id}>{team.name}</MenuItem>
+        ))}
+      </Select>
+    </div>
   );
 } 

@@ -7,10 +7,12 @@ export default function FeedScroll() {
   const athletes = useTrendingAthletes();
 
   return (
-    <Box display="flex" flexDirection="column" overflow="auto" height="100vh">
-      {athletes.map((athlete, index) => (
-        <SpotlightCard key={index} athlete={athlete} />
-      ))}
-    </Box>
+    <div className="w-full" role="region" aria-label="Feed scroll" tabIndex={0}>
+      <Box display="flex" flexDirection="column" overflow="auto" height="100vh">
+        {athletes.map((athlete, index) => (
+          <SpotlightCard key={index} athlete={athlete} />
+        ))}
+      </Box>
+    </div>
   );
 } 

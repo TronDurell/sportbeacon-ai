@@ -3,7 +3,7 @@ import { Card, CardContent, Typography } from '@mui/material';
 
 export default function PlayerComparison({ player1, player2 }: { player1: any, player2: any }) {
   return (
-    <Card>
+    <Card role="region" aria-label="Player comparison card" tabIndex={0} sx={{ outline: 'none', ':focus': { boxShadow: 3 }, mb: 2 }}>
       <CardContent>
         <Typography variant="h5">Player Comparison</Typography>
         <Typography variant="body1">{player1.name} vs {player2.name}</Typography>

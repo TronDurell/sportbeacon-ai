@@ -1,0 +1,33 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+      - name: Lint
+        run: |
+          cd frontend
+          npm run lint
+      - name: Run tests
+        run: |
+          cd frontend
+          npm run test
+      - name: Build
+        run: |
+          cd frontend
+          npm run build 

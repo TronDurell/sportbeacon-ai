@@ -15,5 +15,9 @@ export default function ChartRadarStats({ data }: { data: any }) {
     ],
   };
 
-  return <Radar data={radarData} />;
+  return (
+    <div className="w-full" role="region" aria-label="Chart radar stats" tabIndex={0}>
+      <Radar data={radarData} />
+    </div>
+  );
 } 

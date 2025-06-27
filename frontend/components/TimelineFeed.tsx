@@ -6,7 +6,7 @@ export default function TimelineFeed() {
   const posts = usePosts();
 
   return (
-    <div>
+    <div className="w-full" role="region" aria-label="Timeline feed" tabIndex={0}>
       {posts.map((post, index) => (
         <Card key={index} sx={{ mb: 2, p: 2 }}>
           <Avatar src={post.user.avatarUrl} sx={{ width: 56, height: 56, mb: 1 }} />

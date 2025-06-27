@@ -4,14 +4,16 @@ import TeamRadarChart from './TeamRadarChart';
 
 export default function TeamInsightsCard({ team, teamStats, topPlayers }) {
   return (
-    <Card>
-      <Typography variant="h6">{team.name}</Typography>
-      <TeamRadarChart stats={teamStats} />
-      <List>
-        {topPlayers.map(p => (
-          <ListItem key={p.id}>{p.name}</ListItem>
-        ))}
-      </List>
-    </Card>
+    <div className="w-full" role="region" aria-label="Team insights card" tabIndex={0}>
+      <Card>
+        <Typography variant="h6">{team.name}</Typography>
+        <TeamRadarChart stats={teamStats} />
+        <List>
+          {topPlayers.map(p => (
+            <ListItem key={p.id}>{p.name}</ListItem>
+          ))}
+        </List>
+      </Card>
+    </div>
   );
 } 

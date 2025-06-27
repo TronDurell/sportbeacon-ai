@@ -13,11 +13,13 @@ export default function TeamBuilder({ players, onAssignPlayer }) {
   }));
 
   return (
-    <Box ref={drop} sx={{ p: 2, border: '1px dashed gray', minHeight: '200px', bgcolor: isOver ? 'lightgreen' : 'white' }}>
-      <Typography variant="h6">Team Roster</Typography>
-      {players.map((player) => (
-        <AthleteCard key={player.id} user={player} />
-      ))}
-    </Box>
+    <div className="w-full" role="region" aria-label="Team builder" tabIndex={0}>
+      <Box ref={drop} sx={{ p: 2, border: '1px dashed gray', minHeight: '200px', bgcolor: isOver ? 'lightgreen' : 'white' }}>
+        <Typography variant="h6">Team Roster</Typography>
+        {players.map((player) => (
+          <AthleteCard key={player.id} user={player} />
+        ))}
+      </Box>
+    </div>
   );
 } 

@@ -5,6 +5,7 @@ import useMessages from '../hooks/useMessages';
 export default function MessageModal({ open, onClose, conversationId, senderId }) {
   const { messages, sendMessage } = useMessages(conversationId);
   const [text, setText] = useState('');
+  const modalRef = React.useRef(null);
 
   const handleSend = () => {
     if (text.trim()) {
@@ -14,8 +15,8 @@ export default function MessageModal({ open, onClose, conversationId, senderId }
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box sx={{ p: 4, bgcolor: 'background.paper', borderRadius: 1, width: 400 }}>
+    <Modal open={open} onClose={onClose} aria-labelledby="message-modal-title" aria-describedby="message-modal-desc" aria-modal="true" role="dialog">
+      <Box ref={modalRef} tabIndex={-1} sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: 500, bgcolor: 'background.paper', boxShadow: 24, p: 4, maxHeight: '90vh', overflow: 'auto', outline: 'none' }} role="document" aria-label="Message modal">
         <Typography variant="h6" gutterBottom>Chat</Typography>
         <List sx={{ maxHeight: 300, overflow: 'auto', mb: 2 }}>
           {messages.map((msg) => (

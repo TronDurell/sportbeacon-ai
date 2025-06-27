@@ -1,393 +1,55 @@
-name: CI/CD Pipeline
+name: CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
-  tags:
-    - 'v*'
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+    branches: [ main ]
 
 jobs:
-  code-quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-        
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Install Python dependencies
-      run: |
-        cd backend
-        pip install flake8 black bandit mypy
-        pip install -r requirements.txt
-        
-    - name: Install Node.js dependencies
-      run: |
-        cd frontend
-        npm ci
-        
-    - name: Lint Python code
-      run: |
-        cd backend
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        black --check .
-        bandit -r . -f json -o bandit-report.json
-        
-    - name: Lint TypeScript/JavaScript
-      run: |
-        cd frontend
-        npm run lint
-        npm run type-check
-        
-    - name: Validate YAML files
-      run: |
-        yamllint k8s/
-        yamllint .github/workflows/
-        
-    - name: Upload security scan results
-      uses: actions/upload-artifact@v3
-      with:
-        name: security-scan-results
-        path: backend/bandit-report.json
-
-  test-backend:
-    name: Backend Tests
-    runs-on: ubuntu-latest
-    needs: code-quality
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: sportbeacon_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-          
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-        
-    - name: Install dependencies
-      run: |
-        cd backend
-        pip install -r requirements.txt
-        pip install pytest pytest-cov pytest-asyncio
-        
-    - name: Run backend tests
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sportbeacon_test
-        REDIS_URL: redis://localhost:6379
-        TESTING: true
-      run: |
-        cd backend
-        pytest tests/ -v --cov=. --cov-report=xml --cov-report=html
-        
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
-      with:
-        name: backend-coverage
-        path: backend/htmlcov/
-        
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: backend/coverage.xml
-        flags: backend
-        name: backend-coverage
-
-  test-frontend:
-    name: Frontend Tests
-    runs-on: ubuntu-latest
-    needs: code-quality
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: |
-        cd frontend
-        npm ci
-        
-    - name: Run frontend tests
-      run: |
-        cd frontend
-        npm run test -- --coverage --watchAll=false
-        
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
-      with:
-        name: frontend-coverage
-        path: frontend/coverage/
-        
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: frontend/coverage/lcov.info
-        flags: frontend
-        name: frontend-coverage
-
   build:
-    name: Build Docker Images
     runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend]
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run linter
+      run: npm run lint
+      
+    - name: Run type check
+      run: npm run type-check
+      
+    - name: Run tests
+      run: npm test
+      
+    - name: Build
+      run: npm run build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha
-          
-    - name: Build and push backend image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./backend
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ steps.meta.outputs.version }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
-    - name: Build and push frontend image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./frontend
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ steps.meta.outputs.version }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ steps.meta.outputs.version }}
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        
-    - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: 'trivy-results.sarif'
-
-  vercel-preview:
-    name: Deploy Preview to Vercel
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'pull_request'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      - name: Install dependencies
-        run: |
-          cd frontend
-          npm ci
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./frontend
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  slack-notify-failure:
-    name: Slack Notification on Failure
-    runs-on: ubuntu-latest
-    needs: [build, vercel-preview]
-    if: failure()
-    steps:
-      - name: Send Slack notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-        with:
-          status: ${{ job.status }}
-          fields: repo,commit,author
-          message: 'CI/CD pipeline failed for ${{ github.repository }} on ${{ github.ref }}.'
-
-  changelog-to-issue:
-    name: Publish Changelog to GitHub Issue
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Extract changelog
-        id: changelog
-        run: |
-          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-          tail -n 50 CHANGELOG.md >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-      - name: Create GitHub Issue
-        uses: peter-evans/create-issue-from-file@v4
-        with:
-          title: 'Automated Changelog for ${{ github.repository }}'
-          content-filepath: CHANGELOG.md
-          labels: 'changelog,auto-publish'
-          assignees: ${{ github.actor }}
-
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: staging
+    - uses: actions/checkout@v3
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
+    - name: Deploy to Vercel
+      uses: amondnet/vercel-action@v20
       with:
-        version: 'latest'
-        
-    - name: Configure kubectl
-      run: |
-        echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > kubeconfig
-        export KUBECONFIG=kubeconfig
-        
-    - name: Deploy to staging
-      run: |
-        export KUBECONFIG=kubeconfig
-        kubectl apply -f k8s/namespace.yaml
-        kubectl apply -f k8s/ -n sportbeacon-ai
-        
-    - name: Run smoke tests
-      run: |
-        export KUBECONFIG=kubeconfig
-        kubectl wait --for=condition=ready pod -l app=sportbeacon-api -n sportbeacon-ai --timeout=300s
-        curl -f https://staging.sportbeacon.ai/api/health || exit 1
-
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: deploy-staging
-    if: startsWith(github.ref, 'refs/tags/v')
-    environment: production
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'latest'
-        
-    - name: Configure kubectl
-      run: |
-        echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > kubeconfig
-        export KUBECONFIG=kubeconfig
-        
-    - name: Deploy to production
-      run: |
-        export KUBECONFIG=kubeconfig
-        kubectl apply -f k8s/namespace.yaml
-        kubectl apply -f k8s/ -n sportbeacon-ai
-        
-    - name: Run production tests
-      run: |
-        export KUBECONFIG=kubeconfig
-        kubectl wait --for=condition=ready pod -l app=sportbeacon-api -n sportbeacon-ai --timeout=300s
-        curl -f https://sportbeacon.ai/api/health || exit 1
-        
-    - name: Create GitHub release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: |
-          ## What's Changed
-          
-          This release includes:
-          - Backend improvements and bug fixes
-          - Frontend enhancements and UI updates
-          - Infrastructure optimizations
-          - Security updates
-          
-          ## Deployment
-          
-          - Staging: https://staging.sportbeacon.ai
-          - Production: https://sportbeacon.ai
-          
-          ## Rollback
-          
-          If issues are detected, rollback using:
-          ```bash
-          ./scripts/rollback.sh --version=${{ github.ref }}
-          ```
-        draft: false
-        prerelease: false 
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod' 

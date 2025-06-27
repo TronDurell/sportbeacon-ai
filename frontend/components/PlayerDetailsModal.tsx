@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Modal,
     Box,
@@ -51,6 +51,13 @@ export const PlayerDetailsModal: React.FC<PlayerDetailsModalProps> = ({
     drillHistory
 }) => {
     const [error, setError] = useState<string | null>(null);
+    const modalRef = useRef(null);
+
+    useEffect(() => {
+        if (open && modalRef.current) {
+            (modalRef.current as HTMLElement).focus();
+        }
+    }, [open]);
 
     const performanceData = {
         labels: drillHistory.map(drill => new Date(drill.completedAt).toLocaleDateString()),
@@ -96,21 +103,31 @@ export const PlayerDetailsModal: React.FC<PlayerDetailsModalProps> = ({
         <Modal
             open={open}
             onClose={onClose}
-            aria-labelledby="player-details-modal"
+            aria-labelledby="player-details-title"
+            aria-describedby="player-details-desc"
+            aria-modal="true"
+            role="dialog"
         >
-            <Box sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '90%',
-                maxWidth: 1000,
-                bgcolor: 'background.paper',
-                boxShadow: 24,
-                p: 4,
-                maxHeight: '90vh',
-                overflow: 'auto'
-            }}>
+            <Box
+                ref={modalRef}
+                tabIndex={-1}
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '90%',
+                    maxWidth: 1000,
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    p: 4,
+                    maxHeight: '90vh',
+                    overflow: 'auto',
+                    outline: 'none',
+                }}
+                role="document"
+                aria-label="Player details modal"
+            >
                 {error && (
                     <Alert severity="error" sx={{ mb: 2 }}>
                         {error}
@@ -119,6 +136,7 @@ export const PlayerDetailsModal: React.FC<PlayerDetailsModalProps> = ({
                 <IconButton
                     onClick={onClose}
                     sx={{ position: 'absolute', right: 8, top: 8 }}
+                    aria-label="Close player details"
                 >
                     <CloseIcon />
                 </IconButton>
@@ -127,7 +145,7 @@ export const PlayerDetailsModal: React.FC<PlayerDetailsModalProps> = ({
                     {/* Player Info */}
                     <Grid item xs={12} md={4}>
                         <Card sx={{ p: 2 }}>
-                            <Typography variant="h6" gutterBottom>
+                            <Typography id="player-details-title" variant="h6" gutterBottom>
                                 {player.name}
                             </Typography>
                             <Box sx={{ mb: 2 }}>

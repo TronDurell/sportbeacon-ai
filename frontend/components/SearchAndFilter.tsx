@@ -11,7 +11,7 @@ export default function SearchAndFilter({ onFilter }: { onFilter: (filters: any)
   };
 
   return (
-    <div>
+    <div className="w-full" role="region" aria-label="Search and filter" tabIndex={0}>
       <TextField label="Tag" value={tag} onChange={(e) => setTag(e.target.value)} />
       <TextField label="Location" value={location} onChange={(e) => setLocation(e.target.value)} />
       <Select value={postType} onChange={(e) => setPostType(e.target.value)}>

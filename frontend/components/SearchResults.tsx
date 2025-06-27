@@ -30,17 +30,19 @@ interface SearchResultsProps {
 
 export default function SearchResults({ players, teams }: SearchResultsProps) {
   return (
-    <Grid container spacing={2}>
-      {players.map((p: Player) => (
-        <Grid item key={p.id} xs={12} sm={6} md={4}>
-          <PlayerCard player={p} onViewDetails={() => {}} />
-        </Grid>
-      ))}
-      {teams && teams.map((t: Team) => (
-        <Grid item key={t.id} xs={12} sm={6} md={4}>
-          <TeamInsightsCard team={t} teamStats={t.stats} topPlayers={t.topPlayers} />
-        </Grid>
-      ))}
-    </Grid>
+    <div className="w-full" role="region" aria-label="Search results" tabIndex={0}>
+      <Grid container spacing={2}>
+        {players.map((p: Player) => (
+          <Grid item key={p.id} xs={12} sm={6} md={4}>
+            <PlayerCard player={p} onViewDetails={() => {}} />
+          </Grid>
+        ))}
+        {teams && teams.map((t: Team) => (
+          <Grid item key={t.id} xs={12} sm={6} md={4}>
+            <TeamInsightsCard team={t} teamStats={t.stats} topPlayers={t.topPlayers} />
+          </Grid>
+        ))}
+      </Grid>
+    </div>
   );
 } 

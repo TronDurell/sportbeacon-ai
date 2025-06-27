@@ -10,7 +10,7 @@ export default function EvalForm({ evals, setEvals, submitEvaluation }) {
   };
 
   return (
-    <div>
+    <form className="w-full" role="form" aria-label="Evaluation form" tabIndex={0}>
       {rubric.map((r) => (
         <div key={r.label}>
           <Typography>{r.label}</Typography>
@@ -25,6 +25,6 @@ export default function EvalForm({ evals, setEvals, submitEvaluation }) {
         </div>
       ))}
       <Button onClick={submitEvaluation}>Submit</Button>
-    </div>
+    </form>
   );
 } 

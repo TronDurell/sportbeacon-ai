@@ -100,22 +100,4 @@ router.get('/:id', (req, res) => {
     });
 });
 
-// Real-time closure endpoints
-
-// POST /venues/close-for-weather
-router.post('/close-for-weather', async (req, res) => {
-  const { venueId, reason } = req.body;
-  // TODO: Update venue status in DB
-  // await Venue.updateOne({ _id: venueId }, { $set: { status: 'closed', closureReason: reason || 'weather' } });
-  res.json({ success: true, venueId, reason: reason || 'weather', status: 'closed' });
-});
-
-// POST /venues/close-for-event
-router.post('/close-for-event', async (req, res) => {
-  const { venueId, reason } = req.body;
-  // TODO: Update venue status in DB
-  // await Venue.updateOne({ _id: venueId }, { $set: { status: 'closed', closureReason: reason || 'event' } });
-  res.json({ success: true, venueId, reason: reason || 'event', status: 'closed' });
-});
-
 module.exports = router; 

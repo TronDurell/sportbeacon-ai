@@ -13,12 +13,14 @@ export default function MatchMap({ matches }) {
   };
 
   return (
-    <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
-      <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={10}>
-        {matches.map((match, index) => (
-          <Marker key={index} position={{ lat: match.location.lat, lng: match.location.lng }} />
-        ))}
-      </GoogleMap>
-    </LoadScript>
+    <div className="w-full" role="region" aria-label="Match map" tabIndex={0}>
+      <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
+        <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={10}>
+          {matches.map((match, index) => (
+            <Marker key={index} position={{ lat: match.location.lat, lng: match.location.lng }} />
+          ))}
+        </GoogleMap>
+      </LoadScript>
+    </div>
   );
 } 

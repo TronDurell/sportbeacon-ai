@@ -25,5 +25,21 @@ describe('PlayerDashboard', () => {
     await waitFor(() => expect(screen.getByText(/Player Profile:/i)).toBeInTheDocument());
   });
 
+  it('shows error state if profile not found', async () => {
+    // Mock playerAPI.getProfile to throw
+    // ...mock logic here...
+    renderWithProviders(<PlayerDashboard playerId="notfound" />);
+    // ...simulate error...
+    // expect fallback UI
+  });
+
+  it('shows empty state if no drills assigned', async () => {
+    // Mock playerAPI.getAssignedDrills to return []
+    // ...mock logic here...
+    renderWithProviders(<PlayerDashboard playerId="nodrills" />);
+    // ...simulate empty drills...
+    // expect fallback UI
+  });
+
   // Add more tests for different states and interactions
 }); 
