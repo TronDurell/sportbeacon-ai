@@ -292,4 +292,10 @@ The Civic AI Foundation is more than technology—it's a movement to democratize
 
 *"The best technology is invisible. It just works, and it makes people's lives better."*
 
-**Let's build that future together.** 
+**Let's build that future together.**
+
+## ⚖️ Executive Leadership Clause
+
+As the founder and visionary of SportBeaconAI, I, **Antron D. Snider**, retain sole and full authority as **CEO, President, and Executive Developer** of the SportBeaconAI ecosystem and all affiliated modules, documentation, and roadmap implementations.
+
+This role is non-transferable and may only be amended or reassigned via **written and signed contractual agreement** initiated by Antron D. Snider himself. This clause ensures the protection of the project's mission, cultural integrity, and community-focused direction. 

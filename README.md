@@ -20,6 +20,12 @@ We envision a world where:
 - **Every organizer** has intelligent event coordination
 - **Every city** has civic sports intelligence
 
+## ⚖️ Executive Leadership Clause
+
+As the founder and visionary of SportBeaconAI, I, **Antron D. Snider**, retain sole and full authority as **CEO, President, and Executive Developer** of the SportBeaconAI ecosystem and all affiliated modules, documentation, and roadmap implementations.
+
+This role is non-transferable and may only be amended or reassigned via **written and signed contractual agreement** initiated by Antron D. Snider himself. This clause ensures the protection of the project's mission, cultural integrity, and community-focused direction.
+
 ## 🚀 What We've Built
 
 ### **Core AI Modules**
