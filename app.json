@@ -1,0 +1,314 @@
+{
+  "expo": {
+    "name": "SportBeacon AI",
+    "slug": "sportbeacon-ai",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a1a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sportbeacon.ai",
+      "buildNumber": "200",
+      "infoPlist": {
+        "NSCameraUsageDescription": "SportBeacon AI uses your camera to capture sports moments and analyze performance.",
+        "NSMicrophoneUsageDescription": "SportBeacon AI uses your microphone for voice commands and audio analysis.",
+        "NSLocationWhenInUseUsageDescription": "SportBeacon AI uses your location to find nearby venues and events.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "SportBeacon AI uses your location to provide location-based recommendations.",
+        "NSPhotoLibraryUsageDescription": "SportBeacon AI accesses your photo library to save and share sports content.",
+        "NSPhotoLibraryAddUsageDescription": "SportBeacon AI saves photos to your library for sharing and backup.",
+        "NSMotionUsageDescription": "SportBeacon AI uses motion data to track athletic performance and provide insights.",
+        "NSHealthShareUsageDescription": "SportBeacon AI integrates with HealthKit to track your fitness progress.",
+        "NSHealthUpdateUsageDescription": "SportBeacon AI updates your health data with workout information.",
+        "UIBackgroundModes": [
+          "location",
+          "fetch",
+          "remote-notification",
+          "background-processing"
+        ],
+        "UIRequiresPersistentWiFi": true,
+        "UIStatusBarStyle": "light-content",
+        "UIViewControllerBasedStatusBarAppearance": false,
+        "CFBundleDisplayName": "SportBeacon AI",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "sportbeacon",
+            "CFBundleURLSchemes": [
+              "sportbeacon",
+              "sportbeaconai"
+            ]
+          }
+        ],
+        "LSApplicationQueriesSchemes": [
+          "tel",
+          "mailto",
+          "sms",
+          "whatsapp"
+        ]
+      },
+      "entitlements": {
+        "com.apple.developer.associated-domains": [
+          "applinks:sportbeacon.ai",
+          "applinks:www.sportbeacon.ai"
+        ],
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": [
+          "health-records"
+        ],
+        "com.apple.developer.icloud-container-identifiers": [
+          "iCloud.com.sportbeacon.ai"
+        ],
+        "com.apple.developer.icloud-services": [
+          "CloudKit"
+        ],
+        "com.apple.developer.payment-pass-provisioning": true,
+        "com.apple.developer.siri": true,
+        "com.apple.developer.usernotifications.time-sensitive": true,
+        "com.apple.developer.usernotifications.communication": true,
+        "com.apple.developer.usernotifications.critical-alerts": true
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a1a1a"
+      },
+      "package": "com.sportbeacon.ai",
+      "versionCode": 200,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.BODY_SENSORS",
+        "android.permission.BODY_SENSORS_BACKGROUND",
+        "com.google.android.gms.permission.ACTIVITY_RECOGNITION"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "sportbeacon.ai"
+            },
+            {
+              "scheme": "https",
+              "host": "www.sportbeacon.ai"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "static",
+      "build": {
+        "babel": {
+          "include": [
+            "**/*.ts",
+            "**/*.tsx"
+          ]
+        }
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow SportBeacon AI to access your camera to capture sports moments and analyze performance."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow SportBeacon AI to use your location to find nearby venues and events.",
+          "locationAlwaysPermission": "Allow SportBeacon AI to use your location in the background for location-based features.",
+          "locationWhenInUsePermission": "Allow SportBeacon AI to use your location to find nearby venues and events.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow SportBeacon AI to access your photos to save and share sports content.",
+          "savePhotosPermission": "Allow SportBeacon AI to save photos to your library.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1a1a1a",
+          "sounds": [
+            "./assets/notification-sound.wav"
+          ]
+        }
+      ],
+      [
+        "expo-device",
+        {
+          "motionPermission": "Allow SportBeacon AI to access motion data for performance tracking."
+        }
+      ],
+      [
+        "expo-health",
+        {
+          "isClinicalDataEnabled": true,
+          "healthSharePermission": "Allow SportBeacon AI to read your health data for fitness tracking.",
+          "healthUpdatePermission": "Allow SportBeacon AI to write workout data to your health profile."
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Allow SportBeacon AI to access motion sensors for performance analysis."
+        }
+      ],
+      [
+        "expo-speech",
+        {
+          "microphonePermission": "Allow SportBeacon AI to access your microphone for voice commands."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow SportBeacon AI to access your microphone for audio recording."
+        }
+      ],
+      [
+        "expo-file-system",
+        {
+          "photosPermission": "Allow SportBeacon AI to access your photos for content sharing."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow SportBeacon AI to access your photo library to select and share sports content."
+        }
+      ],
+      [
+        "expo-sqlite",
+        {
+          "enableWAL": true
+        }
+      ],
+      [
+        "expo-updates",
+        {
+          "enabled": true,
+          "fallbackToCacheTimeout": 0,
+          "url": "https://u.expo.dev/your-project-id"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "deploymentTarget": "13.0",
+            "enableBitcode": false,
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "compileSdkVersion": 33,
+            "targetSdkVersion": 33,
+            "buildToolsVersion": "33.0.0",
+            "kotlinVersion": "1.8.0"
+          },
+          "android": {
+            "compileSdkVersion": 33,
+            "targetSdkVersion": 33,
+            "buildToolsVersion": "33.0.0",
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "enableR8": true,
+            "enableR8.fullMode": true
+          }
+        }
+      ]
+    ],
+    "scheme": "sportbeacon",
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "your-project-id"
+      },
+      "apiUrl": "https://api.sportbeacon.ai",
+      "firebaseConfig": {
+        "apiKey": "your-firebase-api-key",
+        "authDomain": "sportbeacon-prod.firebaseapp.com",
+        "projectId": "sportbeacon-prod",
+        "storageBucket": "sportbeacon-prod.appspot.com",
+        "messagingSenderId": "123456789",
+        "appId": "1:123456789:ios:prod123456"
+      },
+      "stripeConfig": {
+        "publishableKey": "your-stripe-publishable-key",
+        "webhookSecret": "your-stripe-webhook-secret"
+      },
+      "sentryConfig": {
+        "dsn": "your-sentry-dsn",
+        "environment": "production"
+      },
+      "analyticsConfig": {
+        "googleAnalyticsId": "GA-PROD-123",
+        "mixpanelToken": "mp-prod-token"
+      }
+    },
+    "owner": "sportbeacon",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/your-project-id"
+    },
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "your-sentry-org",
+            "project": "sportbeacon-ai"
+          }
+        }
+      ]
+    }
+  }
+} 

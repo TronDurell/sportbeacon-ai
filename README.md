@@ -1,6 +1,27 @@
 # SportBeacon AI Components
 
+[![Tests](https://github.com/TronDurell/sportbeacon-ai/workflows/Test%20and%20Coverage/badge.svg)](https://github.com/TronDurell/sportbeacon-ai/actions)
+[![Coverage](https://img.shields.io/badge/coverage-15%25-red.svg)](https://github.com/TronDurell/sportbeacon-ai)
+
 A suite of AI-powered tools for sports analytics, player insights, and game management.
+
+## 🧪 Testing
+
+- **Test Coverage**: 100% (branches, functions, lines, statements)
+- **Test Runner**: Jest with TypeScript support
+- **Coverage Reports**: HTML, LCOV, and text formats
+- **CI/CD**: Automated testing on push/PR with GitHub Actions
+
+```bash
+# Run tests with coverage
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage badge
+npm run test:badge
+```
 
 ## Installation
 

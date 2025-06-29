@@ -24,7 +24,7 @@ describe('AI prompt builders', () => {
     expect(prompt).toContain('Goal: build muscle');
     expect(WORKOUT_PARTNER_SYSTEM_PROMPT).toContain('motivational workout partner');
     logger.logAgentInteraction(prompt, 'response');
-    expect(logger.logAgentInteraction).toHaveBeenCalledWith(prompt, 'response', expect.any(Number));
+    expect(logger.logAgentInteraction).toHaveBeenCalledWith(prompt, 'response');
   });
 
   it('generates a valid workout routine prompt', () => {
@@ -38,7 +38,7 @@ describe('AI prompt builders', () => {
     expect(prompt).toContain('User Description: knees cave in');
     expect(FORM_COACH_SYSTEM_PROMPT).toContain('form coach');
     logger.logAgentInteraction(prompt, 'response');
-    expect(logger.logAgentInteraction).toHaveBeenCalledWith(prompt, 'response', expect.any(Number));
+    expect(logger.logAgentInteraction).toHaveBeenCalledWith(prompt, 'response');
   });
 
   it('should build a voice summary prompt', () => {
@@ -47,7 +47,7 @@ describe('AI prompt builders', () => {
     expect(prompt).toContain('Activities: running, jumping');
     expect(VOICE_SUMMARY_SYSTEM_PROMPT).toContain('voice-enabled sports summary assistant');
     logger.logAgentInteraction(prompt, 'response');
-    expect(logger.logAgentInteraction).toHaveBeenCalledWith(prompt, 'response', expect.any(Number));
+    expect(logger.logAgentInteraction).toHaveBeenCalledWith(prompt, 'response');
   });
 });
 
