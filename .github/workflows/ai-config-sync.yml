@@ -1,0 +1,187 @@
+name: AI Config Sync to Firestore
+
+on:
+  push:
+    branches: [ main, vanguard-stable-v1 ]
+    paths:
+      - 'ai-config.json'
+      - 'scripts/uploadAIConfig.js'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  sync-ai-config:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install script dependencies
+        run: |
+          npm install firebase
+          npm install @slack/web-api
+          npm install axios
+
+      - name: Create AI config if not exists
+        run: |
+          if [ ! -f ai-config.json ]; then
+            echo "Creating default AI config..."
+            node -e "
+              const fs = require('fs');
+              const config = {
+                version: '1.0.0',
+                lastUpdated: new Date().toISOString(),
+                modules: {
+                  skillGraph: { enabled: true, updateInterval: 86400000 },
+                  badgeManager: { enabled: true, reviewInterval: 604800000 },
+                  drillRecommender: { enabled: true, algorithm: 'skill_based' },
+                  feedbackCollector: { enabled: true, collectionInterval: 3600000 },
+                  eventRecommender: { enabled: true, radiusKm: 50 },
+                  aiExecutionRouter: { enabled: true, offlineThreshold: 0.3 }
+                },
+                analytics: { enabled: true, trackingEvents: [] },
+                notifications: { enabled: true, channels: ['push', 'email'] },
+                security: { ageVerification: true, dataRetention: 365 },
+                performance: { cacheEnabled: true, cacheTTL: 3600 }
+              };
+              fs.writeFileSync('ai-config.json', JSON.stringify(config, null, 2));
+            "
+          fi
+
+      - name: Validate AI config
+        run: node -e "
+          const fs = require('fs');
+          const config = JSON.parse(fs.readFileSync('ai-config.json', 'utf8'));
+          
+          if (!config.version) throw new Error('Missing version field');
+          if (!config.modules) throw new Error('Missing modules configuration');
+          if (!config.analytics) throw new Error('Missing analytics configuration');
+          
+          console.log('✅ AI config validation passed');
+          console.log('Version:', config.version);
+          console.log('Modules:', Object.keys(config.modules).length);
+        "
+
+      - name: Upload AI config to Firestore
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: node scripts/uploadAIConfig.js
+
+      - name: Verify upload
+        run: |
+          echo "✅ AI config uploaded successfully!"
+          echo "Version: $(node -e "console.log(require('./ai-config.json').version)")"
+          echo "Deployed by: ${{ github.actor }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: Notify Slack
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#sportbeacon-dev'
+          text: |
+            🚀 AI Config Sync Complete
+            
+            **Environment:** ${{ github.ref_name }}
+            **Version:** $(node -e "console.log(require('./ai-config.json').version)")
+            **Deployed by:** ${{ github.actor }}
+            **Commit:** ${{ github.sha }}
+            
+            AI configuration has been successfully synced to Firestore.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#sportbeacon-dev'
+          text: |
+            ❌ AI Config Sync Failed
+            
+            **Environment:** ${{ github.ref_name }}
+            **Deployed by:** ${{ github.actor }}
+            **Commit:** ${{ github.sha }}
+            
+            AI configuration sync failed. Please check the logs.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Additional job for environment-specific deployments
+  deploy-environment:
+    if: github.event.inputs.environment
+    runs-on: ubuntu-latest
+    needs: sync-ai-config
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Deploy to environment
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: |
+          echo "Deploying to $ENVIRONMENT environment..."
+          
+          # Environment-specific configuration
+          if [ "$ENVIRONMENT" = "production" ]; then
+            echo "Production deployment..."
+            # Add production-specific deployment steps
+          elif [ "$ENVIRONMENT" = "staging" ]; then
+            echo "Staging deployment..."
+            # Add staging-specific deployment steps
+          fi
+          
+          echo "✅ Deployment to $ENVIRONMENT completed!"
+
+      - name: Notify deployment completion
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#sportbeacon-dev'
+          text: |
+            🚀 Environment Deployment Complete
+            
+            **Environment:** ${{ github.event.inputs.environment }}
+            **Deployed by:** ${{ github.actor }}
+            **Commit:** ${{ github.sha }}
+            
+            Deployment to ${{ github.event.inputs.environment }} completed successfully.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

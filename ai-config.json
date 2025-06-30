@@ -1,0 +1,260 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-15T00:00:00.000Z",
+  "modules": {
+    "skillGraph": {
+      "enabled": true,
+      "updateInterval": 86400000,
+      "weights": {
+        "shooting_accuracy": 0.35,
+        "consistency": 0.25,
+        "reaction_time": 0.20,
+        "mental_focus": 0.15,
+        "endurance": 0.05
+      },
+      "consistencyThresholds": {
+        "high": 0.85,
+        "medium": 0.70,
+        "low": 0.69
+      }
+    },
+    "badgeManager": {
+      "enabled": true,
+      "reviewInterval": 604800000,
+      "thresholds": {
+        "bronze": {
+          "sessions": 0,
+          "score": 0,
+          "consistency": "low",
+          "reactionTime": 5000,
+          "endurance": 50
+        },
+        "silver": {
+          "sessions": 10,
+          "score": 75,
+          "consistency": "medium",
+          "reactionTime": 3500,
+          "endurance": 65
+        },
+        "gold": {
+          "sessions": 25,
+          "score": 85,
+          "consistency": "high",
+          "reactionTime": 2500,
+          "endurance": 80
+        },
+        "platinum": {
+          "sessions": 50,
+          "score": 92,
+          "consistency": "high",
+          "reactionTime": 2000,
+          "endurance": 90,
+          "specialAchievements": ["perfect_session", "consistency_streak"]
+        },
+        "diamond": {
+          "sessions": 100,
+          "score": 95,
+          "consistency": "high",
+          "reactionTime": 1500,
+          "endurance": 95,
+          "specialAchievements": ["perfect_session", "consistency_streak", "competition_winner"]
+        }
+      }
+    },
+    "drillRecommender": {
+      "enabled": true,
+      "algorithm": "skill_based",
+      "maxRecommendations": 5,
+      "categories": ["precision", "speed", "endurance", "fundamentals"],
+      "weakAreaMapping": {
+        "shooting_accuracy": ["precision_drill", "slow_fire"],
+        "consistency": ["controlled_pair", "metronome_drill"],
+        "reaction_time": ["draw_fire", "reaction_drill"],
+        "mental_focus": ["endurance_drill"],
+        "endurance": ["long_session"]
+      }
+    },
+    "feedbackCollector": {
+      "enabled": true,
+      "collectionInterval": 3600000,
+      "accuracyThreshold": 0.8,
+      "retrainingThreshold": 0.6,
+      "feedbackTypes": [
+        "muzzle_drift",
+        "trigger_press",
+        "grip",
+        "stance",
+        "breathing",
+        "sight_alignment",
+        "recoil_control",
+        "timing"
+      ]
+    },
+    "eventRecommender": {
+      "enabled": true,
+      "radiusKm": 50,
+      "maxResults": 10,
+      "categories": ["range", "competition", "training", "community"],
+      "skillMatching": {
+        "precision": ["long_range", "static_targets"],
+        "speed": ["moving_targets", "reaction_drills"],
+        "endurance": ["extended_sessions", "competition"],
+        "fundamentals": ["basic_training", "instruction"]
+      }
+    },
+    "aiExecutionRouter": {
+      "enabled": true,
+      "offlineThreshold": 0.3,
+      "latencyThreshold": 2000,
+      "fallbackModel": "tensorflow_lite",
+      "batteryThreshold": 0.2,
+      "networkThresholds": {
+        "fast": 200,
+        "medium": 500,
+        "slow": 1000
+      }
+    },
+    "highlightPoster": {
+      "enabled": true,
+      "autoGenerate": true,
+      "templates": {
+        "minimal": {
+          "backgroundColor": "#000000",
+          "textColor": "#ffffff",
+          "accentColor": "#10b981",
+          "elements": ["title", "score", "aiComment"]
+        },
+        "detailed": {
+          "backgroundColor": "#1f2937",
+          "textColor": "#ffffff",
+          "accentColor": "#3b82f6",
+          "elements": ["title", "stats", "aiComment", "tags"]
+        },
+        "achievement": {
+          "backgroundColor": "#7c3aed",
+          "textColor": "#ffffff",
+          "accentColor": "#fbbf24",
+          "elements": ["title", "achievement", "aiComment", "stats"]
+        },
+        "progress": {
+          "backgroundColor": "#059669",
+          "textColor": "#ffffff",
+          "accentColor": "#10b981",
+          "elements": ["title", "improvement", "aiComment", "trend"]
+        }
+      }
+    }
+  },
+  "analytics": {
+    "enabled": true,
+    "trackingEvents": [
+      "skill_graph_updated",
+      "badge_upgraded",
+      "drill_completed",
+      "feedback_submitted",
+      "event_recommended",
+      "highlight_generated",
+      "pose_analysis_completed",
+      "shooter_verification_checked"
+    ],
+    "retentionDays": 365,
+    "anonymization": true
+  },
+  "notifications": {
+    "enabled": true,
+    "channels": ["push", "email", "in_app"],
+    "templates": {
+      "badge_upgrade": {
+        "title": "🎉 New Badge Unlocked!",
+        "body": "Congratulations! You've earned the {badgeLevel} badge."
+      },
+      "drill_recommendation": {
+        "title": "🎯 New Drill Recommended",
+        "body": "Try this drill to improve your {weakArea}."
+      },
+      "achievement_unlocked": {
+        "title": "🏆 Achievement Unlocked!",
+        "body": "You've earned the {achievement} achievement!"
+      },
+      "highlight_ready": {
+        "title": "📸 Highlight Ready!",
+        "body": "Your session highlight is ready to share."
+      }
+    },
+    "scheduling": {
+      "weekly_review": "sunday",
+      "daily_reminder": "09:00",
+      "achievement_check": "immediate"
+    }
+  },
+  "security": {
+    "ageVerification": true,
+    "dataRetention": 365,
+    "encryption": true,
+    "auditLogging": true,
+    "privacyControls": {
+      "optInLeaderboard": true,
+      "dataSharing": false,
+      "analyticsOptOut": false
+    },
+    "compliance": {
+      "gdpr": true,
+      "ccpa": true,
+      "coppa": true
+    }
+  },
+  "performance": {
+    "cacheEnabled": true,
+    "cacheTTL": 3600,
+    "batchSize": 100,
+    "timeout": 30000,
+    "optimization": {
+      "imageCompression": true,
+      "lazyLoading": true,
+      "codeSplitting": true
+    },
+    "monitoring": {
+      "enabled": true,
+      "metrics": ["response_time", "error_rate", "user_satisfaction"],
+      "alerts": {
+        "errorThreshold": 0.05,
+        "latencyThreshold": 5000
+      }
+    }
+  },
+  "integrations": {
+    "slack": {
+      "enabled": true,
+      "channels": ["#sportbeacon-dev", "#sportbeacon-alerts"],
+      "commands": ["build", "deploy", "badge", "invite", "status"]
+    },
+    "github": {
+      "enabled": true,
+      "webhooks": ["push", "pull_request", "release"],
+      "autoDeploy": true
+    },
+    "firebase": {
+      "enabled": true,
+      "services": ["firestore", "auth", "storage", "functions"],
+      "backupEnabled": true
+    }
+  },
+  "maintenance": {
+    "scheduledMaintenance": {
+      "enabled": true,
+      "window": "sunday 02:00-04:00 UTC",
+      "notifications": true
+    },
+    "autoScaling": {
+      "enabled": true,
+      "minInstances": 1,
+      "maxInstances": 10,
+      "cpuThreshold": 0.7
+    },
+    "backup": {
+      "enabled": true,
+      "frequency": "daily",
+      "retention": 30
+    }
+  }
+} 
