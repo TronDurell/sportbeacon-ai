@@ -18,6 +18,14 @@ export interface PerformanceMetrics {
   lastUpdated: Date;
 }
 
+// Simple analytics wrapper for vanguard modules
+export const analytics = {
+  track: async (eventName: string, data: any): Promise<void> => {
+    // In a real implementation, this would send to analytics service
+    console.log('Analytics Event:', eventName, data);
+  }
+};
+
 export class AIAnalytics {
   private static instance: AIAnalytics;
   private sessionId: string;
@@ -202,10 +210,7 @@ export class AIAnalytics {
 
     let newAverageProcessingTime = currentMetrics.averageProcessingTime;
     if (event.processingTime) {
-      newAverageProcessingTime = (
-        (currentMetrics.averageProcessingTime * currentMetrics.totalRequests + event.processingTime) / 
-        newTotalRequests
-      );
+      newAverageProcessingTime = (currentMetrics.averageProcessingTime * currentMetrics.totalRequests + event.processingTime) / newTotalRequests;
     }
 
     this.performanceMetrics.set(module, {
@@ -251,8 +256,7 @@ export class AIAnalytics {
     const eventSummary: Record<string, number> = {};
     
     this.eventQueue.forEach(event => {
-      const key = `${event.module}_${event.action}`;
-      eventSummary[key] = (eventSummary[key] || 0) + 1;
+      eventSummary[event.action] = (eventSummary[event.action] || 0) + 1;
     });
 
     return {
@@ -264,12 +268,15 @@ export class AIAnalytics {
   }
 
   async cleanup(): Promise<void> {
-    // Flush any remaining events
-    this.eventQueue.forEach(event => {
-      firestoreUtils.logAnalyticsEvent(event);
-    });
+    // Clear event queue
+    this.eventQueue = [];
     
-    this.clearEventQueue();
+    // Reset performance metrics
+    this.performanceMetrics.clear();
+    this.initializePerformanceTracking();
+    
+    // Generate new session ID
+    this.sessionId = this.generateSessionId();
   }
 }
 

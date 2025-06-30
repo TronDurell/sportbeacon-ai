@@ -1,11 +1,14 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { ShieldIcon, TargetIcon, BarChart3Icon, SettingsIcon } from 'lucide-react-native';
+import { ShieldIcon, TargetIcon, BarChart3Icon, SettingsIcon, EditIcon, TrophyIcon, ShareIcon } from 'lucide-react-native';
 import DrillLab from './DrillLab';
 import CoachOverlay from './CoachOverlay';
 import RangeReport from './RangeReport';
 import ShooterVerification from './ShooterVerification';
+import DrillEditor from './DrillEditor';
+import RangeLeaderboard from './RangeLeaderboard';
+import ShareSessionCard from './ShareSessionCard';
 import { useAuth } from '../../frontend/hooks/useAuth';
 import { getUserRangeStats } from './firebase-schema';
 
@@ -77,6 +80,26 @@ function RangeOfficerTabs() {
         }}
       />
       <Tab.Screen
+        name="DrillEditor"
+        component={DrillEditor}
+        options={{
+          title: 'Drill Editor',
+          tabBarIcon: ({ color, size }) => (
+            <EditIcon color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Leaderboard"
+        component={RangeLeaderboard}
+        options={{
+          title: 'Leaderboard',
+          tabBarIcon: ({ color, size }) => (
+            <TrophyIcon color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="RangeReport"
         component={RangeReport}
         options={{
@@ -123,6 +146,14 @@ export default function RangeOfficerNavigator() {
           headerBackTitle: 'Back',
         }}
       />
+      <Stack.Screen
+        name="ShareSession"
+        component={ShareSessionScreen}
+        options={{
+          title: 'Share Session',
+          headerBackTitle: 'Back',
+        }}
+      />
     </Stack.Navigator>
   );
 }
@@ -164,6 +195,23 @@ function DrillSessionScreen({ route, navigation }) {
         />
       )}
     </View>
+  );
+}
+
+// Share Session Screen Component
+function ShareSessionScreen({ route, navigation }) {
+  const { session } = route.params;
+
+  return (
+    <ShareSessionCard 
+      session={session}
+      onShare={() => {
+        navigation.goBack();
+      }}
+      onDownload={() => {
+        navigation.goBack();
+      }}
+    />
   );
 }
 
