@@ -9,10 +9,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert
+  Alert,
+  Switch
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { analytics } from '../lib/ai/shared/analytics';
+import { AvatarLottie } from './AvatarLottie';
+import { AvatarRive } from './AvatarRive';
+import TownRecAIAgent from './townRecAIAgent';
 
 interface Message {
   id: string;
@@ -20,6 +24,7 @@ interface Message {
   sender: 'user' | 'ai';
   timestamp: Date;
   type: 'text' | 'highlight' | 'schedule' | 'injury' | 'reminder';
+  messageType: 'faq' | 'live-answer' | 'push-update' | 'recommendation';
   data?: any;
 }
 
@@ -27,37 +32,51 @@ interface ParentChatInterfaceProps {
   userId: string;
   agentId: string;
   onClose: () => void;
+  avatarType?: 'static' | 'lottie' | 'rive';
+  voiceEnabled?: boolean;
 }
 
 export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
   userId,
   agentId,
-  onClose
+  onClose,
+  avatarType = 'lottie',
+  voiceEnabled = true
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAvatar, setShowAvatar] = useState(true);
+  const [avatarAnimation, setAvatarAnimation] = useState<'idle' | 'talk' | 'alert'>('idle');
+  const [aiAgent, setAiAgent] = useState<TownRecAIAgent | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Quick action suggestions
   const quickActions = [
-    { text: 'When is the next game?', icon: '📅' },
-    { text: 'Show me recent highlights', icon: '🏆' },
-    { text: 'What\'s the practice schedule?', icon: '🏃' },
-    { text: 'Any coach messages?', icon: '💬' },
-    { text: 'Weather for tomorrow\'s game', icon: '🌤️' },
-    { text: 'How is my child doing?', icon: '📊' }
+    { text: 'When is the next game?', icon: '📅', type: 'faq' as const },
+    { text: 'Show me recent highlights', icon: '🏆', type: 'faq' as const },
+    { text: 'What\'s the practice schedule?', icon: '🏃', type: 'faq' as const },
+    { text: 'Any coach messages?', icon: '💬', type: 'faq' as const },
+    { text: 'Weather for tomorrow\'s game', icon: '🌤️', type: 'faq' as const },
+    { text: 'How is my child doing?', icon: '📊', type: 'live-answer' as const }
   ];
 
   useEffect(() => {
+    // Initialize AI Agent
+    const agent = new TownRecAIAgent(userId);
+    agent.init().then(() => {
+      setAiAgent(agent);
+    });
+
     // Add welcome message
     const welcomeMessage: Message = {
       id: 'welcome',
       text: 'Hi! I\'m your Town Rec AI Assistant. I\'m here to help you stay connected with your child\'s sports activities. What would you like to know?',
       sender: 'ai',
       timestamp: new Date(),
-      type: 'text'
+      type: 'text',
+      messageType: 'live-answer'
     };
     setMessages([welcomeMessage]);
 
@@ -65,8 +84,17 @@ export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
     analytics.track('parent_chat_session_started', {
       userId,
       agentId,
+      avatarType,
+      voiceEnabled,
       timestamp: new Date().toISOString()
     });
+
+    // Cleanup on unmount
+    return () => {
+      if (agent) {
+        agent.cleanup();
+      }
+    };
   }, []);
 
   const sendMessage = async (text: string) => {
@@ -77,24 +105,34 @@ export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
       text: text.trim(),
       sender: 'user',
       timestamp: new Date(),
-      type: 'text'
+      type: 'text',
+      messageType: 'live-answer'
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
     setIsTyping(true);
     setIsLoading(true);
+    setAvatarAnimation('talk');
 
     try {
-      // Simulate AI response (replace with actual AI call)
-      const aiResponse = await generateAIResponse(text);
+      let aiResponse: string;
+      
+      if (aiAgent) {
+        // Use the unified AI agent
+        aiResponse = await aiAgent.onChat(text);
+      } else {
+        // Fallback to local response generation
+        aiResponse = await generateAIResponse(text);
+      }
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: aiResponse,
         sender: 'ai',
         timestamp: new Date(),
-        type: 'text'
+        type: 'text',
+        messageType: detectMessageType(aiResponse)
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -104,6 +142,8 @@ export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
         userId,
         agentId,
         messageLength: text.length,
+        messageType: aiMessage.messageType,
+        avatarType,
         timestamp: new Date().toISOString()
       });
 
@@ -115,13 +155,29 @@ export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
         text: 'I apologize, but I\'m having trouble processing your request right now. Please try again in a moment.',
         sender: 'ai',
         timestamp: new Date(),
-        type: 'text'
+        type: 'text',
+        messageType: 'live-answer'
       };
 
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
       setIsLoading(false);
+      setAvatarAnimation('idle');
+    }
+  };
+
+  const detectMessageType = (text: string): 'faq' | 'live-answer' | 'push-update' | 'recommendation' => {
+    const lowerText = text.toLowerCase();
+    
+    if (lowerText.includes('schedule') || lowerText.includes('time') || lowerText.includes('date')) {
+      return 'faq';
+    } else if (lowerText.includes('recommend') || lowerText.includes('suggest') || lowerText.includes('alternative')) {
+      return 'recommendation';
+    } else if (lowerText.includes('update') || lowerText.includes('announcement') || lowerText.includes('alert')) {
+      return 'push-update';
+    } else {
+      return 'live-answer';
     }
   };
 
@@ -181,11 +237,20 @@ export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
     }
   };
 
-  const handleQuickAction = (action: string) => {
-    sendMessage(action);
+  const handleQuickAction = (action: { text: string; icon: string; type: string }) => {
+    sendMessage(action.text);
   };
 
   const handleVoiceCommand = () => {
+    if (!voiceEnabled) {
+      Alert.alert(
+        'Voice Disabled',
+        'Voice commands are disabled in your preferences. You can enable them in the settings.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     Alert.alert(
       'Voice Command',
       'Voice commands are coming soon! For now, you can type your questions or use the quick actions below.',
@@ -194,47 +259,87 @@ export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
   };
 
   const handleAvatarToggle = () => {
-    Alert.alert(
-      'Avatar Mode',
-      'Avatar mode can be enabled in your preferences. Would you like to open preferences now?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Open Preferences', onPress: () => {
-          // This would open the preferences panel
-          console.log('Opening preferences...');
-        }}
-      ]
+    setShowAvatar(!showAvatar);
+    
+    // Track avatar toggle
+    analytics.track('avatar_toggle', {
+      userId,
+      agentId,
+      showAvatar: !showAvatar,
+      avatarType,
+      timestamp: new Date().toISOString()
+    });
+  };
+
+  const renderAvatar = () => {
+    if (!showAvatar) return null;
+
+    const avatarProps = {
+      animation: avatarAnimation,
+      size: 80,
+      style: styles.avatar
+    };
+
+    switch (avatarType) {
+      case 'lottie':
+        return <AvatarLottie {...avatarProps} />;
+      case 'rive':
+        return <AvatarRive {...avatarProps} />;
+      default:
+        return (
+          <View style={[styles.avatar, styles.staticAvatar]}>
+            <MaterialIcons name="person" size={40} color="#007AFF" />
+          </View>
+        );
+    }
+  };
+
+  const renderMessage = (message: Message) => {
+    const isUser = message.sender === 'user';
+    const messageStyle = isUser ? styles.userMessage : styles.aiMessage;
+    const textStyle = isUser ? styles.userText : styles.aiText;
+
+    return (
+      <View key={message.id} style={[styles.messageContainer, isUser ? styles.userContainer : styles.aiContainer]}>
+        {!isUser && showAvatar && (
+          <View style={styles.avatarContainer}>
+            {renderAvatar()}
+          </View>
+        )}
+        <View style={[styles.messageBubble, messageStyle]}>
+          <Text style={textStyle}>{message.text}</Text>
+          <Text style={styles.timestamp}>
+            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+          {!isUser && (
+            <View style={styles.messageTypeBadge}>
+              <Text style={styles.messageTypeText}>{message.messageType}</Text>
+            </View>
+          )}
+        </View>
+      </View>
     );
   };
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container}
+      style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerInfo}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatar}>🤖</Text>
-          </View>
-          <View style={styles.headerText}>
-            <Text style={styles.headerTitle}>Town Rec AI Assistant</Text>
-            <Text style={styles.headerSubtitle}>
-              {isTyping ? 'Typing...' : 'Online'}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.headerActions}>
-          <TouchableOpacity onPress={handleAvatarToggle} style={styles.headerButton}>
-            <MaterialIcons name="face" size={24} color="#666" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleVoiceCommand} style={styles.headerButton}>
-            <MaterialIcons name="mic" size={24} color="#666" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-            <MaterialIcons name="close" size={24} color="#666" />
-          </TouchableOpacity>
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <MaterialIcons name="close" size={24} color="#007AFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Town Rec AI Assistant</Text>
+        <View style={styles.headerControls}>
+          <Switch
+            value={showAvatar}
+            onValueChange={handleAvatarToggle}
+            trackColor={{ false: '#767577', true: '#81b0ff' }}
+            thumbColor={showAvatar ? '#007AFF' : '#f4f3f4'}
+          />
+          <Text style={styles.avatarLabel}>Avatar</Text>
         </View>
       </View>
 
@@ -242,74 +347,43 @@ export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
       <ScrollView
         ref={scrollViewRef}
         style={styles.messagesContainer}
-        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.messagesContent}
         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
       >
-        {messages.map((message) => (
-          <View
-            key={message.id}
-            style={[
-              styles.messageContainer,
-              message.sender === 'user' ? styles.userMessage : styles.aiMessage
-            ]}
-          >
-            {message.sender === 'ai' && (
-              <View style={styles.aiAvatar}>
-                <Text style={styles.aiAvatarText}>🤖</Text>
+        {messages.map(renderMessage)}
+        
+        {isTyping && (
+          <View style={[styles.messageContainer, styles.aiContainer]}>
+            {showAvatar && (
+              <View style={styles.avatarContainer}>
+                {renderAvatar()}
               </View>
             )}
-            <View
-              style={[
-                styles.messageBubble,
-                message.sender === 'user' ? styles.userBubble : styles.aiBubble
-              ]}
-            >
-              <Text
-                style={[
-                  styles.messageText,
-                  message.sender === 'user' ? styles.userText : styles.aiText
-                ]}
-              >
-                {message.text}
-              </Text>
-              <Text style={styles.messageTime}>
-                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Text>
-            </View>
-          </View>
-        ))}
-        
-        {isLoading && (
-          <View style={styles.messageContainer}>
-            <View style={styles.aiAvatar}>
-              <Text style={styles.aiAvatarText}>🤖</Text>
-            </View>
-            <View style={styles.typingIndicator}>
-              <ActivityIndicator size="small" color="#007AFF" />
-              <Text style={styles.typingText}>AI is thinking...</Text>
+            <View style={[styles.messageBubble, styles.aiMessage]}>
+              <View style={styles.typingIndicator}>
+                <ActivityIndicator size="small" color="#007AFF" />
+                <Text style={styles.typingText}>AI is typing...</Text>
+              </View>
             </View>
           </View>
         )}
       </ScrollView>
 
       {/* Quick Actions */}
-      {messages.length === 1 && (
-        <View style={styles.quickActionsContainer}>
-          <Text style={styles.quickActionsTitle}>Quick Actions</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {quickActions.map((action, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.quickActionButton}
-                onPress={() => handleQuickAction(action.text)}
-              >
-                <Text style={styles.quickActionIcon}>{action.icon}</Text>
-                <Text style={styles.quickActionText}>{action.text}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+      <View style={styles.quickActionsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {quickActions.map((action, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.quickActionButton}
+              onPress={() => handleQuickAction(action)}
+            >
+              <Text style={styles.quickActionIcon}>{action.icon}</Text>
+              <Text style={styles.quickActionText}>{action.text}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* Input */}
       <View style={styles.inputContainer}>
@@ -322,17 +396,20 @@ export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
           multiline
           maxLength={500}
         />
-        <TouchableOpacity
-          style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
-          onPress={() => sendMessage(inputText)}
-          disabled={!inputText.trim() || isLoading}
-        >
-          <MaterialIcons 
-            name="send" 
-            size={24} 
-            color={inputText.trim() ? '#007AFF' : '#ccc'} 
-          />
-        </TouchableOpacity>
+        <View style={styles.inputButtons}>
+          {voiceEnabled && (
+            <TouchableOpacity onPress={handleVoiceCommand} style={styles.voiceButton}>
+              <MaterialIcons name="mic" size={24} color="#007AFF" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity 
+            onPress={() => sendMessage(inputText)}
+            style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
+            disabled={!inputText.trim() || isLoading}
+          >
+            <MaterialIcons name="send" size={24} color={inputText.trim() ? "#007AFF" : "#999"} />
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -341,185 +418,173 @@ export const ParentChatInterface: React.FC<ParentChatInterfaceProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
   },
   header: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    paddingTop: 40,
-    backgroundColor: 'white',
+    padding: 16,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#e1e5e9',
   },
-  headerInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  avatarContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  avatar: {
-    fontSize: 20,
-  },
-  headerText: {
-    flex: 1,
+  closeButton: {
+    padding: 8,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
     color: '#333',
   },
-  headerSubtitle: {
+  headerControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarLabel: {
     fontSize: 12,
     color: '#666',
-  },
-  headerActions: {
-    flexDirection: 'row',
-  },
-  headerButton: {
-    padding: 8,
-    marginLeft: 5,
+    marginLeft: 8,
   },
   messagesContainer: {
     flex: 1,
-    padding: 15,
+  },
+  messagesContent: {
+    padding: 16,
   },
   messageContainer: {
     flexDirection: 'row',
-    marginBottom: 15,
+    marginBottom: 16,
   },
-  userMessage: {
+  userContainer: {
     justifyContent: 'flex-end',
   },
-  aiMessage: {
+  aiContainer: {
     justifyContent: 'flex-start',
   },
-  aiAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#007AFF',
-    alignItems: 'center',
-    justifyContent: 'center',
+  avatarContainer: {
     marginRight: 8,
+    justifyContent: 'flex-end',
   },
-  aiAvatarText: {
-    fontSize: 16,
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  staticAvatar: {
+    backgroundColor: '#e1e5e9',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   messageBubble: {
     maxWidth: '80%',
     padding: 12,
     borderRadius: 18,
+    position: 'relative',
   },
-  userBubble: {
+  userMessage: {
     backgroundColor: '#007AFF',
-    borderBottomRightRadius: 4,
   },
-  aiBubble: {
-    backgroundColor: 'white',
-    borderBottomLeftRadius: 4,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  messageText: {
-    fontSize: 16,
-    lineHeight: 22,
+  aiMessage: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e1e5e9',
   },
   userText: {
-    color: 'white',
+    color: '#fff',
+    fontSize: 16,
   },
   aiText: {
     color: '#333',
+    fontSize: 16,
   },
-  messageTime: {
-    fontSize: 11,
+  timestamp: {
+    fontSize: 12,
     color: '#999',
     marginTop: 4,
-    alignSelf: 'flex-end',
+  },
+  messageTypeBadge: {
+    position: 'absolute',
+    top: -8,
+    right: 8,
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  messageTypeText: {
+    fontSize: 10,
+    color: '#fff',
+    textTransform: 'uppercase',
   },
   typingIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 18,
-    borderBottomLeftRadius: 4,
   },
   typingText: {
-    fontSize: 14,
-    color: '#666',
     marginLeft: 8,
+    color: '#666',
+    fontSize: 14,
   },
   quickActionsContainer: {
-    backgroundColor: 'white',
-    padding: 15,
+    padding: 16,
+    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  quickActionsTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 10,
+    borderTopColor: '#e1e5e9',
   },
   quickActionButton: {
     backgroundColor: '#f8f9fa',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
-    marginRight: 10,
-    alignItems: 'center',
-    minWidth: 120,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: '#e1e5e9',
   },
   quickActionIcon: {
     fontSize: 20,
-    marginBottom: 4,
+    textAlign: 'center',
   },
   quickActionText: {
     fontSize: 12,
     color: '#333',
     textAlign: 'center',
+    marginTop: 4,
+    maxWidth: 80,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: 15,
-    backgroundColor: 'white',
+    padding: 16,
+    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: '#e1e5e9',
   },
   textInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#e1e5e9',
     borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    maxHeight: 100,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     fontSize: 16,
-    marginRight: 10,
+    maxHeight: 100,
+    marginRight: 8,
+  },
+  inputButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  voiceButton: {
+    padding: 8,
+    marginRight: 8,
   },
   sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    padding: 8,
     backgroundColor: '#f8f9fa',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 20,
   },
   sendButtonDisabled: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f8f9fa',
   },
 }); 

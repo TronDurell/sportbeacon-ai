@@ -7,138 +7,250 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
-  ActivityIndicator
+  Platform
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { firestore } from '../lib/firebase';
+import { Picker } from '@react-native-picker/picker';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { analytics } from '../lib/ai/shared/analytics';
+
+interface ParentPreferences {
+  notificationLevel: 'all' | 'priority-only' | 'disabled';
+  language: 'en' | 'es' | 'fr';
+  timezone: string;
+  communicationMethod: 'text' | 'voice' | 'avatar';
+  deiReportOptIn: boolean;
+  avatarType: 'static' | 'lottie' | 'rive';
+  voiceEnabled: boolean;
+  autoSync: boolean;
+}
 
 interface ParentPreferencesPanelProps {
   userId: string;
-  visible: boolean;
   onClose: () => void;
+  onPreferencesChange?: (preferences: ParentPreferences) => void;
 }
 
-interface ParentPreferences {
-  alerts: {
-    gameTimeChanges: boolean;
-    injuryNotifications: boolean;
-    highlightClips: boolean;
-    newPhotos: boolean;
-    coachMessages: boolean;
-    practiceReminders: boolean;
-    weatherAlerts: boolean;
-    teamAnnouncements: boolean;
-  };
-  avatarChat: boolean;
-  voiceMode: boolean;
-  language: 'en' | 'es' | 'fr';
-  timezone: string;
-  notificationFrequency: 'immediate' | 'hourly' | 'daily';
-  privacyLevel: 'standard' | 'enhanced' | 'minimal';
-}
+const firestore = getFirestore();
+
+const timezones = [
+  { label: 'Eastern Time (ET)', value: 'America/New_York' },
+  { label: 'Central Time (CT)', value: 'America/Chicago' },
+  { label: 'Mountain Time (MT)', value: 'America/Denver' },
+  { label: 'Pacific Time (PT)', value: 'America/Los_Angeles' },
+  { label: 'Alaska Time (AKT)', value: 'America/Anchorage' },
+  { label: 'Hawaii Time (HST)', value: 'Pacific/Honolulu' },
+  { label: 'Atlantic Time (AT)', value: 'America/Halifax' },
+  { label: 'Newfoundland Time (NT)', value: 'America/St_Johns' }
+];
+
+const languages = [
+  { label: 'English', value: 'en' },
+  { label: 'Español', value: 'es' },
+  { label: 'Français', value: 'fr' }
+];
 
 export const ParentPreferencesPanel: React.FC<ParentPreferencesPanelProps> = ({
   userId,
-  visible,
-  onClose
+  onClose,
+  onPreferencesChange
 }) => {
   const [preferences, setPreferences] = useState<ParentPreferences>({
-    alerts: {
-      gameTimeChanges: true,
-      injuryNotifications: true,
-      highlightClips: true,
-      newPhotos: false,
-      coachMessages: true,
-      practiceReminders: true,
-      weatherAlerts: true,
-      teamAnnouncements: true
-    },
-    avatarChat: true,
-    voiceMode: false,
+    notificationLevel: 'all',
     language: 'en',
     timezone: 'America/New_York',
-    notificationFrequency: 'immediate',
-    privacyLevel: 'standard'
+    communicationMethod: 'text',
+    deiReportOptIn: true,
+    avatarType: 'lottie',
+    voiceEnabled: true,
+    autoSync: true
   });
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    if (visible) {
-      loadPreferences();
-    }
-  }, [visible]);
+    loadPreferences();
+  }, []);
 
   const loadPreferences = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       
-      const prefsRef = doc(firestore, 'users', userId, 'preferences', 'agentToggles');
+      const prefsRef = doc(firestore, 'users', userId, 'preferences', 'aiAgent');
       const prefsSnap = await getDoc(prefsRef);
       
       if (prefsSnap.exists()) {
-        setPreferences({ ...preferences, ...prefsSnap.data() });
+        const savedPrefs = prefsSnap.data() as ParentPreferences;
+        setPreferences(savedPrefs);
+      } else {
+        // Set default timezone based on device
+        const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const defaultTimezone = timezones.find(tz => tz.value === deviceTimezone)?.value || 'America/New_York';
+        
+        setPreferences(prev => ({
+          ...prev,
+          timezone: defaultTimezone
+        }));
       }
-      
     } catch (error) {
       console.error('Error loading preferences:', error);
       Alert.alert('Error', 'Failed to load preferences. Please try again.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const savePreferences = async () => {
     try {
-      setSaving(true);
+      setIsLoading(true);
       
-      const prefsRef = doc(firestore, 'users', userId, 'preferences', 'agentToggles');
+      const prefsRef = doc(firestore, 'users', userId, 'preferences', 'aiAgent');
       await updateDoc(prefsRef, preferences);
       
-      // Track analytics
+      // Track preference changes
       await analytics.track('parent_preferences_updated', {
         userId,
         preferences,
         timestamp: new Date().toISOString()
       });
       
+      setHasChanges(false);
+      
+      if (onPreferencesChange) {
+        onPreferencesChange(preferences);
+      }
+      
       Alert.alert('Success', 'Preferences saved successfully!');
-      onClose();
       
     } catch (error) {
       console.error('Error saving preferences:', error);
       Alert.alert('Error', 'Failed to save preferences. Please try again.');
     } finally {
-      setSaving(false);
+      setIsLoading(false);
     }
   };
 
-  const updateAlertPreference = (key: keyof ParentPreferences['alerts'], value: boolean) => {
-    setPreferences(prev => ({
-      ...prev,
-      alerts: {
-        ...prev.alerts,
-        [key]: value
-      }
-    }));
-  };
-
-  const updateGeneralPreference = (key: keyof Omit<ParentPreferences, 'alerts'>, value: any) => {
+  const updatePreference = <K extends keyof ParentPreferences>(
+    key: K,
+    value: ParentPreferences[K]
+  ) => {
     setPreferences(prev => ({
       ...prev,
       [key]: value
     }));
+    setHasChanges(true);
   };
 
-  if (!visible) return null;
+  const handleClose = () => {
+    if (hasChanges) {
+      Alert.alert(
+        'Unsaved Changes',
+        'You have unsaved changes. Do you want to save them before closing?',
+        [
+          { text: 'Don\'t Save', style: 'destructive', onPress: onClose },
+          { text: 'Save', onPress: savePreferences },
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
+    } else {
+      onClose();
+    }
+  };
 
-  if (loading) {
+  const renderSection = (title: string, children: React.ReactNode) => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+
+  const renderSwitch = (
+    label: string,
+    value: boolean,
+    onValueChange: (value: boolean) => void,
+    description?: string
+  ) => (
+    <View style={styles.switchContainer}>
+      <View style={styles.switchContent}>
+        <Text style={styles.switchLabel}>{label}</Text>
+        {description && <Text style={styles.switchDescription}>{description}</Text>}
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: '#767577', true: '#81b0ff' }}
+        thumbColor={value ? '#007AFF' : '#f4f3f4'}
+      />
+    </View>
+  );
+
+  const renderPicker = (
+    label: string,
+    value: string,
+    items: { label: string; value: string }[],
+    onValueChange: (value: string) => void
+  ) => (
+    <View style={styles.pickerContainer}>
+      <Text style={styles.pickerLabel}>{label}</Text>
+      <View style={styles.pickerWrapper}>
+        <Picker
+          selectedValue={value}
+          onValueChange={onValueChange}
+          style={styles.picker}
+        >
+          {items.map(item => (
+            <Picker.Item key={item.value} label={item.label} value={item.value} />
+          ))}
+        </Picker>
+      </View>
+    </View>
+  );
+
+  const renderRadioGroup = (
+    label: string,
+    value: string,
+    options: { label: string; value: string; description?: string }[],
+    onValueChange: (value: string) => void
+  ) => (
+    <View style={styles.radioGroupContainer}>
+      <Text style={styles.radioGroupLabel}>{label}</Text>
+      {options.map(option => (
+        <TouchableOpacity
+          key={option.value}
+          style={[
+            styles.radioOption,
+            value === option.value && styles.radioOptionSelected
+          ]}
+          onPress={() => onValueChange(option.value)}
+        >
+          <View style={[
+            styles.radioButton,
+            value === option.value && styles.radioButtonSelected
+          ]}>
+            {value === option.value && (
+              <View style={styles.radioButtonInner} />
+            )}
+          </View>
+          <View style={styles.radioContent}>
+            <Text style={[
+              styles.radioLabel,
+              value === option.value && styles.radioLabelSelected
+            ]}>
+              {option.label}
+            </Text>
+            {option.description && (
+              <Text style={styles.radioDescription}>{option.description}</Text>
+            )}
+          </View>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
+  if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
         <Text style={styles.loadingText}>Loading preferences...</Text>
       </View>
     );
@@ -146,441 +258,321 @@ export const ParentPreferencesPanel: React.FC<ParentPreferencesPanelProps> = ({
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+          <MaterialIcons name="close" size={24} color="#007AFF" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>AI Assistant Preferences</Text>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <MaterialIcons name="close" size={24} color="#666" />
+        <TouchableOpacity 
+          onPress={savePreferences}
+          style={[styles.saveButton, !hasChanges && styles.saveButtonDisabled]}
+          disabled={!hasChanges || isLoading}
+        >
+          <Text style={[styles.saveButtonText, !hasChanges && styles.saveButtonTextDisabled]}>
+            Save
+          </Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        
-        {/* Alert Preferences */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📱 Notifications</Text>
-          <Text style={styles.sectionDescription}>
-            Choose what updates you'd like to receive from your AI assistant
-          </Text>
-          
-          {Object.entries({
-            gameTimeChanges: { label: 'Game Time Changes', icon: '📅' },
-            injuryNotifications: { label: 'Injury Reports', icon: '🏥' },
-            highlightClips: { label: 'Highlight Videos', icon: '🏆' },
-            newPhotos: { label: 'New Photos', icon: '📸' },
-            coachMessages: { label: 'Coach Messages', icon: '💬' },
-            practiceReminders: { label: 'Practice Reminders', icon: '🏃' },
-            weatherAlerts: { label: 'Weather Alerts', icon: '🌤️' },
-            teamAnnouncements: { label: 'Team Announcements', icon: '📢' }
-          }).map(([key, config]) => (
-            <View key={key} style={styles.preferenceRow}>
-              <View style={styles.preferenceInfo}>
-                <Text style={styles.preferenceIcon}>{config.icon}</Text>
-                <View style={styles.preferenceText}>
-                  <Text style={styles.preferenceLabel}>{config.label}</Text>
-                  <Text style={styles.preferenceDescription}>
-                    {getPreferenceDescription(key as keyof ParentPreferences['alerts'])}
-                  </Text>
-                </View>
-              </View>
-              <Switch
-                value={preferences.alerts[key as keyof ParentPreferences['alerts']]}
-                onValueChange={(value) => updateAlertPreference(key as keyof ParentPreferences['alerts'], value)}
-                trackColor={{ false: '#ddd', true: '#007AFF' }}
-                thumbColor={preferences.alerts[key as keyof ParentPreferences['alerts']] ? '#fff' : '#f4f3f4'}
-              />
-            </View>
-          ))}
-        </View>
-
-        {/* Communication Preferences */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>💬 Communication Style</Text>
-          <Text style={styles.sectionDescription}>
-            How would you like to interact with your AI assistant?
-          </Text>
-          
-          <View style={styles.preferenceRow}>
-            <View style={styles.preferenceInfo}>
-              <Text style={styles.preferenceIcon}>🤖</Text>
-              <View style={styles.preferenceText}>
-                <Text style={styles.preferenceLabel}>Avatar Chat</Text>
-                <Text style={styles.preferenceDescription}>
-                  Use animated avatar for more engaging conversations
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={preferences.avatarChat}
-              onValueChange={(value) => updateGeneralPreference('avatarChat', value)}
-              trackColor={{ false: '#ddd', true: '#007AFF' }}
-              thumbColor={preferences.avatarChat ? '#fff' : '#f4f3f4'}
-            />
+        {/* Notifications */}
+        {renderSection('Notifications', (
+          <View>
+            {renderRadioGroup(
+              'Notification Level',
+              preferences.notificationLevel,
+              [
+                {
+                  label: 'All Notifications',
+                  value: 'all',
+                  description: 'Receive all updates including games, practices, and announcements'
+                },
+                {
+                  label: 'Priority Only',
+                  value: 'priority-only',
+                  description: 'Only receive important updates like game changes and urgent announcements'
+                },
+                {
+                  label: 'Disabled',
+                  value: 'disabled',
+                  description: 'No notifications (you can still check the app for updates)'
+                }
+              ],
+              (value) => updatePreference('notificationLevel', value as 'all' | 'priority-only' | 'disabled')
+            )}
           </View>
-
-          <View style={styles.preferenceRow}>
-            <View style={styles.preferenceInfo}>
-              <Text style={styles.preferenceIcon}>🎙️</Text>
-              <View style={styles.preferenceText}>
-                <Text style={styles.preferenceLabel}>Voice Mode</Text>
-                <Text style={styles.preferenceDescription}>
-                  Enable voice responses and commands
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={preferences.voiceMode}
-              onValueChange={(value) => updateGeneralPreference('voiceMode', value)}
-              trackColor={{ false: '#ddd', true: '#007AFF' }}
-              thumbColor={preferences.voiceMode ? '#fff' : '#f4f3f4'}
-            />
-          </View>
-        </View>
+        ))}
 
         {/* Language & Timezone */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🌍 Language & Time</Text>
-          
-          <View style={styles.preferenceRow}>
-            <View style={styles.preferenceInfo}>
-              <Text style={styles.preferenceIcon}>🗣️</Text>
-              <View style={styles.preferenceText}>
-                <Text style={styles.preferenceLabel}>Language</Text>
-                <Text style={styles.preferenceDescription}>
-                  Choose your preferred language
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.pickerButton}
-              onPress={() => {
-                Alert.alert(
-                  'Select Language',
-                  'Choose your preferred language',
-                  [
-                    { text: 'English', onPress: () => updateGeneralPreference('language', 'en') },
-                    { text: 'Español', onPress: () => updateGeneralPreference('language', 'es') },
-                    { text: 'Français', onPress: () => updateGeneralPreference('language', 'fr') },
-                    { text: 'Cancel', style: 'cancel' }
-                  ]
-                );
-              }}
-            >
-              <Text style={styles.pickerText}>
-                {preferences.language === 'en' ? 'English' : 
-                 preferences.language === 'es' ? 'Español' : 'Français'}
-              </Text>
-              <MaterialIcons name="arrow-drop-down" size={24} color="#666" />
-            </TouchableOpacity>
+        {renderSection('Language & Timezone', (
+          <View>
+            {renderPicker(
+              'Language',
+              preferences.language,
+              languages,
+              (value) => updatePreference('language', value as 'en' | 'es' | 'fr')
+            )}
+            {renderPicker(
+              'Timezone',
+              preferences.timezone,
+              timezones,
+              (value) => updatePreference('timezone', value)
+            )}
           </View>
+        ))}
 
-          <View style={styles.preferenceRow}>
-            <View style={styles.preferenceInfo}>
-              <Text style={styles.preferenceIcon}>🕐</Text>
-              <View style={styles.preferenceText}>
-                <Text style={styles.preferenceLabel}>Notification Frequency</Text>
-                <Text style={styles.preferenceDescription}>
-                  How often to receive updates
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.pickerButton}
-              onPress={() => {
-                Alert.alert(
-                  'Notification Frequency',
-                  'Choose how often to receive updates',
-                  [
-                    { text: 'Immediate', onPress: () => updateGeneralPreference('notificationFrequency', 'immediate') },
-                    { text: 'Hourly', onPress: () => updateGeneralPreference('notificationFrequency', 'hourly') },
-                    { text: 'Daily', onPress: () => updateGeneralPreference('notificationFrequency', 'daily') },
-                    { text: 'Cancel', style: 'cancel' }
-                  ]
-                );
-              }}
-            >
-              <Text style={styles.pickerText}>
-                {preferences.notificationFrequency === 'immediate' ? 'Immediate' :
-                 preferences.notificationFrequency === 'hourly' ? 'Hourly' : 'Daily'}
-              </Text>
-              <MaterialIcons name="arrow-drop-down" size={24} color="#666" />
-            </TouchableOpacity>
+        {/* Communication Method */}
+        {renderSection('Communication Method', (
+          <View>
+            {renderRadioGroup(
+              'Preferred Method',
+              preferences.communicationMethod,
+              [
+                {
+                  label: 'Text Chat',
+                  value: 'text',
+                  description: 'Traditional text-based chat interface'
+                },
+                {
+                  label: 'Voice Commands',
+                  value: 'voice',
+                  description: 'Use voice commands and receive voice responses'
+                },
+                {
+                  label: 'Avatar Interface',
+                  value: 'avatar',
+                  description: 'Interactive avatar with animations and expressions'
+                }
+              ],
+              (value) => updatePreference('communicationMethod', value as 'text' | 'voice' | 'avatar')
+            )}
           </View>
-        </View>
+        ))}
 
-        {/* Privacy Settings */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🔒 Privacy & Security</Text>
-          <Text style={styles.sectionDescription}>
-            Control how your information is shared and used
+        {/* Avatar Settings */}
+        {renderSection('Avatar Settings', (
+          <View>
+            {renderSwitch(
+              'Enable Voice Commands',
+              preferences.voiceEnabled,
+              (value) => updatePreference('voiceEnabled', value),
+              'Allow voice input and voice responses from the AI assistant'
+            )}
+            {renderPicker(
+              'Avatar Type',
+              preferences.avatarType,
+              [
+                { label: 'Static Icon', value: 'static' },
+                { label: 'Lottie Animation', value: 'lottie' },
+                { label: 'Rive Animation', value: 'rive' }
+              ],
+              (value) => updatePreference('avatarType', value as 'static' | 'lottie' | 'rive')
+            )}
+          </View>
+        ))}
+
+        {/* Privacy & Data */}
+        {renderSection('Privacy & Data', (
+          <View>
+            {renderSwitch(
+              'DEI Report Opt-in',
+              preferences.deiReportOptIn,
+              (value) => updatePreference('deiReportOptIn', value),
+              'Allow anonymous data to be included in diversity, equity, and inclusion reports sent to local government'
+            )}
+            {renderSwitch(
+              'Auto-sync Preferences',
+              preferences.autoSync,
+              (value) => updatePreference('autoSync', value),
+              'Automatically sync preferences across devices and keep them up to date'
+            )}
+          </View>
+        ))}
+
+        {/* Information */}
+        <View style={styles.infoSection}>
+          <MaterialIcons name="info" size={20} color="#007AFF" />
+          <Text style={styles.infoText}>
+            Your preferences help us provide a personalized experience. 
+            All data is stored securely and used only to improve your AI assistant experience.
           </Text>
-          
-          <View style={styles.preferenceRow}>
-            <View style={styles.preferenceInfo}>
-              <Text style={styles.preferenceIcon}>🛡️</Text>
-              <View style={styles.preferenceText}>
-                <Text style={styles.preferenceLabel}>Privacy Level</Text>
-                <Text style={styles.preferenceDescription}>
-                  {getPrivacyDescription(preferences.privacyLevel)}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.pickerButton}
-              onPress={() => {
-                Alert.alert(
-                  'Privacy Level',
-                  'Choose your privacy preference',
-                  [
-                    { 
-                      text: 'Standard', 
-                      onPress: () => updateGeneralPreference('privacyLevel', 'standard'),
-                      style: preferences.privacyLevel === 'standard' ? 'default' : 'default'
-                    },
-                    { 
-                      text: 'Enhanced', 
-                      onPress: () => updateGeneralPreference('privacyLevel', 'enhanced'),
-                      style: preferences.privacyLevel === 'enhanced' ? 'default' : 'default'
-                    },
-                    { 
-                      text: 'Minimal', 
-                      onPress: () => updateGeneralPreference('privacyLevel', 'minimal'),
-                      style: preferences.privacyLevel === 'minimal' ? 'default' : 'default'
-                    },
-                    { text: 'Cancel', style: 'cancel' }
-                  ]
-                );
-              }}
-            >
-              <Text style={styles.pickerText}>
-                {preferences.privacyLevel === 'standard' ? 'Standard' :
-                 preferences.privacyLevel === 'enhanced' ? 'Enhanced' : 'Minimal'}
-              </Text>
-              <MaterialIcons name="arrow-drop-down" size={24} color="#666" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>⚡ Quick Actions</Text>
-          
-          <TouchableOpacity style={styles.actionButton}>
-            <MaterialIcons name="notifications-off" size={24} color="#666" />
-            <Text style={styles.actionButtonText}>Pause All Notifications</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.actionButton}>
-            <MaterialIcons name="refresh" size={24} color="#666" />
-            <Text style={styles.actionButtonText}>Reset to Defaults</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.actionButton}>
-            <MaterialIcons name="help" size={24} color="#666" />
-            <Text style={styles.actionButtonText}>Help & Support</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
-
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={[styles.button, styles.cancelButton]}
-          onPress={onClose}
-          disabled={saving}
-        >
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.button, styles.saveButton, saving && styles.disabledButton]}
-          onPress={savePreferences}
-          disabled={saving}
-        >
-          {saving ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
-            <Text style={styles.saveButtonText}>Save Preferences</Text>
-          )}
-        </TouchableOpacity>
-      </View>
     </View>
   );
-};
-
-const getPreferenceDescription = (key: keyof ParentPreferences['alerts']): string => {
-  const descriptions = {
-    gameTimeChanges: 'Get notified when game times change',
-    injuryNotifications: 'Receive alerts about injuries or health concerns',
-    highlightClips: 'See your child\'s best moments and achievements',
-    newPhotos: 'Get notified when new photos are uploaded',
-    coachMessages: 'Receive important messages from coaches',
-    practiceReminders: 'Get reminded about upcoming practices',
-    weatherAlerts: 'Stay informed about weather that may affect games',
-    teamAnnouncements: 'Receive team updates and announcements'
-  };
-  return descriptions[key];
-};
-
-const getPrivacyDescription = (level: string): string => {
-  const descriptions = {
-    standard: 'Standard privacy with basic data sharing',
-    enhanced: 'Enhanced privacy with minimal data sharing',
-    minimal: 'Minimal privacy with full feature access'
-  };
-  return descriptions[level as keyof typeof descriptions];
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
   },
   loadingText: {
-    marginTop: 10,
     fontSize: 16,
     color: '#666',
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 40,
-    backgroundColor: 'white',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    borderBottomColor: '#e1e5e9',
   },
   closeButton: {
-    padding: 5,
+    padding: 8,
   },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  section: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  sectionTitle: {
+  headerTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  sectionDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 20,
-    lineHeight: 20,
-  },
-  preferenceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  preferenceInfo: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  preferenceIcon: {
-    fontSize: 24,
-    marginRight: 15,
-  },
-  preferenceText: {
-    flex: 1,
-  },
-  preferenceLabel: {
-    fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 4,
-  },
-  preferenceDescription: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 18,
-  },
-  pickerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 10,
-    minWidth: 120,
-  },
-  pickerText: {
-    fontSize: 14,
-    color: '#333',
-    marginRight: 5,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  actionButtonText: {
-    fontSize: 16,
-    color: '#333',
-    marginLeft: 15,
-  },
-  footer: {
-    flexDirection: 'row',
-    padding: 20,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  button: {
-    flex: 1,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginHorizontal: 5,
-  },
-  cancelButton: {
-    backgroundColor: '#f8f9fa',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '600',
   },
   saveButton: {
     backgroundColor: '#007AFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#e1e5e9',
   },
   saveButtonText: {
+    color: '#fff',
     fontSize: 16,
-    color: 'white',
     fontWeight: '600',
   },
-  disabledButton: {
-    backgroundColor: '#ccc',
+  saveButtonTextDisabled: {
+    color: '#999',
+  },
+  content: {
+    flex: 1,
+  },
+  section: {
+    backgroundColor: '#fff',
+    marginBottom: 16,
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 16,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  switchContent: {
+    flex: 1,
+    marginRight: 16,
+  },
+  switchLabel: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 4,
+  },
+  switchDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  pickerContainer: {
+    marginBottom: 16,
+  },
+  pickerLabel: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 8,
+  },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: '#e1e5e9',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
+  picker: {
+    height: 50,
+  },
+  radioGroupContainer: {
+    marginBottom: 16,
+  },
+  radioGroupLabel: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 12,
+  },
+  radioOption: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  radioOptionSelected: {
+    backgroundColor: '#f8f9fa',
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#e1e5e9',
+    marginRight: 12,
+    marginTop: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioButtonSelected: {
+    borderColor: '#007AFF',
+  },
+  radioButtonInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#007AFF',
+  },
+  radioContent: {
+    flex: 1,
+  },
+  radioLabel: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 4,
+  },
+  radioLabelSelected: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  radioDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  infoSection: {
+    flexDirection: 'row',
+    backgroundColor: '#e3f2fd',
+    padding: 16,
+    margin: 16,
+    borderRadius: 8,
+    alignItems: 'flex-start',
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1976d2',
+    lineHeight: 20,
+    marginLeft: 8,
   },
 }); 

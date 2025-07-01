@@ -1,0 +1,500 @@
+name: TownRec AI Unified - Automated Testing & Deployment
+
+on:
+  push:
+    branches: [feature/townrec-ai-unified, main]
+  pull_request:
+    branches: [feature/townrec-ai-unified, main]
+  schedule:
+    # Run daily at 3 AM UTC for DEI report generation
+    - cron: '0 3 * * *'
+
+env:
+  NODE_VERSION: '18'
+  FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+  FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+jobs:
+  # Unit and Integration Tests
+  test:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd frontend && npm ci
+        cd ../backend && npm ci
+
+    - name: Run linting
+      run: |
+        npm run lint
+        cd frontend && npm run lint
+        cd ../backend && npm run lint
+
+    - name: Run unit tests
+      run: |
+        npm test -- --coverage --watchAll=false
+        cd frontend && npm test -- --coverage --watchAll=false
+        cd ../backend && npm test -- --coverage --watchAll=false
+
+    - name: Run integration tests
+      run: |
+        npm run test:integration
+        cd frontend && npm run test:integration
+
+    - name: Upload test coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+
+    - name: Upload frontend coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./frontend/coverage/lcov.info
+        flags: frontend
+        name: codecov-frontend
+
+  # DEI Workflow Validation
+  dei-validation:
+    name: DEI Workflow Validation
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run DEI workflow tests
+      run: |
+        npm run test:dei
+        npm run test:integrity
+
+    - name: Validate Firestore rules
+      run: |
+        npm run test:firestore-rules
+
+    - name: Test exception request flow
+      run: |
+        npm run test:exception-flow
+
+    - name: Test admin approval workflow
+      run: |
+        npm run test:admin-workflow
+
+  # Parent Chat Fallback Testing
+  parent-chat-test:
+    name: Parent Chat Fallback Testing
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd frontend && npm ci
+
+    - name: Test AI Agent fallback
+      run: |
+        npm run test:ai-fallback
+
+    - name: Test chat interface components
+      run: |
+        cd frontend && npm run test:chat-components
+
+    - name: Test voice integration
+      run: |
+        npm run test:voice-integration
+
+    - name: Test avatar animations
+      run: |
+        cd frontend && npm run test:avatar-components
+
+  # Security and Privacy Testing
+  security-test:
+    name: Security & Privacy Testing
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run security audit
+      run: |
+        npm audit --audit-level=moderate
+        cd frontend && npm audit --audit-level=moderate
+        cd ../backend && npm audit --audit-level=moderate
+
+    - name: Test data privacy
+      run: |
+        npm run test:privacy
+
+    - name: Test access controls
+      run: |
+        npm run test:access-controls
+
+    - name: Test rate limiting
+      run: |
+        npm run test:rate-limiting
+
+  # Performance Testing
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run performance tests
+      run: |
+        npm run test:performance
+
+    - name: Test concurrent users
+      run: |
+        npm run test:concurrent-users
+
+    - name: Test analytics performance
+      run: |
+        npm run test:analytics-performance
+
+  # Build and Deploy
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    needs: [test, dei-validation, parent-chat-test, security-test, performance-test]
+    if: github.ref == 'refs/heads/feature/townrec-ai-unified' || github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd frontend && npm ci
+        cd ../backend && npm ci
+
+    - name: Build frontend
+      run: |
+        cd frontend && npm run build
+
+    - name: Build backend
+      run: |
+        cd backend && npm run build
+
+    - name: Setup Firebase
+      uses: FirebaseExtended/action-hosting-deploy@v0
+      with:
+        repoToken: '${{ secrets.GITHUB_TOKEN }}'
+        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+        projectId: ${{ env.FIREBASE_PROJECT_ID }}
+        channelId: live
+
+    - name: Deploy to Firebase
+      run: |
+        firebase deploy --only hosting,functions,firestore:rules
+
+    - name: Deploy AI config
+      run: |
+        npm run deploy:ai-config
+
+  # Daily DEI Report Generation
+  daily-dei-report:
+    name: Daily DEI Report Generation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Setup Firebase
+      uses: FirebaseExtended/action-hosting-deploy@v0
+      with:
+        repoToken: '${{ secrets.GITHUB_TOKEN }}'
+        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+        projectId: ${{ env.FIREBASE_PROJECT_ID }}
+
+    - name: Generate DEI report
+      run: |
+        npm run generate:dei-report
+
+    - name: Export to local government
+      run: |
+        npm run export:dei-report
+
+    - name: Send Slack notification
+      run: |
+        npm run notify:dei-summary
+
+  # Slack Notifications
+  slack-notifications:
+    name: Slack Notifications
+    runs-on: ubuntu-latest
+    needs: [test, dei-validation, parent-chat-test, security-test, performance-test]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Send test results to Slack
+      if: needs.test.result == 'success'
+      run: |
+        npm run slack:test-success
+
+    - name: Send test failure to Slack
+      if: needs.test.result == 'failure'
+      run: |
+        npm run slack:test-failure
+
+    - name: Send DEI validation results
+      if: needs.dei-validation.result == 'success'
+      run: |
+        npm run slack:dei-success
+
+    - name: Send DEI validation failure
+      if: needs.dei-validation.result == 'failure'
+      run: |
+        npm run slack:dei-failure
+
+    - name: Send deployment notification
+      if: needs.build-and-deploy.result == 'success'
+      run: |
+        npm run slack:deploy-success
+
+    - name: Send deployment failure
+      if: needs.build-and-deploy.result == 'failure'
+      run: |
+        npm run slack:deploy-failure
+
+  # Code Quality Checks
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run TypeScript check
+      run: |
+        npm run type-check
+        cd frontend && npm run type-check
+        cd ../backend && npm run type-check
+
+    - name: Run ESLint
+      run: |
+        npm run lint
+        cd frontend && npm run lint
+        cd ../backend && npm run lint
+
+    - name: Run Prettier check
+      run: |
+        npm run format:check
+        cd frontend && npm run format:check
+        cd ../backend && npm run format:check
+
+    - name: Check for unused dependencies
+      run: |
+        npm run check:unused-deps
+        cd frontend && npm run check:unused-deps
+        cd ../backend && npm run check:unused-deps
+
+    - name: Check bundle size
+      run: |
+        cd frontend && npm run build:analyze
+
+  # Mobile Compatibility Testing
+  mobile-test:
+    name: Mobile Compatibility Testing
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd frontend && npm ci
+
+    - name: Test React Native compatibility
+      run: |
+        cd frontend && npm run test:react-native
+
+    - name: Test mobile UI components
+      run: |
+        cd frontend && npm run test:mobile-ui
+
+    - name: Test touch interactions
+      run: |
+        cd frontend && npm run test:touch-interactions
+
+    - name: Test responsive design
+      run: |
+        cd frontend && npm run test:responsive
+
+  # Documentation Generation
+  docs:
+    name: Generate Documentation
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate API documentation
+      run: |
+        npm run docs:api
+
+    - name: Generate component documentation
+      run: |
+        cd frontend && npm run docs:components
+
+    - name: Generate deployment documentation
+      run: |
+        npm run docs:deployment
+
+    - name: Upload documentation artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: documentation
+        path: |
+          docs/
+          frontend/docs/
+          backend/docs/
+
+  # Final Status Check
+  status-check:
+    name: Final Status Check
+    runs-on: ubuntu-latest
+    needs: [test, dei-validation, parent-chat-test, security-test, performance-test, build-and-deploy, code-quality, mobile-test, docs]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate status report
+      run: |
+        npm run generate:status-report
+
+    - name: Send final status to Slack
+      run: |
+        npm run slack:final-status
+
+    - name: Update deployment status
+      if: needs.build-and-deploy.result == 'success'
+      run: |
+        npm run update:deployment-status 
