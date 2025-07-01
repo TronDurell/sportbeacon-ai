@@ -1,153 +1,476 @@
+import { useState, useCallback, useMemo } from 'react';
 import { firestore } from '../firebase';
-import { doc, getDoc, setDoc, collection, query, where, orderBy, limit, getDocs, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, where, orderBy, limit, getDocs, updateDoc, addDoc, Timestamp } from 'firebase/firestore';
 import { analytics } from './shared/analytics';
 
 export interface Badge {
-  level: 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Diamond';
+  id?: string;
+  uid: string;
+  badgeType: 'achievement' | 'streak' | 'monetization' | 'community' | 'milestone';
+  badgeId: string;
   title: string;
   description: string;
+  icon: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  xpReward: number;
+  monetaryReward?: number;
   unlockedAt: Date;
-  requirements: BadgeRequirements;
-  benefits: BadgeBenefits;
+  progress: number;
+  maxProgress: number;
+  isUnlocked: boolean;
+  metadata?: {
+    sourceType?: string;
+    sourceId?: string;
+    streakDays?: number;
+    tipAmount?: number;
+    postCount?: number;
+    followerCount?: number;
+  };
 }
 
-export interface BadgeRequirements {
-  minSessions: number;
-  minAvgScore: number;
-  minConsistency: 'low' | 'medium' | 'high';
-  minReactionTime: number;
-  minEndurance: number;
-  specialAchievements?: string[];
+export interface BadgeCriteria {
+  badgeId: string;
+  type: 'count' | 'streak' | 'amount' | 'composite';
+  target: number;
+  conditions: {
+    postCount?: number;
+    tipAmount?: number;
+    streakDays?: number;
+    followerCount?: number;
+    engagementRate?: number;
+    monetizationTier?: string;
+  };
+  rewards: {
+    xp: number;
+    monetary?: number;
+    tierUpgrade?: boolean;
+  };
 }
 
-export interface BadgeBenefits {
-  monetizationEnabled: boolean;
-  premiumFeatures: string[];
-  communityAccess: string[];
-  exclusiveContent: string[];
-  prioritySupport: boolean;
-}
-
-export interface UserActivity {
+export interface UserBadgeProgress {
   uid: string;
-  totalSessions: number;
-  avgScore: number;
-  consistency: 'low' | 'medium' | 'high';
-  reactionTime: number;
-  endurance: number;
-  lastSessionDate: Date;
-  achievements: string[];
-  currentBadge: Badge;
+  badgeId: string;
+  progress: number;
+  maxProgress: number;
+  lastUpdated: Date;
+  isUnlocked: boolean;
 }
 
-// Badge definitions
-const BADGE_DEFINITIONS: { [key: string]: Badge } = {
-  Bronze: {
-    level: 'Bronze',
-    title: 'Bronze Shooter',
-    description: 'Getting started with precision shooting',
-    unlockedAt: new Date(),
-    requirements: {
-      minSessions: 0,
-      minAvgScore: 0,
-      minConsistency: 'low',
-      minReactionTime: 5000,
-      minEndurance: 50
-    },
-    benefits: {
-      monetizationEnabled: false,
-      premiumFeatures: [],
-      communityAccess: ['basic_forum'],
-      exclusiveContent: [],
-      prioritySupport: false
+export interface BadgeProgress {
+  userId: string;
+  badgeType: string;
+  currentProgress: number;
+  targetProgress: number;
+  lastUpdated: Date;
+  isCompleted: boolean;
+}
+
+export interface BadgeTier {
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  requiredBadges: number;
+  requiredEarnings: number;
+  benefits: string[];
+  unlockedAt?: Date;
+}
+
+interface MonetizationEvent {
+  type: 'badge_upgrade' | 'payout_request' | 'refund' | 'leaderboard_change' | 'streak_achieved';
+  userId: string;
+  timestamp: Date;
+  data: any;
+  metadata?: {
+    sessionId?: string;
+    deviceInfo?: string;
+    location?: string;
+  };
+}
+
+export const useMonetizationUtils = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [events, setEvents] = useState<MonetizationEvent[]>([]);
+
+  // Memoized utility functions for async-heavy logic
+  const checkStreak = useCallback(async (userId: string): Promise<any> => {
+    try {
+      const badgesRef = collection(firestore, 'badges');
+      const userBadgesQuery = query(
+        badgesRef,
+        where('userId', '==', userId),
+        orderBy('unlockedAt', 'desc'),
+        limit(30)
+      );
+      
+      const snapshot = await getDocs(userBadgesQuery);
+      const badges = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        unlockedAt: doc.data().unlockedAt.toDate()
+      }));
+
+      // Calculate badge streak logic
+      let currentStreak = 0;
+      let longestStreak = 0;
+      let tempStreak = 0;
+      const now = new Date();
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      for (let i = 0; i < badges.length - 1; i++) {
+        const currentBadge = badges[i];
+        const nextBadge = badges[i + 1];
+        const dayDiff = Math.floor((currentBadge.unlockedAt.getTime() - nextBadge.unlockedAt.getTime()) / oneDay);
+
+        if (dayDiff === 1) {
+          tempStreak++;
+          if (i === 0) currentStreak = tempStreak;
+        } else {
+          longestStreak = Math.max(longestStreak, tempStreak);
+          tempStreak = 0;
+        }
+      }
+
+      longestStreak = Math.max(longestStreak, tempStreak);
+
+      const streakData = {
+        userId,
+        currentStreak,
+        longestStreak,
+        lastBadgeDate: badges[0]?.unlockedAt || now,
+        streakType: 'daily'
+      };
+
+      // Log streak event
+      await logMonetizationEvent({
+        type: 'streak_achieved',
+        userId,
+        timestamp: now,
+        data: streakData
+      });
+
+      return streakData;
+    } catch (error) {
+      console.error('Error checking badge streak:', error);
+      throw error;
     }
+  }, []);
+
+  const triggerAutoBadge = useCallback(async (userId: string, badgeType: string): Promise<boolean> => {
+    try {
+      setIsProcessing(true);
+      
+      // Check if user already has this badge
+      const badgesRef = collection(firestore, 'badges');
+      const existingBadgeQuery = query(
+        badgesRef,
+        where('userId', '==', userId),
+        where('badgeType', '==', badgeType)
+      );
+      
+      const existingBadge = await getDocs(existingBadgeQuery);
+      if (!existingBadge.empty) {
+        return false; // Badge already exists
+      }
+
+      // Get badge template
+      const badgeTemplate = await getBadgeTemplate(badgeType);
+      if (!badgeTemplate) {
+        throw new Error(`Badge template not found for type: ${badgeType}`);
+      }
+
+      // Create new badge
+      const badgeData: Badge = {
+        uid: userId,
+        badgeType: badgeType,
+        badgeId: badgeType,
+        title: badgeTemplate.title,
+        description: badgeTemplate.description,
+        icon: badgeTemplate.icon,
+        rarity: 'common',
+        xpReward: badgeTemplate.rewards.xp,
+        monetaryReward: badgeTemplate.rewards.monetary,
+        unlockedAt: new Date(),
+        progress: badgeTemplate.rewards.target,
+        maxProgress: badgeTemplate.rewards.target,
+        isUnlocked: true,
+        metadata: {
+          sourceType: 'automated',
+          autoGenerated: true,
+          streakDays: badgeTemplate.rewards.target,
+          tipAmount: badgeTemplate.rewards.target,
+          postCount: badgeTemplate.rewards.target,
+          followerCount: badgeTemplate.rewards.target
+        }
+      };
+
+      await addDoc(badgesRef, {
+        ...badgeData,
+        unlockedAt: Timestamp.fromDate(badgeData.unlockedAt)
+      });
+
+      // Log badge upgrade event
+      await logMonetizationEvent({
+        type: 'badge_upgrade',
+        userId,
+        timestamp: new Date(),
+        data: { badgeType, autoGenerated: true, title: badgeTemplate.title }
+      });
+
+      // Track analytics
+      await analytics.track('badge_auto_generated', {
+        userId,
+        badgeType,
+        title: badgeTemplate.title,
+        timestamp: new Date().toISOString()
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error triggering auto badge:', error);
+      throw error;
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  const logPayoutEvent = useCallback(async (payoutData: any): Promise<void> => {
+    try {
+      // Log to Firestore
+      const payoutsRef = collection(firestore, 'payouts');
+      await addDoc(payoutsRef, {
+        ...payoutData,
+        timestamp: Timestamp.fromDate(payoutData.timestamp)
+      });
+
+      // Log monetization event
+      await logMonetizationEvent({
+        type: 'payout_request',
+        userId: payoutData.creatorId,
+        timestamp: payoutData.timestamp,
+        data: {
+          amount: payoutData.amount,
+          status: payoutData.status,
+          transactionId: payoutData.transactionId
+        }
+      });
+
+      // Track analytics
+      await analytics.track('payout_processed', {
+        creatorId: payoutData.creatorId,
+        amount: payoutData.amount,
+        status: payoutData.status,
+        timestamp: payoutData.timestamp.toISOString()
+      });
+
+      // Add to local events
+      setEvents(prev => [...prev, {
+        type: 'payout_request',
+        userId: payoutData.creatorId,
+        timestamp: payoutData.timestamp,
+        data: payoutData
+      }]);
+    } catch (error) {
+      console.error('Error logging payout event:', error);
+      throw error;
+    }
+  }, []);
+
+  const refundHandler = useCallback(async (refundData: any): Promise<boolean> => {
+    try {
+      setIsProcessing(true);
+
+      // Update tip status
+      const tipRef = doc(firestore, 'tips', refundData.tipId);
+      await updateDoc(tipRef, {
+        status: 'refunded',
+        refundReason: refundData.reason,
+        refundedAt: Timestamp.fromDate(refundData.timestamp)
+      });
+
+      // Log refund event
+      await logMonetizationEvent({
+        type: 'refund',
+        userId: refundData.tipId, // This would be the tipper's ID
+        timestamp: refundData.timestamp,
+        data: {
+          tipId: refundData.tipId,
+          reason: refundData.reason,
+          amount: refundData.amount
+        }
+      });
+
+      // Track analytics
+      await analytics.track('tip_refunded', {
+        tipId: refundData.tipId,
+        reason: refundData.reason,
+        amount: refundData.amount,
+        timestamp: refundData.timestamp.toISOString()
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error processing refund:', error);
+      throw error;
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  const logMonetizationEvent = useCallback(async (event: MonetizationEvent): Promise<void> => {
+    try {
+      // Log to Firestore
+      const eventsRef = collection(firestore, 'monetization_events');
+      await addDoc(eventsRef, {
+        ...event,
+        timestamp: Timestamp.fromDate(event.timestamp)
+      });
+
+      // Add to local state
+      setEvents(prev => [...prev, event]);
+    } catch (error) {
+      console.error('Error logging monetization event:', error);
+      throw error;
+    }
+  }, []);
+
+  const getTierData = useCallback(async (userId: string): Promise<any> => {
+    try {
+      const userRef = doc(firestore, 'users', userId);
+      const userDoc = await userRef.get();
+      const userData = userDoc.data();
+
+      // Calculate tier based on badges and earnings
+      const badgeCount = userData?.badgeCount || 0;
+      const totalEarnings = userData?.totalEarnings || 0;
+
+      let currentTier: 'bronze' | 'silver' | 'gold' | 'platinum' = 'bronze';
+      if (totalEarnings >= 1000 && badgeCount >= 10) currentTier = 'platinum';
+      else if (totalEarnings >= 500 && badgeCount >= 5) currentTier = 'gold';
+      else if (totalEarnings >= 100 && badgeCount >= 2) currentTier = 'silver';
+
+      return {
+        userId,
+        currentTier,
+        totalEarnings,
+        badgeCount,
+        lastUpgradeDate: userData?.lastUpgradeDate?.toDate() || new Date()
+      };
+    } catch (error) {
+      console.error('Error getting tier data:', error);
+      throw error;
+    }
+  }, []);
+
+  // Memoized computed values
+  const monetizationStats = useMemo(() => {
+    const totalEvents = events.length;
+    const payoutEvents = events.filter(e => e.type === 'payout_request');
+    const refundEvents = events.filter(e => e.type === 'refund');
+    const badgeEvents = events.filter(e => e.type === 'badge_upgrade');
+
+    return {
+      totalEvents,
+      payoutCount: payoutEvents.length,
+      refundCount: refundEvents.length,
+      badgeCount: badgeEvents.length,
+      refundRate: totalEvents > 0 ? refundEvents.length / totalEvents : 0
+    };
+  }, [events]);
+
+  return {
+    // Utility functions
+    checkStreak,
+    triggerAutoBadge,
+    logPayoutEvent,
+    refundHandler,
+    logMonetizationEvent,
+    getTierData,
+    
+    // State
+    isProcessing,
+    events,
+    monetizationStats
+  };
+};
+
+// Badge template system
+interface BadgeTemplate {
+  type: string;
+  title: string;
+  description: string;
+  icon: string;
+  triggerValue?: number;
+  requirements: {
+    minTips?: number;
+    minEarnings?: number;
+    minStreak?: number;
+  };
+}
+
+const BADGE_TEMPLATES: Record<string, BadgeTemplate> = {
+  'first_tip': {
+    type: 'first_tip',
+    title: 'First Tip',
+    description: 'Made your first tip to a creator',
+    icon: '💰',
+    triggerValue: 1,
+    requirements: { minTips: 1 }
   },
-  Silver: {
-    level: 'Silver',
-    title: 'Silver Marksman',
-    description: 'Demonstrating consistent improvement',
-    unlockedAt: new Date(),
-    requirements: {
-      minSessions: 10,
-      minAvgScore: 75,
-      minConsistency: 'medium',
-      minReactionTime: 3500,
-      minEndurance: 65
-    },
-    benefits: {
-      monetizationEnabled: true,
-      premiumFeatures: ['custom_drills', 'advanced_analytics'],
-      communityAccess: ['basic_forum', 'training_groups'],
-      exclusiveContent: ['silver_training_plans'],
-      prioritySupport: false
-    }
+  'tipping_streak_7': {
+    type: 'tipping_streak_7',
+    title: 'Week Warrior',
+    description: 'Tipped for 7 consecutive days',
+    icon: '🔥',
+    triggerValue: 7,
+    requirements: { minStreak: 7 }
   },
-  Gold: {
-    level: 'Gold',
-    title: 'Gold Expert',
-    description: 'Mastering precision and consistency',
-    unlockedAt: new Date(),
-    requirements: {
-      minSessions: 25,
-      minAvgScore: 85,
-      minConsistency: 'high',
-      minReactionTime: 2500,
-      minEndurance: 80
-    },
-    benefits: {
-      monetizationEnabled: true,
-      premiumFeatures: ['custom_drills', 'advanced_analytics', 'ai_coaching'],
-      communityAccess: ['basic_forum', 'training_groups', 'expert_network'],
-      exclusiveContent: ['gold_training_plans', 'expert_workshops'],
-      prioritySupport: true
-    }
+  'tipping_streak_30': {
+    type: 'tipping_streak_30',
+    title: 'Monthly Master',
+    description: 'Tipped for 30 consecutive days',
+    icon: '👑',
+    triggerValue: 30,
+    requirements: { minStreak: 30 }
   },
-  Platinum: {
-    level: 'Platinum',
-    title: 'Platinum Master',
-    description: 'Elite level performance and leadership',
-    unlockedAt: new Date(),
-    requirements: {
-      minSessions: 50,
-      minAvgScore: 92,
-      minConsistency: 'high',
-      minReactionTime: 2000,
-      minEndurance: 90,
-      specialAchievements: ['perfect_session', 'consistency_streak']
-    },
-    benefits: {
-      monetizationEnabled: true,
-      premiumFeatures: ['custom_drills', 'advanced_analytics', 'ai_coaching', 'mentorship'],
-      communityAccess: ['basic_forum', 'training_groups', 'expert_network', 'master_class'],
-      exclusiveContent: ['platinum_training_plans', 'expert_workshops', 'private_lessons'],
-      prioritySupport: true
-    }
+  'big_tipper': {
+    type: 'big_tipper',
+    title: 'Big Tipper',
+    description: 'Tipped $100 or more in a single transaction',
+    icon: '💎',
+    triggerValue: 100,
+    requirements: { minTips: 1 }
   },
-  Diamond: {
-    level: 'Diamond',
-    title: 'Diamond Elite',
-    description: 'Legendary status in the shooting community',
-    unlockedAt: new Date(),
-    requirements: {
-      minSessions: 100,
-      minAvgScore: 95,
-      minConsistency: 'high',
-      minReactionTime: 1500,
-      minEndurance: 95,
-      specialAchievements: ['perfect_session', 'consistency_streak', 'competition_winner']
-    },
-    benefits: {
-      monetizationEnabled: true,
-      premiumFeatures: ['custom_drills', 'advanced_analytics', 'ai_coaching', 'mentorship', 'brand_partnerships'],
-      communityAccess: ['basic_forum', 'training_groups', 'expert_network', 'master_class', 'elite_circle'],
-      exclusiveContent: ['diamond_training_plans', 'expert_workshops', 'private_lessons', 'brand_deals'],
-      prioritySupport: true
-    }
+  'creator_supporter': {
+    type: 'creator_supporter',
+    title: 'Creator Supporter',
+    description: 'Supported 10 different creators',
+    icon: '🤝',
+    triggerValue: 10,
+    requirements: { minTips: 10 }
+  },
+  'earnings_milestone_100': {
+    type: 'earnings_milestone_100',
+    title: 'Century Club',
+    description: 'Earned $100 from tips',
+    icon: '💯',
+    triggerValue: 100,
+    requirements: { minEarnings: 100 }
+  },
+  'earnings_milestone_1000': {
+    type: 'earnings_milestone_1000',
+    title: 'Grand Master',
+    description: 'Earned $1,000 from tips',
+    icon: '🏆',
+    triggerValue: 1000,
+    requirements: { minEarnings: 1000 }
   }
+};
+
+const getBadgeTemplate = async (badgeType: string): Promise<BadgeTemplate | null> => {
+  return BADGE_TEMPLATES[badgeType] || null;
 };
 
 export class BadgeManager {
   private static instance: BadgeManager;
+  private readonly WEEKLY_REVIEW_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 7 days
+  private readonly MONETIZATION_ENABLED_THRESHOLD = 5; // Minimum badges for monetization
 
   static getInstance(): BadgeManager {
     if (!BadgeManager.instance) {
@@ -156,398 +479,601 @@ export class BadgeManager {
     return BadgeManager.instance;
   }
 
+  constructor() {
+    this.initializeBadgeCriteria();
+  }
+
+  private initializeBadgeCriteria(): void {
+    const criteria: BadgeCriteria[] = [
+      {
+        badgeId: 'first_post',
+        type: 'count',
+        target: 1,
+        conditions: { postCount: 1 },
+        rewards: { xp: 50, monetary: 5 }
+      },
+      {
+        badgeId: 'tipping_streak_7',
+        type: 'streak',
+        target: 7,
+        conditions: { streakDays: 7 },
+        rewards: { xp: 200, monetary: 25 }
+      },
+      {
+        badgeId: 'tipping_streak_30',
+        type: 'streak',
+        target: 30,
+        conditions: { streakDays: 30 },
+        rewards: { xp: 1000, monetary: 100, tierUpgrade: true }
+      },
+      {
+        badgeId: 'monetization_master',
+        type: 'amount',
+        target: 1000,
+        conditions: { tipAmount: 1000 },
+        rewards: { xp: 500, monetary: 50 }
+      },
+      {
+        badgeId: 'community_leader',
+        type: 'composite',
+        target: 100,
+        conditions: { 
+          followerCount: 100, 
+          engagementRate: 0.05,
+          postCount: 10 
+        },
+        rewards: { xp: 300, monetary: 30 }
+      },
+      {
+        badgeId: 'viral_creator',
+        type: 'count',
+        target: 1,
+        conditions: { engagementRate: 0.15 },
+        rewards: { xp: 750, monetary: 75 }
+      },
+      {
+        badgeId: 'tipping_champion',
+        type: 'amount',
+        target: 5000,
+        conditions: { tipAmount: 5000 },
+        rewards: { xp: 1500, monetary: 150, tierUpgrade: true }
+      },
+      {
+        badgeId: 'consistency_king',
+        type: 'streak',
+        target: 90,
+        conditions: { streakDays: 90 },
+        rewards: { xp: 2000, monetary: 200 }
+      }
+    ];
+
+    criteria.forEach(criterion => {
+      this.badgeCriteria.set(criterion.badgeId, criterion);
+    });
+  }
+
   /**
-   * Weekly badge review process
+   * Check and award badges based on user activity
    */
-  async reviewAllUserBadges(): Promise<void> {
+  async checkAndAwardBadges(uid: string, activityType: string, activityData: any): Promise<Badge[]> {
     try {
-      console.log('Starting weekly badge review...');
-      
-      // Get all users with recent activity
-      const usersRef = collection(firestore, 'users');
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const awardedBadges: Badge[] = [];
+      const userStats = await this.getUserStats(uid);
+      const userBadges = await this.getUserBadges(uid);
+      const existingBadgeIds = new Set(userBadges.map(b => b.badgeId));
 
-      const q = query(
-        usersRef,
-        where('lastSessionDate', '>=', thirtyDaysAgo),
-        limit(1000) // Process in batches
-      );
+      // Get relevant criteria for this activity type
+      const relevantCriteria = this.getRelevantCriteria(activityType, activityData);
 
-      const querySnapshot = await getDocs(q);
-      const updatedUsers: string[] = [];
+      for (const criterion of relevantCriteria) {
+        if (existingBadgeIds.has(criterion.badgeId)) {
+          continue; // Badge already awarded
+        }
 
-      for (const userDoc of querySnapshot.docs) {
-        const uid = userDoc.id;
-        const wasUpgraded = await this.reviewUserBadge(uid);
-        if (wasUpgraded) {
-          updatedUsers.push(uid);
+        const shouldAward = await this.evaluateBadgeCriteria(uid, criterion, userStats, activityData);
+        
+        if (shouldAward) {
+          const badge = await this.awardBadge(uid, criterion, activityData);
+          if (badge) {
+            awardedBadges.push(badge);
+          }
         }
       }
-
-      console.log(`Badge review completed. ${updatedUsers.length} users upgraded.`);
 
       // Track analytics
-      await analytics.track('weekly_badge_review_completed', {
-        totalUsersReviewed: querySnapshot.size,
-        usersUpgraded: updatedUsers.length,
-        timestamp: new Date().toISOString()
-      });
+      if (awardedBadges.length > 0) {
+        await analytics.track('badges_awarded', {
+          userId: uid,
+          badgeCount: awardedBadges.length,
+          badgeIds: awardedBadges.map(b => b.badgeId),
+          activityType,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      return awardedBadges;
 
     } catch (error) {
-      console.error('Failed to review user badges:', error);
-      throw error;
+      console.error('Failed to check and award badges:', error);
+      return [];
     }
   }
 
   /**
-   * Review individual user badge
+   * Get relevant badge criteria for activity type
    */
-  async reviewUserBadge(uid: string): Promise<boolean> {
+  private getRelevantCriteria(activityType: string, activityData: any): BadgeCriteria[] {
+    const relevant: BadgeCriteria[] = [];
+
+    for (const [badgeId, criterion] of this.badgeCriteria) {
+      let isRelevant = false;
+
+      switch (activityType) {
+        case 'post_created':
+          isRelevant = criterion.conditions.postCount !== undefined;
+          break;
+        case 'tip_received':
+          isRelevant = criterion.conditions.tipAmount !== undefined || 
+                      criterion.conditions.streakDays !== undefined;
+          break;
+        case 'follower_gained':
+          isRelevant = criterion.conditions.followerCount !== undefined;
+          break;
+        case 'engagement_achieved':
+          isRelevant = criterion.conditions.engagementRate !== undefined;
+          break;
+        case 'streak_updated':
+          isRelevant = criterion.conditions.streakDays !== undefined;
+          break;
+      }
+
+      if (isRelevant) {
+        relevant.push(criterion);
+      }
+    }
+
+    return relevant;
+  }
+
+  /**
+   * Evaluate if user meets badge criteria
+   */
+  private async evaluateBadgeCriteria(
+    uid: string, 
+    criterion: BadgeCriteria, 
+    userStats: any, 
+    activityData: any
+  ): Promise<boolean> {
     try {
-      const userActivity = await this.getUserActivity(uid);
-      const currentBadge = userActivity.currentBadge;
-      const eligibleBadge = this.calculateEligibleBadge(userActivity);
-
-      if (eligibleBadge.level !== currentBadge.level) {
-        await this.upgradeUserBadge(uid, eligibleBadge, userActivity);
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      console.error(`Failed to review badge for user ${uid}:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Get user activity data
-   */
-  private async getUserActivity(uid: string): Promise<UserActivity> {
-    // Get user's skill graph
-    const skillGraphRef = doc(firestore, 'users', uid, 'skillGraph.json');
-    const skillGraphDoc = await getDoc(skillGraphRef);
-    
-    let skillGraph;
-    if (skillGraphDoc.exists()) {
-      skillGraph = skillGraphDoc.data();
-    } else {
-      skillGraph = {
-        sessionCount: 0,
-        avgScore: 0,
-        consistency: 'low',
-        reactionTime: 5000,
-        endurance: 50
-      };
-    }
-
-    // Get current badge
-    const userRef = doc(firestore, 'users', uid);
-    const userDoc = await getDoc(userRef);
-    const userData = userDoc.exists() ? userDoc.data() : {};
-    
-    const currentBadge = userData.currentBadge || BADGE_DEFINITIONS.Bronze;
-
-    // Get achievements
-    const achievements = await this.getUserAchievements(uid);
-
-    return {
-      uid,
-      totalSessions: skillGraph.sessionCount || 0,
-      avgScore: skillGraph.shooting_accuracy || 0,
-      consistency: skillGraph.consistency || 'low',
-      reactionTime: skillGraph.reaction_time || 5000,
-      endurance: skillGraph.endurance || 50,
-      lastSessionDate: skillGraph.lastUpdated?.toDate() || new Date(),
-      achievements,
-      currentBadge
-    };
-  }
-
-  /**
-   * Calculate eligible badge based on user activity
-   */
-  private calculateEligibleBadge(userActivity: UserActivity): Badge {
-    const badgeLevels = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
-    
-    for (let i = badgeLevels.length - 1; i >= 0; i--) {
-      const level = badgeLevels[i];
-      const badge = BADGE_DEFINITIONS[level];
-      
-      if (this.meetsBadgeRequirements(userActivity, badge.requirements)) {
-        return badge;
-      }
-    }
-    
-    return BADGE_DEFINITIONS.Bronze;
-  }
-
-  /**
-   * Check if user meets badge requirements
-   */
-  private meetsBadgeRequirements(userActivity: UserActivity, requirements: BadgeRequirements): boolean {
-    // Check basic requirements
-    if (userActivity.totalSessions < requirements.minSessions) return false;
-    if (userActivity.avgScore < requirements.minAvgScore) return false;
-    if (userActivity.reactionTime > requirements.minReactionTime) return false;
-    if (userActivity.endurance < requirements.minEndurance) return false;
-
-    // Check consistency requirement
-    const consistencyOrder = { low: 1, medium: 2, high: 3 };
-    const userConsistency = consistencyOrder[userActivity.consistency];
-    const requiredConsistency = consistencyOrder[requirements.minConsistency];
-    if (userConsistency < requiredConsistency) return false;
-
-    // Check special achievements
-    if (requirements.specialAchievements) {
-      for (const achievement of requirements.specialAchievements) {
-        if (!userActivity.achievements.includes(achievement)) {
+      switch (criterion.type) {
+        case 'count':
+          return this.evaluateCountCriteria(criterion, userStats, activityData);
+        
+        case 'streak':
+          return await this.evaluateStreakCriteria(uid, criterion, userStats);
+        
+        case 'amount':
+          return this.evaluateAmountCriteria(criterion, userStats, activityData);
+        
+        case 'composite':
+          return this.evaluateCompositeCriteria(criterion, userStats, activityData);
+        
+        default:
           return false;
-        }
       }
+    } catch (error) {
+      console.error('Failed to evaluate badge criteria:', error);
+      return false;
     }
+  }
 
+  private evaluateCountCriteria(criterion: BadgeCriteria, userStats: any, activityData: any): boolean {
+    if (criterion.conditions.postCount && userStats.postCount >= criterion.target) {
+      return true;
+    }
+    if (criterion.conditions.followerCount && userStats.followerCount >= criterion.target) {
+      return true;
+    }
+    return false;
+  }
+
+  private async evaluateStreakCriteria(uid: string, criterion: BadgeCriteria, userStats: any): Promise<boolean> {
+    if (!criterion.conditions.streakDays) return false;
+
+    const streakData = await this.getUserStreak(uid);
+    return streakData.currentStreak >= criterion.target;
+  }
+
+  private evaluateAmountCriteria(criterion: BadgeCriteria, userStats: any, activityData: any): boolean {
+    if (criterion.conditions.tipAmount && userStats.totalTipsReceived >= criterion.target) {
+      return true;
+    }
+    return false;
+  }
+
+  private evaluateCompositeCriteria(criterion: BadgeCriteria, userStats: any, activityData: any): boolean {
+    const conditions = criterion.conditions;
+    
+    if (conditions.followerCount && userStats.followerCount < conditions.followerCount) {
+      return false;
+    }
+    
+    if (conditions.engagementRate && userStats.engagementRate < conditions.engagementRate) {
+      return false;
+    }
+    
+    if (conditions.postCount && userStats.postCount < conditions.postCount) {
+      return false;
+    }
+    
     return true;
   }
 
   /**
-   * Upgrade user badge
+   * Award badge to user
    */
-  private async upgradeUserBadge(uid: string, newBadge: Badge, userActivity: UserActivity): Promise<void> {
+  private async awardBadge(uid: string, criterion: BadgeCriteria, activityData: any): Promise<Badge | null> {
     try {
-      // Update user document
-      const userRef = doc(firestore, 'users', uid);
-      await updateDoc(userRef, {
-        currentBadge: {
-          ...newBadge,
-          unlockedAt: new Date()
-        },
-        badgeUpgradedAt: new Date(),
-        monetizationEnabled: newBadge.benefits.monetizationEnabled
-      });
+      const badgeData: Omit<Badge, 'id'> = {
+        uid,
+        badgeType: this.getBadgeType(criterion.badgeId),
+        badgeId: criterion.badgeId,
+        title: this.getBadgeTitle(criterion.badgeId),
+        description: this.getBadgeDescription(criterion.badgeId),
+        icon: this.getBadgeIcon(criterion.badgeId),
+        rarity: this.getBadgeRarity(criterion.badgeId),
+        xpReward: criterion.rewards.xp,
+        monetaryReward: criterion.rewards.monetary,
+        unlockedAt: new Date(),
+        progress: criterion.target,
+        maxProgress: criterion.target,
+        isUnlocked: true,
+        metadata: {
+          sourceType: activityData.type,
+          sourceId: activityData.id,
+          streakDays: activityData.streakDays,
+          tipAmount: activityData.tipAmount,
+          postCount: activityData.postCount,
+          followerCount: activityData.followerCount
+        }
+      };
 
-      // Send congratulatory notification
-      await this.sendBadgeNotification(uid, newBadge);
+      const badgesRef = collection(firestore, 'users', uid, 'badges');
+      const docRef = await addDoc(badgesRef, badgeData);
 
-      // Track analytics
-      await analytics.track('badge_upgraded', {
+      // Award XP and monetary rewards
+      await this.awardRewards(uid, criterion.rewards);
+
+      // Update user stats
+      await this.updateUserBadgeStats(uid, criterion.badgeId);
+
+      // Trigger automation if needed
+      await this.triggerBadgeAutomation(uid, badgeData);
+
+      return { ...badgeData, id: docRef.id };
+
+    } catch (error) {
+      console.error('Failed to award badge:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Award XP and monetary rewards
+   */
+  private async awardRewards(uid: string, rewards: any): Promise<void> {
+    try {
+      const userStatsRef = doc(firestore, 'users', uid, 'stats', 'userStats');
+      const userStatsDoc = await getDoc(userStatsRef);
+
+      let userStats: any;
+      if (userStatsDoc.exists()) {
+        userStats = userStatsDoc.data();
+        userStats.totalXP += rewards.xp;
+        userStats.badgesUnlocked = (userStats.badgesUnlocked || 0) + 1;
+        if (rewards.monetary) {
+          userStats.totalEarnings = (userStats.totalEarnings || 0) + rewards.monetary;
+        }
+      } else {
+        userStats = {
+          uid,
+          totalXP: rewards.xp,
+          badgesUnlocked: 1,
+          totalEarnings: rewards.monetary || 0,
+          lastUpdated: new Date()
+        };
+      }
+
+      await setDoc(userStatsRef, userStats);
+
+      // Track reward analytics
+      await analytics.track('badge_rewards_awarded', {
         userId: uid,
-        oldBadge: userActivity.currentBadge.level,
-        newBadge: newBadge.level,
-        totalSessions: userActivity.totalSessions,
-        avgScore: userActivity.avgScore,
+        xpAwarded: rewards.xp,
+        monetaryAwarded: rewards.monetary || 0,
         timestamp: new Date().toISOString()
       });
 
-      console.log(`User ${uid} upgraded from ${userActivity.currentBadge.level} to ${newBadge.level}`);
-
     } catch (error) {
-      console.error(`Failed to upgrade badge for user ${uid}:`, error);
-      throw error;
+      console.error('Failed to award rewards:', error);
     }
   }
 
   /**
-   * Send congratulatory notification
+   * Update user badge statistics
    */
-  private async sendBadgeNotification(uid: string, badge: Badge): Promise<void> {
+  private async updateUserBadgeStats(uid: string, badgeId: string): Promise<void> {
     try {
-      const notificationData = {
+      const statsRef = doc(firestore, 'users', uid, 'badge_stats', badgeId);
+      await setDoc(statsRef, {
+        unlockedAt: new Date(),
+        lastUpdated: new Date()
+      });
+    } catch (error) {
+      console.error('Failed to update badge stats:', error);
+    }
+  }
+
+  /**
+   * Trigger automation for badge unlocks
+   */
+  private async triggerBadgeAutomation(uid: string, badge: Badge): Promise<void> {
+    try {
+      // Send Slack notification for rare/legendary badges
+      if (badge.rarity === 'rare' || badge.rarity === 'legendary') {
+        await this.sendSlackNotification(uid, badge);
+      }
+
+      // Add to leaderboard for monetization badges
+      if (badge.badgeType === 'monetization') {
+        await this.addToLeaderboard(uid, badge);
+      }
+
+      // Trigger tier upgrade if applicable
+      if (badge.metadata?.streakDays && badge.metadata.streakDays >= 30) {
+        await this.triggerTierUpgrade(uid);
+      }
+
+    } catch (error) {
+      console.error('Failed to trigger badge automation:', error);
+    }
+  }
+
+  /**
+   * Send Slack notification for badge unlock
+   */
+  private async sendSlackNotification(uid: string, badge: Badge): Promise<void> {
+    try {
+      const automationRef = collection(firestore, 'automations');
+      await addDoc(automationRef, {
+        type: 'slack_notification',
+        channel: '/marketing',
+        message: `🎉 Creator ${uid} unlocked ${badge.rarity} badge: ${badge.title}!`,
+        badgeId: badge.badgeId,
+        userId: uid,
+        timestamp: new Date()
+      });
+    } catch (error) {
+      console.error('Failed to send Slack notification:', error);
+    }
+  }
+
+  /**
+   * Add user to leaderboard
+   */
+  private async addToLeaderboard(uid: string, badge: Badge): Promise<void> {
+    try {
+      const leaderboardRef = collection(firestore, 'leaderboard');
+      await addDoc(leaderboardRef, {
         uid,
-        type: 'badge_upgrade',
-        title: `🎉 ${badge.title} Unlocked!`,
-        message: `Congratulations! You've earned the ${badge.title} badge. ${badge.description}`,
-        data: {
-          badgeLevel: badge.level,
-          benefits: badge.benefits
-        },
-        createdAt: new Date(),
-        read: false
-      };
-
-      const notificationsRef = collection(firestore, 'notifications');
-      await addDoc(notificationsRef, notificationData);
-
-    } catch (error) {
-      console.error('Failed to send badge notification:', error);
-    }
-  }
-
-  /**
-   * Get user achievements
-   */
-  private async getUserAchievements(uid: string): Promise<string[]> {
-    try {
-      const achievementsRef = collection(firestore, 'users', uid, 'achievements');
-      const querySnapshot = await getDocs(achievementsRef);
-      
-      const achievements: string[] = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.unlocked) {
-          achievements.push(data.achievementId);
-        }
+        badgeId: badge.badgeId,
+        badgeTitle: badge.title,
+        rarity: badge.rarity,
+        unlockedAt: badge.unlockedAt,
+        score: this.calculateLeaderboardScore(badge),
+        timestamp: new Date()
       });
-
-      return achievements;
     } catch (error) {
-      console.error('Failed to get user achievements:', error);
-      return [];
+      console.error('Failed to add to leaderboard:', error);
     }
   }
 
   /**
-   * Check for special achievements
+   * Trigger tier upgrade
    */
-  async checkSpecialAchievements(uid: string, sessionData: any): Promise<void> {
-    try {
-      const achievements: string[] = [];
-
-      // Perfect session achievement
-      if (sessionData.avgScore >= 100) {
-        achievements.push('perfect_session');
-      }
-
-      // Consistency streak achievement
-      const recentSessions = await this.getRecentSessions(uid, 5);
-      if (recentSessions.length >= 5) {
-        const avgScores = recentSessions.map(s => s.avgScore);
-        const variance = this.calculateVariance(avgScores);
-        if (variance < 5) { // Very low variance = high consistency
-          achievements.push('consistency_streak');
-        }
-      }
-
-      // Competition winner achievement (placeholder)
-      if (sessionData.drillType === 'competition' && sessionData.avgScore >= 95) {
-        achievements.push('competition_winner');
-      }
-
-      // Award achievements
-      for (const achievement of achievements) {
-        await this.awardAchievement(uid, achievement);
-      }
-
-    } catch (error) {
-      console.error('Failed to check special achievements:', error);
-    }
-  }
-
-  /**
-   * Get recent sessions for achievement checking
-   */
-  private async getRecentSessions(uid: string, count: number): Promise<any[]> {
-    try {
-      const sessionsRef = collection(firestore, 'range_sessions');
-      const q = query(
-        sessionsRef,
-        where('uid', '==', uid),
-        orderBy('date', 'desc'),
-        limit(count)
-      );
-
-      const querySnapshot = await getDocs(q);
-      const sessions: any[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        sessions.push({
-          avgScore: data.avgScore || 0,
-          date: data.date.toDate()
-        });
-      });
-
-      return sessions;
-    } catch (error) {
-      console.error('Failed to get recent sessions:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Calculate variance of scores
-   */
-  private calculateVariance(scores: number[]): number {
-    if (scores.length < 2) return 0;
-    
-    const mean = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-    const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
-    return variance;
-  }
-
-  /**
-   * Award achievement to user
-   */
-  private async awardAchievement(uid: string, achievementId: string): Promise<void> {
-    try {
-      const achievementRef = doc(firestore, 'users', uid, 'achievements', achievementId);
-      const achievementDoc = await getDoc(achievementRef);
-      
-      if (!achievementDoc.exists()) {
-        await setDoc(achievementRef, {
-          achievementId,
-          unlocked: true,
-          unlockedAt: new Date(),
-          title: this.getAchievementTitle(achievementId),
-          description: this.getAchievementDescription(achievementId)
-        });
-
-        // Track analytics
-        await analytics.track('achievement_unlocked', {
-          userId: uid,
-          achievementId,
-          timestamp: new Date().toISOString()
-        });
-      }
-    } catch (error) {
-      console.error('Failed to award achievement:', error);
-    }
-  }
-
-  /**
-   * Get achievement title
-   */
-  private getAchievementTitle(achievementId: string): string {
-    const titles: { [key: string]: string } = {
-      perfect_session: 'Perfect Session',
-      consistency_streak: 'Consistency Master',
-      competition_winner: 'Competition Champion'
-    };
-    return titles[achievementId] || achievementId;
-  }
-
-  /**
-   * Get achievement description
-   */
-  private getAchievementDescription(achievementId: string): string {
-    const descriptions: { [key: string]: string } = {
-      perfect_session: 'Achieved a perfect score in a training session',
-      consistency_streak: 'Maintained high consistency across multiple sessions',
-      competition_winner: 'Won a shooting competition'
-    };
-    return descriptions[achievementId] || 'Achievement unlocked';
-  }
-
-  /**
-   * Get badge benefits for user
-   */
-  async getBadgeBenefits(uid: string): Promise<BadgeBenefits | null> {
+  private async triggerTierUpgrade(uid: string): Promise<void> {
     try {
       const userRef = doc(firestore, 'users', uid);
-      const userDoc = await getDoc(userRef);
-      
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const currentBadge = userData.currentBadge || BADGE_DEFINITIONS.Bronze;
-        return currentBadge.benefits;
-      }
-      
-      return null;
+      await updateDoc(userRef, {
+        tier: 'premium',
+        tierUpgradedAt: new Date()
+      });
+
+      // Track tier upgrade
+      await analytics.track('tier_upgraded', {
+        userId: uid,
+        newTier: 'premium',
+        reason: 'badge_achievement',
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
-      console.error('Failed to get badge benefits:', error);
-      return null;
+      console.error('Failed to trigger tier upgrade:', error);
     }
+  }
+
+  /**
+   * Calculate leaderboard score for badge
+   */
+  private calculateLeaderboardScore(badge: Badge): number {
+    const rarityMultipliers = {
+      common: 1,
+      rare: 2,
+      epic: 5,
+      legendary: 10
+    };
+
+    const baseScore = badge.xpReward;
+    const rarityMultiplier = rarityMultipliers[badge.rarity] || 1;
+    
+    return baseScore * rarityMultiplier;
+  }
+
+  /**
+   * Get user badges
+   */
+  async getUserBadges(uid: string): Promise<Badge[]> {
+    try {
+      const badgesRef = collection(firestore, 'users', uid, 'badges');
+      const q = query(badgesRef, orderBy('unlockedAt', 'desc'));
+      const snapshot = await getDocs(q);
+
+      const badges: Badge[] = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        badges.push({
+          id: doc.id,
+          uid: data.uid,
+          badgeType: data.badgeType,
+          badgeId: data.badgeId,
+          title: data.title,
+          description: data.description,
+          icon: data.icon,
+          rarity: data.rarity,
+          xpReward: data.xpReward,
+          monetaryReward: data.monetaryReward,
+          unlockedAt: data.unlockedAt.toDate(),
+          progress: data.progress,
+          maxProgress: data.maxProgress,
+          isUnlocked: data.isUnlocked,
+          metadata: data.metadata
+        });
+      });
+
+      return badges;
+    } catch (error) {
+      console.error('Failed to get user badges:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get user statistics
+   */
+  async getUserStats(uid: string): Promise<any> {
+    try {
+      const statsRef = doc(firestore, 'users', uid, 'stats', 'userStats');
+      const statsDoc = await getDoc(statsRef);
+
+      if (statsDoc.exists()) {
+        return statsDoc.data();
+      }
+
+      return {
+        postCount: 0,
+        followerCount: 0,
+        totalTipsReceived: 0,
+        engagementRate: 0,
+        badgesUnlocked: 0,
+        totalXP: 0
+      };
+    } catch (error) {
+      console.error('Failed to get user stats:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Get user streak data
+   */
+  async getUserStreak(uid: string): Promise<any> {
+    try {
+      const streakRef = doc(firestore, 'users', uid, 'streaks', 'tipping');
+      const streakDoc = await getDoc(streakRef);
+
+      if (streakDoc.exists()) {
+        return streakDoc.data();
+      }
+
+      return {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActivity: null
+      };
+    } catch (error) {
+      console.error('Failed to get user streak:', error);
+      return { currentStreak: 0, longestStreak: 0 };
+    }
+  }
+
+  // Helper methods for badge metadata
+  private getBadgeType(badgeId: string): Badge['badgeType'] {
+    const typeMap: Record<string, Badge['badgeType']> = {
+      first_post: 'milestone',
+      tipping_streak_7: 'streak',
+      tipping_streak_30: 'streak',
+      monetization_master: 'monetization',
+      community_leader: 'community',
+      viral_creator: 'achievement',
+      tipping_champion: 'monetization',
+      consistency_king: 'streak'
+    };
+    return typeMap[badgeId] || 'achievement';
+  }
+
+  private getBadgeTitle(badgeId: string): string {
+    const titleMap: Record<string, string> = {
+      first_post: 'First Post',
+      tipping_streak_7: 'Week Warrior',
+      tipping_streak_30: 'Monthly Master',
+      monetization_master: 'Monetization Master',
+      community_leader: 'Community Leader',
+      viral_creator: 'Viral Creator',
+      tipping_champion: 'Tipping Champion',
+      consistency_king: 'Consistency King'
+    };
+    return titleMap[badgeId] || 'Achievement';
+  }
+
+  private getBadgeDescription(badgeId: string): string {
+    const descMap: Record<string, string> = {
+      first_post: 'Created your first post',
+      tipping_streak_7: 'Received tips for 7 consecutive days',
+      tipping_streak_30: 'Received tips for 30 consecutive days',
+      monetization_master: 'Earned $1000+ in tips',
+      community_leader: 'Built a community of 100+ followers',
+      viral_creator: 'Achieved 15%+ engagement rate',
+      tipping_champion: 'Earned $5000+ in tips',
+      consistency_king: 'Maintained activity for 90+ days'
+    };
+    return descMap[badgeId] || 'Achievement unlocked';
+  }
+
+  private getBadgeIcon(badgeId: string): string {
+    const iconMap: Record<string, string> = {
+      first_post: '🎯',
+      tipping_streak_7: '🔥',
+      tipping_streak_30: '👑',
+      monetization_master: '💰',
+      community_leader: '🌟',
+      viral_creator: '🚀',
+      tipping_champion: '🏆',
+      consistency_king: '⚡'
+    };
+    return iconMap[badgeId] || '🏅';
+  }
+
+  private getBadgeRarity(badgeId: string): Badge['rarity'] {
+    const rarityMap: Record<string, Badge['rarity']> = {
+      first_post: 'common',
+      tipping_streak_7: 'rare',
+      tipping_streak_30: 'epic',
+      monetization_master: 'rare',
+      community_leader: 'epic',
+      viral_creator: 'legendary',
+      tipping_champion: 'legendary',
+      consistency_king: 'epic'
+    };
+    return rarityMap[badgeId] || 'common';
   }
 }
 

@@ -2,6 +2,8 @@ const { WebClient } = require('@slack/web-api');
 const { createEventAdapter } = require('@slack/events-api');
 const axios = require('axios');
 const crypto = require('crypto');
+const { initializeApp } = require('firebase/app');
+const { getFirestore, collection, query, where, orderBy, limit, getDocs, Timestamp } = require('firebase/firestore');
 
 // Slack configuration
 const slackToken = process.env.SLACK_BOT_TOKEN;
@@ -11,6 +13,26 @@ const cursorWebhookUrl = process.env.CURSOR_WEBHOOK_URL;
 
 const slack = new WebClient(slackToken);
 const slackEvents = createEventAdapter(slackSigningSecret);
+
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID
+};
+
+const app = initializeApp(firebaseConfig);
+const firestore = getFirestore(app);
+
+// Mock analytics
+const analytics = {
+  track: async (event, data) => {
+    console.log(`📊 Analytics: ${event}`, data);
+  }
+};
 
 // Command handlers
 const commandHandlers = {
@@ -248,6 +270,104 @@ const commandHandlers = {
   },
 
   /**
+   * Run creator economy audit
+   */
+  async audit(args, channel, user) {
+    try {
+      const action = args[0] || 'run';
+      
+      if (action === 'run') {
+        // Send initial response
+        await slack.chat.postMessage({
+          channel: channel,
+          text: `🔍 Running Creator Economy Audit...\nRequested by <@${user}>`,
+          thread_ts: null
+        });
+
+        // Run diagnostics
+        const alerts = await useDiagnosticsAlerts();
+        
+        // Get top creators by payout
+        const payoutsRef = collection(firestore, 'payouts');
+        const topPayoutsQuery = query(
+          payoutsRef,
+          where('status', '==', 'completed'),
+          orderBy('amount', 'desc'),
+          limit(3)
+        );
+        
+        const topPayoutsSnapshot = await getDocs(topPayoutsQuery);
+        const topCreators = topPayoutsSnapshot.docs.map(doc => ({
+          creatorId: doc.data().creatorId,
+          amount: doc.data().amount,
+          date: doc.data().processedAt
+        }));
+
+        // Generate audit summary
+        const summary = {
+          alerts: alerts.length,
+          criticalAlerts: alerts.filter(a => a.type === 'critical').length,
+          topCreators: topCreators.length,
+          flaggedIssues: alerts.filter(a => a.type === 'critical' || a.type === 'high').length
+        };
+
+        // Send audit results
+        const attachments = [
+          {
+            color: summary.criticalAlerts > 0 ? '#FF4444' : '#00CC00',
+            title: 'Audit Summary',
+            text: `Alerts: ${summary.alerts}\nCritical: ${summary.criticalAlerts}\nTop Creators: ${summary.topCreators}\nFlagged Issues: ${summary.flaggedIssues}`,
+            footer: 'Creator Economy Audit',
+            ts: Math.floor(Date.now() / 1000)
+          }
+        ];
+
+        // Add top creators
+        if (topCreators.length > 0) {
+          attachments.push({
+            color: '#007AFF',
+            title: 'Top Creators by Payout',
+            text: topCreators.map((creator, index) => 
+              `${index + 1}. <@${creator.creatorId}> - $${creator.amount}`
+            ).join('\n'),
+            footer: 'Payout Analysis',
+            ts: Math.floor(Date.now() / 1000)
+          });
+        }
+
+        // Add flagged issues
+        const flaggedIssues = alerts.filter(a => a.type === 'critical' || a.type === 'high');
+        if (flaggedIssues.length > 0) {
+          attachments.push({
+            color: '#FF8800',
+            title: 'Flagged Issues',
+            text: flaggedIssues.map(issue => 
+              `• ${issue.title}: ${issue.message}`
+            ).join('\n'),
+            footer: 'Issue Tracking',
+            ts: Math.floor(Date.now() / 1000)
+          });
+        }
+
+        await slack.chat.postMessage({
+          channel: channel,
+          text: `✅ Creator Economy Audit completed`,
+          attachments: attachments
+        });
+
+        return `✅ Audit completed with ${summary.alerts} alerts and ${summary.flaggedIssues} flagged issues.`;
+
+      } else {
+        return '❌ Invalid audit action. Use: run';
+      }
+
+    } catch (error) {
+      console.error('Audit command error:', error);
+      return '❌ Failed to run audit. Please check logs.';
+    }
+  },
+
+  /**
    * Show help
    */
   async help(args, channel, user) {
@@ -269,6 +389,7 @@ const commandHandlers = {
 
 *System:*
 • \`/cursor status\` - Get system health status
+• \`/cursor audit run\` - Run creator economy audit
 • \`/cursor help\` - Show this help message
 
 *Examples:*
@@ -276,6 +397,7 @@ const commandHandlers = {
 • \`/cursor deploy staging vanguard-stable-v1\`
 • \`/cursor badge upgrade U1234567890 Gold\`
 • \`/cursor invite developer@example.com admin\`
+• \`/cursor tip audit run\`
     `;
 
     return helpText;
@@ -449,12 +571,207 @@ async function handleDeploymentCompletion(payload) {
   }
 }
 
+// Diagnostics Alerts System
+const useDiagnosticsAlerts = async () => {
+  const alerts = [];
+  
+  try {
+    // Check for failed payouts (3+ in last 24 hours)
+    const payoutsRef = collection(firestore, 'payouts');
+    const failedPayoutsQuery = query(
+      payoutsRef,
+      where('status', '==', 'failed'),
+      where('requestedAt', '>=', new Date(Date.now() - 24 * 60 * 60 * 1000)),
+      orderBy('requestedAt', 'desc')
+    );
+    
+    const failedPayoutsSnapshot = await getDocs(failedPayoutsQuery);
+    const failedPayouts = failedPayoutsSnapshot.docs;
+    
+    if (failedPayouts.length >= 3) {
+      alerts.push({
+        type: 'critical',
+        title: 'High Failed Payout Rate',
+        message: `${failedPayouts.length} failed payouts in the last 24 hours`,
+        data: {
+          failedCount: failedPayouts.length,
+          timeWindow: '24 hours',
+          topCreators: failedPayouts.slice(0, 3).map(doc => doc.data().creatorId)
+        }
+      });
+    }
+
+    // Check for analytics spike in refund/dropoff rate
+    const eventsRef = collection(firestore, 'monetization_events');
+    const recentEventsQuery = query(
+      eventsRef,
+      where('timestamp', '>=', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)),
+      orderBy('timestamp', 'desc')
+    );
+    
+    const eventsSnapshot = await getDocs(recentEventsQuery);
+    const recentEvents = eventsSnapshot.docs.map(doc => doc.data());
+    
+    const refundEvents = recentEvents.filter(event => event.type === 'refund');
+    const totalEvents = recentEvents.length;
+    const refundRate = totalEvents > 0 ? refundEvents.length / totalEvents : 0;
+    
+    if (refundRate > 0.15) { // 15% threshold
+      alerts.push({
+        type: 'warning',
+        title: 'High Refund Rate Detected',
+        message: `${(refundRate * 100).toFixed(1)}% refund rate in the last 7 days`,
+        data: {
+          refundRate,
+          refundCount: refundEvents.length,
+          totalEvents,
+          timeWindow: '7 days'
+        }
+      });
+    }
+
+    // Check for dropoff rate spike
+    const dropoffEvents = recentEvents.filter(event => 
+      event.data?.dropoffCause || event.type === 'leaderboard_change'
+    );
+    const dropoffRate = totalEvents > 0 ? dropoffEvents.length / totalEvents : 0;
+    
+    if (dropoffRate > 0.25) { // 25% threshold
+      alerts.push({
+        type: 'warning',
+        title: 'High Dropoff Rate Detected',
+        message: `${(dropoffRate * 100).toFixed(1)}% dropoff rate in the last 7 days`,
+        data: {
+          dropoffRate,
+          dropoffCount: dropoffEvents.length,
+          totalEvents,
+          timeWindow: '7 days',
+          topDropoffCauses: dropoffEvents
+            .map(event => event.data?.dropoffCause)
+            .filter(Boolean)
+            .slice(0, 3)
+        }
+      });
+    }
+
+    // Check if any badge never triggers in 7 days
+    const badgesRef = collection(firestore, 'badges');
+    const recentBadgesQuery = query(
+      badgesRef,
+      where('earnedAt', '>=', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)),
+      orderBy('earnedAt', 'desc')
+    );
+    
+    const badgesSnapshot = await getDocs(recentBadgesQuery);
+    const recentBadges = badgesSnapshot.docs.map(doc => doc.data());
+    
+    // Get all badge types that should be auto-generated
+    const expectedBadgeTypes = [
+      'first_tip', 'tipping_streak_7', 'tipping_streak_30', 
+      'big_tipper', 'creator_supporter', 'earnings_milestone_100'
+    ];
+    
+    const triggeredBadgeTypes = [...new Set(recentBadges.map(badge => badge.type))];
+    const missingBadgeTypes = expectedBadgeTypes.filter(type => 
+      !triggeredBadgeTypes.includes(type)
+    );
+    
+    if (missingBadgeTypes.length > 0) {
+      alerts.push({
+        type: 'info',
+        title: 'Inactive Badge Types',
+        message: `${missingBadgeTypes.length} badge types haven't been triggered in 7 days`,
+        data: {
+          missingBadgeTypes,
+          triggeredBadgeTypes,
+          timeWindow: '7 days'
+        }
+      });
+    }
+
+    return alerts;
+  } catch (error) {
+    console.error('Error in diagnostics alerts:', error);
+    alerts.push({
+      type: 'error',
+      title: 'Diagnostics Error',
+      message: 'Failed to run diagnostics checks',
+      data: { error: error.message }
+    });
+    return alerts;
+  }
+};
+
+// Send alert to Slack
+const sendSlackAlert = async (alert) => {
+  try {
+    const colorMap = {
+      critical: '#FF4444',
+      warning: '#FF8800',
+      info: '#007AFF',
+      error: '#FF0000'
+    };
+
+    const attachment = {
+      color: colorMap[alert.type] || '#666666',
+      title: alert.title,
+      text: alert.message,
+      fields: Object.entries(alert.data || {}).map(([key, value]) => ({
+        title: key.charAt(0).toUpperCase() + key.slice(1),
+        value: typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value),
+        short: true
+      })),
+      footer: 'Creator Economy Diagnostics',
+      ts: Math.floor(Date.now() / 1000)
+    };
+
+    await slack.chat.postMessage({
+      channel: process.env.SLACK_CHANNEL_ID || 'C1234567890',
+      text: `🚨 ${alert.title}: ${alert.message}`,
+      attachments: [attachment]
+    });
+
+    console.log(`✅ Alert sent to Slack: ${alert.title}`);
+  } catch (error) {
+    console.error('Error sending Slack alert:', error);
+  }
+};
+
+// Main diagnostics function
+const runDiagnostics = async () => {
+  console.log('🔍 Running Creator Economy Diagnostics...');
+  
+  const alerts = await useDiagnosticsAlerts();
+  
+  if (alerts.length === 0) {
+    console.log('✅ No alerts generated - system is healthy');
+    return;
+  }
+
+  console.log(`🚨 Generated ${alerts.length} alerts:`);
+  
+  for (const alert of alerts) {
+    console.log(`- ${alert.type.toUpperCase()}: ${alert.title}`);
+    await sendSlackAlert(alert);
+  }
+
+  // Track analytics
+  await analytics.track('diagnostics_completed', {
+    alertCount: alerts.length,
+    alertTypes: alerts.map(a => a.type),
+    timestamp: new Date().toISOString()
+  });
+};
+
 // Export for use in other modules
 module.exports = {
   slackEvents,
   commandHandlers,
   handleBuildCompletion,
-  handleDeploymentCompletion
+  handleDeploymentCompletion,
+  useDiagnosticsAlerts,
+  sendSlackAlert,
+  runDiagnostics
 };
 
 // Start the server if this file is run directly

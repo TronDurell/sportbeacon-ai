@@ -1,0 +1,237 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    function isLeagueAdmin(leagueId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/leagues/$(leagueId)/admins/$(request.auth.uid));
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isLeagueMember(leagueId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/leagues/$(leagueId)/members/$(request.auth.uid));
+    }
+    
+    // League documents
+    match /leagues/{leagueId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || isLeagueAdmin(leagueId);
+      allow delete: if isAdmin();
+      
+      // League members subcollection
+      match /members/{memberId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin() || isLeagueAdmin(leagueId) || isOwner(memberId);
+      }
+      
+      // League admins subcollection
+      match /admins/{adminId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+    
+    // Exception requests
+    match /exception_requests/{requestId} {
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.userId) || 
+        isAdmin() || 
+        isLeagueAdmin(resource.data.leagueId)
+      );
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        isLeagueAdmin(resource.data.leagueId)
+      );
+      allow delete: if isAdmin();
+    }
+    
+    // League overrides (admin audit trail)
+    match /league_overrides/{overrideId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isLeagueAdmin(resource.data.leagueId) ||
+        isOwner(resource.data.userId)
+      );
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if false; // Never allow deletion for audit purposes
+    }
+    
+    // Integrity configuration
+    match /integrityConfig/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Integrity logs
+    match /integrity_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // System can create logs
+      allow update, delete: if false; // Never allow modification
+    }
+    
+    // Admin actions audit trail
+    match /admin_actions/{actionId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // System can create audit entries
+      allow update, delete: if false; // Never allow modification
+    }
+    
+    // DEI Reports
+    match /DEIReports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // System can create reports
+      allow update, delete: if false; // Never allow modification
+    }
+    
+    // User profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (
+        isOwner(userId) || 
+        isAdmin() ||
+        // Allow league admins to read basic profile info for exception requests
+        (resource.data.leagueId != null && isLeagueAdmin(resource.data.leagueId))
+      );
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (
+        isOwner(userId) || 
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+      
+      // User privacy settings
+      match /privacy/{settingId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // League join requests
+    match /join_requests/{requestId} {
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.userId) || 
+        isAdmin() || 
+        isLeagueAdmin(resource.data.leagueId)
+      );
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        isLeagueAdmin(resource.data.leagueId)
+      );
+      allow delete: if isAdmin();
+    }
+    
+    // League policies
+    match /league_policies/{policyId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || isLeagueAdmin(resource.data.leagueId);
+    }
+    
+    // Gender identity verification (if needed)
+    match /identity_verification/{verificationId} {
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.userId) || 
+        isAdmin()
+      );
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Admin notifications
+    match /admin_notifications/{notificationId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // System can create notifications
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // User notifications
+    match /user_notifications/{notificationId} {
+      allow read, write: if isAuthenticated() && isOwner(resource.data.userId);
+      allow create: if isAuthenticated(); // System can create notifications
+    }
+    
+    // Analytics events (for tracking)
+    match /analytics_events/{eventId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // System can create events
+      allow update, delete: if false; // Never allow modification
+    }
+    
+    // System configuration
+    match /system_config/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Emergency overrides (for urgent situations)
+    match /emergency_overrides/{overrideId} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false; // Never allow deletion
+    }
+    
+    // Compliance reports
+    match /compliance_reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // System can create reports
+      allow update, delete: if false; // Never allow modification
+    }
+    
+    // Privacy consent tracking
+    match /privacy_consent/{consentId} {
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.userId) || 
+        isAdmin()
+      );
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow update: if isAuthenticated() && isOwner(resource.data.userId);
+      allow delete: if isAdmin();
+    }
+    
+    // Data retention policies
+    match /retention_policies/{policyId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // Audit trail for all sensitive operations
+    match /audit_trail/{auditId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // System can create audit entries
+      allow update, delete: if false; // Never allow modification
+    }
+    
+    // Rate limiting for exception requests
+    function hasRecentExceptionRequest(userId, leagueId) {
+      let cutoff = timestamp.date(2023, 1, 1); // Example cutoff
+      return exists(/databases/$(database)/documents/exception_requests) &&
+        get(/databases/$(database)/documents/exception_requests).data.userId == userId &&
+        get(/databases/$(database)/documents/exception_requests).data.leagueId == leagueId &&
+        get(/databases/$(database)/documents/exception_requests).data.timestamp > cutoff;
+    }
+    
+    // Prevent spam exception requests
+    match /exception_requests/{requestId} {
+      allow create: if isAuthenticated() && 
+        isOwner(request.resource.data.userId) &&
+        !hasRecentExceptionRequest(request.resource.data.userId, request.resource.data.leagueId);
+    }
+  }
+} 
