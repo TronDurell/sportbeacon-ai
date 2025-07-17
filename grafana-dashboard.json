@@ -1,0 +1,89 @@
+{
+  "dashboard": {
+    "title": "SportBeaconAI DevOps Dashboard",
+    "tags": [
+      "sportbeacon",
+      "devops",
+      "monitoring",
+      "firebase",
+      "github"
+    ],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Firebase Function Invocations",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "targets": [
+          {
+            "expr": "rate(firebase_function_invocations_total{environment=\"$environment\"}[5m])",
+            "legendFormat": "{{function_name}}"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "targets": [
+          {
+            "expr": "rate(firebase_function_errors_total{environment=\"$environment\"}[5m])",
+            "legendFormat": "{{function_name}}"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "GitHub Build Success Rate",
+        "type": "stat",
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 0,
+          "y": 8
+        },
+        "targets": [
+          {
+            "expr": "github_actions_build_success_rate",
+            "legendFormat": "Build Success Rate"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Test Pass Rate",
+        "type": "stat",
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 6,
+          "y": 8
+        },
+        "targets": [
+          {
+            "expr": "test_pass_rate",
+            "legendFormat": "Test Pass Rate"
+          }
+        ]
+      }
+    ]
+  }
+}
