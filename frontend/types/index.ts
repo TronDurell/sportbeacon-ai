@@ -111,35 +111,132 @@ export interface APIError {
 
 export interface PlayerProfile {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    dateOfBirth: string;
+    position: string;
+    skillLevel: string;
+    team: string;
+    school: string;
+    location: string;
+    bio: string;
     avatar: string;
-    level: number;
-    xp: {
+    isActive: boolean;
+    emergencyContact: {
+        name: string;
+        phone: string;
+        relationship: string;
+    };
+    preferences: {
+        notifications: boolean;
+        publicProfile: boolean;
+        shareStats: boolean;
+    };
+    // Legacy fields for backward compatibility
+    name?: string;
+    level?: number;
+    xp?: {
         current: number;
         nextLevel: number;
     };
-    stats: {
+    stats?: {
         completedDrills: number;
         averagePerformance: number;
         streak: number;
         totalTime: number;
     };
-    recentDrills: {
+    recentDrills?: {
         id: string;
         name: string;
         date: string;
         performance: number;
     }[];
-    insights: {
+    insights?: {
         type: 'improvement' | 'achievement' | 'suggestion';
         message: string;
         date: string;
     }[];
-    badges: {
+    badges?: {
         id: string;
         name: string;
         icon: string;
         progress: number;
         unlocked: boolean;
     }[];
-} 
+}
+
+// Video Annotation Types
+export interface VideoAnnotation {
+    id: string;
+    type: 'drawing' | 'text' | 'highlight';
+    timestamp: number;
+    data: any;
+    notes?: string;
+    color: string;
+    visible: boolean;
+}
+
+// Search and Filter Types
+export interface SearchFilters {
+    query: string;
+    positions: string[];
+    skillLevels: string[];
+    locations: string[];
+    teams: string[];
+    schools: string[];
+    availability: string[];
+    ageRange: [number, number];
+    experienceYears: [number, number];
+    isActive: boolean;
+    hasVideo: boolean;
+    tags: string[];
+}
+
+// Monetization Types
+export interface EarningsData {
+    totalEarnings: number;
+    thisMonth: number;
+    lastMonth: number;
+    pendingPayouts: number;
+    totalTips: number;
+    totalLikes: number;
+    currentStreak: number;
+    bestStreak: number;
+}
+
+export interface TipHistory {
+    id: string;
+    amount: number;
+    fromUser: string;
+    message: string;
+    date: string;
+    status: 'completed' | 'pending' | 'failed';
+}
+
+export interface PayoutRequest {
+    id: string;
+    amount: number;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    requestedDate: string;
+    processedDate?: string;
+    method: 'stripe' | 'paypal' | 'bank';
+}
+
+// Coach Assistant Types
+export interface CoachAssistantMessage {
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: string;
+}
+
+export interface PerformanceStats {
+    shootingPercentage: number;
+    assists: number;
+    rebounds: number;
+    steals: number;
+    blocks: number;
+    gamesPlayed: number;
+    improvement: number;
+}

@@ -1,4 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from typing import List, Dict, Optional, Any
 from .models import (
     PlayerStatRecord,
@@ -25,6 +28,20 @@ import os
 from datetime import datetime
 
 app = FastAPI(title="SportBeacon AI API")
+
+# Security middleware configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "https://sportbeacon-ai.web.app"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
+
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Initialize services
 insight_service = PlayerInsightService()
 matchmaking_service = MatchmakingService()
 drill_service = DrillService()

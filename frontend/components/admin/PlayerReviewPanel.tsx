@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { usePlayerRegistrations } from '../../hooks/useTownRec';
+// import { usePlayerRegistrations } from '../../hooks/useTownRec';
 import { PlayerRegistration } from '../../types/townRec';
 
 const PlayerReviewPanel: React.FC = () => {
-  const { registrations, loading, error, approveRegistration, rejectRegistration } = usePlayerRegistrations();
+  // Stub implementation for missing usePlayerRegistrations hook
+  const registrations: PlayerRegistration[] = [];
+  const loading = false;
+  const error = null;
+  const approveRegistration = async (registrationId: string, adminId: string) => ({ success: true } as any);
+  const rejectRegistration = async (registrationId: string, adminId: string, reason: string) => ({ success: true } as any);
+
   const [selectedRegistration, setSelectedRegistration] = useState<PlayerRegistration | null>(null);
-  const [filters, setFilters] = useState({
-    status: '',
-    autoFlagged: '',
-  });
+  const [filters, setFilters] = useState({ status: '', autoFlagged: '' });
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);

@@ -804,7 +804,7 @@ export const useRefereeScheduler = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
       return MOCK_DATA.referees.filter(ref => {
-        const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'lowercase' });
+        const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
         const timeOfDay = timeSlot.includes('09:00') || timeSlot.includes('10:30') ? 'morning' : 'afternoon';
         return ref.availability[dayOfWeek]?.[timeOfDay] && ref.currentAssignments.length < ref.maxGamesPerWeek;
       });
@@ -963,8 +963,8 @@ export const useCoachManagement = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
       return MOCK_DATA.coaches.filter(coach => 
-        coach.certifications.some(cert => cert.status === 'expired') ||
-        coach.backgroundCheck.status === 'expired'
+        coach.certifications.some(cert => cert.status === 'failed') ||
+        coach.backgroundCheck.status === 'failed'
       );
     } catch (err) {
       throw new Error('Failed to get missing certifications');

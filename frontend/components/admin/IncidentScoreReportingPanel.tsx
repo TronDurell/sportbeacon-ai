@@ -413,26 +413,26 @@ export const IncidentScoreReportingPanel: React.FC<IncidentScoreReportingPanelPr
                           </td>
                           <td className="px-6 py-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {incident.incidentType}
+                              {incident.type}
                             </div>
                             <div className="text-sm text-gray-500">
                               {incident.description}
                             </div>
                             <div className="text-xs text-gray-400">
-                              {new Date(incident.reportDate).toLocaleDateString()}
+                              {new Date(incident.createdAt).toLocaleDateString()}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
-                              {incident.homeTeam} vs {incident.awayTeam}
+                              {incident.title}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {incident.reportedBy}
+                              {incident.type}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(incident.severity)}`}>
-                              {incident.severity}
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(incident.status)}`}>
+                              {incident.status}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -539,12 +539,9 @@ export const IncidentScoreReportingPanel: React.FC<IncidentScoreReportingPanelPr
                             <div className="text-sm font-medium text-gray-900">
                               {score.homeScore} - {score.awayScore}
                             </div>
-                            {score.disputed && (
-                              <div className="text-xs text-red-600">Disputed</div>
-                            )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{score.reportedBy}</div>
+                            <div className="text-sm text-gray-900">{(selectedReport as ScoreReport).submittedBy}</div>
                             <div className="text-sm text-gray-500">{score.reportDate}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -629,12 +626,12 @@ export const IncidentScoreReportingPanel: React.FC<IncidentScoreReportingPanelPr
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Incident Type</label>
-                        <p className="mt-1 text-sm text-gray-900">{(selectedReport as IncidentReport).incidentType}</p>
+                        <p className="mt-1 text-sm text-gray-900">{(selectedReport as IncidentReport).type}</p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Severity</label>
-                        <span className={`mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor((selectedReport as IncidentReport).severity)}`}>
-                          {(selectedReport as IncidentReport).severity}
+                        <span className={`mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor((selectedReport as IncidentReport).status)}`}>
+                          {(selectedReport as IncidentReport).status}
                         </span>
                       </div>
                     </div>
@@ -648,12 +645,12 @@ export const IncidentScoreReportingPanel: React.FC<IncidentScoreReportingPanelPr
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Teams</label>
                         <p className="mt-1 text-sm text-gray-900">
-                          {(selectedReport as IncidentReport).homeTeam} vs {(selectedReport as IncidentReport).awayTeam}
+                          {(selectedReport as IncidentReport).title}
                         </p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Reported By</label>
-                        <p className="mt-1 text-sm text-gray-900">{(selectedReport as IncidentReport).reportedBy}</p>
+                        <p className="mt-1 text-sm text-gray-900">System</p>
                       </div>
                     </div>
                   </div>
@@ -663,7 +660,7 @@ export const IncidentScoreReportingPanel: React.FC<IncidentScoreReportingPanelPr
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Teams</label>
                         <p className="mt-1 text-sm text-gray-900">
-                          {(selectedReport as ScoreReport).homeTeam} vs {(selectedReport as ScoreReport).awayTeam}
+                          Game ID: {(selectedReport as ScoreReport).gameId}
                         </p>
                       </div>
                       <div>
@@ -678,21 +675,14 @@ export const IncidentScoreReportingPanel: React.FC<IncidentScoreReportingPanelPr
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Game Date</label>
                         <p className="mt-1 text-sm text-gray-900">
-                          {new Date((selectedReport as ScoreReport).gameDate).toLocaleDateString()}
+                          {new Date((selectedReport as ScoreReport).submittedAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Reported By</label>
-                        <p className="mt-1 text-sm text-gray-900">{(selectedReport as ScoreReport).reportedBy}</p>
+                        <p className="mt-1 text-sm text-gray-900">{(selectedReport as ScoreReport).submittedBy}</p>
                       </div>
                     </div>
-                    
-                    {(selectedReport as ScoreReport).disputed && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Dispute Notes</label>
-                        <p className="mt-1 text-sm text-gray-900">{(selectedReport as ScoreReport).disputeNotes}</p>
-                      </div>
-                    )}
                   </div>
                 )}
                 
@@ -707,7 +697,7 @@ export const IncidentScoreReportingPanel: React.FC<IncidentScoreReportingPanelPr
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Comments</label>
                   <div className="mt-2 space-y-2 max-h-32 overflow-y-auto">
-                    {selectedReport.comments?.map((comment, index) => (
+                    {/* {selectedReport.comments?.map((comment, index) => (
                       <div key={index} className="bg-gray-50 rounded-lg p-3">
                         <div className="flex justify-between items-start">
                           <div className="text-sm text-gray-900">{comment.text}</div>
@@ -717,7 +707,7 @@ export const IncidentScoreReportingPanel: React.FC<IncidentScoreReportingPanelPr
                         </div>
                         <div className="text-xs text-gray-500 mt-1">by {comment.author}</div>
                       </div>
-                    ))}
+                    ))} */}
                   </div>
                   
                   {/* Add Comment */}

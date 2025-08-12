@@ -64,7 +64,7 @@ class InputValidator {
     return uuidRegex.test(uuid);
   }
 
-  static validateObject(obj: any, schema: Record<string, string>): boolean {
+  static validateObject(obj: Record<string, unknown>, schema: Record<string, string>): boolean {
     for (const [key, type] of Object.entries(schema)) {
       if (!(key in obj)) {
         throw new Error(`Missing required field: ${key}`);
@@ -240,14 +240,14 @@ class SecureApiService {
     return this.request<T>(endpoint, { method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data: any): Promise<T> {
+  async post<T>(endpoint: string, data: Record<string, unknown>): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async put<T>(endpoint: string, data: any): Promise<T> {
+  async put<T>(endpoint: string, data: Record<string, unknown>): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),

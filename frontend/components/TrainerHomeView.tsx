@@ -48,7 +48,7 @@ export const TrainerHomeView: React.FC = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
     const { user } = useAuth();
-    const { socket } = useWebSocket();
+    const { socket } = useWebSocket('ws://localhost:3000');
     const queryClient = useQueryClient();
     
     // State
@@ -163,26 +163,31 @@ export const TrainerHomeView: React.FC = () => {
         setFilterAnchorEl(null);
     };
 
+    const handleViewPlayerDetails = useCallback((player: Player) => {
+        handlePlayerSelect(player);
+    }, [handlePlayerSelect]);
+
     // Real-time updates
     useEffect(() => {
         if (!socket) return;
 
-        socket.on('player_update', (data: Player) => {
-            queryClient.invalidateQueries(['trainer', 'roster']);
-        });
-
-        socket.on('new_insight', (data: Insight) => {
-            queryClient.invalidateQueries(['trainer', 'insights']);
-        });
-
-        socket.on('feed_update', (data: FeedItem) => {
-            queryClient.invalidateQueries(['community', 'feed']);
+        socket?.addEventListener('message', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'player_update') {
+              queryClient.invalidateQueries(['trainer', 'roster']);
+            } else if (data.type === 'new_insight') {
+              queryClient.invalidateQueries(['trainer', 'insights']);
+            } else if (data.type === 'feed_update') {
+              queryClient.invalidateQueries(['community', 'feed']);
+            }
+          } catch (error) {
+            console.error('WebSocket message error:', error);
+          }
         });
 
         return () => {
-            socket.off('player_update');
-            socket.off('new_insight');
-            socket.off('feed_update');
+          socket?.removeEventListener('message', () => {});
         };
     }, [socket, queryClient]);
 
@@ -235,8 +240,7 @@ export const TrainerHomeView: React.FC = () => {
                                 <Grid item xs={12} sm={6} key={player.id}>
                                     <PlayerCard
                                         player={player}
-                                        onViewDetails={() => handlePlayerSelect(player)}
-                                        compact={isMobile}
+                                        onViewDetails={() => handleViewPlayerDetails(player)}
                                     />
                                 </Grid>
                             ))}
@@ -259,7 +263,11 @@ export const TrainerHomeView: React.FC = () => {
                                     {insights?.map((insight: Insight) => (
                                         <InsightCard
                                             key={insight.id}
-                                            insight={insight}
+                                            insight={{
+                                                ...insight,
+                                                metric: insight.metric || 'performance',
+                                                timestamp: insight.timestamp || new Date()
+                                            }}
                                             onAction={() => trainerAPI.acknowledgeInsight(insight.id)}
                                             compact={isMobile}
                                         />
@@ -312,7 +320,10 @@ export const TrainerHomeView: React.FC = () => {
                             />
                         </Box>
                         <AIAssistantPanel
-                            responses={askAssistant.data ? [askAssistant.data] : []}
+                            responses={askAssistant.data ? [{
+                                ...askAssistant.data,
+                                role: askAssistant.data.role === 'user' ? 'trainer' : 'ai'
+                            }] : []}
                             isLoading={askAssistant.isLoading}
                             compact={isMobile}
                         />
@@ -326,9 +337,12 @@ export const TrainerHomeView: React.FC = () => {
                             {feed?.items.map((item: FeedItem) => (
                                 <CommunityCard
                                     key={item.id}
-                                    item={item}
-                                    onInteract={(type: InteractionType, data: any) => 
-                                        trainerAPI.interactWithPost(item.id, type, data)
+                                    item={{
+                                        ...item,
+                                        timestamp: new Date(item.timestamp)
+                                    }}
+                                                                        onInteract={(type) => 
+                                        trainerAPI.interactWithPost(item.id, type)
                                     }
                                     compact={isMobile}
                                 />
@@ -345,7 +359,7 @@ export const TrainerHomeView: React.FC = () => {
                     onClose={() => setSelectedPlayer(null)}
                     player={selectedPlayer}
                     drillHistory={drillHistory}
-                    feedbackStats={feedbackStats}
+
                     isMobile={isMobile}
                 />
             )}

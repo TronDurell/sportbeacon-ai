@@ -18,21 +18,22 @@ class APIError extends Error {
     }
 }
 
-async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+// Export fetchWithAuth function
+export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+    const token = localStorage.getItem('authToken');
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+    };
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-        credentials: 'include', // Include cookies for auth
+        headers,
     });
 
     if (!response.ok) {
-        throw new APIError(
-            response.status,
-            await response.text()
-        );
+        throw new APIError(response.status, `API request failed: ${response.statusText}`);
     }
 
     return response.json();
@@ -231,6 +232,19 @@ export async function recordDrillCompletion(playerId: string, drillId: string, p
 }
 
 export const playerAPI = {
+    getProfile: async (playerId: string): Promise<PlayerProfile> => {
+        return getPlayerProfile(playerId);
+    },
+
+    getAssignedDrills: async (playerId: string): Promise<DrillDetail[]> => {
+        return getDrillHistory(playerId);
+    },
+
+    getInsights: async (playerId: string): Promise<any[]> => {
+        // Mock insights for now
+        return [];
+    },
+
     getScoutPlayers: async (scoutId: string, listType: string): Promise<PlayerProfile[]> => {
         const response = await fetch(`/api/scout/${scoutId}/players?list=${listType}`, {
             headers: {
@@ -274,5 +288,15 @@ export const playerAPI = {
             body: JSON.stringify(evaluation),
         });
         if (!response.ok) throw new Error('Failed to update evaluation');
+    },
+
+    getPlayerBadges: async (playerId: string): Promise<any[]> => {
+        const response = await fetch(`/api/players/${playerId}/badges`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
+        if (!response.ok) throw new Error('Failed to fetch player badges');
+        return response.json();
     },
 }; 

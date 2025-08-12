@@ -1,5 +1,7 @@
 # SportBeaconAI Town-Rec Automation Suite
 
+[![CI/CD Pipeline](https://github.com/your-username/sportbeacon-ai/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/your-username/sportbeacon-ai/actions/workflows/ci.yml)
+
 A comprehensive admin panel system for municipal Parks & Rec departments managing youth sports leagues. Built with React, TypeScript, and Tailwind CSS.
 
 ## 🚀 Features
@@ -26,6 +28,25 @@ A comprehensive admin panel system for municipal Parks & Rec departments managin
 - **Cypress E2E Tests** - Comprehensive test coverage
 - **Responsive Design** - Mobile-first Tailwind CSS implementation
 - **TypeScript** - Full type safety and IntelliSense support
+
+## 🚀 CI/CD Pipeline
+
+Our GitHub Actions pipeline ensures code quality and deployment readiness:
+
+### Automated Checks
+- **Linting**: ESLint with TypeScript and React rules
+- **Type Checking**: TypeScript compilation validation
+- **Testing**: Jest with coverage reporting
+- **Security**: npm audit and dependency scanning
+- **Build**: Production build verification
+
+### Pipeline Triggers
+- **Pull Requests**: Full validation on all PRs
+- **Main Branch**: Automatic deployment to production
+- **Path-based**: Only runs when relevant files change
+
+### Status Badge
+The badge above shows the current pipeline status. Click to view detailed logs and test results.
 
 ## 🔧 Developer Environment Setup
 

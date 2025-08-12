@@ -1,0 +1,68 @@
+{
+  "AssetObjectData": {
+    "Properties": [
+      {
+        "Name": "NavMeshName",
+        "Type": "String",
+        "Value": "Venue Navigation Mesh"
+      },
+      {
+        "Name": "CellSize",
+        "Type": "Float",
+        "Value": 10.0
+      },
+      {
+        "Name": "CellHeight",
+        "Type": "Float",
+        "Value": 2.0
+      },
+      {
+        "Name": "WalkableSlopeAngle",
+        "Type": "Float",
+        "Value": 45.0
+      },
+      {
+        "Name": "WalkableHeight",
+        "Type": "Float",
+        "Value": 200.0
+      },
+      {
+        "Name": "WalkableRadius",
+        "Type": "Float",
+        "Value": 60.0
+      },
+      {
+        "Name": "WalkableClimb",
+        "Type": "Float",
+        "Value": 40.0
+      },
+      {
+        "Name": "InteractiveZones",
+        "Type": "Array",
+        "Value": [
+          {
+            "zoneId": "zone_001",
+            "name": "Soccer Field",
+            "type": "sports_field",
+            "coordinates": {"x": 0, "y": 0, "z": 0},
+            "radius": 50.0
+          },
+          {
+            "zoneId": "zone_002",
+            "name": "Basketball Court",
+            "type": "sports_field", 
+            "coordinates": {"x": 100, "y": 0, "z": 0},
+            "radius": 30.0
+          },
+          {
+            "zoneId": "zone_003",
+            "name": "Tennis Court",
+            "type": "sports_field",
+            "coordinates": {"x": 200, "y": 0, "z": 0},
+            "radius": 25.0
+          }
+        ]
+      }
+    ]
+  }
+} 

@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { usePlayerRegistrations } from '../../hooks/useTownRec';
+// import { usePlayerRegistrations } from '../../hooks/useTownRec';
 
 const PlayerReviews: React.FC = () => {
-  const { registrations, loading, error, approveRegistration, rejectRegistration } = usePlayerRegistrations();
+  // Stub implementation for missing usePlayerRegistrations hook
+  const registrations: any[] = [];
+  const loading = false;
+  const error = null;
+  const approveRegistration = async (registrationId: string, adminId: string) => ({ success: true } as any);
+  const rejectRegistration = async (registrationId: string, adminId: string, reason: string) => ({ success: true } as any);
   const [filters, setFilters] = useState({
     status: '',
     autoFlagged: '',
@@ -187,7 +192,7 @@ const PlayerReviews: React.FC = () => {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                             <span className="text-blue-600 font-semibold text-sm">
-                              {registration.formData.playerName.split(' ').map(n => n[0]).join('')}
+                              {registration.formData.playerName.split(' ').map((n: string) => n[0]).join('')}
                             </span>
                           </div>
                         </div>

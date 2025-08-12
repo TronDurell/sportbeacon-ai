@@ -1,0 +1,65 @@
+name: iOS TestFlight Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Build number (optional)'
+        required: false
+        default: ''
+  push:
+    tags:
+      - 'deploy-*'
+
+jobs:
+  ios-build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+        bundler-cache: true
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        cd mobile/ios
+        bundle install
+        npm install
+        
+    - name: Setup iOS certificates
+      uses: apple-actions/import-codesigning-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.IOS_P12_BASE64 }}
+        p12-password: ${{ secrets.IOS_P12_PASSWORD }}
+        
+    - name: Build and upload to TestFlight
+      run: |
+        cd mobile/ios
+        if [ -n "${{ github.event.inputs.build_number }}" ]; then
+          fastlane beta build_number:${{ github.event.inputs.build_number }}
+        else
+          fastlane beta
+        fi
+      env:
+        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+        
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "✅ iOS TestFlight build successful"
+        else
+          echo "❌ iOS TestFlight build failed"
+        fi 

@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { Box, Grid, Paper, Typography, Tooltip, CircularProgress, Theme } from '@mui/material';
 import { styled } from '@mui/system';
-import { ScoutReportExport } from './ScoutReportExport';
-import { VideoOverlay } from './VideoOverlay';
+// import { ScoutReportExport } from './ScoutReportExport';
+// import { VideoOverlay } from './VideoOverlay';
 
 export interface Badge {
     id: string;
@@ -16,7 +16,7 @@ export interface Badge {
     category: 'achievement' | 'skill' | 'social' | 'challenge';
 }
 
-const BadgeContainer = styled(Paper)(({ theme }: { theme: Theme }) => ({
+const BadgeContainer = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(2),
     textAlign: 'center',
     position: 'relative',
@@ -123,64 +123,64 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({
     );
 };
 
-interface ScoutDashboardProps {
-    organizationId: string;
-    scoutId: string;
-}
+// interface ScoutDashboardProps {
+//     organizationId: string;
+//     scoutId: string;
+// }
 
-const handleClipExport = async (clip: VideoClip): Promise<string> => {
-    // Implement FFmpeg clip generation here
-    // This is a placeholder that would be replaced with actual implementation
-    const formData = new FormData();
-    formData.append('videoUrl', videoUrl);
-    formData.append('startTime', clip.startTime.toString());
-    formData.append('endTime', clip.endTime.toString());
+// const handleClipExport = async (clip: VideoClip): Promise<string> => {
+//     // Implement FFmpeg clip generation here
+//     // This is a placeholder that would be replaced with actual implementation
+//     const formData = new FormData();
+//     formData.append('videoUrl', videoUrl);
+//     formData.append('startTime', clip.startTime.toString());
+//     formData.append('endTime', clip.endTime.toString());
     
-    const response = await fetch('/api/clips/generate', {
-        method: 'POST',
-        body: formData,
-    });
+//     const response = await fetch('/api/clips/generate', {
+//         method: 'POST',
+//         body: formData,
+//     });
     
-    const { url } = await response.json();
-    return url;
-};
+//     const { url } = await response.json();
+//     return url;
+// };
 
-const ScoutDashboard: React.FC<ScoutDashboardProps> = ({ organizationId, scoutId }: ScoutDashboardProps) => {
-    const [selectedPlayer, setSelectedPlayer] = React.useState<Player | null>(null);
-    const [videoUrl, setVideoUrl] = React.useState<string>('');
-    const [markers, setMarkers] = React.useState<Marker[]>([]);
-    const [aiAnalysis, setAiAnalysis] = React.useState<AiAnalysis | null>(null);
-    const [videoSnapshots, setVideoSnapshots] = React.useState<VideoSnapshot[]>([]);
-    const [drillHistory, setDrillHistory] = React.useState<DrillHistory[]>([]);
+// const ScoutDashboard: React.FC<ScoutDashboardProps> = ({ organizationId, scoutId }: ScoutDashboardProps) => {
+//     const [selectedPlayer, setSelectedPlayer] = React.useState<Player | null>(null);
+//     const [videoUrl, setVideoUrl] = React.useState<string>('');
+//     const [markers, setMarkers] = React.useState<Marker[]>([]);
+//     const [aiAnalysis, setAiAnalysis] = React.useState<AiAnalysis | null>(null);
+//     const [videoSnapshots, setVideoSnapshots] = React.useState<VideoSnapshot[]>([]);
+//     const [drillHistory, setDrillHistory] = React.useState<DrillHistory[]>([]);
 
-    const handleMarkerClick = (marker: Marker) => {
-        // Handle marker click
-    };
+//     const handleMarkerClick = (marker: Marker) => {
+//         // Handle marker click
+//     };
 
-    return (
-        <Grid container spacing={3}>
-            <Grid item xs={12}>
-                <VideoOverlay
-                    player={selectedPlayer}
-                    videoUrl={videoUrl}
-                    markers={markers}
-                    onMarkerClick={handleMarkerClick}
-                    onClipExport={handleClipExport}
-                />
-            </Grid>
+//     return (
+//         <Grid container spacing={3}>
+//             <Grid item xs={12}>
+//                 {/* <VideoOverlay
+//                     player={selectedPlayer}
+//                     videoUrl={videoUrl}
+//                     markers={markers}
+//                     onMarkerClick={handleMarkerClick}
+//                     onClipExport={handleClipExport}
+//                 /> */}
+//             </Grid>
             
-            <Grid item xs={12}>
-                <ScoutReportExport
-                    player={selectedPlayer}
-                    badges={badges}
-                    aiAnalysis={aiAnalysis}
-                    videoSnapshots={videoSnapshots}
-                    drillHistory={drillHistory}
-                    organizationLogo="/path/to/logo.png"
-                />
-            </Grid>
-        </Grid>
-    );
-};
+//             <Grid item xs={12}>
+//                 {/* <ScoutReportExport
+//                     player={selectedPlayer}
+//                     badges={badges}
+//                     aiAnalysis={aiAnalysis}
+//                     videoSnapshots={videoSnapshots}
+//                     drillHistory={drillHistory}
+//                     organizationLogo="/path/to/logo.png"
+//                 /> */}
+//             </Grid>
+//         </Grid>
+//     );
+// };
 
-export default ScoutDashboard; 
+// export default ScoutDashboard; 

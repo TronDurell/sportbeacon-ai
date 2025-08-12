@@ -1,0 +1,52 @@
+{
+  "AssetObjectData": {
+    "Properties": [
+      {
+        "Name": "ModelName",
+        "Type": "String",
+        "Value": "Venue 3D Model"
+      },
+      {
+        "Name": "ModelType",
+        "Type": "String",
+        "Value": "Sports Venue"
+      },
+      {
+        "Name": "LODLevels",
+        "Type": "Array",
+        "Value": [
+          {
+            "level": 0,
+            "polygonCount": 5000,
+            "distance": 100
+          },
+          {
+            "level": 1,
+            "polygonCount": 2500,
+            "distance": 500
+          },
+          {
+            "level": 2,
+            "polygonCount": 1000,
+            "distance": 1000
+          }
+        ]
+      },
+      {
+        "Name": "Materials",
+        "Type": "Array",
+        "Value": [
+          "M_Venue_Exterior",
+          "M_Venue_Interior",
+          "M_Sports_Field",
+          "M_Glass_Windows"
+        ]
+      },
+      {
+        "Name": "CollisionMesh",
+        "Type": "String",
+        "Value": "SM_Venue_Collision"
+      }
+    ]
+  }
+} 

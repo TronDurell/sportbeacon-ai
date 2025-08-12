@@ -12,7 +12,7 @@ import {
     ListItemText,
     Chip,
     IconButton,
-    Badge,
+    Badge as MuiBadge,
     useTheme,
     useMediaQuery,
     Drawer,
@@ -36,13 +36,13 @@ import {
 } from '@mui/icons-material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PlayerProfile, DrillDetail } from '../types';
-import { DrillCard } from './DrillCard';
+// import { DrillCard } from './DrillCard';
 import { XPProgressBar } from './XPProgressBar';
 import { BadgeSystem } from './BadgeSystem';
 import { playerAPI } from '../services/api';
 import { levelSystem } from '../services/levelSystem';
 import { badgeService } from '../services/badgeService';
-import confetti from 'canvas-confetti';
+// import confetti from 'canvas-confetti';
 
 interface PlayerDashboardProps {
     playerId: string;
@@ -97,7 +97,7 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ playerId }) =>
         // Check for new badges
         const badges = await badgeService.checkBadgeProgress(profile);
         const newlyEarnedBadge = badges.find(b => 
-            b.earned && !profile.badges?.some(pb => pb.id === b.id && pb.earned)
+            b.earned && !profile.badges?.some(pb => pb.id === b.id && pb.unlocked)
         );
 
         if (newlyEarnedBadge) {
@@ -242,11 +242,11 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ playerId }) =>
                         <Grid container spacing={2}>
                             {assignedDrills?.map((drill: DrillDetail) => (
                                 <Grid item xs={12} sm={isMobile ? 12 : 6} key={drill.id}>
-                                    <DrillCard
+                                    {/* <DrillCard
                                         drill={drill}
                                         onStart={() => {/* Handle drill start */}}
                                         compact={isMobile}
-                                    />
+                                    /> */}
                                 </Grid>
                             ))}
                         </Grid>

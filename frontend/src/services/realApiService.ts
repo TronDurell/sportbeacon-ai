@@ -28,13 +28,13 @@ class RealApiService {
   }
 
   // Generic query method
-  async query<T>(collection: string, params: any = {}): Promise<ApiResponse<T[]>> {
-    const queryParams = new URLSearchParams(params).toString();
+  async query<T>(collection: string, params: Record<string, unknown> = {}): Promise<ApiResponse<T[]>> {
+    const queryParams = new URLSearchParams(params as Record<string, string>).toString();
     return this.request<T[]>(`/${collection}?${queryParams}`);
   }
 
   // Generic create method
-  async create<T>(collection: string, data: any): Promise<ApiResponse<T>> {
+  async create<T>(collection: string, data: Record<string, unknown>): Promise<ApiResponse<T>> {
     return this.request<T>(`/${collection}`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -42,7 +42,7 @@ class RealApiService {
   }
 
   // Generic update method
-  async update<T>(collection: string, id: string, data: any): Promise<ApiResponse<T>> {
+  async update<T>(collection: string, id: string, data: Record<string, unknown>): Promise<ApiResponse<T>> {
     return this.request<T>(`/${collection}/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),

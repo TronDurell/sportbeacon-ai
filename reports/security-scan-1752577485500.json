@@ -1,0 +1,1036 @@
+{
+  "timestamp": "2025-07-15T11:03:43.831Z",
+  "project": "SportBeaconAI",
+  "vulnerabilities": [
+    {
+      "type": "code_quality",
+      "file": "frontend\\.lighthouserc.js",
+      "pattern": "Insecure HTTP",
+      "severity": "medium",
+      "matches": 1,
+      "description": "Found 1 instances of Insecure HTTP",
+      "timestamp": "2025-07-15T11:04:44.601Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\build\\service-worker.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.604Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\AgeExceptionRequestsPanel.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.607Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\CreatorDashboard.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.609Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\IncidentScoreReportingPanel.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 5,
+      "description": "Found 5 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.610Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\PaymentRefundPanel.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 3,
+      "description": "Found 3 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.613Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\PlayerRegistrationReviewPanel.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 6,
+      "description": "Found 6 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.613Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\PlayerReviewPanel.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 6,
+      "description": "Found 6 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.614Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\PlayerReviews.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 6,
+      "description": "Found 6 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.614Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\RefereeSchedulerDashboard.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 3,
+      "description": "Found 3 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.614Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\SiblingTeamPlacementPanel.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 3,
+      "description": "Found 3 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.617Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\Waitlist.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 5,
+      "description": "Found 5 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.619Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\WaitlistManager.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.620Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\admin\\WaitlistPanel.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 5,
+      "description": "Found 5 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.620Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\creator_dashboard\\stats.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.623Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\scout\\CreatorInvoiceTable.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.636Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\scout\\PDFExport.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.636Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\scout\\PDFHistory.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.636Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\scout\\PlayerRecap.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.637Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\scout\\RecruiterExportModule\\useRecruiterExport.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 3,
+      "description": "Found 3 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.639Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\scout\\ScoutDashboard.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 7,
+      "description": "Found 7 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.639Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\scout\\ScoutReportExport.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.642Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\scout\\VideoNotes.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.642Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\scout\\VideoOverlay.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.642Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\townRec\\dashboard\\RecStaffCentralView.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.647Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\components\\TrainerHomeView.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.648Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\coverage\\lcov-report\\prettify.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.651Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\coverage\\lcov-report\\prettify.js",
+      "pattern": "XSS Risk",
+      "severity": "high",
+      "matches": 1,
+      "description": "Found 1 instances of XSS Risk",
+      "timestamp": "2025-07-15T11:04:44.651Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\coverage\\lcov-report\\sorter.js",
+      "pattern": "XSS Risk",
+      "severity": "high",
+      "matches": 1,
+      "description": "Found 1 instances of XSS Risk",
+      "timestamp": "2025-07-15T11:04:44.651Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\coverage\\prettify.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.652Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\coverage\\prettify.js",
+      "pattern": "XSS Risk",
+      "severity": "high",
+      "matches": 1,
+      "description": "Found 1 instances of XSS Risk",
+      "timestamp": "2025-07-15T11:04:44.652Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\coverage\\sorter.js",
+      "pattern": "XSS Risk",
+      "severity": "high",
+      "matches": 1,
+      "description": "Found 1 instances of XSS Risk",
+      "timestamp": "2025-07-15T11:04:44.653Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\cypress\\e2e\\smoke-tests.cy.ts",
+      "pattern": "Hardcoded Secrets",
+      "severity": "high",
+      "matches": 7,
+      "description": "Found 7 instances of Hardcoded Secrets",
+      "timestamp": "2025-07-15T11:04:44.654Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\dist\\assets\\index-40543d85.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 28,
+      "description": "Found 28 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.659Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\dist\\assets\\index-40543d85.js",
+      "pattern": "XSS Risk",
+      "severity": "high",
+      "matches": 3,
+      "description": "Found 3 instances of XSS Risk",
+      "timestamp": "2025-07-15T11:04:44.659Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\dist\\assets\\index-40543d85.js",
+      "pattern": "Insecure HTTP",
+      "severity": "medium",
+      "matches": 13,
+      "description": "Found 13 instances of Insecure HTTP",
+      "timestamp": "2025-07-15T11:04:44.660Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\dist\\service-worker.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.660Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\hooks\\useCoachFeedback.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.664Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\hooks\\useFirestoreLeagues.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 5,
+      "description": "Found 5 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.665Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\hooks\\useShooterVerification.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 5,
+      "description": "Found 5 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.671Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\hooks\\useWebSocket.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.674Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\pages\\api\\dashboard\\sibling-status.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.676Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\pages\\api\\emails\\send-parent-update.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.676Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\pages\\api\\waitlist\\override.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.677Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\pages\\dashboard\\civic.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.677Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\public\\service-worker.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.679Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\scripts\\addTestAdminUser.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 43,
+      "description": "Found 43 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.680Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\scripts\\addTestAdminUser.js",
+      "pattern": "Insecure HTTP",
+      "severity": "medium",
+      "matches": 1,
+      "description": "Found 1 instances of Insecure HTTP",
+      "timestamp": "2025-07-15T11:04:44.680Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\services\\aiAssistant.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.680Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\App.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.684Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\ai\\CivicAgentUI.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.687Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\commerce\\BeaconBuyBot.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.687Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\commerce\\BulkProcurementPortal.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.688Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\commerce\\SocialCommerceFeed.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 3,
+      "description": "Found 3 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.688Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\Help\\RoleOnboarding.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.689Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\Messaging\\MessageCenter.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.691Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\modules\\Settings.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.699Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\Registration\\RegistrationForm.tsx",
+      "pattern": "Hardcoded Secrets",
+      "severity": "high",
+      "matches": 3,
+      "description": "Found 3 instances of Hardcoded Secrets",
+      "timestamp": "2025-07-15T11:04:44.701Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\Registration\\RegistrationForm.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.701Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\Schedule\\ScheduleBuilder.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.701Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\components\\SmartAlerts.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.702Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\contexts\\AdminAuthContext.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.705Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\lib\\analytics\\eventTracking.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 7,
+      "description": "Found 7 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.707Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\lib\\firebase.ts",
+      "pattern": "Insecure HTTP",
+      "severity": "medium",
+      "matches": 1,
+      "description": "Found 1 instances of Insecure HTTP",
+      "timestamp": "2025-07-15T11:04:44.707Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\lib\\i18n\\index.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.707Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\pages\\admin\\AdminDashboard.tsx",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.713Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\services\\api.ts",
+      "pattern": "Hardcoded Secrets",
+      "severity": "high",
+      "matches": 1,
+      "description": "Found 1 instances of Hardcoded Secrets",
+      "timestamp": "2025-07-15T11:04:44.714Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\services\\api.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.714Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\services\\api.ts",
+      "pattern": "Insecure HTTP",
+      "severity": "medium",
+      "matches": 1,
+      "description": "Found 1 instances of Insecure HTTP",
+      "timestamp": "2025-07-15T11:04:44.714Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\services\\realApiService.ts",
+      "pattern": "Insecure HTTP",
+      "severity": "medium",
+      "matches": 1,
+      "description": "Found 1 instances of Insecure HTTP",
+      "timestamp": "2025-07-15T11:04:44.715Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\src\\utils\\environmentValidation.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 6,
+      "description": "Found 6 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.715Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "frontend\\utils\\leaderboardScore.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 9,
+      "description": "Found 9 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.721Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\api\\pdf-reports.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.744Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\api\\upload-pdf.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.745Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\app.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.746Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\functions\\agentVoiceRouter.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 9,
+      "description": "Found 9 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.751Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\functions\\notifyCoach.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 8,
+      "description": "Found 8 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.752Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\functions\\townRecTriggers.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 17,
+      "description": "Found 17 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.752Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\functions\\voiceTokenHandler.ts",
+      "pattern": "Hardcoded Secrets",
+      "severity": "high",
+      "matches": 2,
+      "description": "Found 2 instances of Hardcoded Secrets",
+      "timestamp": "2025-07-15T11:04:44.752Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\functions\\voiceTokenHandler.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 5,
+      "description": "Found 5 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.753Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\jobs\\weeklyTrainerSummary.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.755Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\middleware\\auth.guard.ts",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 2,
+      "description": "Found 2 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.756Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\routes\\badges.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 3,
+      "description": "Found 3 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.761Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\routes\\coach.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 5,
+      "description": "Found 5 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.762Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\routes\\highlights.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 3,
+      "description": "Found 3 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.762Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\routes\\media.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.762Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\routes\\progress.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.763Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\scripts\\setup-media-infra.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.763Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\services\\media_service.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.764Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\services\\rewards_service.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.766Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\services\\voice_assistant.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 1,
+      "description": "Found 1 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.768Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\websocket\\rewards_handler.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 4,
+      "description": "Found 4 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.770Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\websocket.js",
+      "pattern": "Console Logs in Production",
+      "severity": "low",
+      "matches": 3,
+      "description": "Found 3 instances of Console Logs in Production",
+      "timestamp": "2025-07-15T11:04:44.770Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "backend\\websocket.js",
+      "pattern": "Insecure HTTP",
+      "severity": "medium",
+      "matches": 1,
+      "description": "Found 1 instances of Insecure HTTP",
+      "timestamp": "2025-07-15T11:04:44.770Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "functions\\lib\\__tests__\\functions.test.js",
+      "pattern": "Hardcoded Secrets",
+      "severity": "high",
+      "matches": 1,
+      "description": "Found 1 instances of Hardcoded Secrets",
+      "timestamp": "2025-07-15T11:04:44.844Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "functions\\src\\index.ts",
+      "pattern": "Hardcoded Secrets",
+      "severity": "high",
+      "matches": 1,
+      "description": "Found 1 instances of Hardcoded Secrets",
+      "timestamp": "2025-07-15T11:04:44.847Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "functions\\src\\__tests__\\auth-functions.test.ts",
+      "pattern": "Hardcoded Secrets",
+      "severity": "high",
+      "matches": 10,
+      "description": "Found 10 instances of Hardcoded Secrets",
+      "timestamp": "2025-07-15T11:04:44.855Z"
+    },
+    {
+      "type": "code_quality",
+      "file": "functions\\src\\__tests__\\functions.test.ts",
+      "pattern": "Hardcoded Secrets",
+      "severity": "high",
+      "matches": 1,
+      "description": "Found 1 instances of Hardcoded Secrets",
+      "timestamp": "2025-07-15T11:04:44.855Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\components\\admin\\AdminLogin.tsx",
+      "severity": "critical",
+      "description": "Potential secret found: superadmin...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.021Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\components\\admin\\IncidentScoreReportingPanel.tsx",
+      "severity": "critical",
+      "description": "Potential secret found: IncidentSc...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.027Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\components\\admin\\PlayerRegistrationReviewPanel.tsx",
+      "severity": "critical",
+      "description": "Potential secret found: PlayerRegi...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.032Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\components\\townRec\\ui\\SiblingSplitConfirmationNotice.tsx",
+      "severity": "critical",
+      "description": "Potential secret found: SiblingSpl...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.081Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\dist\\assets\\index-40543d85.js",
+      "severity": "critical",
+      "description": "Potential secret found: reactInter...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.104Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\package-lock(2).json",
+      "severity": "critical",
+      "description": "Potential secret found: V7TZWfmbgJ...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.151Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\package-lock.json",
+      "severity": "critical",
+      "description": "Potential secret found: LTIYoeivqY...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.178Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\src\\components\\admin\\IncidentScoreReportingReviewPanel.tsx",
+      "severity": "critical",
+      "description": "Potential secret found: IncidentSc...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.212Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\src\\modules\\GrowthSessions\\SessionLiberationAnalytics.ts",
+      "severity": "critical",
+      "description": "Potential secret found: calculateI...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.264Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\src\\routes\\AdminRoutes.tsx",
+      "severity": "critical",
+      "description": "Potential secret found: IncidentSc...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.271Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\tsconfig 2.json",
+      "severity": "critical",
+      "description": "Potential secret found: forceConsi...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.283Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\tsconfig 3.json",
+      "severity": "critical",
+      "description": "Potential secret found: forceConsi...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.283Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "frontend\\tsconfig(2).json",
+      "severity": "critical",
+      "description": "Potential secret found: forceConsi...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.283Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "backend\\jobs\\weeklyTrainerSummary.ts",
+      "severity": "critical",
+      "description": "Potential secret found: notificati...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.328Z"
+    },
+    {
+      "type": "exposed_secret",
+      "file": "functions\\package-lock.json",
+      "severity": "critical",
+      "description": "Potential secret found: LTIYoeivqY...",
+      "recommendation": "Review and remove or secure this secret",
+      "timestamp": "2025-07-15T11:04:45.450Z"
+    },
+    {
+      "type": "firebase_rules",
+      "file": "firestore.rules",
+      "pattern": "Overly Permissive Rules",
+      "severity": "medium",
+      "description": "Found 17 instances of Overly Permissive Rules",
+      "recommendation": "Review and tighten Firebase security rules",
+      "timestamp": "2025-07-15T11:04:45.496Z"
+    },
+    {
+      "type": "firebase_rules",
+      "file": "firestore.rules",
+      "pattern": "Missing Input Validation",
+      "severity": "medium",
+      "description": "Found 27 instances of Missing Input Validation",
+      "recommendation": "Review and tighten Firebase security rules",
+      "timestamp": "2025-07-15T11:04:45.496Z"
+    }
+  ],
+  "warnings": [],
+  "info": [],
+  "summary": {
+    "total": 115,
+    "critical": 15,
+    "high": 13,
+    "medium": 9,
+    "low": 78,
+    "riskScore": 0
+  }
+}

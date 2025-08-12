@@ -1,6 +1,7 @@
 // Core types
 export interface User {
   id: string;
+  uid?: string; // Add uid property for Firebase compatibility
   email: string;
   firstName: string;
   lastName: string;

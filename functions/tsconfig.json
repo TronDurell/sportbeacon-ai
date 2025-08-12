@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "outDir": "lib",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2017",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true,
+    "types": ["node", "jest"]
+  },
+  "compileOnSave": true,
+  "include": [
+    "src/**/*",
+    ".eslintrc.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "../node_modules",
+    "../frontend",
+    "../mobile",
+    "src/**/__tests__/**/*",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts"
+  ]
+}

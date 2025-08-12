@@ -11,6 +11,12 @@ import {
 } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { app } from '../lib/firebase';
+import { 
+  validateUserRegistration, 
+  validateUserLogin,
+  formatValidationErrors,
+  UserRegistrationData
+} from '../utils/validation';
 
 interface AuthState {
   user: User | null;
@@ -37,6 +43,26 @@ export const useAuth = () => {
 
 // Alias for compatibility
 export const useAdminAuth = useAuth;
+
+// Admin role hook for dashboard components
+export const useAdminRole = () => {
+  const { user } = useAuth();
+  
+  return {
+    user,
+    canViewPlayers: true,
+    canApproveRegistrations: true,
+    canManageWaitlist: true,
+    canManageSiblings: true,
+    canApproveAgeExceptions: true,
+    canViewIncidents: true,
+    canManageScores: true,
+    canViewPayments: true,
+    canProcessRefunds: true,
+    canManageReferees: true,
+    canViewLeagueDashboard: true,
+  };
+};
 
 interface AdminAuthProviderProps {
   children: ReactNode;
@@ -78,7 +104,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
           email: firebaseUser.email || '',
           firstName: firebaseUser.displayName?.split(' ')[0] || '',
           lastName: firebaseUser.displayName?.split(' ').slice(1).join(' ') || '',
-          role: 'athlete',
+          role: 'player',
           createdAt: new Date(),
           updatedAt: new Date()
         };
@@ -186,43 +212,38 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     setAuthState(prev => ({ ...prev, loading: true }));
     
     try {
-      // Input validation
-      if (!userData.email || !userData.password) {
-        throw new Error('Email and password are required');
+      // Comprehensive input validation using new validation utilities
+      const validationResult = validateUserRegistration(userData);
+      
+      if (!validationResult.isValid) {
+        const errorMessages = formatValidationErrors(validationResult.errors);
+        throw new Error(`Registration validation failed: ${errorMessages}`);
       }
       
-      if (!userData.firstName || !userData.lastName) {
-        throw new Error('First name and last name are required');
-      }
+      const validatedData = validationResult.data!;
       
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(userData.email)) {
-        throw new Error('Invalid email format');
-      }
-      
-      // Create Firebase user
+      // Create Firebase user with validated data
       const userCredential = await createUserWithEmailAndPassword(
         auth, 
-        userData.email, 
-        userData.password
+        validatedData.email, 
+        validatedData.password
       );
       
       const firebaseUser = userCredential.user;
       
       // Update Firebase profile
       await updateProfile(firebaseUser, {
-        displayName: `${userData.firstName} ${userData.lastName}`
+        displayName: `${validatedData.firstName} ${validatedData.lastName}`
       });
       
       // Create user document in Firestore
       const newUser: User = {
         id: firebaseUser.uid,
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        role: userData.role || 'athlete',
-        organization: userData.organization,
+        email: validatedData.email,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        role: validatedData.role,
+        organization: validatedData.organization,
         createdAt: new Date(),
         updatedAt: new Date()
       };

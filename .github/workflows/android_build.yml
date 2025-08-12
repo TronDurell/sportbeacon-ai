@@ -1,0 +1,80 @@
+name: Android Play Store Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'beta'
+        type: choice
+        options:
+        - beta
+        - production
+  push:
+    tags:
+      - 'deploy-*'
+
+jobs:
+  android-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        cd mobile/android
+        npm install
+        
+    - name: Setup Android signing
+      run: |
+        cd mobile/android
+        echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/keystore.jks
+        echo "storeFile=keystore.jks" >> gradle.properties
+        echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}" >> gradle.properties
+        echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> gradle.properties
+        echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> gradle.properties
+        
+    - name: Build Android APK
+      run: |
+        cd mobile/android
+        ./gradlew assembleRelease
+        
+    - name: Upload to Play Store
+      if: github.event.inputs.release_type == 'production'
+      run: |
+        cd mobile/android
+        fastlane deploy_production
+      env:
+        PLAY_STORE_CONFIG_JSON: ${{ secrets.PLAY_STORE_CONFIG_JSON }}
+        
+    - name: Upload to Internal Testing
+      if: github.event.inputs.release_type == 'beta'
+      run: |
+        cd mobile/android
+        fastlane deploy_beta
+      env:
+        PLAY_STORE_CONFIG_JSON: ${{ secrets.PLAY_STORE_CONFIG_JSON }}
+        
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "✅ Android build successful"
+        else
+          echo "❌ Android build failed"
+        fi 

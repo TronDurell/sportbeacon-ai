@@ -1,0 +1,195 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Base user authentication check
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is Town Staff
+    function isTownStaff() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/townStaff/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/townStaff/$(request.auth.uid)).data.isActive == true;
+    }
+    
+    // Check if user is Rec Director
+    function isRecDirector() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/townStaff/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/townStaff/$(request.auth.uid)).data.role == 'RecDirector';
+    }
+    
+    // Check if user is Rec Coordinator
+    function isRecCoordinator() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/townStaff/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/townStaff/$(request.auth.uid)).data.role == 'RecCoordinator';
+    }
+    
+    // Check if user has specific permission
+    function hasPermission(permission) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/townStaff/$(request.auth.uid)) &&
+        permission in get(/databases/$(database)/documents/townStaff/$(request.auth.uid)).data.permissions;
+    }
+    
+    // Check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Check if user is the parent of the registration
+    function isParent(parentEmail) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/townStaff/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/townStaff/$(request.auth.uid)).data.email == parentEmail;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isTownStaff();
+      allow write: if isOwner(userId) || isTownStaff();
+      
+      // User's rec history
+      match /recHistory/{historyId} {
+        allow read: if isOwner(userId) || isTownStaff();
+        allow write: if isTownStaff();
+      }
+      
+      // User's registrations
+      match /registrations/{registrationId} {
+        allow read: if isOwner(userId) || isTownStaff();
+        allow write: if isOwner(userId) || isTownStaff();
+      }
+    }
+
+    // Town Staff users
+    match /townStaff/{staffId} {
+      allow read: if isTownStaff();
+      allow write: if isRecDirector() || isOwner(staffId);
+      
+      // Staff sessions
+      match /sessions/{sessionId} {
+        allow read, write: if isOwner(staffId);
+      }
+    }
+
+    // Age overrides
+    match /ageOverrides/{overrideId} {
+      allow read: if isTownStaff() || 
+        (isAuthenticated() && resource.data.requestedBy == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow update: if isTownStaff();
+      allow delete: if isRecDirector();
+    }
+
+    // Waitlists
+    match /waitlists/{entryId} {
+      allow read: if isTownStaff() || 
+        (isAuthenticated() && resource.data.parentEmail == request.auth.token.email);
+      allow create: if isAuthenticated();
+      allow update: if isTownStaff() || 
+        (isAuthenticated() && resource.data.parentEmail == request.auth.token.email);
+      allow delete: if isTownStaff();
+    }
+
+    // Sibling pairings
+    match /siblingPairings/{pairingId} {
+      allow read: if isTownStaff() || 
+        (isAuthenticated() && resource.data.parentEmail == request.auth.token.email);
+      allow create: if isAuthenticated();
+      allow update: if isTownStaff();
+      allow delete: if isRecDirector();
+    }
+
+    // Registrations
+    match /registrations/{registrationId} {
+      allow read: if isTownStaff() || 
+        (isAuthenticated() && resource.data.parentEmail == request.auth.token.email);
+      allow create: if isAuthenticated();
+      allow update: if isTownStaff() || 
+        (isAuthenticated() && resource.data.parentEmail == request.auth.token.email);
+      allow delete: if isTownStaff();
+    }
+
+    // League capacities
+    match /leagueCapacities/{leagueId} {
+      allow read: if isAuthenticated();
+      allow write: if isTownStaff();
+    }
+
+    // Waitlist policies
+    match /waitlistPolicies/{policyId} {
+      allow read: if isAuthenticated();
+      allow write: if isRecDirector();
+    }
+
+    // Age override policies
+    match /ageOverridePolicies/{policyId} {
+      allow read: if isAuthenticated();
+      allow write: if isRecDirector();
+    }
+
+    // Sibling pairing policies
+    match /siblingPairingPolicies/{policyId} {
+      allow read: if isAuthenticated();
+      allow write: if isRecDirector();
+    }
+
+    // Teams
+    match /teams/{teamId} {
+      allow read: if isAuthenticated();
+      allow write: if isTownStaff();
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && 
+        (resource.data.recipient == request.auth.token.email || isTownStaff());
+      allow create: if isTownStaff();
+      allow update: if isTownStaff();
+      allow delete: if isTownStaff();
+    }
+
+    // Town Staff sessions
+    match /townStaffSessions/{sessionId} {
+      allow read, write: if isTownStaff();
+    }
+
+    // Town Staff audit logs
+    match /townStaffAuditLogs/{logId} {
+      allow read: if isTownStaff();
+      allow create: if isTownStaff();
+      allow update: if isRecDirector();
+      allow delete: if false; // Never allow deletion of audit logs
+    }
+
+    // Analytics
+    match /analytics/{analyticsId} {
+      allow read: if isTownStaff();
+      allow write: if isRecDirector();
+    }
+
+    // Permissions
+    match /townStaffPermissions/{permissionId} {
+      allow read: if isAuthenticated();
+      allow write: if isRecDirector();
+    }
+
+    // General security rules
+    match /{document=**} {
+      // Deny all other access
+      allow read, write: if false;
+    }
+
+    match /admin/auditTrail/logs/{logId} {
+      allow read, write: if request.auth != null &&
+        exists(/databases/$(database)/documents/testGroups/caryAdminTest/$(request.auth.uid));
+    }
+
+    match /testGroups/caryAdminTest/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+} 

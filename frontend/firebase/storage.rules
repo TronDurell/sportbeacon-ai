@@ -1,0 +1,140 @@
+rules_version = '2';
+
+// Firebase Storage security rules for SportBeaconAI
+// Handles video uploads, user access control, and file validation
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isValidVideoFile() {
+      return request.resource.size < 100 * 1024 * 1024 // 100MB limit
+        && request.resource.contentType.matches('video/.*');
+    }
+    
+    function isValidImageFile() {
+      return request.resource.size < 10 * 1024 * 1024 // 10MB limit
+        && request.resource.contentType.matches('image/.*');
+    }
+    
+    function hasValidMetadata() {
+      return request.resource.metadata.keys().hasAll(['uploadedBy', 'uploadedAt'])
+        && request.resource.metadata.uploadedBy == request.auth.uid;
+    }
+    
+    // Video files - users can only upload to their own folder
+    match /videos/{userId}/{fileName} {
+      allow read: if isAuthenticated() && (
+        isOwner(userId) || 
+        // Allow coaches to view their players' videos
+        exists(/databases/$(firestore.default)/documents/players/$(userId)) &&
+        get(/databases/$(firestore.default)/documents/players/$(userId)).data.coachId == request.auth.uid
+      );
+      
+      allow create: if isAuthenticated() 
+        && isOwner(userId)
+        && isValidVideoFile()
+        && hasValidMetadata();
+      
+      allow update: if isAuthenticated() 
+        && isOwner(userId)
+        && isValidVideoFile();
+      
+      allow delete: if isAuthenticated() 
+        && isOwner(userId);
+    }
+    
+    // User avatars and profile images
+    match /avatars/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      
+      allow create: if isAuthenticated() 
+        && isOwner(userId)
+        && isValidImageFile()
+        && hasValidMetadata();
+      
+      allow update: if isAuthenticated() 
+        && isOwner(userId)
+        && isValidImageFile();
+      
+      allow delete: if isAuthenticated() 
+        && isOwner(userId);
+    }
+    
+    // Team logos and images
+    match /teams/{teamId}/{fileName} {
+      allow read: if isAuthenticated();
+      
+      allow create: if isAuthenticated() 
+        && isValidImageFile()
+        && hasValidMetadata()
+        && (
+          // Team admin or coach can upload team images
+          exists(/databases/$(firestore.default)/documents/teams/$(teamId)) &&
+          get(/databases/$(firestore.default)/documents/teams/$(teamId)).data.adminId == request.auth.uid
+        );
+      
+      allow update: if isAuthenticated() 
+        && isValidImageFile()
+        && exists(/databases/$(firestore.default)/documents/teams/$(teamId)) &&
+        get(/databases/$(firestore.default)/documents/teams/$(teamId)).data.adminId == request.auth.uid;
+      
+      allow delete: if isAuthenticated() 
+        && exists(/databases/$(firestore.default)/documents/teams/$(teamId)) &&
+        get(/databases/$(firestore.default)/documents/teams/$(teamId)).data.adminId == request.auth.uid;
+    }
+    
+    // League images and documents
+    match /leagues/{leagueId}/{fileName} {
+      allow read: if isAuthenticated();
+      
+      allow create: if isAuthenticated() 
+        && isValidImageFile()
+        && hasValidMetadata()
+        && (
+          // League admin can upload league images
+          exists(/databases/$(firestore.default)/documents/leagues/$(leagueId)) &&
+          get(/databases/$(firestore.default)/documents/leagues/$(leagueId)).data.adminId == request.auth.uid
+        );
+      
+      allow update: if isAuthenticated() 
+        && isValidImageFile()
+        && exists(/databases/$(firestore.default)/documents/leagues/$(leagueId)) &&
+        get(/databases/$(firestore.default)/documents/leagues/$(leagueId)).data.adminId == request.auth.uid;
+      
+      allow delete: if isAuthenticated() 
+        && exists(/databases/$(firestore.default)/documents/leagues/$(leagueId)) &&
+        get(/databases/$(firestore.default)/documents/leagues/$(leagueId)).data.adminId == request.auth.uid;
+    }
+    
+    // Temporary uploads (for processing)
+    match /temp/{userId}/{fileName} {
+      allow read, write: if isAuthenticated() 
+        && isOwner(userId)
+        && request.resource.size < 100 * 1024 * 1024; // 100MB limit
+      
+      // Auto-delete temp files after 24 hours (handled by Cloud Functions)
+    }
+    
+    // Public assets (logos, icons, etc.)
+    match /public/{fileName} {
+      allow read: if true; // Public read access
+      
+      allow write: if isAuthenticated() 
+        && request.auth.token.admin == true; // Only admins can upload public assets
+    }
+    
+    // Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+} 

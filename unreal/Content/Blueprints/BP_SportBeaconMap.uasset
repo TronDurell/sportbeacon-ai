@@ -1,0 +1,39 @@
+{
+  "AssetObjectData": {
+    "Properties": [
+      {
+        "Name": "MapName",
+        "Type": "String",
+        "Value": "SportBeacon Immersive Map"
+      },
+      {
+        "Name": "MapVersion",
+        "Type": "String", 
+        "Value": "1.0.0"
+      },
+      {
+        "Name": "MapDescription",
+        "Type": "String",
+        "Value": "Interactive sports venue map with AR integration"
+      },
+      {
+        "Name": "VenueData",
+        "Type": "Array",
+        "Value": [
+          {
+            "venueId": "venue_001",
+            "name": "Central Sports Complex",
+            "coordinates": {"lat": 40.7128, "lng": -74.0060},
+            "facilities": ["soccer_field", "basketball_court", "tennis_court"]
+          },
+          {
+            "venueId": "venue_002", 
+            "name": "Community Recreation Center",
+            "coordinates": {"lat": 40.7589, "lng": -73.9851},
+            "facilities": ["indoor_pool", "gym", "track"]
+          }
+        ]
+      }
+    ]
+  }
+} 
