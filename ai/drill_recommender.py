@@ -4,7 +4,6 @@ import random
 from datetime import datetime, timedelta
 from backend.models import (
     DrillInfo,
-    DrillRecommendation,
     DrillRecommendationRequest,
     DrillRecommendationResponse,
     DrillScheduleRequest,

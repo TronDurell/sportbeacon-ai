@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta
-import pandas as pd
+try:
+    import pandas as pd
+except Exception:  # pragma: no cover
+    pd = None
 from typing import List, Dict, Optional
 from ai.player_insight import PlayerInsightEngine
 from .models import PlayerStatRecord, PlayerAnalysisResponse, PlayerInsightResponse
