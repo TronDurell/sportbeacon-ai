@@ -9,7 +9,12 @@ declare global {
 import { Player, Insight, FeedItem, Message, PlayerProfile, DrillDetail } from '../types';
 import { ScoutNote, PlayerEvaluation } from '../types/scout';
 
-const API_BASE_URL = window.env?.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_ORIGIN =
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ||
+  (typeof window !== 'undefined' && window.env?.NEXT_PUBLIC_API_URL) ||
+  '';
+
+const API_BASE_URL = `${API_ORIGIN}`;
 
 class APIError extends Error {
     constructor(public status: number, message: string) {
@@ -19,7 +24,7 @@ class APIError extends Error {
 }
 
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
         ...options,
         headers: {
             'Content-Type': 'application/json',
@@ -69,25 +74,25 @@ interface TrainerAPI {
 
 export const trainerAPI: TrainerAPI = {
     getRoster: async () => {
-        const response = await fetch('/api/trainer/roster');
+        const response = await fetch(`${API_BASE_URL}/api/trainer/roster`);
         if (!response.ok) throw new Error('Failed to fetch roster');
         return response.json();
     },
 
     getPlayerProfile: async (playerId) => {
-        const response = await fetch(`/api/players/${playerId}/profile`);
+        const response = await fetch(`${API_BASE_URL}/api/players/${playerId}/profile`);
         if (!response.ok) throw new Error('Failed to fetch player profile');
         return response.json();
     },
 
     getPlayerDetails: async (playerId) => {
-        const response = await fetch(`/api/players/${playerId}/details`);
+        const response = await fetch(`${API_BASE_URL}/api/players/${playerId}/details`);
         if (!response.ok) throw new Error('Failed to fetch player details');
         return response.json();
     },
 
     updatePlayerLevel: async (playerId, level) => {
-        const response = await fetch(`/api/players/${playerId}/level`, {
+        const response = await fetch(`${API_BASE_URL}/api/players/${playerId}/level`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ level })
@@ -97,19 +102,19 @@ export const trainerAPI: TrainerAPI = {
     },
 
     getDrillHistory: async (playerId) => {
-        const response = await fetch(`/api/players/${playerId}/drills/history`);
+        const response = await fetch(`${API_BASE_URL}/api/players/${playerId}/drills/history`);
         if (!response.ok) throw new Error('Failed to fetch drill history');
         return response.json();
     },
 
     getPlayerDrillHistory: async (playerId) => {
-        const response = await fetch(`/api/players/${playerId}/drills/history`);
+        const response = await fetch(`${API_BASE_URL}/api/players/${playerId}/drills/history`);
         if (!response.ok) throw new Error('Failed to fetch drill history');
         return response.json();
     },
 
     getDrillSuggestions: async (playerId, prompt) => {
-        const response = await fetch(`/api/players/${playerId}/drills/suggestions`, {
+        const response = await fetch(`${API_BASE_URL}/api/players/${playerId}/drills/suggestions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt })
@@ -119,7 +124,7 @@ export const trainerAPI: TrainerAPI = {
     },
 
     assignDrill: async (playerId, drillId) => {
-        const response = await fetch(`/api/players/${playerId}/drills/assign`, {
+        const response = await fetch(`${API_BASE_URL}/api/players/${playerId}/drills/assign`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ drillId })
@@ -128,7 +133,7 @@ export const trainerAPI: TrainerAPI = {
     },
 
     recordDrillCompletion: async (playerId, drillId, performance) => {
-        const response = await fetch(`/api/players/${playerId}/drills/${drillId}/complete`, {
+        const response = await fetch(`${API_BASE_URL}/api/players/${playerId}/drills/${drillId}/complete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ performance })
@@ -137,26 +142,26 @@ export const trainerAPI: TrainerAPI = {
     },
 
     getInsights: async () => {
-        const response = await fetch('/api/trainer/insights');
+        const response = await fetch(`${API_BASE_URL}/api/trainer/insights`);
         if (!response.ok) throw new Error('Failed to fetch insights');
         return response.json();
     },
 
     acknowledgeInsight: async (insightId) => {
-        const response = await fetch(`/api/insights/${insightId}/acknowledge`, {
+        const response = await fetch(`${API_BASE_URL}/api/insights/${insightId}/acknowledge`, {
             method: 'POST'
         });
         if (!response.ok) throw new Error('Failed to acknowledge insight');
     },
 
     getFeed: async () => {
-        const response = await fetch('/api/community/feed');
+        const response = await fetch(`${API_BASE_URL}/api/community/feed`);
         if (!response.ok) throw new Error('Failed to fetch feed');
         return response.json();
     },
 
     interactWithPost: async (postId, type, data) => {
-        const response = await fetch(`/api/community/posts/${postId}/interact`, {
+        const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/interact`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type, data })
@@ -165,7 +170,7 @@ export const trainerAPI: TrainerAPI = {
     },
 
     sendAssistantMessage: async (message) => {
-        const response = await fetch('/api/assistant/message', {
+        const response = await fetch(`${API_BASE_URL}/api/assistant/message`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message })
@@ -175,7 +180,7 @@ export const trainerAPI: TrainerAPI = {
     },
 
     askDrillAssistant: async (drillId, question) => {
-        const response = await fetch(`/api/drills/${drillId}/assistant/ask`, {
+        const response = await fetch(`${API_BASE_URL}/api/drills/${drillId}/assistant/ask`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ question })

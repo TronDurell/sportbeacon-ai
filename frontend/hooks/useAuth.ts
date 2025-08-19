@@ -26,7 +26,11 @@ export const useAuth = () => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await fetch('/api/auth/session');
+                const API_ORIGIN =
+                    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ||
+                    (typeof window !== 'undefined' && (window as any).env?.NEXT_PUBLIC_API_URL) ||
+                    '';
+                const response = await fetch(`${API_ORIGIN}/api/auth/session`);
                 if (!response.ok) {
                     throw new Error('Authentication failed');
                 }
@@ -53,7 +57,11 @@ export const useAuth = () => {
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await fetch('/api/auth/login', {
+            const API_ORIGIN =
+                (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ||
+                (typeof window !== 'undefined' && (window as any).env?.NEXT_PUBLIC_API_URL) ||
+                '';
+            const response = await fetch(`${API_ORIGIN}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -83,7 +91,11 @@ export const useAuth = () => {
 
     const logout = async () => {
         try {
-            await fetch('/api/auth/logout', { method: 'POST' });
+            const API_ORIGIN =
+                (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ||
+                (typeof window !== 'undefined' && (window as any).env?.NEXT_PUBLIC_API_URL) ||
+                '';
+            await fetch(`${API_ORIGIN}/api/auth/logout`, { method: 'POST' });
             setAuthState({
                 user: null,
                 isAuthenticated: false,
@@ -105,4 +117,4 @@ export const useAuth = () => {
         login,
         logout
     };
-}; 
+};

@@ -16,22 +16,76 @@ from .models import (
     CoachResponse,
     ExtendedDrillScheduleRequest
 )
-from .insight_service import PlayerInsightService
-from .matchmaking_service import MatchmakingService
-from .drill_service import DrillService
-from .highlight_generator import HighlightTaggingEngine
-from .coach_assistant import CoachAssistant
 import os
 from datetime import datetime
 
 app = FastAPI(title="SportBeacon AI API")
-insight_service = PlayerInsightService()
-matchmaking_service = MatchmakingService()
-drill_service = DrillService()
 
-# Initialize services
-highlight_engine = HighlightTaggingEngine()
-coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
+# Lazy service singletons (to avoid importing heavy deps at module import time)
+_insight_service = None
+_matchmaking_service = None
+_drill_service = None
+_highlight_engine = None
+_coach_assistant = None
+
+def get_insight_service():
+    global _insight_service
+    if _insight_service is None:
+        try:
+            from .insight_service import PlayerInsightService
+            _insight_service = PlayerInsightService()
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Insight service unavailable: {exc}")
+    return _insight_service
+
+def get_matchmaking_service():
+    global _matchmaking_service
+    if _matchmaking_service is None:
+        try:
+            from .matchmaking_service import MatchmakingService
+            _matchmaking_service = MatchmakingService()
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Matchmaking service unavailable: {exc}")
+    return _matchmaking_service
+
+def get_drill_service():
+    global _drill_service
+    if _drill_service is None:
+        try:
+            from .drill_service import DrillService
+            _drill_service = DrillService()
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Drill service unavailable: {exc}")
+    return _drill_service
+
+def get_highlight_engine():
+    global _highlight_engine
+    if _highlight_engine is None:
+        try:
+            from .highlight_generator import HighlightTaggingEngine
+            _highlight_engine = HighlightTaggingEngine()
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Highlight engine unavailable: {exc}")
+    return _highlight_engine
+
+def get_coach_assistant():
+    global _coach_assistant
+    if _coach_assistant is None:
+        try:
+            from .coach_assistant import CoachAssistant
+            _coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Coach assistant unavailable: {exc}")
+    return _coach_assistant
+
+# Health and test endpoints
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    return {"status": "ok"}
+
+@app.get("/api/test")
+async def api_test() -> Dict[str, str]:
+    return {"message": "API is working"}
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
@@ -46,7 +100,7 @@ async def get_top_winners(time_period_days: int = 30, limit: int = 5):
         List of top players with their win rates and stats
     """
     try:
-        return insight_service.get_top_winners(time_period_days, limit)
+        return get_insight_service().get_top_winners(time_period_days, limit)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -65,7 +119,7 @@ async def analyze_player_stats(stats: List[PlayerStatRecord]):
         PlayerAnalysisResponse containing normalized stats, top skills, and growth areas
     """
     try:
-        return insight_service.analyze_player_stats(stats)
+        return get_insight_service().analyze_player_stats(stats)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -84,7 +138,7 @@ async def create_balanced_teams(request: MatchmakingRequest):
         MatchmakingResponse with two balanced teams and balance metrics
     """
     try:
-        return matchmaking_service.create_balanced_teams(request)
+        return get_matchmaking_service().create_balanced_teams(request)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -97,7 +151,7 @@ async def get_drill_recommendations(
 ) -> DrillRecommendationResponse:
     """Get personalized drill recommendations."""
     try:
-        return drill_service.get_recommendations(request)
+        return get_drill_service().get_recommendations(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -108,8 +162,8 @@ async def get_formatted_recommendations(
 ) -> str:
     """Get formatted drill recommendations."""
     try:
-        recommendations = drill_service.get_recommendations(request)
-        return drill_service.format_recommendations(recommendations, format_type)
+        recommendations = get_drill_service().get_recommendations(request)
+        return get_drill_service().format_recommendations(recommendations, format_type)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -119,7 +173,7 @@ async def get_weekly_schedule(
 ) -> DrillScheduleResponse:
     """Get a personalized weekly training schedule."""
     try:
-        return drill_service.get_weekly_schedule(request)
+        return get_drill_service().get_weekly_schedule(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -130,8 +184,8 @@ async def get_formatted_schedule(
 ) -> str:
     """Get a formatted weekly training schedule."""
     try:
-        schedule = drill_service.get_weekly_schedule(request)
-        return drill_service.format_schedule(schedule, format_type)
+        schedule = get_drill_service().get_weekly_schedule(request)
+        return get_drill_service().format_schedule(schedule, format_type)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -142,7 +196,7 @@ async def tag_game_highlights(
 ) -> HighlightResponse:
     """Tag and analyze game highlights."""
     try:
-        return highlight_engine.tag_highlights(game_id, events)
+        return get_highlight_engine().tag_highlights(game_id, events)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -156,7 +210,7 @@ async def ask_coach_question(
 ) -> CoachResponse:
     """Get coaching advice and recommendations."""
     try:
-        return coach_assistant.answer_question(request, channel)
+        return get_coach_assistant().answer_question(request, channel)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -170,7 +224,7 @@ async def get_weekly_summary(
 ) -> Dict[str, Any]:
     """Get a player's weekly progress summary."""
     try:
-        summary = coach_assistant.generate_weekly_summary(player_id, channel)
+        summary = get_coach_assistant().generate_weekly_summary(player_id, channel)
         return {
             "player_id": player_id,
             "summary": summary,
@@ -189,7 +243,7 @@ async def get_extended_schedule(
 ) -> DrillScheduleResponse:
     """Get an extended weekly training schedule with adaptations."""
     try:
-        return drill_service.get_extended_schedule(request)
+        return get_drill_service().get_extended_schedule(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

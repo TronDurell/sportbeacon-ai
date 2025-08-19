@@ -1,5 +1,10 @@
 import { fetchWithAuth } from './api';
 
+const API_ORIGIN =
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ||
+  (typeof window !== 'undefined' && window.env?.NEXT_PUBLIC_API_URL) ||
+  '';
+
 export interface AuthToken {
     accessToken: string;
     refreshToken: string;
@@ -32,7 +37,7 @@ class AuthService {
     }
 
     async login(credentials: LoginCredentials): Promise<PlayerSession> {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch(`${API_ORIGIN}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(credentials),
@@ -67,7 +72,7 @@ class AuthService {
         }
 
         try {
-            const response = await fetch('/api/auth/refresh', {
+            const response = await fetch(`${API_ORIGIN}/api/auth/refresh`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ refreshToken: currentToken.refreshToken }),

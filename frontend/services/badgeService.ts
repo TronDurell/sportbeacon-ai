@@ -94,7 +94,11 @@ class BadgeService {
         if (!badge.sound || !this.audioContext) return;
 
         try {
-            const response = await fetch(badge.sound);
+            const API_ORIGIN =
+                (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ||
+                (typeof window !== 'undefined' && window.env?.NEXT_PUBLIC_API_URL) ||
+                '';
+            const response = await fetch(`${API_ORIGIN}${badge.sound.startsWith('/api') ? '' : '/api'}${badge.sound}`);
             const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
             
