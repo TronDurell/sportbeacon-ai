@@ -25,13 +25,29 @@ import os
 from datetime import datetime
 
 app = FastAPI(title="SportBeacon AI API")
-insight_service = PlayerInsightService()
-matchmaking_service = MatchmakingService()
-drill_service = DrillService()
 
-# Initialize services
-highlight_engine = HighlightTaggingEngine()
-coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
+# Lazy-initialized services to avoid heavy imports at startup
+insight_service = None
+matchmaking_service = None
+drill_service = None
+highlight_engine = None
+coach_assistant = None
+
+def ensure_services_initialized():
+    global insight_service, matchmaking_service, drill_service, highlight_engine, coach_assistant
+    if insight_service is None:
+        insight_service = PlayerInsightService()
+    if matchmaking_service is None:
+        matchmaking_service = MatchmakingService()
+    if drill_service is None:
+        drill_service = DrillService()
+    if highlight_engine is None:
+        from .highlight_generator import HighlightTaggingEngine as _HTE
+        # Re-import inside to avoid early initialization side-effects
+        globals()["highlight_engine"] = _HTE()
+    if coach_assistant is None:
+        from .coach_assistant import CoachAssistant as _CA
+        globals()["coach_assistant"] = _CA(os.getenv("OPENAI_API_KEY"))
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
@@ -46,6 +62,7 @@ async def get_top_winners(time_period_days: int = 30, limit: int = 5):
         List of top players with their win rates and stats
     """
     try:
+        ensure_services_initialized()
         return insight_service.get_top_winners(time_period_days, limit)
     except Exception as e:
         raise HTTPException(
@@ -65,6 +82,7 @@ async def analyze_player_stats(stats: List[PlayerStatRecord]):
         PlayerAnalysisResponse containing normalized stats, top skills, and growth areas
     """
     try:
+        ensure_services_initialized()
         return insight_service.analyze_player_stats(stats)
     except Exception as e:
         raise HTTPException(
@@ -84,6 +102,7 @@ async def create_balanced_teams(request: MatchmakingRequest):
         MatchmakingResponse with two balanced teams and balance metrics
     """
     try:
+        ensure_services_initialized()
         return matchmaking_service.create_balanced_teams(request)
     except Exception as e:
         raise HTTPException(
@@ -97,6 +116,7 @@ async def get_drill_recommendations(
 ) -> DrillRecommendationResponse:
     """Get personalized drill recommendations."""
     try:
+        ensure_services_initialized()
         return drill_service.get_recommendations(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -108,6 +128,7 @@ async def get_formatted_recommendations(
 ) -> str:
     """Get formatted drill recommendations."""
     try:
+        ensure_services_initialized()
         recommendations = drill_service.get_recommendations(request)
         return drill_service.format_recommendations(recommendations, format_type)
     except Exception as e:
@@ -119,6 +140,7 @@ async def get_weekly_schedule(
 ) -> DrillScheduleResponse:
     """Get a personalized weekly training schedule."""
     try:
+        ensure_services_initialized()
         return drill_service.get_weekly_schedule(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -130,6 +152,7 @@ async def get_formatted_schedule(
 ) -> str:
     """Get a formatted weekly training schedule."""
     try:
+        ensure_services_initialized()
         schedule = drill_service.get_weekly_schedule(request)
         return drill_service.format_schedule(schedule, format_type)
     except Exception as e:
@@ -142,6 +165,7 @@ async def tag_game_highlights(
 ) -> HighlightResponse:
     """Tag and analyze game highlights."""
     try:
+        ensure_services_initialized()
         return highlight_engine.tag_highlights(game_id, events)
     except Exception as e:
         raise HTTPException(
@@ -156,6 +180,7 @@ async def ask_coach_question(
 ) -> CoachResponse:
     """Get coaching advice and recommendations."""
     try:
+        ensure_services_initialized()
         return coach_assistant.answer_question(request, channel)
     except Exception as e:
         raise HTTPException(
@@ -170,6 +195,7 @@ async def get_weekly_summary(
 ) -> Dict[str, Any]:
     """Get a player's weekly progress summary."""
     try:
+        ensure_services_initialized()
         summary = coach_assistant.generate_weekly_summary(player_id, channel)
         return {
             "player_id": player_id,
@@ -360,3 +386,15 @@ SAMPLE_COACH_QUESTION = {
     "question": "How can I improve my three-point shooting?",
     "include_stats": True
 } 
+
+@app.get("/health")
+async def health() -> Dict[str, str]:
+    return {"status": "ok"}
+
+@app.get("/api/test")
+async def api_test() -> Dict[str, str]:
+    return {"message": "ok"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
