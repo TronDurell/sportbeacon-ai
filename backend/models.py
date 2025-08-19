@@ -212,3 +212,9 @@ class CoachResponse(BaseModel):
     stats: Optional[Dict[str, Any]]
     video_links: Optional[List[str]]
     confidence_score: float 
+
+class VideoRecommendation(BaseModel):
+    title: str
+    url: str
+    duration_seconds: Optional[int] = None
+    skill_tags: Optional[List[str]] = None
