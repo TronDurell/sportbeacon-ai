@@ -40,6 +40,8 @@ class PlayerProfile(BaseModel):
     skill_scores: Dict[str, float]
     overall_rating: float
     recent_games: List[PlayerStatRecord] = []
+    # Optional availability for matchmaking/scheduling
+    availability: List[datetime] = []
 
 class TeamComposition(BaseModel):
     players: List[PlayerProfile]

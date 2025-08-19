@@ -1,7 +1,9 @@
 from typing import List, Dict
 from .models import (
     DrillRecommendationRequest,
-    DrillRecommendationResponse
+    DrillRecommendationResponse,
+    DrillScheduleRequest,
+    DrillScheduleResponse,
 )
 from ai.drill_recommender import DrillRecommendationEngine
 
@@ -26,3 +28,18 @@ class DrillService:
             response,
             format_type
         ) 
+
+    def get_weekly_schedule(
+        self,
+        request: DrillScheduleRequest
+    ) -> DrillScheduleResponse:
+        """Generate a weekly schedule via AI recommender."""
+        return self.recommender.create_weekly_schedule(request)
+
+    def format_schedule(
+        self,
+        response: DrillScheduleResponse,
+        format_type: str = 'text'
+    ) -> str:
+        """Format weekly schedule for display."""
+        return self.recommender.format_schedule_for_display(response, format_type)

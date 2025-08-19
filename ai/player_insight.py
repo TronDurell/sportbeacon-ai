@@ -30,8 +30,12 @@ class PlayerInsightEngine:
         for col in self._stats_columns:
             if col in player_stats.columns:
                 current_avg = player_stats[col].tail(window_size).mean()
-                previous_avg = player_stats[col].tail(window_size * 2).head(window_size).mean()
-                trends[col] = ((current_avg - previous_avg) / previous_avg) * 100
+                previous_window = player_stats[col].tail(window_size * 2).head(window_size)
+                previous_avg = previous_window.mean()
+                if previous_avg == 0 or pd.isna(previous_avg):
+                    trends[col] = float(current_avg * 100.0)
+                else:
+                    trends[col] = float(((current_avg - previous_avg) / previous_avg) * 100.0)
         return trends
 
     def _calculate_weighted_skill_score(
@@ -39,33 +43,23 @@ class PlayerInsightEngine:
         stats: pd.Series,
         recent_weight: float = 0.7
     ) -> Tuple[float, float]:
-        """
-        Calculate weighted skill score giving more importance to recent performance.
-        
-        Args:
-            stats: Time series of a specific stat
-            recent_weight: Weight given to recent performance (0-1)
-            
-        Returns:
-            Tuple of (weighted score, raw percentile)
-        """
-        if len(stats) < 2:
-            return (float(stats.iloc[-1]), float(stats.iloc[-1]))
-            
-        # Calculate recent and overall percentiles
-        recent_window = min(5, len(stats) // 2)
-        recent_stats = stats.tail(recent_window)
-        recent_percentile = np.percentile(recent_stats, 75)
-        
-        overall_percentile = np.percentile(stats, 75)
-        
-        # Combine with weighting
-        weighted_score = (
-            recent_weight * recent_percentile +
-            (1 - recent_weight) * overall_percentile
-        )
-        
-        return (weighted_score, overall_percentile)
+        """Calculate weighted score and percentile rank of recent performance."""
+        if len(stats) == 0:
+            return (0.0, 0.0)
+        if len(stats) == 1:
+            value = float(stats.iloc[-1])
+            # Percentile rank of single value among itself is 100
+            return (value, 100.0)
+
+        recent_window = max(1, min(5, len(stats)))
+        recent_mean = float(stats.tail(recent_window).mean())
+        overall_mean = float(stats.mean())
+        weighted_value = recent_weight * recent_mean + (1.0 - recent_weight) * overall_mean
+
+        # Percentile rank of weighted_value within the series distribution
+        values = stats.to_numpy()
+        percentile_rank = float((values <= weighted_value).sum() / len(values) * 100.0)
+        return (weighted_value, percentile_rank)
 
     def identify_top_skills(
         self,
@@ -85,19 +79,17 @@ class PlayerInsightEngine:
         Returns:
             List of top skills
         """
-        top_skills = []
-        
+        top_skills: List[str] = []
         for col in self._stats_columns:
             if col in player_stats.columns:
-                weighted_score, raw_percentile = self._calculate_weighted_skill_score(
-                    player_stats[col],
-                    recent_weight
-                )
-                
-                # Consider a skill as top if either weighted score or raw percentile is high
-                if weighted_score >= np.percentile(player_stats[col], percentile_threshold):
+                values = player_stats[col].to_numpy()
+                if len(values) == 0:
+                    continue
+                last_val = float(values[-1])
+                # Percentile rank of the latest performance within the series
+                percentile_rank = float(((values <= last_val).sum() / len(values)) * 100.0)
+                if percentile_rank >= float(percentile_threshold):
                     top_skills.append(col)
-                    
         return top_skills
 
     def get_growth_areas(
