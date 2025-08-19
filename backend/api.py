@@ -18,20 +18,73 @@ from .models import (
 )
 from .insight_service import PlayerInsightService
 from .matchmaking_service import MatchmakingService
-from .drill_service import DrillService
 from .highlight_generator import HighlightTaggingEngine
-from .coach_assistant import CoachAssistant
+try:
+    from .coach_assistant import CoachAssistant
+    coach_assistant_import_error = None
+except Exception as e:
+    CoachAssistant = None  # type: ignore
+    coach_assistant_import_error = e
 import os
 from datetime import datetime
 
 app = FastAPI(title="SportBeacon AI API")
 insight_service = PlayerInsightService()
 matchmaking_service = MatchmakingService()
-drill_service = DrillService()
+drill_service: Optional[object] = None
 
 # Initialize services
 highlight_engine = HighlightTaggingEngine()
-coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
+
+# Lazily initialize CoachAssistant to avoid startup failures when optional
+# dependencies or OPENAI_API_KEY are missing. Endpoints will create it on demand.
+coach_assistant: Optional["CoachAssistant"] = None
+
+def get_coach_assistant() -> "CoachAssistant":
+    """Return a shared CoachAssistant instance, creating it on first use.
+
+    Raises HTTPException with 503 if unavailable due to missing deps or config.
+    """
+    global coach_assistant
+    if coach_assistant is not None:
+        return coach_assistant
+    if CoachAssistant is None:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Coach assistant unavailable: {coach_assistant_import_error}"
+        )
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Coach assistant requires OPENAI_API_KEY to be set"
+        )
+    coach_assistant = CoachAssistant(api_key)
+    return coach_assistant
+
+
+def get_drill_service():
+    """Return a shared DrillService instance, creating it on first use.
+
+    Raises HTTPException with 503 if unavailable due to import errors.
+    """
+    global drill_service
+    if drill_service is not None:
+        return drill_service
+    # Lazy import to avoid import-time errors blocking app startup
+    try:
+        from .drill_service import DrillService  # type: ignore
+    except Exception as import_error:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Drill service unavailable: {import_error}"
+        )
+    drill_service = DrillService()
+    return drill_service
+
+@app.get("/health")
+async def health() -> Dict[str, str]:
+    return {"status": "ok"}
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
@@ -97,7 +150,8 @@ async def get_drill_recommendations(
 ) -> DrillRecommendationResponse:
     """Get personalized drill recommendations."""
     try:
-        return drill_service.get_recommendations(request)
+        service = get_drill_service()
+        return service.get_recommendations(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -108,8 +162,9 @@ async def get_formatted_recommendations(
 ) -> str:
     """Get formatted drill recommendations."""
     try:
-        recommendations = drill_service.get_recommendations(request)
-        return drill_service.format_recommendations(recommendations, format_type)
+        service = get_drill_service()
+        recommendations = service.get_recommendations(request)
+        return service.format_recommendations(recommendations, format_type)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -119,7 +174,8 @@ async def get_weekly_schedule(
 ) -> DrillScheduleResponse:
     """Get a personalized weekly training schedule."""
     try:
-        return drill_service.get_weekly_schedule(request)
+        service = get_drill_service()
+        return service.get_weekly_schedule(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -130,8 +186,9 @@ async def get_formatted_schedule(
 ) -> str:
     """Get a formatted weekly training schedule."""
     try:
-        schedule = drill_service.get_weekly_schedule(request)
-        return drill_service.format_schedule(schedule, format_type)
+        service = get_drill_service()
+        schedule = service.get_weekly_schedule(request)
+        return service.format_schedule(schedule, format_type)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -156,7 +213,8 @@ async def ask_coach_question(
 ) -> CoachResponse:
     """Get coaching advice and recommendations."""
     try:
-        return coach_assistant.answer_question(request, channel)
+        assistant = get_coach_assistant()
+        return assistant.answer_question(request, channel)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -170,7 +228,8 @@ async def get_weekly_summary(
 ) -> Dict[str, Any]:
     """Get a player's weekly progress summary."""
     try:
-        summary = coach_assistant.generate_weekly_summary(player_id, channel)
+        assistant = get_coach_assistant()
+        summary = assistant.generate_weekly_summary(player_id, channel)
         return {
             "player_id": player_id,
             "summary": summary,
