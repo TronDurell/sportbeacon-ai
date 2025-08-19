@@ -1,3 +1,19 @@
+class DrillRecommendationEngine:
+    def recommend_drills(self, request):
+        return {"message": "stubbed drills"}
+
+    def format_recommendations_for_display(self, response, format_type: str = "text"):
+        return f"{format_type}:{response}"
+
+    def get_weekly_schedule(self, request):
+        return {"message": "stubbed schedule"}
+
+    def format_schedule(self, schedule, format_type: str = "text"):
+        return f"{format_type}:{schedule}"
+
+    def get_extended_schedule(self, request):
+        return {"message": "stubbed extended schedule"}
+
 from typing import List, Dict, Optional, Tuple
 import numpy as np
 import random

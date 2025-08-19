@@ -33,6 +33,15 @@ drill_service = DrillService()
 highlight_engine = HighlightTaggingEngine()
 coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
 
+# Basic health and test endpoints
+@app.get("/health")
+async def health() -> Dict[str, str]:
+    return {"status": "ok"}
+
+@app.get("/api/test")
+async def api_test() -> Dict[str, str]:
+    return {"message": "api ok"}
+
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
     """
