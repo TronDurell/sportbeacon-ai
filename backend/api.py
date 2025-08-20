@@ -1,4 +1,7 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Optional, Any
 from .models import (
     PlayerStatRecord,
@@ -23,6 +26,9 @@ from .highlight_generator import HighlightTaggingEngine
 from .coach_assistant import CoachAssistant
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="SportBeacon AI API")
 insight_service = PlayerInsightService()
@@ -32,6 +38,56 @@ drill_service = DrillService()
 # Initialize services
 highlight_engine = HighlightTaggingEngine()
 coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
+
+# CORS configuration
+frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:3002")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[frontend_origin],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Prometheus metrics
+try:
+    from prometheus_fastapi_instrumentator import Instrumentator
+
+    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+except Exception:
+    # Metrics are optional in local dev if dependency is missing
+    pass
+
+# Health endpoint
+@app.get("/health")
+async def health() -> Dict[str, str]:
+    return {"status": "ok", "service": "sportbeacon-api"}
+
+# Error handlers
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": {
+                "type": "validation_error",
+                "detail": exc.errors(),
+                "message": "Invalid request",
+            }
+        },
+    )
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": {
+                "type": "server_error",
+                "message": str(exc),
+            }
+        },
+    )
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
