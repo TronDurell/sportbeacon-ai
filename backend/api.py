@@ -23,8 +23,22 @@ from .highlight_generator import HighlightTaggingEngine
 from .coach_assistant import CoachAssistant
 import os
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="SportBeacon AI API")
+__version__ = "0.1.0-rc"
+
+app = FastAPI(title="SportBeacon AI API", version=__version__)
+
+# CORS configuration
+frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:3002")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[frontend_origin],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 insight_service = PlayerInsightService()
 matchmaking_service = MatchmakingService()
 drill_service = DrillService()
@@ -32,6 +46,18 @@ drill_service = DrillService()
 # Initialize services
 highlight_engine = HighlightTaggingEngine()
 coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
+
+@app.get("/health")
+async def health() -> Dict[str, Any]:
+    return {"status": "ok", "version": __version__}
+
+# Optional metrics endpoint
+ENABLE_METRICS = os.getenv("ENABLE_METRICS", "false").lower() == "true"
+if ENABLE_METRICS:
+    @app.get("/metrics")
+    async def metrics() -> str:
+        # Placeholder for Prometheus-style metrics
+        return "# HELP sportbeacon_requests_total Total requests\n# TYPE sportbeacon_requests_total counter\nsportbeacon_requests_total{app=\"backend\"} 1\n"
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
