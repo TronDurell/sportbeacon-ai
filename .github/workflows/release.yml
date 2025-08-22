@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +17,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build backend image
-        run: docker build -f backend/Dockerfile -t ghcr.io/trondurell/sportbeacon-ai-backend:${{ github.ref_name }} .
+        run: docker build -f backend/Dockerfile -t ${{ github.repository }}-backend:${{ github.ref_name }} .
       - name: Build frontend image
-        run: docker build -f frontend/Dockerfile -t ghcr.io/trondurell/sportbeacon-ai-frontend:${{ github.ref_name }} .
+        run: docker build -f frontend/Dockerfile -t ${{ github.repository }}-frontend:${{ github.ref_name }} .
+      - name: Docker login
+        if: ${{ secrets.DOCKER_USERNAME && secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Push images
+        if: ${{ secrets.DOCKER_USERNAME && secrets.DOCKER_PASSWORD }}
+        run: |
+          docker tag ${{ github.repository }}-backend:${{ github.ref_name }} ${{ github.repository }}-backend:latest
+          docker tag ${{ github.repository }}-frontend:${{ github.ref_name }} ${{ github.repository }}-frontend:latest
+          docker push ${{ github.repository }}-backend:${{ github.ref_name }}
+          docker push ${{ github.repository }}-backend:latest
+          docker push ${{ github.repository }}-frontend:${{ github.ref_name }}
+          docker push ${{ github.repository }}-frontend:latest
