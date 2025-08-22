@@ -25,7 +25,7 @@ import os
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 
-__version__ = "0.1.0-rc"
+from .version import __version__
 
 app = FastAPI(title="SportBeacon AI API", version=__version__)
 
@@ -51,13 +51,29 @@ coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
 async def health() -> Dict[str, Any]:
     return {"status": "ok", "version": __version__}
 
-# Optional metrics endpoint
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
+from fastapi.responses import Response
+
+REQUESTS = Counter("sb_requests_total", "Total API requests", ["path"])
+
+@app.middleware("http")
+async def req_count_mw(request, call_next):
+    response = await call_next(request)
+    try:
+        REQUESTS.labels(path=str(request.url.path)).inc()
+    except Exception:
+        pass
+    return response
+
 ENABLE_METRICS = os.getenv("ENABLE_METRICS", "false").lower() == "true"
 if ENABLE_METRICS:
     @app.get("/metrics")
-    async def metrics() -> str:
-        # Placeholder for Prometheus-style metrics
-        return "# HELP sportbeacon_requests_total Total requests\n# TYPE sportbeacon_requests_total counter\nsportbeacon_requests_total{app=\"backend\"} 1\n"
+    def metrics():
+        return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+@app.get("/api/test")
+async def api_test() -> Dict[str, Any]:
+    return {"status": "ok"}
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
@@ -80,7 +96,7 @@ async def get_top_winners(time_period_days: int = 30, limit: int = 5):
         )
 
 @app.post("/api/players/analyze", response_model=PlayerAnalysisResponse)
-async def analyze_player_stats(stats: List[PlayerStatRecord]):
+async def analyze_player_stats(stats: List[Dict[str, Any]]):
     """
     Analyze player statistics to generate insights.
     

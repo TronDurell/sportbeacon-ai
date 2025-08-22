@@ -1,0 +1,18 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build backend image
+        run: docker build -f backend/Dockerfile -t ghcr.io/trondurell/sportbeacon-ai-backend:${{ github.ref_name }} .
+      - name: Build frontend image
+        run: docker build -f frontend/Dockerfile -t ghcr.io/trondurell/sportbeacon-ai-frontend:${{ github.ref_name }} .

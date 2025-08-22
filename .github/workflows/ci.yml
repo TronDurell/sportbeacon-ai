@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, 'release/*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: FastAPI import check
+        run: python -c "from backend.api import app; print('api ok')"
+      - name: Launch API
+        run: uvicorn backend.api:app --host 127.0.0.1 --port 8000 &
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Smoke
+        run: ./scripts/smoke.sh http://127.0.0.1:8000
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - name: Install deps
+        run: npm --prefix frontend ci || npm --prefix frontend install
+      - name: Typecheck
+        run: npm --prefix frontend run typecheck
+      - name: Build
+        run: npm --prefix frontend run build

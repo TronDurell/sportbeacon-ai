@@ -9,7 +9,7 @@ declare global {
 import { Player, Insight, FeedItem, Message, PlayerProfile, DrillDetail } from '../types';
 import { ScoutNote, PlayerEvaluation } from '../types/scout';
 
-const API_BASE_URL = (typeof import !== 'undefined' && (import.meta as any)?.env?.VITE_API_URL) || window.env?.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+export const API_BASE_URL = (typeof import !== 'undefined' && (import.meta as any)?.env?.VITE_API_URL) || window.env?.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 class APIError extends Error {
     constructor(public status: number, message: string) {
