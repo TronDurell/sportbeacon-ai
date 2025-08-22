@@ -16,15 +16,14 @@ from .models import (
     CoachResponse,
     ExtendedDrillScheduleRequest
 )
-from .insight_service import PlayerInsightService
-from .matchmaking_service import MatchmakingService
-from .drill_service import DrillService
-from .highlight_generator import HighlightTaggingEngine
-from .coach_assistant import CoachAssistant
+# from .insight_service import PlayerInsightService
+# from .matchmaking_service import MatchmakingService
+# from .drill_service import DrillService
+# from .highlight_generator import HighlightTaggingEngine
+# from .coach_assistant import CoachAssistant
 import os
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
-
 from .version import __version__
 
 app = FastAPI(title="SportBeacon AI API", version=__version__)
@@ -39,17 +38,12 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-insight_service = PlayerInsightService()
-matchmaking_service = MatchmakingService()
-drill_service = DrillService()
-
-# Initialize services
-highlight_engine = HighlightTaggingEngine()
-coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
-
-@app.get("/health")
-async def health() -> Dict[str, Any]:
-    return {"status": "ok", "version": __version__}
+# Lazy service singletons
+insight_service = None
+matchmaking_service = None
+drill_service = None
+highlight_engine = None
+coach_assistant = None
 
 from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response
@@ -65,6 +59,10 @@ async def req_count_mw(request, call_next):
         pass
     return response
 
+@app.get("/health")
+async def health() -> Dict[str, Any]:
+    return {"status": "healthy", "service": "SportBeacon AI API", "version": __version__}
+
 ENABLE_METRICS = os.getenv("ENABLE_METRICS", "false").lower() == "true"
 if ENABLE_METRICS:
     @app.get("/metrics")
@@ -77,17 +75,11 @@ async def api_test() -> Dict[str, Any]:
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
-    """
-    Get the top players with highest win rates for the specified time period.
-    
-    Args:
-        time_period_days: Number of days to consider for win rate calculation
-        limit: Number of top players to return
-    
-    Returns:
-        List of top players with their win rates and stats
-    """
     try:
+        global insight_service
+        if insight_service is None:
+            from .insight_service import PlayerInsightService
+            insight_service = PlayerInsightService()
         return insight_service.get_top_winners(time_period_days, limit)
     except Exception as e:
         raise HTTPException(
@@ -97,16 +89,11 @@ async def get_top_winners(time_period_days: int = 30, limit: int = 5):
 
 @app.post("/api/players/analyze", response_model=PlayerAnalysisResponse)
 async def analyze_player_stats(stats: List[Dict[str, Any]]):
-    """
-    Analyze player statistics to generate insights.
-    
-    Args:
-        stats: List of player stat entries
-        
-    Returns:
-        PlayerAnalysisResponse containing normalized stats, top skills, and growth areas
-    """
     try:
+        global insight_service
+        if insight_service is None:
+            from .insight_service import PlayerInsightService
+            insight_service = PlayerInsightService()
         return insight_service.analyze_player_stats(stats)
     except Exception as e:
         raise HTTPException(
@@ -116,16 +103,11 @@ async def analyze_player_stats(stats: List[Dict[str, Any]]):
 
 @app.post("/api/matchmaking/create-teams", response_model=MatchmakingResponse)
 async def create_balanced_teams(request: MatchmakingRequest):
-    """
-    Create balanced teams from player statistics.
-    
-    Args:
-        request: MatchmakingRequest containing player stats and preferences
-        
-    Returns:
-        MatchmakingResponse with two balanced teams and balance metrics
-    """
     try:
+        global matchmaking_service
+        if matchmaking_service is None:
+            from .matchmaking_service import MatchmakingService
+            matchmaking_service = MatchmakingService()
         return matchmaking_service.create_balanced_teams(request)
     except Exception as e:
         raise HTTPException(
@@ -137,8 +119,11 @@ async def create_balanced_teams(request: MatchmakingRequest):
 async def get_drill_recommendations(
     request: DrillRecommendationRequest
 ) -> DrillRecommendationResponse:
-    """Get personalized drill recommendations."""
     try:
+        global drill_service
+        if drill_service is None:
+            from .drill_service import DrillService
+            drill_service = DrillService()
         return drill_service.get_recommendations(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -148,8 +133,11 @@ async def get_formatted_recommendations(
     request: DrillRecommendationRequest,
     format_type: str = 'text'
 ) -> str:
-    """Get formatted drill recommendations."""
     try:
+        global drill_service
+        if drill_service is None:
+            from .drill_service import DrillService
+            drill_service = DrillService()
         recommendations = drill_service.get_recommendations(request)
         return drill_service.format_recommendations(recommendations, format_type)
     except Exception as e:
@@ -159,8 +147,11 @@ async def get_formatted_recommendations(
 async def get_weekly_schedule(
     request: DrillScheduleRequest
 ) -> DrillScheduleResponse:
-    """Get a personalized weekly training schedule."""
     try:
+        global drill_service
+        if drill_service is None:
+            from .drill_service import DrillService
+            drill_service = DrillService()
         return drill_service.get_weekly_schedule(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -170,8 +161,11 @@ async def get_formatted_schedule(
     request: DrillScheduleRequest,
     format_type: str = 'text'
 ) -> str:
-    """Get a formatted weekly training schedule."""
     try:
+        global drill_service
+        if drill_service is None:
+            from .drill_service import DrillService
+            drill_service = DrillService()
         schedule = drill_service.get_weekly_schedule(request)
         return drill_service.format_schedule(schedule, format_type)
     except Exception as e:
@@ -182,8 +176,11 @@ async def tag_game_highlights(
     game_id: str,
     events: List[Dict]
 ) -> HighlightResponse:
-    """Tag and analyze game highlights."""
     try:
+        global highlight_engine
+        if highlight_engine is None:
+            from .highlight_generator import HighlightTaggingEngine
+            highlight_engine = HighlightTaggingEngine()
         return highlight_engine.tag_highlights(game_id, events)
     except Exception as e:
         raise HTTPException(
@@ -196,8 +193,11 @@ async def ask_coach_question(
     request: CoachQuestion,
     channel: str = Query(default="chat", regex="^(chat|email|sms|web)$")
 ) -> CoachResponse:
-    """Get coaching advice and recommendations."""
     try:
+        global coach_assistant
+        if coach_assistant is None:
+            from .coach_assistant import CoachAssistant
+            coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
         return coach_assistant.answer_question(request, channel)
     except Exception as e:
         raise HTTPException(
@@ -210,8 +210,11 @@ async def get_weekly_summary(
     player_id: str,
     channel: str = Query(default="chat", regex="^(chat|email|sms|web)$")
 ) -> Dict[str, Any]:
-    """Get a player's weekly progress summary."""
     try:
+        global coach_assistant
+        if coach_assistant is None:
+            from .coach_assistant import CoachAssistant
+            coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
         summary = coach_assistant.generate_weekly_summary(player_id, channel)
         return {
             "player_id": player_id,
@@ -229,8 +232,11 @@ async def get_weekly_summary(
 async def get_extended_schedule(
     request: ExtendedDrillScheduleRequest
 ) -> DrillScheduleResponse:
-    """Get an extended weekly training schedule with adaptations."""
     try:
+        global drill_service
+        if drill_service is None:
+            from .drill_service import DrillService
+            drill_service = DrillService()
         return drill_service.get_extended_schedule(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
