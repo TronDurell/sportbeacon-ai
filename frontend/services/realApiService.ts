@@ -24,8 +24,7 @@ import {
   User as FirebaseUser 
 } from 'firebase/auth';
 import { db } from '../lib/firebase';
-import { captureAPIError, captureDBError } from '../lib/errorMonitoring';
-import { withErrorMonitoring } from '../lib/errorMonitoring';
+import { captureAPIError, captureDBError, withAsyncErrorMonitoring } from '../lib/errorMonitoring';
 
 // Types
 export interface ApiResponse<T = any> {
@@ -84,14 +83,14 @@ class RealApiService {
       }
       return 'user';
     } catch (error) {
-      captureDBError(error, 'get_user_role', 'users', this.currentUser.uid);
+      captureDBError(error as Error, { context: 'get_user_role' });
       return 'user';
     }
   }
 
   // Generic CRUD operations
   async create<T>(collectionName: string, data: T): Promise<ApiResponse<T>> {
-    return withErrorMonitoring(async () => {
+    const wrappedFn = withAsyncErrorMonitoring(async () => {
       try {
         const docRef = await addDoc(collection(db, collectionName), {
           ...data,
@@ -106,14 +105,15 @@ class RealApiService {
           data: { id: docRef.id, ...doc.data() } as T,
         };
       } catch (error) {
-        captureDBError(error, 'create', collectionName);
+        captureDBError(error as Error, { context: 'create' });
         throw error;
       }
-    }, `create_${collectionName}`)();
+    });
+    return wrappedFn();
   }
 
   async getById<T>(collectionName: string, id: string): Promise<ApiResponse<T>> {
-    return withErrorMonitoring(async () => {
+    const wrappedFn = withAsyncErrorMonitoring(async () => {
       try {
         const docRef = doc(db, collectionName, id);
         const docSnap = await getDoc(docRef);
@@ -130,14 +130,15 @@ class RealApiService {
           data: { id: docSnap.id, ...docSnap.data() } as T,
         };
       } catch (error) {
-        captureDBError(error, 'get_by_id', collectionName, id);
+        captureDBError(error as Error, { context: 'get_by_id', collectionName, id });
         throw error;
       }
-    }, `get_${collectionName}_by_id`)();
+    });
+    return wrappedFn();
   }
 
   async update<T>(collectionName: string, id: string, data: Partial<T>): Promise<ApiResponse<T>> {
-    return withErrorMonitoring(async () => {
+    const wrappedFn = withAsyncErrorMonitoring(async () => {
       try {
         const docRef = doc(db, collectionName, id);
         await updateDoc(docRef, {
@@ -152,14 +153,15 @@ class RealApiService {
           data: { id: updatedDoc.id, ...updatedDoc.data() } as T,
         };
       } catch (error) {
-        captureDBError(error, 'update', collectionName, id);
+        captureDBError(error as Error, { context: 'update', collectionName, id });
         throw error;
       }
-    }, `update_${collectionName}`)();
+    });
+    return wrappedFn();
   }
 
   async delete(collectionName: string, id: string): Promise<ApiResponse<void>> {
-    return withErrorMonitoring(async () => {
+    const wrappedFn = withAsyncErrorMonitoring(async () => {
       try {
         await deleteDoc(doc(db, collectionName, id));
         return {
@@ -167,21 +169,22 @@ class RealApiService {
           message: 'Document deleted successfully',
         };
       } catch (error) {
-        captureDBError(error, 'delete', collectionName, id);
+        captureDBError(error as Error, { context: 'delete', collectionName, id });
         throw error;
       }
-    }, `delete_${collectionName}`)();
+    });
+    return wrappedFn();
   }
 
   async query<T>(
     collectionName: string, 
     params: QueryParams = {}
   ): Promise<ApiResponse<PaginatedResponse<T>>> {
-    return withErrorMonitoring(async () => {
+    const wrappedFn = withAsyncErrorMonitoring(async () => {
       try {
         const { page = 1, limit: limitCount = 20, sortBy, sortOrder = 'desc', filters = {} } = params;
         
-        let q = collection(db, collectionName);
+        let q: any = collection(db, collectionName);
         
         // Apply filters
         Object.entries(filters).forEach(([key, value]) => {
@@ -207,7 +210,7 @@ class RealApiService {
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data(),
+          ...(doc.data() as any),
         })) as T[];
 
         return {
@@ -219,10 +222,11 @@ class RealApiService {
           },
         };
       } catch (error) {
-        captureDBError(error, 'query', collectionName);
+        captureDBError(error as Error, { context: 'query', collectionName });
         throw error;
       }
-    }, `query_${collectionName}`)();
+    });
+    return wrappedFn();
   }
 
   // Real-time listeners
@@ -232,7 +236,7 @@ class RealApiService {
     filters: Record<string, any> = {}
   ): () => void {
     try {
-      let q = collection(db, collectionName);
+        let q: any = collection(db, collectionName);
       
       // Apply filters
       Object.entries(filters).forEach(([key, value]) => {
@@ -241,19 +245,19 @@ class RealApiService {
         }
       });
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({
+      const unsubscribe = onSnapshot(q, (snapshot: any) => {
+        const data = snapshot.docs.map((doc: any) => ({
           id: doc.id,
-          ...doc.data(),
+          ...(doc.data() as any),
         })) as T[];
         callback(data);
-      }, (error) => {
-        captureDBError(error, 'subscribe', collectionName);
+      }, (error: any) => {
+        captureDBError(error as Error, { context: 'subscribe', collectionName });
       });
 
       return unsubscribe;
     } catch (error) {
-      captureDBError(error, 'subscribe_setup', collectionName);
+      captureDBError(error as Error, { context: 'subscribe_setup', collectionName });
       return () => {};
     }
   }
@@ -273,20 +277,20 @@ class RealApiService {
         } else {
           callback(null);
         }
-      }, (error) => {
-        captureDBError(error, 'subscribe_doc', collectionName, documentId);
+      }, (error: any) => {
+        captureDBError(error as Error, { context: 'subscribe_doc', collectionName, documentId });
       });
 
       return unsubscribe;
     } catch (error) {
-      captureDBError(error, 'subscribe_doc_setup', collectionName, documentId);
+      captureDBError(error as Error, { context: 'subscribe_doc_setup', collectionName, documentId });
       return () => {};
     }
   }
 
   // Batch operations
   async batchCreate<T>(collectionName: string, items: T[]): Promise<ApiResponse<string[]>> {
-    return withErrorMonitoring(async () => {
+    const wrappedFn = withAsyncErrorMonitoring(async () => {
       try {
         const batch = writeBatch(db);
         const ids: string[] = [];
@@ -308,14 +312,15 @@ class RealApiService {
           data: ids,
         };
       } catch (error) {
-        captureDBError(error, 'batch_create', collectionName);
+        captureDBError(error as Error, { context: 'batch_create', collectionName });
         throw error;
       }
-    }, `batch_create_${collectionName}`)();
+    });
+    return wrappedFn();
   }
 
   async batchUpdate<T>(collectionName: string, updates: Array<{ id: string; data: Partial<T> }>): Promise<ApiResponse<void>> {
-    return withErrorMonitoring(async () => {
+    const wrappedFn = withAsyncErrorMonitoring(async () => {
       try {
         const batch = writeBatch(db);
 
@@ -334,14 +339,15 @@ class RealApiService {
           message: 'Batch update completed successfully',
         };
       } catch (error) {
-        captureDBError(error, 'batch_update', collectionName);
+        captureDBError(error as Error, { context: 'batch_update', collectionName });
         throw error;
       }
-    }, `batch_update_${collectionName}`)();
+    });
+    return wrappedFn();
   }
 
   async batchDelete(collectionName: string, ids: string[]): Promise<ApiResponse<void>> {
-    return withErrorMonitoring(async () => {
+    const wrappedFn = withAsyncErrorMonitoring(async () => {
       try {
         const batch = writeBatch(db);
 
@@ -356,10 +362,11 @@ class RealApiService {
           message: 'Batch delete completed successfully',
         };
       } catch (error) {
-        captureDBError(error, 'batch_delete', collectionName);
+        captureDBError(error as Error, { context: 'batch_delete', collectionName });
         throw error;
       }
-    }, `batch_delete_${collectionName}`)();
+    });
+    return wrappedFn();
   }
 }
 
@@ -432,10 +439,15 @@ class TownRecApiService extends RealApiService {
 
   // Sibling Team Placement
   async getSiblingGroups(): Promise<ApiResponse<any[]>> {
-    return this.query('siblingGroups', {
+    const result = await this.query('siblingGroups', {
       sortBy: 'createdAt',
       sortOrder: 'desc',
     });
+    return {
+      success: result.success,
+      data: result.data?.data || [],
+      message: result.message
+    };
   }
 
   async createSiblingGroup(siblings: string[], requestedBy: string): Promise<ApiResponse<any>> {
@@ -542,18 +554,28 @@ class TownRecApiService extends RealApiService {
   }
 
   async getTeamRosters(leagueId: string): Promise<ApiResponse<any[]>> {
-    return this.query('teamPlayers', {
+    const result = await this.query('teamPlayers', {
       filters: { leagueId },
       sortBy: 'teamName',
     });
+    return {
+      success: result.success,
+      data: result.data?.data || [],
+      message: result.message
+    };
   }
 
   async getGameSchedules(leagueId: string): Promise<ApiResponse<any[]>> {
-    return this.query('gameSchedules', {
+    const result = await this.query('gameSchedules', {
       filters: { leagueId },
       sortBy: 'gameDate',
       sortOrder: 'asc',
     });
+    return {
+      success: result.success,
+      data: result.data?.data || [],
+      message: result.message
+    };
   }
 
   // Payments & Refunds
@@ -605,4 +627,4 @@ class TownRecApiService extends RealApiService {
 export const realApiService = new TownRecApiService();
 
 // Export types for use in components
-export type { ApiResponse, PaginatedResponse, QueryParams }; 
+// Types are already exported above 

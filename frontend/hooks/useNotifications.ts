@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../firebase/init';
 
 export function useNotifications(userId: string) {
-  const [alerts, setAlerts] = useState([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
 
   useEffect(() => {
     const q = query(collection(db, 'notifications'), where('userId', '==', userId));

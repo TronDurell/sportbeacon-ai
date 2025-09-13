@@ -3,30 +3,36 @@
  * Creates a new team with basic information
  */
 export declare const createTeam: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
-    success: boolean;
-    message: string;
-    data: {
-        teamId: any;
-    };
-    error?: undefined;
+    success?: boolean;
+    message?: string;
+    error?: any;
+    data?: any;
 } | {
     success: boolean;
     message: string;
-    error: unknown;
-    data?: undefined;
+    data: any;
+    errors: {
+        field: string;
+        message: string;
+    }[];
 }>, unknown>;
 /**
  * Team Function: Update Team
  * Updates team information and settings
  */
 export declare const updateTeam: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
-    success: boolean;
-    message: string;
-    error?: undefined;
+    success?: boolean;
+    message?: string;
+    error?: any;
+    data?: any;
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    data: any;
+    errors: {
+        field: string;
+        message: string;
+    }[];
 }>, unknown>;
 /**
  * Team Function: Get Team Roster
@@ -44,7 +50,7 @@ export declare const getTeamRoster: import("firebase-functions/v2/https").Callab
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -58,7 +64,7 @@ export declare const addPlayerToTeam: import("firebase-functions/v2/https").Call
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
 }>, unknown>;
 /**
  * Team Function: Remove Player from Team
@@ -71,7 +77,7 @@ export declare const removePlayerFromTeam: import("firebase-functions/v2/https")
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
 }>, unknown>;
 /**
  * Team Function: Get Team Statistics
@@ -102,7 +108,7 @@ export declare const getTeamStatistics: import("firebase-functions/v2/https").Ca
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -121,7 +127,7 @@ export declare const getTeamSchedule: import("firebase-functions/v2/https").Call
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -135,6 +141,6 @@ export declare const updateTeamPerformance: import("firebase-functions/v2/https"
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
 }>, unknown>;
 //# sourceMappingURL=index.d.ts.map

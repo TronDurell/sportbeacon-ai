@@ -1,85 +1,85 @@
-import React from 'react';
-import { DollarSign, CheckCircle, XCircle } from 'lucide-react';
+import React from "react";
+import { DollarSign, CheckCircle, XCircle } from "lucide-react";
 
 interface Payment {
   id: string;
   description: string;
   amount: number;
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  status: "pending" | "completed" | "failed" | "refunded";
   date: Date;
-  type: 'registration' | 'equipment' | 'tournament' | 'subscription';
+  type: "registration" | "equipment" | "tournament" | "subscription";
 }
 
 const Payments: React.FC = () => {
   const payments: Payment[] = [
     {
-      id: '1',
-      description: 'Season Registration Fee',
+      id: "1",
+      description: "Season Registration Fee",
       amount: 150.00,
-      status: 'completed',
-      date: new Date('2024-01-15'),
-      type: 'registration'
+      status: "completed",
+      date: new Date("2024-01-15"),
+      type: "registration"
     },
     {
-      id: '2',
-      description: 'Team Jersey',
+      id: "2",
+      description: "Team Jersey",
       amount: 45.00,
-      status: 'pending',
-      date: new Date('2024-01-20'),
-      type: 'equipment'
+      status: "pending",
+      date: new Date("2024-01-20"),
+      type: "equipment"
     },
     {
-      id: '3',
-      description: 'Tournament Entry',
+      id: "3",
+      description: "Tournament Entry",
       amount: 75.00,
-      status: 'completed',
-      date: new Date('2024-01-10'),
-      type: 'tournament'
+      status: "completed",
+      date: new Date("2024-01-10"),
+      type: "tournament"
     },
     {
-      id: '4',
-      description: 'Premium Subscription',
+      id: "4",
+      description: "Premium Subscription",
       amount: 29.99,
-      status: 'failed',
-      date: new Date('2024-01-18'),
-      type: 'subscription'
+      status: "failed",
+      date: new Date("2024-01-18"),
+      type: "subscription"
     }
   ];
 
-  const getStatusColor = (status: Payment['status']) => {
+  const getStatusColor = (status: Payment["status"]) => {
     switch (status) {
-      case 'completed': return 'text-green-600';
-      case 'pending': return 'text-yellow-600';
-      case 'failed': return 'text-red-600';
-      case 'refunded': return 'text-gray-600';
-      default: return 'text-gray-600';
+      case "completed": return "text-green-600";
+      case "pending": return "text-yellow-600";
+      case "failed": return "text-red-600";
+      case "refunded": return "text-gray-600";
+      default: return "text-gray-600";
     }
   };
 
-  const getStatusIcon = (status: Payment['status']) => {
+  const getStatusIcon = (status: Payment["status"]) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case 'failed': return <XCircle className="w-5 h-5 text-red-500" />;
+      case "completed": return <CheckCircle className="w-5 h-5 text-green-500" />;
+      case "failed": return <XCircle className="w-5 h-5 text-red-500" />;
       default: return <DollarSign className="w-5 h-5 text-yellow-500" />;
     }
   };
 
-  const getTypeColor = (type: Payment['type']) => {
+  const getTypeColor = (type: Payment["type"]) => {
     switch (type) {
-      case 'registration': return 'bg-blue-100 text-blue-800';
-      case 'equipment': return 'bg-green-100 text-green-800';
-      case 'tournament': return 'bg-purple-100 text-purple-800';
-      case 'subscription': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "registration": return "bg-blue-100 text-blue-800";
+      case "equipment": return "bg-green-100 text-green-800";
+      case "tournament": return "bg-purple-100 text-purple-800";
+      case "subscription": return "bg-orange-100 text-orange-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
   const totalPaid = payments
-    .filter(p => p.status === 'completed')
+    .filter(p => p.status === "completed")
     .reduce((sum, p) => sum + p.amount, 0);
 
   const pendingAmount = payments
-    .filter(p => p.status === 'pending')
+    .filter(p => p.status === "pending")
     .reduce((sum, p) => sum + p.amount, 0);
 
   return (

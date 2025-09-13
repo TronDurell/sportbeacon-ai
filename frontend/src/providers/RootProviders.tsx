@@ -1,7 +1,7 @@
-import React from 'react';
-import { AdminAuthProvider } from '../contexts/AdminAuthContext';
-import { AgentOrchestrationProvider } from '../contexts/AgentOrchestrationContext';
-import { ToastProvider } from '../components/ui/toast';
+import React from "react";
+import { AdminAuthProvider } from "../contexts/AdminAuthContext";
+import { AgentOrchestrationProvider } from "../contexts/AgentOrchestrationContext";
+import { ToastProvider } from "../components/ui/toast";
 
 interface ProvidersProps {
   children: React.ReactNode;

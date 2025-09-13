@@ -1,0 +1,23 @@
+{
+  "name": "sportbeacon-backend",
+  "version": "1.0.0",
+  "description": "SportBeacon Backend Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "setup-media": "node scripts/setup-media-infra.js"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1450.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mime-types": "^2.1.35",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.7.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+} 

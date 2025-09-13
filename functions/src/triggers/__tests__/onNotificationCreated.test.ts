@@ -201,7 +201,7 @@ describe("onNotificationCreated", () => {
     // Act
     const promises = notifications.map((notification) => {
       const event = createMockDocumentCreatedEvent("notifications/{notificationId}", notification.id,
-notification.data);
+        notification.data);
 
       return onNotificationCreated(event as any);
     });

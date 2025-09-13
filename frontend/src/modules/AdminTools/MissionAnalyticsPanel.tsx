@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { useAuth } from '../../contexts/AdminAuthContext';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { useAuth } from "../../contexts/AdminAuthContext";
 import { 
   TrendingUp, 
   Target, 
   Activity,
   Download,
   Filter
-} from 'lucide-react';
+} from "lucide-react";
 
 interface MissionData {
   intentTriggers: IntentTriggerData[];
@@ -60,7 +60,7 @@ interface TimeSeriesData {
 }
 
 interface FilterOptions {
-  dateRange: '7d' | '30d' | '90d' | '1y';
+  dateRange: "7d" | "30d" | "90d" | "1y";
   role: string;
   intent: string;
 }
@@ -70,9 +70,9 @@ const MissionAnalyticsPanel: React.FC = () => {
   
   const [missionData, setMissionData] = useState<MissionData | null>(null);
   const [filters, setFilters] = useState<FilterOptions>({
-    dateRange: '30d',
-    role: 'all',
-    intent: 'all'
+    dateRange: "30d",
+    role: "all",
+    intent: "all"
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -81,33 +81,33 @@ const MissionAnalyticsPanel: React.FC = () => {
     const generateMockData = () => {
       const mockData: MissionData = {
         intentTriggers: [
-          { intent: 'train', count: 245, percentage: 35, role: 'player', timestamp: Date.now() - 86400000 },
-          { intent: 'learn', count: 180, percentage: 26, role: 'player', timestamp: Date.now() - 172800000 },
-          { intent: 'create', count: 120, percentage: 17, role: 'coach', timestamp: Date.now() - 259200000 },
-          { intent: 'explore', count: 95, percentage: 14, role: 'parent', timestamp: Date.now() - 345600000 },
-          { intent: 'connect', count: 55, percentage: 8, role: 'admin', timestamp: Date.now() - 432000000 }
+          { intent: "train", count: 245, percentage: 35, role: "player", timestamp: Date.now() - 86400000 },
+          { intent: "learn", count: 180, percentage: 26, role: "player", timestamp: Date.now() - 172800000 },
+          { intent: "create", count: 120, percentage: 17, role: "coach", timestamp: Date.now() - 259200000 },
+          { intent: "explore", count: 95, percentage: 14, role: "parent", timestamp: Date.now() - 345600000 },
+          { intent: "connect", count: 55, percentage: 8, role: "admin", timestamp: Date.now() - 432000000 }
         ],
         scrollInterventions: [
-          { type: 'coach_nudge', count: 320, successRate: 68, averageResponseTime: 45, role: 'player' },
-          { type: 'scroll_break', count: 180, successRate: 52, averageResponseTime: 120, role: 'coach' },
-          { type: 'intent_reminder', count: 95, successRate: 75, averageResponseTime: 30, role: 'parent' },
-          { type: 'achievement_celebration', count: 45, successRate: 88, averageResponseTime: 15, role: 'admin' }
+          { type: "coach_nudge", count: 320, successRate: 68, averageResponseTime: 45, role: "player" },
+          { type: "scroll_break", count: 180, successRate: 52, averageResponseTime: 120, role: "coach" },
+          { type: "intent_reminder", count: 95, successRate: 75, averageResponseTime: 30, role: "parent" },
+          { type: "achievement_celebration", count: 45, successRate: 88, averageResponseTime: 15, role: "admin" }
         ],
         aiActions: [
-          { action: 'drill_started', count: 156, completionRate: 82, averageTime: 25, role: 'player' },
-          { action: 'progress_logged', count: 98, completionRate: 91, averageTime: 12, role: 'player' },
-          { action: 'goal_set', count: 67, completionRate: 78, averageTime: 18, role: 'coach' },
-          { action: 'community_engaged', count: 43, completionRate: 65, averageTime: 35, role: 'parent' },
-          { action: 'coach_contacted', count: 28, completionRate: 72, averageTime: 22, role: 'admin' }
+          { action: "drill_started", count: 156, completionRate: 82, averageTime: 25, role: "player" },
+          { action: "progress_logged", count: 98, completionRate: 91, averageTime: 12, role: "player" },
+          { action: "goal_set", count: 67, completionRate: 78, averageTime: 18, role: "coach" },
+          { action: "community_engaged", count: 43, completionRate: 65, averageTime: 35, role: "parent" },
+          { action: "coach_contacted", count: 28, completionRate: 72, averageTime: 22, role: "admin" }
         ],
         roleBreakdown: [
-          { role: 'player', totalUsers: 1250, activeUsers: 890, engagementRate: 71, averageSessionTime: 18 },
-          { role: 'coach', totalUsers: 180, activeUsers: 145, engagementRate: 81, averageSessionTime: 25 },
-          { role: 'parent', totalUsers: 320, activeUsers: 210, engagementRate: 66, averageSessionTime: 12 },
-          { role: 'admin', totalUsers: 45, activeUsers: 42, engagementRate: 93, averageSessionTime: 30 }
+          { role: "player", totalUsers: 1250, activeUsers: 890, engagementRate: 71, averageSessionTime: 18 },
+          { role: "coach", totalUsers: 180, activeUsers: 145, engagementRate: 81, averageSessionTime: 25 },
+          { role: "parent", totalUsers: 320, activeUsers: 210, engagementRate: 66, averageSessionTime: 12 },
+          { role: "admin", totalUsers: 45, activeUsers: 42, engagementRate: 93, averageSessionTime: 30 }
         ],
         timeSeriesData: Array.from({ length: 30 }, (_, i) => ({
-          date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split('T')[0],
+          date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split("T")[0],
           interventions: Math.floor(Math.random() * 50) + 20,
           actions: Math.floor(Math.random() * 30) + 10,
           engagement: Math.floor(Math.random() * 30) + 60
@@ -126,27 +126,27 @@ const MissionAnalyticsPanel: React.FC = () => {
     if (!missionData) return;
     
     const csvContent = [
-      'Intent Triggers,Count,Percentage,Role',
+      "Intent Triggers,Count,Percentage,Role",
       ...missionData.intentTriggers.map(item => 
         `${item.intent},${item.count},${item.percentage},${item.role}`
       ),
-      '',
-      'Scroll Interventions,Count,Success Rate,Avg Response Time,Role',
+      "",
+      "Scroll Interventions,Count,Success Rate,Avg Response Time,Role",
       ...missionData.scrollInterventions.map(item => 
         `${item.type},${item.count},${item.successRate},${item.averageResponseTime},${item.role}`
       )
-    ].join('\n');
+    ].join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `mission-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `mission-analytics-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== "admin") {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-gray-500">Access restricted to administrators</p>
@@ -346,7 +346,7 @@ const MissionAnalyticsPanel: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full bg-green-500"></div>
                       <div>
-                        <p className="font-medium text-gray-900">{item.type.replace('_', ' ')}</p>
+                        <p className="font-medium text-gray-900">{item.type.replace("_", " ")}</p>
                         <p className="text-sm text-gray-500">{item.role}</p>
                       </div>
                     </div>
@@ -379,7 +379,7 @@ const MissionAnalyticsPanel: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                       <div>
-                        <p className="font-medium text-gray-900">{item.action.replace('_', ' ')}</p>
+                        <p className="font-medium text-gray-900">{item.action.replace("_", " ")}</p>
                         <p className="text-sm text-gray-500">{item.role}</p>
                       </div>
                     </div>

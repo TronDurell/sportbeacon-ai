@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAgentOrchestration } from '../contexts/AgentOrchestrationContext';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAgentOrchestration } from "../contexts/AgentOrchestrationContext";
 import { 
   Target, 
   BookOpen, 
   Users, 
   Sparkles,
   CheckCircle
-} from 'lucide-react';
+} from "lucide-react";
 
 interface Intent {
   id: string;
@@ -19,32 +19,32 @@ interface Intent {
 
 const intents: Intent[] = [
   {
-    id: 'explore',
-    label: 'Explore',
-    description: 'Discover new sports, skills, and opportunities',
+    id: "explore",
+    label: "Explore",
+    description: "Discover new sports, skills, and opportunities",
     icon: <Sparkles className="w-6 h-6" />,
-    color: 'from-purple-500 to-pink-500'
+    color: "from-purple-500 to-pink-500"
   },
   {
-    id: 'train',
-    label: 'Train',
-    description: 'Improve my skills and physical performance',
+    id: "train",
+    label: "Train",
+    description: "Improve my skills and physical performance",
     icon: <Target className="w-6 h-6" />,
-    color: 'from-blue-500 to-cyan-500'
+    color: "from-blue-500 to-cyan-500"
   },
   {
-    id: 'learn',
-    label: 'Learn',
-    description: 'Study techniques, strategies, and sports knowledge',
+    id: "learn",
+    label: "Learn",
+    description: "Study techniques, strategies, and sports knowledge",
     icon: <BookOpen className="w-6 h-6" />,
-    color: 'from-green-500 to-emerald-500'
+    color: "from-green-500 to-emerald-500"
   },
   {
-    id: 'create',
-    label: 'Create',
-    description: 'Build teams, organize events, and lead communities',
+    id: "create",
+    label: "Create",
+    description: "Build teams, organize events, and lead communities",
     icon: <Users className="w-6 h-6" />,
-    color: 'from-orange-500 to-red-500'
+    color: "from-orange-500 to-red-500"
   }
 ];
 
@@ -69,7 +69,7 @@ const IntentTrigger: React.FC<IntentTriggerProps> = ({ isOpen, onComplete }) => 
     
     // Send intent to AI for contextual setup
     sendRequest({
-      type: 'intent_declaration',
+      type: "intent_declaration",
       context: selectedIntent,
       data: { intent: selectedIntent }
     });
@@ -127,13 +127,13 @@ const IntentTrigger: React.FC<IntentTriggerProps> = ({ isOpen, onComplete }) => 
                   className={`p-6 rounded-xl border-2 transition-all duration-200 transform hover:scale-105 ${
                     selectedIntent === intent.id
                       ? `border-transparent bg-gradient-to-r ${intent.color} text-white shadow-lg`
-                      : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-md'
+                      : "border-gray-200 hover:border-gray-300 bg-white hover:shadow-md"
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-lg ${
                       selectedIntent === intent.id 
-                        ? 'bg-white/20' 
+                        ? "bg-white/20" 
                         : `bg-gradient-to-r ${intent.color} text-white`
                     }`}>
                       {intent.icon}
@@ -141,7 +141,7 @@ const IntentTrigger: React.FC<IntentTriggerProps> = ({ isOpen, onComplete }) => 
                     <div className="text-left">
                       <h3 className="font-semibold text-lg">{intent.label}</h3>
                       <p className={`text-sm ${
-                        selectedIntent === intent.id ? 'text-white/90' : 'text-gray-600'
+                        selectedIntent === intent.id ? "text-white/90" : "text-gray-600"
                       }`}>
                         {intent.description}
                       </p>
@@ -170,8 +170,8 @@ const IntentTrigger: React.FC<IntentTriggerProps> = ({ isOpen, onComplete }) => 
                 disabled={!selectedIntent || isSubmitting}
                 className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 ${
                   selectedIntent && !isSubmitting
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}
               >
                 {isSubmitting ? (
@@ -180,7 +180,7 @@ const IntentTrigger: React.FC<IntentTriggerProps> = ({ isOpen, onComplete }) => 
                     Setting up your experience...
                   </div>
                 ) : (
-                  'Start My Journey'
+                  "Start My Journey"
                 )}
               </motion.button>
             </div>

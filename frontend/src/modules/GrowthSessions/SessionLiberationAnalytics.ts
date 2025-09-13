@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import { useSmartLayer } from '../../contexts/SmartLayerContext';
+import { useCallback } from "react";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import { useSmartLayer } from "../../contexts/SmartLayerContext";
 
 interface LiberationSession {
   id: string;
@@ -13,7 +13,7 @@ interface LiberationSession {
   interventions: Intervention[];
   actionsTaken: ActionTaken[];
   intent: string;
-  sessionType: 'Training' | 'Learning' | 'Scouting' | 'Planning' | 'Social' | 'Review';
+  sessionType: "Training" | "Learning" | "Scouting" | "Planning" | "Social" | "Review";
   metrics: SessionMetrics;
   insights: SessionInsight[];
 }
@@ -21,7 +21,7 @@ interface LiberationSession {
 interface ScrollEvent {
   timestamp: number;
   scrollY: number;
-  scrollDirection: 'up' | 'down';
+  scrollDirection: "up" | "down";
   scrollSpeed: number;
   timeSinceLastScroll: number;
   elementId?: string;
@@ -32,10 +32,10 @@ interface ScrollEvent {
 
 interface Intervention {
   id: string;
-  type: 'coach_nudge' | 'scroll_break' | 'intent_reminder' | 'achievement_celebration' | 'goal_setting' | 'community_engagement';
+  type: "coach_nudge" | "scroll_break" | "intent_reminder" | "achievement_celebration" | "goal_setting" | "community_engagement";
   timestamp: number;
   trigger: string;
-  response: 'dismissed' | 'action_taken' | 'ignored';
+  response: "dismissed" | "action_taken" | "ignored";
   timeToResponse: number;
   effectiveness: number; // 0-1 scale
   userFeedback?: string;
@@ -44,7 +44,7 @@ interface Intervention {
 
 interface ActionTaken {
   id: string;
-  type: 'drill_started' | 'progress_logged' | 'goal_set' | 'community_engaged' | 'coach_contacted' | 'workout_completed' | 'achievement_unlocked';
+  type: "drill_started" | "progress_logged" | "goal_set" | "community_engaged" | "coach_contacted" | "workout_completed" | "achievement_unlocked";
   timestamp: number;
   description: string;
   aiPrompt: string;
@@ -83,15 +83,15 @@ interface LiberationMetrics {
 }
 
 interface SessionInsight {
-  type: 'positive' | 'warning' | 'opportunity' | 'achievement';
+  type: "positive" | "warning" | "opportunity" | "achievement";
   title: string;
   description: string;
   metric: string;
   value: number;
-  trend: 'up' | 'down' | 'stable';
+  trend: "up" | "down" | "stable";
   actionable: boolean;
   actionPrompt?: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
 }
 
 interface RealTimeAnalytics {
@@ -117,7 +117,7 @@ export class SessionLiberationAnalytics {
     trendingInsights: [],
     systemHealth: { cpu: 0, memory: 0, responseTime: 0 }
   };
-  private eventListeners: Map<string, Function[]> = new Map();
+  private eventListeners: Map<string, ((...args: any[]) => void)[]> = new Map();
 
   static getInstance(): SessionLiberationAnalytics {
     if (!SessionLiberationAnalytics.instance) {
@@ -162,7 +162,7 @@ export class SessionLiberationAnalytics {
     localStorage.setItem(`sb_liberation_session_${sessionId}`, JSON.stringify(session));
     
     // Emit session start event
-    this.emitEvent('session_started', { sessionId, userId, role, intent, sessionType });
+    this.emitEvent("session_started", { sessionId, userId, role, intent, sessionType });
     
     // Start real-time monitoring
     this.startRealTimeMonitoring(sessionId);
@@ -172,7 +172,7 @@ export class SessionLiberationAnalytics {
 
   logScrollEvent(
     scrollY: number, 
-    scrollDirection: 'up' | 'down', 
+    scrollDirection: "up" | "down", 
     scrollSpeed: number,
     elementId?: string,
     pageSection?: string
@@ -203,7 +203,7 @@ export class SessionLiberationAnalytics {
     this.updateSession(this.currentSession);
     
     // Emit scroll event
-    this.emitEvent('scroll_event', { 
+    this.emitEvent("scroll_event", { 
       sessionId: this.currentSession.id, 
       scrollEvent,
       metrics: this.currentSession.metrics 
@@ -219,7 +219,7 @@ export class SessionLiberationAnalytics {
     aiPrompt?: string,
     effectiveness?: number
   ): string {
-    if (!this.currentSession) return '';
+    if (!this.currentSession) return "";
 
     const interventionId = `intervention_${Date.now()}`;
     const intervention: Intervention = {
@@ -227,7 +227,7 @@ export class SessionLiberationAnalytics {
       type: type as any,
       timestamp: Date.now(),
       trigger,
-      response: 'ignored',
+      response: "ignored",
       timeToResponse: 0,
       effectiveness: effectiveness || 0.5,
       aiPrompt
@@ -239,7 +239,7 @@ export class SessionLiberationAnalytics {
     this.updateSession(this.currentSession);
     
     // Emit intervention event
-    this.emitEvent('intervention_served', { 
+    this.emitEvent("intervention_served", { 
       sessionId: this.currentSession.id, 
       intervention,
       metrics: this.currentSession.metrics 
@@ -250,7 +250,7 @@ export class SessionLiberationAnalytics {
 
   logInterventionResponse(
     interventionId: string, 
-    response: 'dismissed' | 'action_taken',
+    response: "dismissed" | "action_taken",
     userFeedback?: string
   ): void {
     if (!this.currentSession) return;
@@ -262,9 +262,9 @@ export class SessionLiberationAnalytics {
       intervention.userFeedback = userFeedback;
       
       // Calculate effectiveness based on response
-      if (response === 'action_taken') {
+      if (response === "action_taken") {
         intervention.effectiveness = Math.min(1, intervention.effectiveness + 0.2);
-      } else if (response === 'dismissed') {
+      } else if (response === "dismissed") {
         intervention.effectiveness = Math.max(0, intervention.effectiveness - 0.1);
       }
       
@@ -272,7 +272,7 @@ export class SessionLiberationAnalytics {
       this.updateSession(this.currentSession);
       
       // Emit response event
-      this.emitEvent('intervention_response', { 
+      this.emitEvent("intervention_response", { 
         sessionId: this.currentSession.id, 
         intervention,
         metrics: this.currentSession.metrics 
@@ -287,7 +287,7 @@ export class SessionLiberationAnalytics {
     relatedContent?: string[],
     location?: string
   ): string {
-    if (!this.currentSession) return '';
+    if (!this.currentSession) return "";
 
     const actionId = `action_${Date.now()}`;
     const action: ActionTaken = {
@@ -310,7 +310,7 @@ export class SessionLiberationAnalytics {
     this.updateSession(this.currentSession);
     
     // Emit action event
-    this.emitEvent('action_logged', { 
+    this.emitEvent("action_logged", { 
       sessionId: this.currentSession.id, 
       action,
       metrics: this.currentSession.metrics 
@@ -332,7 +332,7 @@ export class SessionLiberationAnalytics {
       this.updateSession(this.currentSession);
       
       // Emit completion event
-      this.emitEvent('action_completed', { 
+      this.emitEvent("action_completed", { 
         sessionId: this.currentSession.id, 
         action,
         metrics: this.currentSession.metrics 
@@ -360,13 +360,13 @@ export class SessionLiberationAnalytics {
     
     // Update real-time data
     this.realTimeData.activeSessions--;
-    this.realTimeData.currentInterventions -= this.currentSession.interventions.filter(i => i.response === 'ignored').length;
+    this.realTimeData.currentInterventions -= this.currentSession.interventions.filter(i => i.response === "ignored").length;
     
     const completedSession = this.currentSession;
     this.currentSession = null;
     
     // Emit session end event
-    this.emitEvent('session_ended', { 
+    this.emitEvent("session_ended", { 
       session: completedSession,
       metrics: completedSession.metrics 
     });
@@ -410,7 +410,7 @@ export class SessionLiberationAnalytics {
     // Calculate total time between interventions and user actions as recovery time
     let recoveryTime = 0;
     session.interventions.forEach((intervention) => {
-      if (intervention.response === 'action_taken') {
+      if (intervention.response === "action_taken") {
         recoveryTime += intervention.timeToResponse;
       }
     });
@@ -512,12 +512,12 @@ export class SessionLiberationAnalytics {
     
     // Trigger intervention for rapid scrolling
     if (rapidScrolls > 5) {
-      this.logIntervention('scroll_break', 'rapid_scrolling', 'Take a moment to reflect on what you\'ve learned');
+      this.logIntervention("scroll_break", "rapid_scrolling", "Take a moment to reflect on what you've learned");
     }
     
     // Trigger intervention for long pauses (might indicate disengagement)
     if (longPauses > 3) {
-      this.logIntervention('intent_reminder', 'long_pause', 'What would you like to accomplish today?');
+      this.logIntervention("intent_reminder", "long_pause", "What would you like to accomplish today?");
     }
   }
 
@@ -525,17 +525,17 @@ export class SessionLiberationAnalytics {
     if (!this.currentSession) return;
     
     const insight: SessionInsight = {
-      type: action.success ? 'positive' : 'opportunity',
-      title: action.success ? 'Great Progress!' : 'Keep Going!',
+      type: action.success ? "positive" : "opportunity",
+      title: action.success ? "Great Progress!" : "Keep Going!",
       description: action.success 
         ? `You successfully completed: ${action.description}`
         : `You're working on: ${action.description}`,
-      metric: 'action_completion',
+      metric: "action_completion",
       value: action.impact,
-      trend: action.success ? 'up' : 'stable',
+      trend: action.success ? "up" : "stable",
       actionable: true,
       actionPrompt: action.aiPrompt,
-      priority: action.impact > 0.7 ? 'high' : 'medium'
+      priority: action.impact > 0.7 ? "high" : "medium"
     };
     
     this.currentSession.insights.push(insight);
@@ -549,29 +549,29 @@ export class SessionLiberationAnalytics {
     // Generate insights based on current metrics
     if (metrics.scrollEfficiency < 0.3) {
       const insight: SessionInsight = {
-        type: 'warning',
-        title: 'Scroll Efficiency Low',
-        description: 'Consider focusing on more meaningful content',
-        metric: 'scroll_efficiency',
+        type: "warning",
+        title: "Scroll Efficiency Low",
+        description: "Consider focusing on more meaningful content",
+        metric: "scroll_efficiency",
         value: metrics.scrollEfficiency,
-        trend: 'down',
+        trend: "down",
         actionable: true,
-        actionPrompt: 'Help me find more relevant content',
-        priority: 'medium'
+        actionPrompt: "Help me find more relevant content",
+        priority: "medium"
       };
       session.insights.push(insight);
     }
     
     if (metrics.conversionRate > 0.5) {
       const insight: SessionInsight = {
-        type: 'positive',
-        title: 'High Action Rate',
-        description: 'You\'re taking great action on what you learn!',
-        metric: 'conversion_rate',
+        type: "positive",
+        title: "High Action Rate",
+        description: "You're taking great action on what you learn!",
+        metric: "conversion_rate",
         value: metrics.conversionRate,
-        trend: 'up',
+        trend: "up",
         actionable: false,
-        priority: 'low'
+        priority: "low"
       };
       session.insights.push(insight);
     }
@@ -586,7 +586,7 @@ export class SessionLiberationAnalytics {
         responseTime: Math.random() * 1000 // Mock response time
       };
       
-      this.emitEvent('system_health_update', this.realTimeData.systemHealth);
+      this.emitEvent("system_health_update", this.realTimeData.systemHealth);
     }, 5000);
   }
 
@@ -600,14 +600,14 @@ export class SessionLiberationAnalytics {
     listeners.forEach(listener => listener(data));
   }
 
-  addEventListener(eventType: string, listener: Function): void {
+  addEventListener(eventType: string, listener: (...args: any[]) => void): void {
     if (!this.eventListeners.has(eventType)) {
       this.eventListeners.set(eventType, []);
     }
     this.eventListeners.get(eventType)!.push(listener);
   }
 
-  removeEventListener(eventType: string, listener: Function): void {
+  removeEventListener(eventType: string, listener: (...args: any[]) => void): void {
     const listeners = this.eventListeners.get(eventType) || [];
     const index = listeners.indexOf(listener);
     if (index > -1) {
@@ -707,26 +707,26 @@ export class SessionLiberationAnalytics {
     // Engagement insight
     if (metrics.engagementRate > 0.7) {
       insights.push({
-        type: 'positive',
-        title: 'High Engagement',
-        description: 'You responded well to coach nudges and took action!',
-        metric: 'Engagement Rate',
+        type: "positive",
+        title: "High Engagement",
+        description: "You responded well to coach nudges and took action!",
+        metric: "Engagement Rate",
         value: Math.round(metrics.engagementRate * 100),
-        trend: 'up',
+        trend: "up",
         actionable: false,
-        priority: 'low'
+        priority: "low"
       });
     } else if (metrics.engagementRate < 0.3) {
       insights.push({
-        type: 'warning',
-        title: 'Low Engagement',
-        description: 'Consider responding to coach nudges to maximize your growth.',
-        metric: 'Engagement Rate',
+        type: "warning",
+        title: "Low Engagement",
+        description: "Consider responding to coach nudges to maximize your growth.",
+        metric: "Engagement Rate",
         value: Math.round(metrics.engagementRate * 100),
-        trend: 'down',
+        trend: "down",
         actionable: true,
-        actionPrompt: 'Help me find more relevant content',
-        priority: 'medium'
+        actionPrompt: "Help me find more relevant content",
+        priority: "medium"
       });
     }
 
@@ -734,14 +734,14 @@ export class SessionLiberationAnalytics {
     const recoveryPercentage = (metrics.totalRecoveryTime / Math.max(metrics.totalScrollTime, 1)) * 100;
     if (recoveryPercentage > 50) {
       insights.push({
-        type: 'positive',
-        title: 'Great Recovery',
-        description: 'You converted scroll time into productive actions effectively.',
-        metric: 'Recovery Rate',
+        type: "positive",
+        title: "Great Recovery",
+        description: "You converted scroll time into productive actions effectively.",
+        metric: "Recovery Rate",
         value: Math.round(recoveryPercentage),
-        trend: 'up',
+        trend: "up",
         actionable: false,
-        priority: 'low'
+        priority: "low"
       });
     }
 
@@ -749,15 +749,15 @@ export class SessionLiberationAnalytics {
     const sessionMinutes = Math.round(metrics.averageSessionDuration / 60000);
     if (sessionMinutes > 30) {
       insights.push({
-        type: 'opportunity',
-        title: 'Long Session',
-        description: 'Consider breaking this into shorter, focused sessions.',
-        metric: 'Session Duration',
+        type: "opportunity",
+        title: "Long Session",
+        description: "Consider breaking this into shorter, focused sessions.",
+        metric: "Session Duration",
         value: sessionMinutes,
-        trend: 'stable',
+        trend: "stable",
         actionable: true,
-        actionPrompt: 'Help me find more relevant content',
-        priority: 'medium'
+        actionPrompt: "Help me find more relevant content",
+        priority: "medium"
       });
     }
 
@@ -766,7 +766,7 @@ export class SessionLiberationAnalytics {
 
   exportSessionData(sessionId: string): string {
     const session = this.sessions.get(sessionId);
-    if (!session) return '';
+    if (!session) return "";
 
     return JSON.stringify({
       session,
@@ -781,7 +781,7 @@ export class SessionLiberationAnalytics {
     
     // Clear localStorage
     Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('sb_liberation_session_')) {
+      if (key.startsWith("sb_liberation_session_")) {
         localStorage.removeItem(key);
       }
     });
@@ -796,10 +796,10 @@ export const useSessionLiberationAnalytics = () => {
 
   const startAnalyticsSession = useCallback((sessionType: string) => {
     if (!user) return null;
-    return analytics.startSession(user.id, user.role, userIntent || 'explore', sessionType);
+    return analytics.startSession(user.id, user.role, userIntent || "explore", sessionType);
   }, [user, userIntent, analytics]);
 
-  const logScroll = useCallback((scrollY: number, direction: 'up' | 'down', speed: number) => {
+  const logScroll = useCallback((scrollY: number, direction: "up" | "down", speed: number) => {
     analytics.logScrollEvent(scrollY, direction, speed);
   }, [analytics]);
 
@@ -807,7 +807,7 @@ export const useSessionLiberationAnalytics = () => {
     return analytics.logIntervention(type, trigger);
   }, [analytics]);
 
-  const logInterventionResponse = useCallback((interventionId: string, response: 'dismissed' | 'action_taken') => {
+  const logInterventionResponse = useCallback((interventionId: string, response: "dismissed" | "action_taken") => {
     analytics.logInterventionResponse(interventionId, response);
   }, [analytics]);
 

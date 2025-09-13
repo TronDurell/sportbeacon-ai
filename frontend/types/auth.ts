@@ -71,9 +71,9 @@ export type Permission =
   | 'financial.settings';
 
 // Role Permission Mapping
-export interface RolePermissions {
+export type RolePermissions = {
   [key in UserRole]: Permission[];
-}
+};
 
 // User Profile Types
 export interface UserProfile {
@@ -320,25 +320,4 @@ export interface AuthConfig {
   };
 }
 
-// Export all types
-export type {
-  UserRole,
-  Permission,
-  RolePermissions,
-  UserProfile,
-  UserPreferences,
-  UserMetadata,
-  AuthState,
-  AuthError,
-  RoleAssignment,
-  PermissionCheck,
-  AuthContextType,
-  ProtectedRouteProps,
-  RoleBasedComponentProps,
-  AuthGuardConfig,
-  SessionInfo,
-  LoginHistory,
-  SecurityEvent,
-  RoleHierarchy,
-  AuthConfig
-}; 
+// All types are already exported inline above 

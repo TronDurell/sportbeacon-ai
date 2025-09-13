@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import SmartTile from '../../SmartTile';
-import { useAgentOrchestration } from '../../../contexts/AgentOrchestrationContext';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import SmartTile from "../../SmartTile";
+import { useAgentOrchestration } from "../../../contexts/AgentOrchestrationContext";
 import { 
   Calendar, 
   Clock, 
@@ -12,7 +12,7 @@ import {
   MapPin,
   Star,
   Activity
-} from 'lucide-react';
+} from "lucide-react";
 
 interface PlayerData {
   nextEvent?: {
@@ -25,13 +25,13 @@ interface PlayerData {
     id: string;
     title: string;
     dueDate: string;
-    priority: 'high' | 'medium' | 'low';
+    priority: "high" | "medium" | "low";
   }>;
   aiSuggestions?: Array<{
     id: string;
     title: string;
     description: string;
-    type: 'training' | 'nutrition' | 'recovery' | 'mental';
+    type: "training" | "nutrition" | "recovery" | "mental";
   }>;
   recentAchievements?: Array<{
     id: string;
@@ -67,18 +67,18 @@ const PlayerDashboard: React.FC = () => {
           type: "practice"
         },
         pendingTasks: [
-          { id: '1', title: "Complete fitness assessment", dueDate: "Today", priority: 'high' },
-          { id: '2', title: "Review game footage", dueDate: "Tomorrow", priority: 'medium' },
-          { id: '3', title: "Update player profile", dueDate: "This week", priority: 'low' }
+          { id: "1", title: "Complete fitness assessment", dueDate: "Today", priority: "high" },
+          { id: "2", title: "Review game footage", dueDate: "Tomorrow", priority: "medium" },
+          { id: "3", title: "Update player profile", dueDate: "This week", priority: "low" }
         ],
         aiSuggestions: [
-          { id: '1', title: "Focus on agility drills", description: "Based on your recent performance, try these specific drills", type: 'training' },
-          { id: '2', title: "Hydration reminder", description: "Increase water intake before practice sessions", type: 'nutrition' },
-          { id: '3', title: "Recovery routine", description: "Implement stretching routine after training", type: 'recovery' }
+          { id: "1", title: "Focus on agility drills", description: "Based on your recent performance, try these specific drills", type: "training" },
+          { id: "2", title: "Hydration reminder", description: "Increase water intake before practice sessions", type: "nutrition" },
+          { id: "3", title: "Recovery routine", description: "Implement stretching routine after training", type: "recovery" }
         ],
         recentAchievements: [
-          { id: '1', title: "Perfect Attendance", date: "2 days ago", category: "dedication" },
-          { id: '2', title: "Skill Improvement", date: "1 week ago", category: "performance" }
+          { id: "1", title: "Perfect Attendance", date: "2 days ago", category: "dedication" },
+          { id: "2", title: "Skill Improvement", date: "1 week ago", category: "performance" }
         ],
         stats: {
           sessionsThisWeek: 4,
@@ -95,7 +95,7 @@ const PlayerDashboard: React.FC = () => {
 
   const handleAIAssistance = (context: string) => {
     sendRequest({
-      type: 'player_assistance',
+      type: "player_assistance",
       context,
       data: playerData
     });
@@ -180,7 +180,7 @@ const PlayerDashboard: React.FC = () => {
             title="Next Event"
             icon={<Calendar className="w-5 h-5" />}
             status="info"
-            onClickAI={() => handleAIAssistance('next_event')}
+            onClickAI={() => handleAIAssistance("next_event")}
             loading={loading}
           >
             {playerData.nextEvent && (
@@ -204,8 +204,8 @@ const PlayerDashboard: React.FC = () => {
           <SmartTile
             title="Pending Tasks"
             icon={<CheckCircle className="w-5 h-5" />}
-            status={playerData.pendingTasks?.some(t => t.priority === 'high') ? 'warning' : 'neutral'}
-            onClickAI={() => handleAIAssistance('pending_tasks')}
+            status={playerData.pendingTasks?.some(t => t.priority === "high") ? "warning" : "neutral"}
+            onClickAI={() => handleAIAssistance("pending_tasks")}
             loading={loading}
           >
             <div className="space-y-2">
@@ -213,9 +213,9 @@ const PlayerDashboard: React.FC = () => {
                 <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <span className="text-sm text-gray-700">{task.title}</span>
                   <span className={`text-xs px-2 py-1 rounded ${
-                    task.priority === 'high' ? 'bg-red-100 text-red-700' :
-                    task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
+                    task.priority === "high" ? "bg-red-100 text-red-700" :
+                    task.priority === "medium" ? "bg-yellow-100 text-yellow-700" :
+                    "bg-green-100 text-green-700"
                   }`}>
                     {task.priority}
                   </span>
@@ -231,7 +231,7 @@ const PlayerDashboard: React.FC = () => {
             title="AI Suggestions"
             icon={<Target className="w-5 h-5" />}
             status="success"
-            onClickAI={() => handleAIAssistance('ai_suggestions')}
+            onClickAI={() => handleAIAssistance("ai_suggestions")}
             loading={loading}
           >
             <div className="space-y-3">
@@ -251,7 +251,7 @@ const PlayerDashboard: React.FC = () => {
             title="Recent Achievements"
             icon={<Star className="w-5 h-5" />}
             status="success"
-            onClickAI={() => handleAIAssistance('achievements')}
+            onClickAI={() => handleAIAssistance("achievements")}
             loading={loading}
           >
             <div className="space-y-2">

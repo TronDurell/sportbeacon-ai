@@ -147,8 +147,8 @@ export const TrainerView: React.FC<TrainerViewProps> = ({ trainerId }) => {
                 key={insight.id}
                 insight={{
                   ...insight,
-                  metric: insight.metric || 'performance',
-                  timestamp: insight.timestamp || new Date()
+                  metric: typeof insight.metric === 'number' ? insight.metric : 0,
+                  timestamp: typeof insight.timestamp === 'string' ? insight.timestamp : new Date().toISOString()
                 }}
                 onAction={() => handleInsightAction(insight.id)}
               />
@@ -163,7 +163,11 @@ export const TrainerView: React.FC<TrainerViewProps> = ({ trainerId }) => {
               ...msg,
               role: msg.role === 'user' ? 'trainer' : 'ai'
             }))}
-            onAsk={handleAskAssistant}
+            isLoading={false}
+            onSendMessage={handleAskAssistant}
+            onStartRecording={() => {}}
+            onStopRecording={() => {}}
+            isRecording={false}
           />
         </div>
 
@@ -175,7 +179,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({ trainerId }) => {
                 key={item.id}
                 item={{
                   ...item,
-                  timestamp: new Date(item.timestamp)
+                  timestamp: typeof item.timestamp === 'string' ? item.timestamp : (item.timestamp as Date).toISOString()
                 }}
                 onInteract={(type) => handleFeedInteraction(item.id, type)}
               />
@@ -189,7 +193,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({ trainerId }) => {
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           player={selectedPlayer}
-          isMobile={false}
+          drillHistory={[]}
         />
       )}
     </div>

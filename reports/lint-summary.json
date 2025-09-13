@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-01-08T07:25:00.000Z",
+  "phase": "baseline",
+  "summary": {
+    "total_problems": 2294,
+    "frontend_problems": 1987,
+    "functions_problems": 307,
+    "error_breakdown": {
+      "frontend": {
+        "errors": 153,
+        "warnings": 1834
+      },
+      "functions": {
+        "errors": 0,
+        "warnings": 307
+      }
+    }
+  },
+  "top_lint_categories": [
+    "@typescript-eslint/no-explicit-any: 400+ instances",
+    "@typescript-eslint/no-unused-vars: 300+ instances", 
+    "no-console: 200+ instances",
+    "react-hooks/exhaustive-deps: 150+ instances",
+    "@typescript-eslint/no-require-imports: 10+ instances"
+  ],
+  "critical_lint_issues": [
+    "Excessive use of 'any' types throughout codebase",
+    "Many unused variables and imports",
+    "Console.log statements in production code",
+    "React hooks dependency array issues",
+    "Legacy require() imports in test files"
+  ]
+}

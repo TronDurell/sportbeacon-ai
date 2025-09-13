@@ -1,4 +1,4 @@
-import { analyticsTracker } from '../analytics/eventTracking';
+import { analyticsTracker } from "../analytics/eventTracking";
 
 export interface MunicipalityConfig {
   name: string;
@@ -12,7 +12,7 @@ export interface MunicipalityConfig {
 export interface SportsFacility {
   id: string;
   name: string;
-  type: 'indoor' | 'outdoor' | 'both';
+  type: "indoor" | "outdoor" | "both";
   sports: string[];
   address: string;
   coordinates: { lat: number; lng: number };
@@ -41,7 +41,7 @@ export interface AgeGroup {
   minAge: number;
   maxAge: number;
   name: string;
-  skillLevel: 'beginner' | 'intermediate' | 'advanced';
+  skillLevel: "beginner" | "intermediate" | "advanced";
   description: string;
 }
 
@@ -70,7 +70,7 @@ export interface TimeSlot {
 }
 
 export interface CivicQuery {
-  type: 'policy' | 'registration' | 'facility' | 'recommendation' | 'general';
+  type: "policy" | "registration" | "facility" | "recommendation" | "general";
   question: string;
   context?: {
     childAge?: number;
@@ -103,15 +103,15 @@ class CivicAgent {
     
     // Track agent initialization
     analyticsTracker.trackEvent({
-      eventName: 'civic_agent_init',
+      eventName: "civic_agent_init",
       eventParams: {
         municipality: municipalityName,
         adminRole,
         sessionId: this.sessionId
       },
       timestamp: new Date(),
-      feature: 'CivicAgent',
-      category: 'feature_usage'
+      feature: "CivicAgent",
+      category: "feature_usage"
     });
   }
 
@@ -119,50 +119,50 @@ class CivicAgent {
     // Mock municipality data - in production, this would load from Firestore
     const mockFacilities: SportsFacility[] = [
       {
-        id: 'facility-1',
-        name: 'Cary Community Center',
-        type: 'indoor',
-        sports: ['basketball', 'volleyball', 'badminton'],
-        address: '123 Main St, Cary, NC',
+        id: "facility-1",
+        name: "Cary Community Center",
+        type: "indoor",
+        sports: ["basketball", "volleyball", "badminton"],
+        address: "123 Main St, Cary, NC",
         coordinates: { lat: 35.7915, lng: -78.7811 },
         capacity: 200,
-        amenities: ['parking', 'locker rooms', 'equipment rental'],
+        amenities: ["parking", "locker rooms", "equipment rental"],
         availability: this.generateMockSchedule()
       },
       {
-        id: 'facility-2',
-        name: 'Cary Soccer Complex',
-        type: 'outdoor',
-        sports: ['soccer', 'football'],
-        address: '456 Sports Ave, Cary, NC',
+        id: "facility-2",
+        name: "Cary Soccer Complex",
+        type: "outdoor",
+        sports: ["soccer", "football"],
+        address: "456 Sports Ave, Cary, NC",
         coordinates: { lat: 35.7920, lng: -78.7820 },
         capacity: 500,
-        amenities: ['parking', 'concession stand', 'bleachers'],
+        amenities: ["parking", "concession stand", "bleachers"],
         availability: this.generateMockSchedule()
       }
     ];
 
     return {
       name,
-      state: 'NC',
+      state: "NC",
       population: 175000,
       sportsFacilities: mockFacilities,
       leaguePolicies: policies,
       contactInfo: {
-        phone: '(919) 469-4000',
-        email: 'parks@cary.gov',
-        website: 'https://www.cary.gov/parks',
-        officeHours: 'Mon-Fri 8AM-5PM',
-        address: '316 N Academy St, Cary, NC 27513'
+        phone: "(919) 469-4000",
+        email: "parks@cary.gov",
+        website: "https://www.cary.gov/parks",
+        officeHours: "Mon-Fri 8AM-5PM",
+        address: "316 N Academy St, Cary, NC 27513"
       }
     };
   }
 
   private generateMockSchedule(): AvailabilitySchedule {
     const timeSlots: TimeSlot[] = [
-      { startTime: '09:00', endTime: '12:00', available: true },
-      { startTime: '13:00', endTime: '17:00', available: true },
-      { startTime: '18:00', endTime: '22:00', available: true }
+      { startTime: "09:00", endTime: "12:00", available: true },
+      { startTime: "13:00", endTime: "17:00", available: true },
+      { startTime: "18:00", endTime: "22:00", available: true }
     ];
 
     return {
@@ -182,27 +182,27 @@ class CivicAgent {
   async handleQuery(query: CivicQuery): Promise<CivicResponse> {
     // Track query
     analyticsTracker.trackEvent({
-      eventName: 'civic_query',
+      eventName: "civic_query",
       eventParams: {
         queryType: query.type,
         question: query.question,
         sessionId: this.sessionId
       },
       timestamp: new Date(),
-      feature: 'CivicAgent',
-      category: 'user_interaction'
+      feature: "CivicAgent",
+      category: "user_interaction"
     });
 
     switch (query.type) {
-      case 'policy':
+      case "policy":
         return this.handlePolicyQuery(query);
-      case 'registration':
+      case "registration":
         return this.handleRegistrationQuery(query);
-      case 'facility':
+      case "facility":
         return this.handleFacilityQuery(query);
-      case 'recommendation':
+      case "recommendation":
         return this.handleRecommendationQuery(query);
-      case 'general':
+      case "general":
         return this.handleGeneralQuery(query);
       default:
         return this.handleGeneralQuery(query);
@@ -215,24 +215,24 @@ class CivicAgent {
   private async handlePolicyQuery(query: CivicQuery): Promise<CivicResponse> {
     const question = query.question.toLowerCase();
     let relevantPolicies: LeaguePolicy[] = [];
-    let answer = '';
+    let answer = "";
 
     // Search for relevant policies
-    if (question.includes('refund') || question.includes('money back')) {
+    if (question.includes("refund") || question.includes("money back")) {
       relevantPolicies = this.municipality.leaguePolicies.filter(p => p.refundPolicy);
-      answer = `Refund Policy: ${relevantPolicies[0]?.refundPolicy || 'Contact our office for refund requests.'}`;
-    } else if (question.includes('age') || question.includes('old')) {
+      answer = `Refund Policy: ${relevantPolicies[0]?.refundPolicy || "Contact our office for refund requests."}`;
+    } else if (question.includes("age") || question.includes("old")) {
       relevantPolicies = this.municipality.leaguePolicies;
       const ageGroups = relevantPolicies.flatMap(p => p.ageGroups);
-      answer = `Age Groups: ${ageGroups.map(ag => `${ag.name} (${ag.minAge}-${ag.maxAge})`).join(', ')}`;
-    } else if (question.includes('cost') || question.includes('price') || question.includes('fee')) {
+      answer = `Age Groups: ${ageGroups.map(ag => `${ag.name} (${ag.minAge}-${ag.maxAge})`).join(", ")}`;
+    } else if (question.includes("cost") || question.includes("price") || question.includes("fee")) {
       relevantPolicies = this.municipality.leaguePolicies;
-      answer = `League Costs: ${relevantPolicies.map(p => `${p.sport}: $${p.cost}`).join(', ')}`;
-    } else if (question.includes('sibling') || question.includes('brother') || question.includes('sister')) {
+      answer = `League Costs: ${relevantPolicies.map(p => `${p.sport}: $${p.cost}`).join(", ")}`;
+    } else if (question.includes("sibling") || question.includes("brother") || question.includes("sister")) {
       relevantPolicies = this.municipality.leaguePolicies.filter(p => p.siblingDiscount > 0);
       answer = `Sibling Discount: ${relevantPolicies[0]?.siblingDiscount || 0}% off for additional siblings`;
     } else {
-      answer = 'For specific policy questions, please contact our office or visit our website.';
+      answer = "For specific policy questions, please contact our office or visit our website.";
     }
 
     return {
@@ -249,7 +249,7 @@ class CivicAgent {
    */
   private async handleRegistrationQuery(query: CivicQuery): Promise<CivicResponse> {
     const { childAge, sport } = query.context || {};
-    let answer = '';
+    let answer = "";
     let recommendedPolicies: LeaguePolicy[] = [];
 
     if (childAge && sport) {
@@ -265,7 +265,7 @@ class CivicAgent {
         answer = `No ${sport} leagues available for age ${childAge}. Please check our website for other options.`;
       }
     } else {
-      answer = 'Please provide your child\'s age and preferred sport for specific registration information.';
+      answer = "Please provide your child's age and preferred sport for specific registration information.";
     }
 
     return {
@@ -273,7 +273,7 @@ class CivicAgent {
       confidence: 0.9,
       sources: [`${this.municipality.name} Registration System`],
       relatedPolicies: recommendedPolicies,
-      nextSteps: ['Visit our website to register', 'Call our office for assistance'],
+      nextSteps: ["Visit our website to register", "Call our office for assistance"],
       contactInfo: this.municipality.contactInfo
     };
   }
@@ -294,8 +294,8 @@ class CivicAgent {
     }
 
     const answer = relevantFacilities.length > 0 
-      ? `Available facilities: ${relevantFacilities.map(f => f.name).join(', ')}`
-      : 'No facilities found for your request.';
+      ? `Available facilities: ${relevantFacilities.map(f => f.name).join(", ")}`
+      : "No facilities found for your request.";
 
     return {
       answer,
@@ -327,15 +327,15 @@ class CivicAgent {
     }
 
     const answer = recommendations.length > 0
-      ? `Recommended leagues: ${recommendations.map(p => `${p.sport} (${p.ageGroups[0].name})`).join(', ')}`
-      : 'No leagues match your criteria. Please contact our office for assistance.';
+      ? `Recommended leagues: ${recommendations.map(p => `${p.sport} (${p.ageGroups[0].name})`).join(", ")}`
+      : "No leagues match your criteria. Please contact our office for assistance.";
 
     return {
       answer,
       confidence: 0.8,
       sources: [`${this.municipality.name} League Recommendations`],
       relatedPolicies: recommendations,
-      nextSteps: ['Review league details', 'Contact us for more information'],
+      nextSteps: ["Review league details", "Contact us for more information"],
       contactInfo: this.municipality.contactInfo
     };
   }
@@ -371,7 +371,7 @@ What would you like to know more about?`;
       answer,
       confidence: 0.9,
       sources: [`${this.municipality.name} Onboarding Guide`],
-      nextSteps: ['Browse leagues', 'Register online', 'Contact office'],
+      nextSteps: ["Browse leagues", "Register online", "Contact office"],
       contactInfo: this.municipality.contactInfo
     };
   }
@@ -381,7 +381,7 @@ What would you like to know more about?`;
    */
   async getPolicyLookup(question: string): Promise<CivicResponse> {
     return this.handleQuery({
-      type: 'policy',
+      type: "policy",
       question,
       context: {}
     });
@@ -397,8 +397,8 @@ What would you like to know more about?`;
     budget?: number;
   }): Promise<CivicResponse> {
     return this.handleQuery({
-      type: 'recommendation',
-      question: 'Find leagues for my child',
+      type: "recommendation",
+      question: "Find leagues for my child",
       context: criteria
     });
   }
@@ -408,8 +408,8 @@ What would you like to know more about?`;
    */
   async getFacilityInfo(sport?: string, location?: string): Promise<CivicResponse> {
     return this.handleQuery({
-      type: 'facility',
-      question: 'Find sports facilities',
+      type: "facility",
+      question: "Find sports facilities",
       context: { sport, location }
     });
   }
@@ -419,15 +419,15 @@ What would you like to know more about?`;
    */
   async endSession(): Promise<void> {
     analyticsTracker.trackEvent({
-      eventName: 'civic_session_end',
+      eventName: "civic_session_end",
       eventParams: {
         sessionId: this.sessionId,
         municipality: this.municipality.name,
         adminRole: this.adminRole
       },
       timestamp: new Date(),
-      feature: 'CivicAgent',
-      category: 'feature_usage'
+      feature: "CivicAgent",
+      category: "feature_usage"
     });
   }
 }

@@ -1,16 +1,15 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+// import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Commented out - react-leaflet not installed
 import 'leaflet/dist/leaflet.css';
 
 const MapPage = () => {
   return (
-    <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: "100vh", width: "100%" }}>
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
-      />
-      {/* Add markers here */}
-    </MapContainer>
+    <div style={{ height: "100vh", width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div>
+        <h1>Map Component</h1>
+        <p>Map functionality will be implemented when react-leaflet is installed.</p>
+      </div>
+    </div>
   );
 };
 

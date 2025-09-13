@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { realApiService } from '../../services/realApiService';
+import React, { useState, useEffect } from "react";
+import { realApiService } from "../../services/realApiService";
 
 interface User {
   id: string;
@@ -23,7 +23,7 @@ interface UsedGearProduct {
   name: string;
   description: string;
   price: number;
-  condition: 'new' | 'like_new' | 'good' | 'fair' | 'poor';
+  condition: "new" | "like_new" | "good" | "fair" | "poor";
   imageUrl?: string;
   seller: User;
   likes: number;
@@ -33,15 +33,15 @@ interface UsedGearProduct {
 const SocialCommerceFeed: React.FC = () => {
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [products, setProducts] = useState<UsedGearProduct[]>([]);
-  const [activeTab, setActiveTab] = useState<'social' | 'marketplace'>('social');
+  const [activeTab, setActiveTab] = useState<"social" | "marketplace">("social");
   const [loading, setLoading] = useState(false);
 
   const conditions = [
-    { value: 'new', label: 'New', color: 'bg-green-100 text-green-800' },
-    { value: 'like_new', label: 'Like New', color: 'bg-blue-100 text-blue-800' },
-    { value: 'good', label: 'Good', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'fair', label: 'Fair', color: 'bg-orange-100 text-orange-800' },
-    { value: 'poor', label: 'Poor', color: 'bg-red-100 text-red-800' }
+    { value: "new", label: "New", color: "bg-green-100 text-green-800" },
+    { value: "like_new", label: "Like New", color: "bg-blue-100 text-blue-800" },
+    { value: "good", label: "Good", color: "bg-yellow-100 text-yellow-800" },
+    { value: "fair", label: "Fair", color: "bg-orange-100 text-orange-800" },
+    { value: "poor", label: "Poor", color: "bg-red-100 text-red-800" }
   ];
 
   useEffect(() => {
@@ -52,8 +52,8 @@ const SocialCommerceFeed: React.FC = () => {
     setLoading(true);
     try {
       const [postsResponse, productsResponse] = await Promise.all([
-        realApiService.query('socialPosts', { sortBy: 'createdAt', sortOrder: 'desc' }),
-        realApiService.query('usedGear', { sortBy: 'createdAt', sortOrder: 'desc' })
+        realApiService.query("socialPosts", { sortBy: "createdAt", sortOrder: "desc" }),
+        realApiService.query("usedGear", { sortBy: "createdAt", sortOrder: "desc" })
       ]);
 
       setPosts((postsResponse.data as SocialPost[]) || []);
@@ -64,19 +64,19 @@ const SocialCommerceFeed: React.FC = () => {
     }
   };
 
-  const handleLike = async (collection: 'socialPosts' | 'usedGear', itemId: string) => {
+  const handleLike = async (collection: "socialPosts" | "usedGear", itemId: string) => {
     try {
       const currentPost = posts.find(p => p.id === itemId);
       const currentProduct = products.find(p => p.id === itemId);
       
       await realApiService.update(collection, itemId, {
-        likes: collection === 'socialPosts'
+        likes: collection === "socialPosts"
           ? (currentPost?.likes || 0) + 1
           : (currentProduct?.likes || 0) + 1,
       });
 
       // Update local state
-      if (collection === 'socialPosts') {
+      if (collection === "socialPosts") {
         setPosts(prev => prev.map(post =>
           post.id === itemId ? { ...post, likes: post.likes + 1 } : post
         ));
@@ -91,14 +91,14 @@ const SocialCommerceFeed: React.FC = () => {
 
   const handleMessage = async (userId: string) => {
     try {
-      await realApiService.create('messages', {
+      await realApiService.create("messages", {
         recipientId: userId,
-        content: 'Hi! I saw your post and would like to connect.',
-        type: 'text'
+        content: "Hi! I saw your post and would like to connect.",
+        type: "text"
       });
-      alert('Message sent!');
+      alert("Message sent!");
     } catch (error) {
-      alert('Failed to send message. Please try again.');
+      alert("Failed to send message. Please try again.");
     }
   };
 
@@ -133,21 +133,21 @@ const SocialCommerceFeed: React.FC = () => {
       <div className="flex justify-center mb-6">
         <div className="bg-gray-100 rounded-lg p-1">
           <button
-            onClick={() => setActiveTab('social')}
+            onClick={() => setActiveTab("social")}
             className={`px-4 py-2 rounded-md transition-colors ${
-              activeTab === 'social'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+              activeTab === "social"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
             }`}
           >
             Social Feed
           </button>
           <button
-            onClick={() => setActiveTab('marketplace')}
+            onClick={() => setActiveTab("marketplace")}
             className={`px-4 py-2 rounded-md transition-colors ${
-              activeTab === 'marketplace'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+              activeTab === "marketplace"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
             }`}
           >
             Marketplace
@@ -162,20 +162,20 @@ const SocialCommerceFeed: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'social' && (
+      {activeTab === "social" && (
         <div className="space-y-6">
           {posts.map((post) => (
             <div key={post.id} className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                   <span className="text-gray-600 font-medium">
-                    {post.user?.name?.charAt(0) || 'U'}
+                    {post.user?.name?.charAt(0) || "U"}
                   </span>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-gray-900">
-                      {post.user?.name || 'Anonymous User'}
+                      {post.user?.name || "Anonymous User"}
                     </h3>
                     <span className="text-sm text-gray-500">
                       {formatDate(post.createdAt)}
@@ -193,7 +193,7 @@ const SocialCommerceFeed: React.FC = () => {
                   )}
                   <div className="flex items-center gap-4">
                     <button
-                      onClick={() => handleLike('socialPosts', post.id)}
+                      onClick={() => handleLike("socialPosts", post.id)}
                       className="flex items-center gap-2 text-gray-600 hover:text-red-500"
                     >
                       <span>❤️</span>
@@ -214,7 +214,7 @@ const SocialCommerceFeed: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'marketplace' && (
+      {activeTab === "marketplace" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
             <div key={product.id} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow">
@@ -227,7 +227,7 @@ const SocialCommerceFeed: React.FC = () => {
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-semibold text-gray-900">{product.name}</h3>
                   <span className={`text-xs px-2 py-1 rounded-full ${
-                    conditions.find(c => c.value === product.condition)?.color || 'bg-gray-100 text-gray-800'
+                    conditions.find(c => c.value === product.condition)?.color || "bg-gray-100 text-gray-800"
                   }`}>
                     {conditions.find(c => c.value === product.condition)?.label}
                   </span>
@@ -241,7 +241,7 @@ const SocialCommerceFeed: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <button
-                    onClick={() => handleLike('usedGear', product.id)}
+                    onClick={() => handleLike("usedGear", product.id)}
                     className="flex items-center gap-1 text-gray-600 hover:text-red-500"
                   >
                     <span>❤️</span>

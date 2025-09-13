@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
-import { MessageSquare, Send, Bot, Search } from 'lucide-react';
+import React, { useState } from "react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
+import { MessageSquare, Send, Bot, Search } from "lucide-react";
 
 interface Message {
   id: string;
   sender: string;
   content: string;
   timestamp: Date;
-  type: 'user' | 'ai' | 'system';
+  type: "user" | "ai" | "system";
   avatar?: string;
 }
 
@@ -15,64 +15,64 @@ const Messages: React.FC = () => {
   const { sendRequest } = useAgentOrchestration();
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
-      sender: 'Coach Smith',
-      content: 'Great practice today! Don\'t forget about the game this weekend.',
+      id: "1",
+      sender: "Coach Smith",
+      content: "Great practice today! Don't forget about the game this weekend.",
       timestamp: new Date(Date.now() - 3600000),
-      type: 'user',
-      avatar: 'CS'
+      type: "user",
+      avatar: "CS"
     },
     {
-      id: '2',
-      sender: 'AI Assistant',
-      content: 'I\'ve updated your training schedule based on your performance metrics.',
+      id: "2",
+      sender: "AI Assistant",
+      content: "I've updated your training schedule based on your performance metrics.",
       timestamp: new Date(Date.now() - 1800000),
-      type: 'ai',
-      avatar: 'AI'
+      type: "ai",
+      avatar: "AI"
     },
     {
-      id: '3',
-      sender: 'Team Captain',
-      content: 'Team meeting tomorrow at 3 PM. Please bring your gear.',
+      id: "3",
+      sender: "Team Captain",
+      content: "Team meeting tomorrow at 3 PM. Please bring your gear.",
       timestamp: new Date(Date.now() - 900000),
-      type: 'user',
-      avatar: 'TC'
+      type: "user",
+      avatar: "TC"
     }
   ]);
 
-  const [newMessage, setNewMessage] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [newMessage, setNewMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
     const message: Message = {
       id: Date.now().toString(),
-      sender: 'You',
+      sender: "You",
       content: newMessage,
       timestamp: new Date(),
-      type: 'user',
-      avatar: 'U'
+      type: "user",
+      avatar: "U"
     };
 
     setMessages(prev => [...prev, message]);
-    setNewMessage('');
+    setNewMessage("");
 
     // Send to AI for processing
     const response = await sendRequest({
-      type: 'send_message',
+      type: "send_message",
       content: newMessage,
-      context: 'messaging'
+      context: "messaging"
     });
 
     if (response.success) {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        sender: 'AI Assistant',
-        content: response.data?.reply || 'I received your message and will respond shortly.',
+        sender: "AI Assistant",
+        content: response.data?.reply || "I received your message and will respond shortly.",
         timestamp: new Date(),
-        type: 'ai',
-        avatar: 'AI'
+        type: "ai",
+        avatar: "AI"
       };
       setMessages(prev => [...prev, aiResponse]);
     }
@@ -83,21 +83,21 @@ const Messages: React.FC = () => {
     message.sender.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getMessageTypeStyles = (type: Message['type']) => {
+  const getMessageTypeStyles = (type: Message["type"]) => {
     switch (type) {
-      case 'ai':
-        return 'bg-blue-50 border-blue-200';
-      case 'system':
-        return 'bg-gray-50 border-gray-200';
+      case "ai":
+        return "bg-blue-50 border-blue-200";
+      case "system":
+        return "bg-gray-50 border-gray-200";
       default:
-        return 'bg-white border-gray-200';
+        return "bg-white border-gray-200";
     }
   };
 
   const getAvatarColor = (avatar: string) => {
     const colors = [
-      'bg-blue-500', 'bg-green-500', 'bg-purple-500', 
-      'bg-red-500', 'bg-yellow-500', 'bg-indigo-500'
+      "bg-blue-500", "bg-green-500", "bg-purple-500", 
+      "bg-red-500", "bg-yellow-500", "bg-indigo-500"
     ];
     const index = avatar.charCodeAt(0) % colors.length;
     return colors[index];
@@ -135,7 +135,7 @@ const Messages: React.FC = () => {
               key={message.id}
               className={`flex items-start space-x-3 p-4 rounded-lg border ${getMessageTypeStyles(message.type)}`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${getAvatarColor(message.avatar || 'U')}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${getAvatarColor(message.avatar || "U")}`}>
                 {message.avatar}
               </div>
               
@@ -143,7 +143,7 @@ const Messages: React.FC = () => {
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="text-sm font-medium text-gray-900">
                     {message.sender}
-                    {message.type === 'ai' && (
+                    {message.type === "ai" && (
                       <Bot className="inline w-3 h-3 ml-1 text-blue-500" />
                     )}
                   </h4>
@@ -166,7 +166,7 @@ const Messages: React.FC = () => {
             placeholder="Type your message..."
             value={newMessage}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMessage(e.target.value)}
-            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSendMessage()}
+            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && handleSendMessage()}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button

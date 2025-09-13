@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { useSmartLayer } from '../contexts/SmartLayerContext';
-import { useAuth } from '../contexts/AdminAuthContext';
-import { useAgentOrchestration } from '../contexts/AgentOrchestrationContext';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { useSmartLayer } from "../contexts/SmartLayerContext";
+import { useAuth } from "../contexts/AdminAuthContext";
+import { useAgentOrchestration } from "../contexts/AgentOrchestrationContext";
 import { 
   Users, 
   Trophy, 
@@ -16,74 +16,74 @@ import {
   Shield,
   Bot,
   X
-} from 'lucide-react';
+} from "lucide-react";
 
 interface SmartLayerInterfaceProps {
   className?: string;
 }
 
-const SmartLayerInterface: React.FC<SmartLayerInterfaceProps> = ({ className = '' }) => {
+const SmartLayerInterface: React.FC<SmartLayerInterfaceProps> = ({ className = "" }) => {
   const { user } = useAuth();
   const { isAIAssistantOpen, toggleAIAssistant } = useSmartLayer();
   const { startAgent } = useAgentOrchestration();
 
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   // Role-based tab configuration
   const getTabsForRole = (role: string) => {
     switch (role) {
-      case 'player':
+      case "player":
         return [
-          { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-          { id: 'schedule', label: 'Schedule', icon: Calendar },
-          { id: 'messages', label: 'Messages', icon: MessageSquare },
-          { id: 'achievements', label: 'Achievements', icon: Trophy }
+          { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+          { id: "schedule", label: "Schedule", icon: Calendar },
+          { id: "messages", label: "Messages", icon: MessageSquare },
+          { id: "achievements", label: "Achievements", icon: Trophy }
         ];
-      case 'coach':
+      case "coach":
         return [
-          { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-          { id: 'teams', label: 'Teams', icon: Users },
-          { id: 'schedule', label: 'Schedule', icon: Calendar },
-          { id: 'messages', label: 'Messages', icon: MessageSquare },
-          { id: 'analytics', label: 'Analytics', icon: BarChart3 }
+          { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+          { id: "teams", label: "Teams", icon: Users },
+          { id: "schedule", label: "Schedule", icon: Calendar },
+          { id: "messages", label: "Messages", icon: MessageSquare },
+          { id: "analytics", label: "Analytics", icon: BarChart3 }
         ];
-      case 'parent':
+      case "parent":
         return [
-          { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-          { id: 'children', label: 'Children', icon: Users },
-          { id: 'schedule', label: 'Schedule', icon: Calendar },
-          { id: 'messages', label: 'Messages', icon: MessageSquare },
-          { id: 'payments', label: 'Payments', icon: Shield }
+          { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+          { id: "children", label: "Children", icon: Users },
+          { id: "schedule", label: "Schedule", icon: Calendar },
+          { id: "messages", label: "Messages", icon: MessageSquare },
+          { id: "payments", label: "Payments", icon: Shield }
         ];
-      case 'admin':
+      case "admin":
         return [
-          { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-          { id: 'users', label: 'Users', icon: Users },
-          { id: 'leagues', label: 'Leagues', icon: Trophy },
-          { id: 'settings', label: 'Settings', icon: Settings },
-          { id: 'analytics', label: 'Analytics', icon: BarChart3 }
+          { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+          { id: "users", label: "Users", icon: Users },
+          { id: "leagues", label: "Leagues", icon: Trophy },
+          { id: "settings", label: "Settings", icon: Settings },
+          { id: "analytics", label: "Analytics", icon: BarChart3 }
         ];
       default:
         return [
-          { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-          { id: 'schedule', label: 'Schedule', icon: Calendar },
-          { id: 'messages', label: 'Messages', icon: MessageSquare }
+          { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+          { id: "schedule", label: "Schedule", icon: Calendar },
+          { id: "messages", label: "Messages", icon: MessageSquare }
         ];
     }
   };
 
-  const tabs = getTabsForRole(user?.role || 'player');
+  const tabs = getTabsForRole(user?.role || "player");
 
   const renderTabContent = (tabId: string) => {
     switch (tabId) {
-      case 'dashboard':
+      case "dashboard":
         return (
           <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
-                  Welcome, {user?.firstName || 'User'}!
+                  Welcome, {user?.firstName || "User"}!
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -127,7 +127,7 @@ const SmartLayerInterface: React.FC<SmartLayerInterfaceProps> = ({ className = '
           </div>
         );
       
-      case 'schedule':
+      case "schedule":
         return (
           <Card>
             <CardHeader>
@@ -144,7 +144,7 @@ const SmartLayerInterface: React.FC<SmartLayerInterfaceProps> = ({ className = '
           </Card>
         );
       
-      case 'messages':
+      case "messages":
         return (
           <Card>
             <CardHeader>
@@ -200,7 +200,7 @@ const SmartLayerInterface: React.FC<SmartLayerInterfaceProps> = ({ className = '
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">
-                    {user?.firstName?.charAt(0) || 'U'}
+                    {user?.firstName?.charAt(0) || "U"}
                   </span>
                 </div>
                 <span className="text-sm font-medium text-gray-700">
@@ -244,10 +244,10 @@ const SmartLayerInterface: React.FC<SmartLayerInterfaceProps> = ({ className = '
       <AnimatePresence>
         {isAIAssistantOpen && (
           <motion.div
-            initial={{ x: '100%' }}
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l z-50"
           >
             <div className="flex flex-col h-full">
@@ -279,21 +279,21 @@ const SmartLayerInterface: React.FC<SmartLayerInterfaceProps> = ({ className = '
                         <Button
                           variant="outline"
                           className="w-full justify-start"
-                          onClick={() => startAgent('scheduler')}
+                          onClick={() => startAgent("scheduler")}
                         >
                           Schedule a game or practice
                         </Button>
                         <Button
                           variant="outline"
                           className="w-full justify-start"
-                          onClick={() => startAgent('notifier')}
+                          onClick={() => startAgent("notifier")}
                         >
                           Send team notifications
                         </Button>
                         <Button
                           variant="outline"
                           className="w-full justify-start"
-                          onClick={() => startAgent('analyzer')}
+                          onClick={() => startAgent("analyzer")}
                         >
                           Analyze team performance
                         </Button>

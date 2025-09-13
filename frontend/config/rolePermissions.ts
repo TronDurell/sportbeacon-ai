@@ -462,7 +462,7 @@ export function getRolePermissions(role: UserRole): Permission[] {
   }
   
   const inheritedPermissions = hierarchy.inheritsFrom.flatMap(inheritedRole => 
-    getRolePermissions(inheritedRole)
+    getRolePermissions(inheritedRole as UserRole)
   );
   
   return [...new Set([...directPermissions, ...inheritedPermissions])];
@@ -473,7 +473,7 @@ export function getRolePermissions(role: UserRole): Permission[] {
  */
 export function canAssignRole(assignerRole: UserRole, targetRole: UserRole): boolean {
   const hierarchy = ROLE_HIERARCHY[assignerRole];
-  return hierarchy?.canAssignRoles.includes(targetRole) || false;
+  return hierarchy?.canAssignRoles.includes(targetRole as any) || false;
 }
 
 /**
@@ -481,7 +481,7 @@ export function canAssignRole(assignerRole: UserRole, targetRole: UserRole): boo
  */
 export function getAssignableRoles(role: UserRole): UserRole[] {
   const hierarchy = ROLE_HIERARCHY[role];
-  return hierarchy?.canAssignRoles || [];
+  return (hierarchy?.canAssignRoles || []) as UserRole[];
 }
 
 /**
@@ -497,7 +497,7 @@ export function hasAdminAccess(role: UserRole): boolean {
  */
 export function getInheritingRoles(role: UserRole): UserRole[] {
   return Object.entries(ROLE_HIERARCHY)
-    .filter(([_, hierarchy]) => hierarchy.inheritsFrom.includes(role))
+    .filter(([_, hierarchy]) => hierarchy.inheritsFrom.includes(role as any))
     .map(([inheritingRole]) => inheritingRole as UserRole);
 }
 
@@ -511,7 +511,7 @@ export function getRoleLevel(role: UserRole): number {
   }
   
   return Math.max(...hierarchy.inheritsFrom.map(inheritedRole => 
-    getRoleLevel(inheritedRole)
+    getRoleLevel(inheritedRole as UserRole)
   )) + 1;
 }
 
@@ -526,21 +526,21 @@ export function isHigherRole(role1: UserRole, role2: UserRole): boolean {
  * Get all permissions grouped by category
  */
 export function getPermissionsByCategory(): Record<string, Permission[]> {
-  return PERMISSION_CATEGORIES;
+  return PERMISSION_CATEGORIES as Record<string, Permission[]>;
 }
 
 /**
  * Get permissions for a specific category
  */
 export function getCategoryPermissions(category: string): Permission[] {
-  return PERMISSION_CATEGORIES[category] || [];
+  return (PERMISSION_CATEGORIES as any)[category] || [];
 }
 
 /**
  * Get all available permissions
  */
 export function getAllPermissions(): Permission[] {
-  return Object.values(PERMISSION_CATEGORIES).flat();
+  return Object.values(PERMISSION_CATEGORIES as any).flat() as Permission[];
 }
 
 export default {

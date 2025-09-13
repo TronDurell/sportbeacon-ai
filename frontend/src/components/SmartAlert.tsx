@@ -1,12 +1,12 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { X, Bot } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { X, Bot } from "lucide-react";
 
 export interface SmartAlertAction {
   label: string;
   onClick: () => void;
   aiPrompt?: string;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: "primary" | "secondary" | "ghost";
 }
 
 export interface SmartAlertProps {
@@ -14,16 +14,16 @@ export interface SmartAlertProps {
   title: string;
   message: string;
   icon?: React.ReactNode;
-  status?: 'info' | 'warning' | 'error' | 'success';
+  status?: "info" | "warning" | "error" | "success";
   onDismiss: (id: string) => void;
   actions?: SmartAlertAction[];
 }
 
 const statusColors = {
-  info: 'border-blue-300 bg-blue-50',
-  warning: 'border-yellow-300 bg-yellow-50',
-  error: 'border-red-300 bg-red-50',
-  success: 'border-green-300 bg-green-50',
+  info: "border-blue-300 bg-blue-50",
+  warning: "border-yellow-300 bg-yellow-50",
+  error: "border-red-300 bg-red-50",
+  success: "border-green-300 bg-green-50",
 };
 
 const SmartAlert: React.FC<SmartAlertProps> = ({
@@ -31,7 +31,7 @@ const SmartAlert: React.FC<SmartAlertProps> = ({
   title,
   message,
   icon,
-  status = 'info',
+  status = "info",
   onDismiss,
   actions = [],
 }) => {
@@ -65,9 +65,9 @@ const SmartAlert: React.FC<SmartAlertProps> = ({
                 key={idx}
                 onClick={action.onClick}
                 className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors
-                  ${action.variant === 'primary' ? 'bg-blue-600 text-white hover:bg-blue-700' :
-                    action.variant === 'secondary' ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' :
-                    'text-blue-600 hover:bg-blue-50'}
+                  ${action.variant === "primary" ? "bg-blue-600 text-white hover:bg-blue-700" :
+                    action.variant === "secondary" ? "bg-gray-100 text-gray-700 hover:bg-gray-200" :
+                    "text-blue-600 hover:bg-blue-50"}
                 `}
               >
                 {action.label}

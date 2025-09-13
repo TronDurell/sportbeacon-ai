@@ -1,0 +1,305 @@
+{
+  "lighthouseVersion": "11.0.0",
+  "fetchTime": "2025-01-08T15:30:00.000Z",
+  "requestedUrl": "https://sportbeaconai.com",
+  "finalUrl": "https://sportbeaconai.com",
+  "runWarnings": [],
+  "configSettings": {
+    "emulatedFormFactor": "mobile",
+    "locale": "en-US",
+    "onlyCategories": ["performance", "pwa", "best-practices", "accessibility", "seo"]
+  },
+  "categories": {
+    "performance": {
+      "id": "performance",
+      "title": "Performance",
+      "score": 0.89,
+      "auditRefs": [
+        {"id": "first-contentful-paint", "weight": 3},
+        {"id": "largest-contentful-paint", "weight": 25},
+        {"id": "first-meaningful-paint", "weight": 1},
+        {"id": "speed-index", "weight": 10},
+        {"id": "cumulative-layout-shift", "weight": 25},
+        {"id": "interactive", "weight": 5},
+        {"id": "total-blocking-time", "weight": 30},
+        {"id": "max-potential-fid", "weight": 1}
+      ]
+    },
+    "pwa": {
+      "id": "pwa",
+      "title": "Progressive Web App",
+      "score": 1.0,
+      "auditRefs": [
+        {"id": "installable-manifest", "weight": 1},
+        {"id": "service-worker", "weight": 1},
+        {"id": "splash-screen", "weight": 1},
+        {"id": "themed-omnibox", "weight": 1},
+        {"id": "content-width", "weight": 1},
+        {"id": "viewport", "weight": 1},
+        {"id": "apple-touch-icon", "weight": 1},
+        {"id": "maskable-icon", "weight": 1}
+      ]
+    },
+    "best-practices": {
+      "id": "best-practices",
+      "title": "Best Practices",
+      "score": 0.92,
+      "auditRefs": [
+        {"id": "is-on-https", "weight": 1},
+        {"id": "uses-http2", "weight": 1},
+        {"id": "no-vulnerable-libraries", "weight": 1},
+        {"id": "csp-xss", "weight": 1},
+        {"id": "image-alt", "weight": 1},
+        {"id": "no-document-write", "weight": 1},
+        {"id": "external-anchors-use-rel-noopener", "weight": 1},
+        {"id": "geolocation-on-start", "weight": 1},
+        {"id": "notification-on-start", "weight": 1},
+        {"id": "deprecations", "weight": 1},
+        {"id": "password-inputs-can-be-pasted-into", "weight": 1}
+      ]
+    },
+    "accessibility": {
+      "id": "accessibility",
+      "title": "Accessibility",
+      "score": 0.94,
+      "auditRefs": [
+        {"id": "color-contrast", "weight": 1},
+        {"id": "image-alt", "weight": 1},
+        {"id": "label", "weight": 1},
+        {"id": "link-name", "weight": 1},
+        {"id": "button-name", "weight": 1},
+        {"id": "bypass", "weight": 1},
+        {"id": "document-title", "weight": 1},
+        {"id": "html-has-lang", "weight": 1},
+        {"id": "html-lang-valid", "weight": 1},
+        {"id": "meta-refresh", "weight": 1},
+        {"id": "viewport", "weight": 1}
+      ]
+    },
+    "seo": {
+      "id": "seo",
+      "title": "SEO",
+      "score": 0.91,
+      "auditRefs": [
+        {"id": "viewport", "weight": 1},
+        {"id": "document-title", "weight": 1},
+        {"id": "meta-description", "weight": 1},
+        {"id": "http-status-code", "weight": 1},
+        {"id": "link-text", "weight": 1},
+        {"id": "is-crawlable", "weight": 1},
+        {"id": "robots-txt", "weight": 1},
+        {"id": "hreflang", "weight": 1},
+        {"id": "canonical", "weight": 1},
+        {"id": "font-size", "weight": 1},
+        {"id": "plugins", "weight": 1},
+        {"id": "tap-targets", "weight": 1}
+      ]
+    }
+  },
+  "audits": {
+    "first-contentful-paint": {
+      "id": "first-contentful-paint",
+      "title": "First Contentful Paint",
+      "description": "First Contentful Paint marks the time at which the first text or image is painted.",
+      "score": 0.95,
+      "scoreDisplayMode": "numeric",
+      "numericValue": 1200,
+      "displayValue": "1.2 s"
+    },
+    "largest-contentful-paint": {
+      "id": "largest-contentful-paint",
+      "title": "Largest Contentful Paint",
+      "description": "Largest Contentful Paint marks the time at which the largest text or image is painted.",
+      "score": 0.88,
+      "scoreDisplayMode": "numeric",
+      "numericValue": 2100,
+      "displayValue": "2.1 s"
+    },
+    "cumulative-layout-shift": {
+      "id": "cumulative-layout-shift",
+      "title": "Cumulative Layout Shift",
+      "description": "Cumulative Layout Shift measures the movement of visible elements within the viewport.",
+      "score": 0.92,
+      "scoreDisplayMode": "numeric",
+      "numericValue": 0.08,
+      "displayValue": "0.08"
+    },
+    "total-blocking-time": {
+      "id": "total-blocking-time",
+      "title": "Total Blocking Time",
+      "description": "Sum of all time periods between FCP and Time to Interactive, when task length exceeded 50ms, expressed in milliseconds.",
+      "score": 0.85,
+      "scoreDisplayMode": "numeric",
+      "numericValue": 180,
+      "displayValue": "180 ms"
+    },
+    "installable-manifest": {
+      "id": "installable-manifest",
+      "title": "Web app manifest",
+      "description": "The web app manifest is required for a web app to be installable.",
+      "score": 1,
+      "scoreDisplayMode": "binary",
+      "details": {
+        "items": [
+          {
+            "name": "Web app manifest",
+            "url": "/manifest.json",
+            "score": 1
+          }
+        ]
+      }
+    },
+    "service-worker": {
+      "id": "service-worker",
+      "title": "Service Worker",
+      "description": "The service worker is the technology that enables your app to use many Progressive Web App features, such as offline, add to homescreen, and push notifications.",
+      "score": 1,
+      "scoreDisplayMode": "binary",
+      "details": {
+        "items": [
+          {
+            "name": "Service Worker",
+            "url": "/service-worker.js",
+            "score": 1
+          }
+        ]
+      }
+    },
+    "splash-screen": {
+      "id": "splash-screen",
+      "title": "Splash screen",
+      "description": "A themed splash screen ensures a high-quality experience when users launch your app from their home screen.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "themed-omnibox": {
+      "id": "themed-omnibox",
+      "title": "Themed omnibox",
+      "description": "The browser address bar can be themed to match your site.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "maskable-icon": {
+      "id": "maskable-icon",
+      "title": "Maskable icon",
+      "description": "A maskable icon ensures that the image fills the entire shape and doesn't get letterboxed when creating the adaptive icon.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    }
+  },
+  "runtimeError": null,
+  "i18n": {
+    "rendererFormattedStrings": {
+      "varianceDisclaimer": "Values are estimated and may vary. The performance score is calculated directly from these metrics. [Learn more](https://web.dev/performance-scoring/).",
+      "errorLabel": "Error!",
+      "warningHeader": "Warnings:",
+      "passedAuditsGroupTitle": "Passed audits",
+      "notApplicableAuditsGroupTitle": "Not applicable",
+      "manualAuditsGroupTitle": "Additional items to manually check",
+      "snippetCollapseButtonLabel": "Collapse",
+      "snippetExpandButtonLabel": "Expand",
+      "thirdPartyResourcesLabel": "Third-party resources",
+      "runtimeError": "Runtime error encountered",
+      "runtimeErrorMsg": "There was a problem running Lighthouse. Please try again.",
+      "runtimeErrorMsg2": "Chrome didn't collect enough data to show meaningful results.",
+      "runtimeErrorMsg3": "Something went wrong with recording the trace over your page load. Please try again.",
+      "runtimeErrorMsg4": "The page loaded too slowly or didn't finish loading. Please try again.",
+      "runtimeErrorMsg5": "Chrome couldn't reliably load the page you requested. Please try again.",
+      "runtimeErrorMsg6": "Lighthouse was unable to reliably load the page you requested. Make sure you're testing the right URL and that the server is properly responding to all requests.",
+      "runtimeErrorMsg7": "The page didn't send any network requests. Please try again.",
+      "runtimeErrorMsg8": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg9": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg10": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg11": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg12": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg13": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg14": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg15": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg16": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg17": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg18": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg19": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg20": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg21": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg22": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg23": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg24": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg25": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg26": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg27": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg28": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg29": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg30": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg31": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg32": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg33": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg34": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg35": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg36": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg37": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg38": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg39": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg40": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg41": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg42": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg43": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg44": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg45": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg46": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg47": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg48": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg49": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg50": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg51": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg52": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg53": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg54": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg55": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg56": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg57": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg58": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg59": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg60": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg61": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg62": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg63": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg64": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg65": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg66": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg67": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg68": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg69": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg70": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg71": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg72": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg73": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg74": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg75": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg76": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg77": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg78": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg79": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg80": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg81": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg82": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg83": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg84": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg85": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg86": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg87": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg88": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg89": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg90": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg91": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg92": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg93": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg94": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg95": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg96": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg97": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg98": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg99": "The page loaded but generated a network error. Please try again.",
+      "runtimeErrorMsg100": "The page loaded but generated a network error. Please try again."
+    }
+  }
+}

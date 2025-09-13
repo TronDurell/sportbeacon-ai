@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../contexts/AdminAuthContext';
-import { useSmartLayer } from '../contexts/SmartLayerContext';
-import { useAgentOrchestration } from '../contexts/AgentOrchestrationContext';
+import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../contexts/AdminAuthContext";
+import { useSmartLayer } from "../contexts/SmartLayerContext";
+import { useAgentOrchestration } from "../contexts/AgentOrchestrationContext";
 import { 
   Target, 
   TrendingUp,
@@ -14,16 +14,16 @@ import {
   Trophy,
   Lightbulb,
   Heart
-} from 'lucide-react';
+} from "lucide-react";
 
 interface SmartAlert {
   id: string;
-  type: 'info' | 'success' | 'warning' | 'error' | 'achievement' | 'motivation' | 'action' | 'insight';
+  type: "info" | "success" | "warning" | "error" | "achievement" | "motivation" | "action" | "insight";
   title: string;
   message: string;
   icon?: React.ReactNode;
   actions?: AlertAction[];
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
   role?: string;
   intent?: string;
   sessionType?: string;
@@ -35,14 +35,14 @@ interface SmartAlert {
 
 interface AlertAction {
   label: string;
-  variant: 'primary' | 'secondary' | 'ghost' | 'destructive';
+  variant: "primary" | "secondary" | "ghost" | "destructive";
   onClick: () => void;
   aiPrompt?: string;
 }
 
 interface SmartAlertsProps {
   className?: string;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'center';
+  position?: "top-right" | "top-left" | "bottom-right" | "bottom-left" | "center";
   maxAlerts?: number;
   autoDismiss?: boolean;
   roleBased?: boolean;
@@ -50,8 +50,8 @@ interface SmartAlertsProps {
 }
 
 const SmartAlerts: React.FC<SmartAlertsProps> = ({
-  className = '',
-  position = 'top-right',
+  className = "",
+  position = "top-right",
   maxAlerts = 3,
   roleBased = true,
   intentAware = true
@@ -106,87 +106,87 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
     const alerts: SmartAlert[] = [];
 
     switch (role) {
-      case 'player':
+      case "player":
         alerts.push({
-          id: 'player-training-reminder',
-          type: 'action',
-          title: 'Training Time!',
-          message: 'Ready to improve your skills? Check out today\'s recommended drills.',
+          id: "player-training-reminder",
+          type: "action",
+          title: "Training Time!",
+          message: "Ready to improve your skills? Check out today's recommended drills.",
           icon: <Target className="w-5 h-5" />,
-          priority: 'medium',
-          role: 'player',
+          priority: "medium",
+          role: "player",
           dismissible: true,
           autoDismiss: 10000,
           actions: [
             {
-              label: 'View Drills',
-              variant: 'primary',
-              onClick: () => handleAction('view_drills', 'Show me today\'s training drills'),
-              aiPrompt: 'Show me today\'s training drills'
+              label: "View Drills",
+              variant: "primary",
+              onClick: () => handleAction("view_drills", "Show me today's training drills"),
+              aiPrompt: "Show me today's training drills"
             },
             {
-              label: 'Log Progress',
-              variant: 'secondary',
-              onClick: () => handleAction('log_progress', 'Help me log my recent training progress'),
-              aiPrompt: 'Help me log my recent training progress'
+              label: "Log Progress",
+              variant: "secondary",
+              onClick: () => handleAction("log_progress", "Help me log my recent training progress"),
+              aiPrompt: "Help me log my recent training progress"
             }
           ]
         });
         break;
 
-      case 'coach':
+      case "coach":
         alerts.push({
-          id: 'coach-team-update',
-          type: 'info',
-          title: 'Team Update',
-          message: '3 players have completed their weekly assessments. Review their progress?',
+          id: "coach-team-update",
+          type: "info",
+          title: "Team Update",
+          message: "3 players have completed their weekly assessments. Review their progress?",
           icon: <Users className="w-5 h-5" />,
-          priority: 'medium',
-          role: 'coach',
+          priority: "medium",
+          role: "coach",
           dismissible: true,
           autoDismiss: 15000,
           actions: [
             {
-              label: 'Review',
-              variant: 'primary',
-              onClick: () => handleAction('review_assessments', 'Show me the completed player assessments'),
-              aiPrompt: 'Show me the completed player assessments'
+              label: "Review",
+              variant: "primary",
+              onClick: () => handleAction("review_assessments", "Show me the completed player assessments"),
+              aiPrompt: "Show me the completed player assessments"
             }
           ]
         });
         break;
 
-      case 'parent':
+      case "parent":
         alerts.push({
-          id: 'parent-schedule-reminder',
-          type: 'info',
-          title: 'Upcoming Game',
-          message: 'Your child has a game tomorrow at 3:00 PM. Don\'t forget to bring water!',
+          id: "parent-schedule-reminder",
+          type: "info",
+          title: "Upcoming Game",
+          message: "Your child has a game tomorrow at 3:00 PM. Don't forget to bring water!",
           icon: <Clock className="w-5 h-5" />,
-          priority: 'high',
-          role: 'parent',
+          priority: "high",
+          role: "parent",
           dismissible: true,
           autoDismiss: 20000,
           actions: [
             {
-              label: 'View Details',
-              variant: 'primary',
-              onClick: () => handleAction('view_game_details', 'Show me the game details'),
-              aiPrompt: 'Show me the game details'
+              label: "View Details",
+              variant: "primary",
+              onClick: () => handleAction("view_game_details", "Show me the game details"),
+              aiPrompt: "Show me the game details"
             }
           ]
         });
         break;
 
-      case 'admin':
+      case "admin":
         alerts.push({
-          id: 'admin-system-status',
-          type: 'info',
-          title: 'System Status',
-          message: 'All systems operational. 156 active users, 23 sessions in progress.',
+          id: "admin-system-status",
+          type: "info",
+          title: "System Status",
+          message: "All systems operational. 156 active users, 23 sessions in progress.",
           icon: <TrendingUp className="w-5 h-5" />,
-          priority: 'low',
-          role: 'admin',
+          priority: "low",
+          role: "admin",
           dismissible: true,
           autoDismiss: 8000
         });
@@ -200,67 +200,67 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
     const alerts: SmartAlert[] = [];
 
     switch (intent) {
-      case 'train':
+      case "train":
         alerts.push({
-          id: 'intent-training-focus',
-          type: 'motivation',
-          title: 'Training Focus',
-          message: 'Great choice! Let\'s focus on improving your skills. What would you like to work on today?',
+          id: "intent-training-focus",
+          type: "motivation",
+          title: "Training Focus",
+          message: "Great choice! Let's focus on improving your skills. What would you like to work on today?",
           icon: <Zap className="w-5 h-5" />,
-          priority: 'medium',
-          intent: 'train',
+          priority: "medium",
+          intent: "train",
           dismissible: true,
           autoDismiss: 12000,
           actions: [
             {
-              label: 'Start Training',
-              variant: 'primary',
-              onClick: () => handleAction('start_training', 'Help me start a focused training session'),
-              aiPrompt: 'Help me start a focused training session'
+              label: "Start Training",
+              variant: "primary",
+              onClick: () => handleAction("start_training", "Help me start a focused training session"),
+              aiPrompt: "Help me start a focused training session"
             }
           ]
         });
         break;
 
-      case 'learn':
+      case "learn":
         alerts.push({
-          id: 'intent-learning-resources',
-          type: 'insight',
-          title: 'Learning Resources',
-          message: 'I found 5 new articles and 3 video tutorials that match your learning goals.',
+          id: "intent-learning-resources",
+          type: "insight",
+          title: "Learning Resources",
+          message: "I found 5 new articles and 3 video tutorials that match your learning goals.",
           icon: <Lightbulb className="w-5 h-5" />,
-          priority: 'medium',
-          intent: 'learn',
+          priority: "medium",
+          intent: "learn",
           dismissible: true,
           autoDismiss: 15000,
           actions: [
             {
-              label: 'Explore',
-              variant: 'primary',
-              onClick: () => handleAction('explore_resources', 'Show me the learning resources'),
-              aiPrompt: 'Show me the learning resources'
+              label: "Explore",
+              variant: "primary",
+              onClick: () => handleAction("explore_resources", "Show me the learning resources"),
+              aiPrompt: "Show me the learning resources"
             }
           ]
         });
         break;
 
-      case 'connect':
+      case "connect":
         alerts.push({
-          id: 'intent-community-connect',
-          type: 'action',
-          title: 'Community Connection',
-          message: 'There are 12 players in your area looking to connect. Ready to build your network?',
+          id: "intent-community-connect",
+          type: "action",
+          title: "Community Connection",
+          message: "There are 12 players in your area looking to connect. Ready to build your network?",
           icon: <Users className="w-5 h-5" />,
-          priority: 'medium',
-          intent: 'connect',
+          priority: "medium",
+          intent: "connect",
           dismissible: true,
           autoDismiss: 18000,
           actions: [
             {
-              label: 'Connect',
-              variant: 'primary',
-              onClick: () => handleAction('connect_community', 'Help me connect with local players'),
-              aiPrompt: 'Help me connect with local players'
+              label: "Connect",
+              variant: "primary",
+              onClick: () => handleAction("connect_community", "Help me connect with local players"),
+              aiPrompt: "Help me connect with local players"
             }
           ]
         });
@@ -277,20 +277,20 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
     const sessionDuration = 25 * 60 * 1000; // 25 minutes
     if (sessionDuration > 20 * 60 * 1000) { // After 20 minutes
       alerts.push({
-        id: 'session-break-reminder',
-        type: 'warning',
-        title: 'Take a Break',
-        message: 'You\'ve been active for 25 minutes. Consider taking a short break to maintain focus.',
+        id: "session-break-reminder",
+        type: "warning",
+        title: "Take a Break",
+        message: "You've been active for 25 minutes. Consider taking a short break to maintain focus.",
         icon: <Clock className="w-5 h-5" />,
-        priority: 'medium',
+        priority: "medium",
         dismissible: true,
         autoDismiss: 10000,
         actions: [
           {
-            label: 'Take Break',
-            variant: 'secondary',
-            onClick: () => handleAction('take_break', 'Help me take a productive break'),
-            aiPrompt: 'Help me take a productive break'
+            label: "Take Break",
+            variant: "secondary",
+            onClick: () => handleAction("take_break", "Help me take a productive break"),
+            aiPrompt: "Help me take a productive break"
           }
         ]
       });
@@ -305,17 +305,17 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
     // Mock achievement data - in real implementation, fetch from API
     const achievements = [
       {
-        id: 'first_workout',
-        title: 'First Workout Complete!',
-        message: 'Congratulations on completing your first workout! You\'re on your way to greatness.',
-        type: 'achievement' as const,
+        id: "first_workout",
+        title: "First Workout Complete!",
+        message: "Congratulations on completing your first workout! You're on your way to greatness.",
+        type: "achievement" as const,
         icon: <Trophy className="w-5 h-5" />
       },
       {
-        id: 'streak_7_days',
-        title: '7-Day Streak!',
-        message: 'Amazing! You\'ve been consistent for 7 days. Keep up the momentum!',
-        type: 'achievement' as const,
+        id: "streak_7_days",
+        title: "7-Day Streak!",
+        message: "Amazing! You've been consistent for 7 days. Keep up the momentum!",
+        type: "achievement" as const,
         icon: <Star className="w-5 h-5" />
       }
     ];
@@ -329,15 +329,15 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
         title: achievement.title,
         message: achievement.message,
         icon: achievement.icon,
-        priority: 'high',
+        priority: "high",
         dismissible: true,
         autoDismiss: 15000,
         actions: [
           {
-            label: 'View Achievements',
-            variant: 'primary',
-            onClick: () => handleAction('view_achievements', 'Show me my achievements'),
-            aiPrompt: 'Show me my achievements'
+            label: "View Achievements",
+            variant: "primary",
+            onClick: () => handleAction("view_achievements", "Show me my achievements"),
+            aiPrompt: "Show me my achievements"
           }
         ]
       });
@@ -351,15 +351,15 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
 
     const motivations = [
       {
-        id: 'motivation_1',
-        title: 'You\'ve Got This!',
-        message: 'Every expert was once a beginner. Your dedication is what sets you apart.',
+        id: "motivation_1",
+        title: "You've Got This!",
+        message: "Every expert was once a beginner. Your dedication is what sets you apart.",
         icon: <Heart className="w-5 h-5" />
       },
       {
-        id: 'motivation_2',
-        title: 'Progress Over Perfection',
-        message: 'Focus on getting 1% better each day. Small improvements compound into massive results.',
+        id: "motivation_2",
+        title: "Progress Over Perfection",
+        message: "Focus on getting 1% better each day. Small improvements compound into massive results.",
         icon: <TrendingUp className="w-5 h-5" />
       }
     ];
@@ -369,11 +369,11 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
       const motivation = motivations[Math.floor(Math.random() * motivations.length)];
       alerts.push({
         id: motivation.id,
-        type: 'motivation',
+        type: "motivation",
         title: motivation.title,
         message: motivation.message,
         icon: motivation.icon,
-        priority: 'low',
+        priority: "low",
         dismissible: true,
         autoDismiss: 12000
       });
@@ -409,7 +409,7 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
     try {
       // Send to AI orchestration
       await sendRequest({
-        type: 'smart_alert_action',
+        type: "smart_alert_action",
         data: {
           actionType,
           aiPrompt,
@@ -429,23 +429,23 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
     setAlerts(prev => prev.filter(alert => alert.id !== alertId));
   }, []);
 
-  const getAlertStyles = (type: SmartAlert['type']) => {
-    const baseStyles = 'rounded-lg p-4 shadow-lg border-l-4 max-w-sm';
+  const getAlertStyles = (type: SmartAlert["type"]) => {
+    const baseStyles = "rounded-lg p-4 shadow-lg border-l-4 max-w-sm";
     
     switch (type) {
-      case 'success':
+      case "success":
         return `${baseStyles} bg-green-50 border-green-400 text-green-800`;
-      case 'warning':
+      case "warning":
         return `${baseStyles} bg-yellow-50 border-yellow-400 text-yellow-800`;
-      case 'error':
+      case "error":
         return `${baseStyles} bg-red-50 border-red-400 text-red-800`;
-      case 'achievement':
+      case "achievement":
         return `${baseStyles} bg-purple-50 border-purple-400 text-purple-800`;
-      case 'motivation':
+      case "motivation":
         return `${baseStyles} bg-blue-50 border-blue-400 text-blue-800`;
-      case 'action':
+      case "action":
         return `${baseStyles} bg-indigo-50 border-indigo-400 text-indigo-800`;
-      case 'insight':
+      case "insight":
         return `${baseStyles} bg-cyan-50 border-cyan-400 text-cyan-800`;
       default:
         return `${baseStyles} bg-gray-50 border-gray-400 text-gray-800`;
@@ -454,18 +454,18 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
 
   const getPositionStyles = () => {
     switch (position) {
-      case 'top-right':
-        return 'top-4 right-4';
-      case 'top-left':
-        return 'top-4 left-4';
-      case 'bottom-right':
-        return 'bottom-4 right-4';
-      case 'bottom-left':
-        return 'bottom-4 left-4';
-      case 'center':
-        return 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2';
+      case "top-right":
+        return "top-4 right-4";
+      case "top-left":
+        return "top-4 left-4";
+      case "bottom-right":
+        return "bottom-4 right-4";
+      case "bottom-left":
+        return "bottom-4 left-4";
+      case "center":
+        return "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2";
       default:
-        return 'top-4 right-4';
+        return "top-4 right-4";
     }
   };
 
@@ -479,10 +479,10 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
         {alerts.map((alert) => (
           <motion.div
             key={alert.id}
-            initial={{ opacity: 0, x: position.includes('right') ? 100 : -100, scale: 0.9 }}
+            initial={{ opacity: 0, x: position.includes("right") ? 100 : -100, scale: 0.9 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: position.includes('right') ? 100 : -100, scale: 0.9 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
+            exit={{ opacity: 0, x: position.includes("right") ? 100 : -100, scale: 0.9 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className={getAlertStyles(alert.type)}
           >
             <div className="flex items-start justify-between">
@@ -503,13 +503,13 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
                           key={index}
                           onClick={action.onClick}
                           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                            action.variant === 'primary'
-                              ? 'bg-blue-600 text-white hover:bg-blue-700'
-                              : action.variant === 'secondary'
-                              ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                              : action.variant === 'ghost'
-                              ? 'bg-transparent text-gray-600 hover:bg-gray-100'
-                              : 'bg-red-600 text-white hover:bg-red-700'
+                            action.variant === "primary"
+                              ? "bg-blue-600 text-white hover:bg-blue-700"
+                              : action.variant === "secondary"
+                              ? "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                              : action.variant === "ghost"
+                              ? "bg-transparent text-gray-600 hover:bg-gray-100"
+                              : "bg-red-600 text-white hover:bg-red-700"
                           }`}
                         >
                           {action.label}

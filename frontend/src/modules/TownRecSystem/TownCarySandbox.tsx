@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Play, 
   Pause, 
@@ -38,13 +38,13 @@ import {
   Target,
   Zap,
   XCircle
-} from 'lucide-react';
+} from "lucide-react";
 
 interface SandboxUser {
   id: string;
   name: string;
   email: string;
-  role: 'TownStaff' | 'RecDirector' | 'RecCoordinator' | 'TestParent' | 'TestChild';
+  role: "TownStaff" | "RecDirector" | "RecCoordinator" | "TestParent" | "TestChild";
   department?: string;
   isActive: boolean;
   lastLogin?: Date;
@@ -69,7 +69,7 @@ interface SandboxLeague {
   endDate: Date;
   location: string;
   coach?: string;
-  status: 'active' | 'full' | 'waitlist' | 'completed';
+  status: "active" | "full" | "waitlist" | "completed";
   testData: {
     participants: number;
     siblings: number;
@@ -81,8 +81,8 @@ interface SandboxScenario {
   id: string;
   name: string;
   description: string;
-  category: 'waitlist' | 'overrides' | 'siblings' | 'registration' | 'approvals';
-  complexity: 'basic' | 'intermediate' | 'advanced';
+  category: "waitlist" | "overrides" | "siblings" | "registration" | "approvals";
+  complexity: "basic" | "intermediate" | "advanced";
   steps: string[];
   expectedOutcome: string;
   isActive: boolean;
@@ -126,45 +126,45 @@ const TownCarySandbox: React.FC = () => {
       // Mock sandbox users
       const mockUsers: SandboxUser[] = [
         {
-          id: 'user_001',
-          name: 'Sarah Johnson',
-          email: 'sarah.johnson@cary.gov',
-          role: 'RecDirector',
-          department: 'ParksAndRec',
+          id: "user_001",
+          name: "Sarah Johnson",
+          email: "sarah.johnson@cary.gov",
+          role: "RecDirector",
+          department: "ParksAndRec",
           isActive: true,
-          lastLogin: new Date('2024-01-26T10:30:00'),
-          permissions: ['waitlist_manage', 'overrides_approve', 'analytics_view', 'users_manage'],
+          lastLogin: new Date("2024-01-26T10:30:00"),
+          permissions: ["waitlist_manage", "overrides_approve", "analytics_view", "users_manage"],
           testData: { registrations: 45, waitlistEntries: 12, overrides: 8, approvals: 15 }
         },
         {
-          id: 'user_002',
-          name: 'Michael Chen',
-          email: 'michael.chen@cary.gov',
-          role: 'RecCoordinator',
-          department: 'ParksAndRec',
+          id: "user_002",
+          name: "Michael Chen",
+          email: "michael.chen@cary.gov",
+          role: "RecCoordinator",
+          department: "ParksAndRec",
           isActive: true,
-          lastLogin: new Date('2024-01-26T09:15:00'),
-          permissions: ['waitlist_manage', 'registration_view', 'analytics_view'],
+          lastLogin: new Date("2024-01-26T09:15:00"),
+          permissions: ["waitlist_manage", "registration_view", "analytics_view"],
           testData: { registrations: 32, waitlistEntries: 8, overrides: 3, approvals: 0 }
         },
         {
-          id: 'user_003',
-          name: 'Jennifer Smith',
-          email: 'jennifer.smith@test.com',
-          role: 'TestParent',
+          id: "user_003",
+          name: "Jennifer Smith",
+          email: "jennifer.smith@test.com",
+          role: "TestParent",
           isActive: true,
-          lastLogin: new Date('2024-01-26T08:45:00'),
-          permissions: ['registration_view'],
+          lastLogin: new Date("2024-01-26T08:45:00"),
+          permissions: ["registration_view"],
           testData: { registrations: 2, waitlistEntries: 1, overrides: 1, approvals: 0 }
         },
         {
-          id: 'user_004',
-          name: 'David Wilson',
-          email: 'david.wilson@test.com',
-          role: 'TestParent',
+          id: "user_004",
+          name: "David Wilson",
+          email: "david.wilson@test.com",
+          role: "TestParent",
           isActive: true,
-          lastLogin: new Date('2024-01-25T16:20:00'),
-          permissions: ['registration_view'],
+          lastLogin: new Date("2024-01-25T16:20:00"),
+          permissions: ["registration_view"],
           testData: { registrations: 3, waitlistEntries: 0, overrides: 0, approvals: 0 }
         }
       ];
@@ -172,63 +172,63 @@ const TownCarySandbox: React.FC = () => {
       // Mock sandbox leagues
       const mockLeagues: SandboxLeague[] = [
         {
-          id: 'league_001',
-          name: 'Youth Soccer U8',
-          ageGroup: 'U8',
-          sport: 'Soccer',
+          id: "league_001",
+          name: "Youth Soccer U8",
+          ageGroup: "U8",
+          sport: "Soccer",
           maxCapacity: 24,
           currentRegistrations: 22,
           waitlistCount: 8,
-          startDate: new Date('2024-03-01'),
-          endDate: new Date('2024-05-31'),
-          location: 'Cary Community Center',
-          coach: 'Coach Martinez',
-          status: 'active',
+          startDate: new Date("2024-03-01"),
+          endDate: new Date("2024-05-31"),
+          location: "Cary Community Center",
+          coach: "Coach Martinez",
+          status: "active",
           testData: { participants: 22, siblings: 6, ageOverrides: 2 }
         },
         {
-          id: 'league_002',
-          name: 'Youth Soccer U10',
-          ageGroup: 'U10',
-          sport: 'Soccer',
+          id: "league_002",
+          name: "Youth Soccer U10",
+          ageGroup: "U10",
+          sport: "Soccer",
           maxCapacity: 32,
           currentRegistrations: 32,
           waitlistCount: 15,
-          startDate: new Date('2024-03-01'),
-          endDate: new Date('2024-05-31'),
-          location: 'Cary Community Center',
-          coach: 'Coach Rodriguez',
-          status: 'full',
+          startDate: new Date("2024-03-01"),
+          endDate: new Date("2024-05-31"),
+          location: "Cary Community Center",
+          coach: "Coach Rodriguez",
+          status: "full",
           testData: { participants: 32, siblings: 8, ageOverrides: 5 }
         },
         {
-          id: 'league_003',
-          name: 'Youth Basketball U10',
-          ageGroup: 'U10',
-          sport: 'Basketball',
+          id: "league_003",
+          name: "Youth Basketball U10",
+          ageGroup: "U10",
+          sport: "Basketball",
           maxCapacity: 20,
           currentRegistrations: 18,
           waitlistCount: 3,
-          startDate: new Date('2024-02-15'),
-          endDate: new Date('2024-04-30'),
-          location: 'Cary Gymnasium',
-          coach: 'Coach Thompson',
-          status: 'active',
+          startDate: new Date("2024-02-15"),
+          endDate: new Date("2024-04-30"),
+          location: "Cary Gymnasium",
+          coach: "Coach Thompson",
+          status: "active",
           testData: { participants: 18, siblings: 4, ageOverrides: 1 }
         },
         {
-          id: 'league_004',
-          name: 'Youth Basketball U12',
-          ageGroup: 'U12',
-          sport: 'Basketball',
+          id: "league_004",
+          name: "Youth Basketball U12",
+          ageGroup: "U12",
+          sport: "Basketball",
           maxCapacity: 24,
           currentRegistrations: 20,
           waitlistCount: 6,
-          startDate: new Date('2024-02-15'),
-          endDate: new Date('2024-04-30'),
-          location: 'Cary Gymnasium',
-          coach: 'Coach Williams',
-          status: 'active',
+          startDate: new Date("2024-02-15"),
+          endDate: new Date("2024-04-30"),
+          location: "Cary Gymnasium",
+          coach: "Coach Williams",
+          status: "active",
           testData: { participants: 20, siblings: 5, ageOverrides: 3 }
         }
       ];
@@ -236,75 +236,75 @@ const TownCarySandbox: React.FC = () => {
       // Mock scenarios
       const mockScenarios: SandboxScenario[] = [
         {
-          id: 'scenario_001',
-          name: 'Waitlist Promotion',
-          description: 'Promote a child from waitlist to active registration when a spot opens',
-          category: 'waitlist',
-          complexity: 'basic',
+          id: "scenario_001",
+          name: "Waitlist Promotion",
+          description: "Promote a child from waitlist to active registration when a spot opens",
+          category: "waitlist",
+          complexity: "basic",
           steps: [
-            'Navigate to Waitlists tab',
-            'Find a child in waitlist position #1',
-            'Click "Promote" button',
-            'Confirm promotion',
-            'Verify child appears in registrations'
+            "Navigate to Waitlists tab",
+            "Find a child in waitlist position #1",
+            "Click \"Promote\" button",
+            "Confirm promotion",
+            "Verify child appears in registrations"
           ],
-          expectedOutcome: 'Child successfully promoted from waitlist to active registration',
+          expectedOutcome: "Child successfully promoted from waitlist to active registration",
           isActive: true,
           completionRate: 95,
           averageTime: 2
         },
         {
-          id: 'scenario_002',
-          name: 'Age Override Approval',
-          description: 'Review and approve an age override request for a child',
-          category: 'overrides',
-          complexity: 'intermediate',
+          id: "scenario_002",
+          name: "Age Override Approval",
+          description: "Review and approve an age override request for a child",
+          category: "overrides",
+          complexity: "intermediate",
           steps: [
-            'Navigate to Age Overrides tab',
-            'Find a pending override request',
-            'Review child details and reason',
-            'Click "Approve" or "Deny"',
-            'Add director notes if needed',
-            'Submit decision'
+            "Navigate to Age Overrides tab",
+            "Find a pending override request",
+            "Review child details and reason",
+            "Click \"Approve\" or \"Deny\"",
+            "Add director notes if needed",
+            "Submit decision"
           ],
-          expectedOutcome: 'Override request processed and parent notified',
+          expectedOutcome: "Override request processed and parent notified",
           isActive: true,
           completionRate: 88,
           averageTime: 4
         },
         {
-          id: 'scenario_003',
-          name: 'Sibling Pairing Conflict',
-          description: 'Resolve a sibling pairing conflict manually',
-          category: 'siblings',
-          complexity: 'advanced',
+          id: "scenario_003",
+          name: "Sibling Pairing Conflict",
+          description: "Resolve a sibling pairing conflict manually",
+          category: "siblings",
+          complexity: "advanced",
           steps: [
-            'Navigate to Sibling Pairing tab',
-            'Find a pairing with conflicts',
-            'Review conflict details',
-            'Choose resolution action',
-            'Assign team if needed',
-            'Confirm resolution'
+            "Navigate to Sibling Pairing tab",
+            "Find a pairing with conflicts",
+            "Review conflict details",
+            "Choose resolution action",
+            "Assign team if needed",
+            "Confirm resolution"
           ],
-          expectedOutcome: 'Sibling pairing conflict resolved and children assigned',
+          expectedOutcome: "Sibling pairing conflict resolved and children assigned",
           isActive: true,
           completionRate: 75,
           averageTime: 6
         },
         {
-          id: 'scenario_004',
-          name: 'Registration Analytics',
-          description: 'Generate and export registration analytics report',
-          category: 'registration',
-          complexity: 'basic',
+          id: "scenario_004",
+          name: "Registration Analytics",
+          description: "Generate and export registration analytics report",
+          category: "registration",
+          complexity: "basic",
           steps: [
-            'Navigate to Analytics tab',
-            'Review registration overview',
-            'Check league capacity charts',
-            'Export data to CSV',
-            'Review exported file'
+            "Navigate to Analytics tab",
+            "Review registration overview",
+            "Check league capacity charts",
+            "Export data to CSV",
+            "Review exported file"
           ],
-          expectedOutcome: 'Analytics report generated and exported successfully',
+          expectedOutcome: "Analytics report generated and exported successfully",
           isActive: true,
           completionRate: 92,
           averageTime: 3
@@ -387,9 +387,9 @@ const TownCarySandbox: React.FC = () => {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${isRunning ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+              <div className={`w-3 h-3 rounded-full ${isRunning ? "bg-green-500" : "bg-gray-400"}`}></div>
               <span className="text-sm text-gray-600">
-                {isRunning ? 'Running' : 'Stopped'}
+                {isRunning ? "Running" : "Stopped"}
               </span>
             </div>
             <button
@@ -509,9 +509,9 @@ const TownCarySandbox: React.FC = () => {
                       <p className="text-sm text-gray-600">{scenario.description}</p>
                     </div>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      scenario.complexity === 'basic' ? 'bg-green-100 text-green-800' :
-                      scenario.complexity === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
+                      scenario.complexity === "basic" ? "bg-green-100 text-green-800" :
+                      scenario.complexity === "intermediate" ? "bg-yellow-100 text-yellow-800" :
+                      "bg-red-100 text-red-800"
                     }`}>
                       {scenario.complexity}
                     </span>
@@ -549,9 +549,9 @@ const TownCarySandbox: React.FC = () => {
                       <p className="text-sm text-gray-600">{user.email}</p>
                     </div>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.role === 'RecDirector' ? 'bg-purple-100 text-purple-800' :
-                      user.role === 'RecCoordinator' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
+                      user.role === "RecDirector" ? "bg-purple-100 text-purple-800" :
+                      user.role === "RecCoordinator" ? "bg-blue-100 text-blue-800" :
+                      "bg-green-100 text-green-800"
                     }`}>
                       {user.role}
                     </span>
@@ -616,9 +616,9 @@ const TownCarySandbox: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      league.status === 'active' ? 'bg-green-100 text-green-800' :
-                      league.status === 'full' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
+                      league.status === "active" ? "bg-green-100 text-green-800" :
+                      league.status === "full" ? "bg-yellow-100 text-yellow-800" :
+                      "bg-gray-100 text-gray-800"
                     }`}>
                       {league.status}
                     </span>
@@ -690,9 +690,9 @@ const TownCarySandbox: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Role</label>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      selectedUser.role === 'RecDirector' ? 'bg-purple-100 text-purple-800' :
-                      selectedUser.role === 'RecCoordinator' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
+                      selectedUser.role === "RecDirector" ? "bg-purple-100 text-purple-800" :
+                      selectedUser.role === "RecCoordinator" ? "bg-blue-100 text-blue-800" :
+                      "bg-green-100 text-green-800"
                     }`}>
                       {selectedUser.role}
                     </span>
@@ -700,9 +700,9 @@ const TownCarySandbox: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Status</label>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      selectedUser.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      selectedUser.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                     }`}>
-                      {selectedUser.isActive ? 'Active' : 'Inactive'}
+                      {selectedUser.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
                 </div>
@@ -775,9 +775,9 @@ const TownCarySandbox: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Status</label>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      selectedLeague.status === 'active' ? 'bg-green-100 text-green-800' :
-                      selectedLeague.status === 'full' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
+                      selectedLeague.status === "active" ? "bg-green-100 text-green-800" :
+                      selectedLeague.status === "full" ? "bg-yellow-100 text-yellow-800" :
+                      "bg-gray-100 text-gray-800"
                     }`}>
                       {selectedLeague.status}
                     </span>

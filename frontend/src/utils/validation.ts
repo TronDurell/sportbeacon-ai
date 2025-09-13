@@ -5,7 +5,7 @@
  * to prevent injection attacks and ensure data integrity.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -16,36 +16,36 @@ import { z } from 'zod';
  */
 export const UserRegistrationSchema = z.object({
   email: z.string()
-    .email('Invalid email format')
-    .min(1, 'Email is required')
-    .max(254, 'Email too long')
-    .transform(email => email.trim().toLowerCase()),
+    .email("Invalid email format")
+    .min(1, "Email is required")
+    .max(254, "Email too long")
+    .transform((email: string) => email.trim().toLowerCase()),
   
   password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password too long')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase, and number'),
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password too long")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain uppercase, lowercase, and number"),
   
   firstName: z.string()
-    .min(1, 'First name is required')
-    .max(50, 'First name too long')
-    .regex(/^[a-zA-Z\s\-']+$/, 'First name contains invalid characters')
-    .transform(name => name.trim()),
+    .min(1, "First name is required")
+    .max(50, "First name too long")
+    .regex(/^[a-zA-Z\s\-']+$/, "First name contains invalid characters")
+    .transform((name: string) => name.trim()),
   
   lastName: z.string()
-    .min(1, 'Last name is required')
-    .max(50, 'Last name too long')
-    .regex(/^[a-zA-Z\s\-']+$/, 'Last name contains invalid characters')
-    .transform(name => name.trim()),
+    .min(1, "Last name is required")
+    .max(50, "Last name too long")
+    .regex(/^[a-zA-Z\s\-']+$/, "Last name contains invalid characters")
+    .transform((name: string) => name.trim()),
   
-  role: z.enum(['admin', 'director', 'coach', 'townStaff', 'athlete'], {
-    errorMap: () => ({ message: 'Invalid role selected' })
+  role: z.enum(["admin", "director", "coach", "townStaff", "athlete"], {
+    errorMap: () => ({ message: "Invalid role selected" })
   }),
   
   organization: z.string()
-    .max(100, 'Organization name too long')
+    .max(100, "Organization name too long")
     .optional()
-    .transform(org => org?.trim() || undefined),
+    .transform((org: string) => org?.trim() || undefined),
 });
 
 /**
@@ -53,15 +53,15 @@ export const UserRegistrationSchema = z.object({
  */
 export const UserLoginSchema = z.object({
   email: z.string()
-    .email('Invalid email format')
-    .min(1, 'Email is required')
-    .transform(email => email.trim().toLowerCase()),
+    .email("Invalid email format")
+    .min(1, "Email is required")
+    .transform((email: string) => email.trim().toLowerCase()),
   
   password: z.string()
-    .min(1, 'Password is required'),
+    .min(1, "Password is required"),
   
-  role: z.enum(['admin', 'director', 'coach', 'townStaff', 'athlete'], {
-    errorMap: () => ({ message: 'Invalid role selected' })
+  role: z.enum(["admin", "director", "coach", "townStaff", "athlete"], {
+    errorMap: () => ({ message: "Invalid role selected" })
   }),
 });
 
@@ -70,23 +70,23 @@ export const UserLoginSchema = z.object({
  */
 export const UserProfileUpdateSchema = z.object({
   firstName: z.string()
-    .min(1, 'First name is required')
-    .max(50, 'First name too long')
-    .regex(/^[a-zA-Z\s\-']+$/, 'First name contains invalid characters')
-    .transform(name => name.trim())
+    .min(1, "First name is required")
+    .max(50, "First name too long")
+    .regex(/^[a-zA-Z\s\-']+$/, "First name contains invalid characters")
+    .transform((name: string) => name.trim())
     .optional(),
   
   lastName: z.string()
-    .min(1, 'Last name is required')
-    .max(50, 'Last name too long')
-    .regex(/^[a-zA-Z\s\-']+$/, 'Last name contains invalid characters')
-    .transform(name => name.trim())
+    .min(1, "Last name is required")
+    .max(50, "Last name too long")
+    .regex(/^[a-zA-Z\s\-']+$/, "Last name contains invalid characters")
+    .transform((name: string) => name.trim())
     .optional(),
   
   organization: z.string()
-    .max(100, 'Organization name too long')
+    .max(100, "Organization name too long")
     .optional()
-    .transform(org => org?.trim() || undefined),
+    .transform((org: string) => org?.trim() || undefined),
 });
 
 /**
@@ -94,36 +94,36 @@ export const UserProfileUpdateSchema = z.object({
  */
 export const LeagueSchema = z.object({
   name: z.string()
-    .min(1, 'League name is required')
-    .max(100, 'League name too long')
-    .regex(/^[a-zA-Z0-9\s\-']+$/, 'League name contains invalid characters')
-    .transform(name => name.trim()),
+    .min(1, "League name is required")
+    .max(100, "League name too long")
+    .regex(/^[a-zA-Z0-9\s\-']+$/, "League name contains invalid characters")
+    .transform((name: string) => name.trim()),
   
-  sport: z.enum(['soccer', 'basketball', 'baseball', 'football', 'hockey', 'tennis', 'volleyball', 'lacrosse'], {
-    errorMap: () => ({ message: 'Invalid sport selected' })
+  sport: z.enum(["soccer", "basketball", "baseball", "football", "hockey", "tennis", "volleyball", "lacrosse"], {
+    errorMap: () => ({ message: "Invalid sport selected" })
   }),
   
-  ageGroup: z.enum(['u6', 'u8', 'u10', 'u12', 'u14', 'u16', 'u18', 'adult'], {
-    errorMap: () => ({ message: 'Invalid age group selected' })
+  ageGroup: z.enum(["u6", "u8", "u10", "u12", "u14", "u16", "u18", "adult"], {
+    errorMap: () => ({ message: "Invalid age group selected" })
   }),
   
   maxTeams: z.number()
-    .int('Max teams must be a whole number')
-    .min(1, 'Max teams must be at least 1')
-    .max(100, 'Max teams cannot exceed 100'),
+    .int("Max teams must be a whole number")
+    .min(1, "Max teams must be at least 1")
+    .max(100, "Max teams cannot exceed 100"),
   
   maxPlayersPerTeam: z.number()
-    .int('Max players per team must be a whole number')
-    .min(1, 'Max players per team must be at least 1')
-    .max(50, 'Max players per team cannot exceed 50'),
+    .int("Max players per team must be a whole number")
+    .min(1, "Max players per team must be at least 1")
+    .max(50, "Max players per team cannot exceed 50"),
   
   minPlayersPerTeam: z.number()
-    .int('Min players per team must be a whole number')
-    .min(1, 'Min players per team must be at least 1')
-    .max(50, 'Min players per team cannot exceed 50'),
+    .int("Min players per team must be a whole number")
+    .min(1, "Min players per team must be at least 1")
+    .max(50, "Min players per team cannot exceed 50"),
   
   organizationId: z.string()
-    .uuid('Invalid organization ID format')
+    .uuid("Invalid organization ID format")
     .optional(),
 });
 
@@ -132,16 +132,16 @@ export const LeagueSchema = z.object({
  */
 export const TeamSchema = z.object({
   name: z.string()
-    .min(1, 'Team name is required')
-    .max(100, 'Team name too long')
-    .regex(/^[a-zA-Z0-9\s\-']+$/, 'Team name contains invalid characters')
-    .transform(name => name.trim()),
+    .min(1, "Team name is required")
+    .max(100, "Team name too long")
+    .regex(/^[a-zA-Z0-9\s\-']+$/, "Team name contains invalid characters")
+    .transform((name: string) => name.trim()),
   
   leagueId: z.string()
-    .uuid('Invalid league ID format'),
+    .uuid("Invalid league ID format"),
   
   coachId: z.string()
-    .uuid('Invalid coach ID format'),
+    .uuid("Invalid coach ID format"),
 });
 
 /**
@@ -149,28 +149,28 @@ export const TeamSchema = z.object({
  */
 export const PlayerSchema = z.object({
   firstName: z.string()
-    .min(1, 'First name is required')
-    .max(50, 'First name too long')
-    .regex(/^[a-zA-Z\s\-']+$/, 'First name contains invalid characters')
-    .transform(name => name.trim()),
+    .min(1, "First name is required")
+    .max(50, "First name too long")
+    .regex(/^[a-zA-Z\s\-']+$/, "First name contains invalid characters")
+    .transform((name: string) => name.trim()),
   
   lastName: z.string()
-    .min(1, 'Last name is required')
-    .max(50, 'Last name too long')
-    .regex(/^[a-zA-Z\s\-']+$/, 'Last name contains invalid characters')
-    .transform(name => name.trim()),
+    .min(1, "Last name is required")
+    .max(50, "Last name too long")
+    .regex(/^[a-zA-Z\s\-']+$/, "Last name contains invalid characters")
+    .transform((name: string) => name.trim()),
   
   dateOfBirth: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)')
-    .refine(date => {
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
+    .refine((date: Date) => {
       const birthDate = new Date(date);
       const today = new Date();
       const age = today.getFullYear() - birthDate.getFullYear();
       return age >= 3 && age <= 100;
-    }, 'Invalid birth date'),
+    }, "Invalid birth date"),
   
   teamId: z.string()
-    .uuid('Invalid team ID format')
+    .uuid("Invalid team ID format")
     .optional(),
 });
 
@@ -205,12 +205,12 @@ export function validateData<T>(
     if (error instanceof z.ZodError) {
       return {
         isValid: false,
-        errors: error.errors.map(err => err.message)
+        errors: (error as any).errors.map((err: any) => err.message)
       };
     }
     return {
       isValid: false,
-      errors: ['Validation failed with unknown error']
+      errors: ["Validation failed with unknown error"]
     };
   }
 }
@@ -265,7 +265,7 @@ export function validatePlayerData(data: unknown): ValidationResult<z.infer<type
  * Format validation errors for display
  */
 export function formatValidationErrors(errors: string[]): string {
-  return errors.join(', ');
+  return errors.join(", ");
 }
 
 /**
@@ -273,8 +273,8 @@ export function formatValidationErrors(errors: string[]): string {
  */
 export function sanitizeString(input: string): string {
   return input
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/[<>]/g, "") // Remove potential HTML tags
+    .replace(/javascript:/gi, "") // Remove javascript: protocol
     .trim();
 }
 

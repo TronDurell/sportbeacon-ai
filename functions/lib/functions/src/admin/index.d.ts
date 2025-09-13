@@ -1,8 +1,8 @@
 export declare const adminGetLeagueStats: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
     message: string;
     success: boolean;
-    error?: any;
     data?: any;
+    error?: any;
 } | {
     success: boolean;
     message: string;
@@ -15,8 +15,8 @@ export declare const adminGetLeagueStats: import("firebase-functions/v2/https").
 export declare const adminUpdateStaffRole: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
     message: string;
     success: boolean;
-    error?: any;
     data?: any;
+    error?: any;
 } | {
     success: boolean;
     message: string;
@@ -29,8 +29,8 @@ export declare const adminUpdateStaffRole: import("firebase-functions/v2/https")
 export declare const adminGenerateReport: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
     message: string;
     success: boolean;
-    error?: any;
     data?: any;
+    error?: any;
 } | {
     success: boolean;
     message: string;

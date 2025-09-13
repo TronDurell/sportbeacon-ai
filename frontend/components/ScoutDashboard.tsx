@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PlayerAPI } from '../services/playerAPI';
 import { PlayerProfile, ScoutNote, PlayerEvaluation } from '../types';
-import { VideoPlayer } from './VideoPlayer';
+// import { VideoPlayer } from './VideoPlayer'; // Component not found
 import { PerformanceChart } from './PerformanceChart';
 
 interface ScoutDashboardProps {

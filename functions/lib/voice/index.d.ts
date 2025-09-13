@@ -49,7 +49,7 @@ export declare const generateAudio: import("firebase-functions/v2/https").Callab
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 export {};

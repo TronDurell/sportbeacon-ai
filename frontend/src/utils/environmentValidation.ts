@@ -58,7 +58,7 @@ interface EnvironmentConfig {
   
   // App Configuration
   app: {
-    environment: 'development' | 'staging' | 'production';
+    environment: "development" | "staging" | "production";
     version: string;
     buildNumber: string;
     debugMode: boolean;
@@ -159,12 +159,12 @@ class EnvironmentValidator {
     const config: any = {};
 
     const requiredKeys = [
-      'VITE_FIREBASE_API_KEY',
-      'VITE_FIREBASE_AUTH_DOMAIN',
-      'VITE_FIREBASE_PROJECT_ID',
-      'VITE_FIREBASE_STORAGE_BUCKET',
-      'VITE_FIREBASE_MESSAGING_SENDER_ID',
-      'VITE_FIREBASE_APP_ID'
+      "VITE_FIREBASE_API_KEY",
+      "VITE_FIREBASE_AUTH_DOMAIN",
+      "VITE_FIREBASE_PROJECT_ID",
+      "VITE_FIREBASE_STORAGE_BUCKET",
+      "VITE_FIREBASE_MESSAGING_SENDER_ID",
+      "VITE_FIREBASE_APP_ID"
     ];
 
     requiredKeys.forEach(key => {
@@ -173,7 +173,7 @@ class EnvironmentValidator {
         missing.push(key);
         errors.push(`Missing required Firebase configuration: ${key}`);
       } else {
-        config[key.replace('VITE_FIREBASE_', '').toLowerCase()] = value;
+        config[key.replace("VITE_FIREBASE_", "").toLowerCase()] = value;
       }
     });
 
@@ -187,7 +187,7 @@ class EnvironmentValidator {
     // OpenAI API Key (Required)
     const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
     if (!openaiKey) {
-      errors.push('Missing OpenAI API key - AI features will be disabled');
+      errors.push("Missing OpenAI API key - AI features will be disabled");
     } else {
       config.openaiApiKey = openaiKey;
     }
@@ -213,7 +213,7 @@ class EnvironmentValidator {
     // Stripe Configuration
     const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
     if (!stripePublishableKey) {
-      errors.push('Missing Stripe publishable key - payment features will be disabled');
+      errors.push("Missing Stripe publishable key - payment features will be disabled");
     } else {
       config.stripePublishableKey = stripePublishableKey;
     }
@@ -291,13 +291,13 @@ class EnvironmentValidator {
   }
 
   private validateAppConfig(): any {
-    const environment = import.meta.env.VITE_APP_ENVIRONMENT || 'development';
-    const version = import.meta.env.VITE_APP_VERSION || '1.0.0';
-    const buildNumber = import.meta.env.VITE_APP_BUILD_NUMBER || '1';
-    const debugMode = this.parseBoolean(import.meta.env.VITE_DEBUG_MODE, environment === 'development');
+    const environment = import.meta.env.VITE_APP_ENVIRONMENT || "development";
+    const version = import.meta.env.VITE_APP_VERSION || "1.0.0";
+    const buildNumber = import.meta.env.VITE_APP_BUILD_NUMBER || "1";
+    const debugMode = this.parseBoolean(import.meta.env.VITE_DEBUG_MODE, environment === "development");
 
     return {
-      environment: environment as 'development' | 'staging' | 'production',
+      environment: environment as "development" | "staging" | "production",
       version,
       buildNumber,
       debugMode
@@ -305,34 +305,34 @@ class EnvironmentValidator {
   }
 
   private validateEnvironmentSpecific(errors: string[], warnings: string[]): void {
-    const environment = import.meta.env.VITE_APP_ENVIRONMENT || 'development';
+    const environment = import.meta.env.VITE_APP_ENVIRONMENT || "development";
 
     // Production-specific validations
-    if (environment === 'production') {
+    if (environment === "production") {
       if (!import.meta.env.VITE_SENTRY_DSN) {
-        warnings.push('Sentry DSN not configured - error monitoring will be disabled in production');
+        warnings.push("Sentry DSN not configured - error monitoring will be disabled in production");
       }
 
       if (!import.meta.env.VITE_GOOGLE_ANALYTICS_ID) {
-        warnings.push('Google Analytics not configured - analytics will be disabled in production');
+        warnings.push("Google Analytics not configured - analytics will be disabled in production");
       }
 
-      if (import.meta.env.VITE_DEBUG_MODE === 'true') {
-        warnings.push('Debug mode is enabled in production - consider disabling for security');
+      if (import.meta.env.VITE_DEBUG_MODE === "true") {
+        warnings.push("Debug mode is enabled in production - consider disabling for security");
       }
     }
 
     // Development-specific validations
-    if (environment === 'development') {
+    if (environment === "development") {
       if (!import.meta.env.VITE_DEBUG_MODE) {
-        warnings.push('Debug mode not explicitly set in development');
+        warnings.push("Debug mode not explicitly set in development");
       }
     }
   }
 
   private parseBoolean(value: string | undefined, defaultValue: boolean): boolean {
     if (!value) return defaultValue;
-    return value.toLowerCase() === 'true';
+    return value.toLowerCase() === "true";
   }
 
   /**
@@ -346,7 +346,7 @@ class EnvironmentValidator {
   /**
    * Check if a specific feature is enabled
    */
-  isFeatureEnabled(feature: keyof EnvironmentConfig['features']): boolean {
+  isFeatureEnabled(feature: keyof EnvironmentConfig["features"]): boolean {
     const config = this.getConfig();
     return config.features?.[feature] || false;
   }
@@ -376,20 +376,20 @@ class EnvironmentValidator {
   logValidationResults(): void {
     const validation = this.validateEnvironment();
     
-    console.group('🔧 Environment Validation Results');
+    console.group("🔧 Environment Validation Results");
     
     if (validation.isValid) {
-      console.log('✅ Environment validation passed');
+      console.log("✅ Environment validation passed");
     } else {
-      validation.errors.forEach(error => console.error('❌ Error:', error));
+      validation.errors.forEach(error => console.error("❌ Error:", error));
     }
 
     if (validation.warnings.length > 0) {
-      validation.warnings.forEach(warning => console.warn('⚠️ Warning:', warning));
+      validation.warnings.forEach(warning => console.warn("⚠️ Warning:", warning));
     }
 
     if (validation.missing.length > 0) {
-      validation.missing.forEach(missing => console.info('ℹ️ Missing:', missing));
+      validation.missing.forEach(missing => console.info("ℹ️ Missing:", missing));
     }
 
     console.groupEnd();
@@ -429,7 +429,7 @@ class EnvironmentValidator {
     
     // Get all VITE_ prefixed environment variables
     Object.keys(import.meta.env).forEach(key => {
-      if (key.startsWith('VITE_')) {
+      if (key.startsWith("VITE_")) {
         env[key] = import.meta.env[key] as string;
       }
     });
@@ -447,6 +447,6 @@ export type { EnvironmentConfig, ValidationResult };
 // Export convenience functions
 export const validateEnvironment = () => environmentValidator.validateEnvironment();
 export const getConfig = () => environmentValidator.getConfig();
-export const isFeatureEnabled = (feature: keyof EnvironmentConfig['features']) => environmentValidator.isFeatureEnabled(feature);
+export const isFeatureEnabled = (feature: keyof EnvironmentConfig["features"]) => environmentValidator.isFeatureEnabled(feature);
 export const getEnvironmentConfig = () => environmentValidator.getEnvironmentConfig();
 export const logValidationResults = () => environmentValidator.logValidationResults(); 

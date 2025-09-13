@@ -22,7 +22,7 @@ describe("onRegistrationUpdated", () => {
     const beforeData = {...mockData.registration, status: "pending"};
     const afterData = {...mockData.registration, status: "active"};
     const event = createMockDocumentUpdatedEvent("registrations/{registrationId}", registrationId, beforeData,
-afterData);
+      afterData);
 
 
     // Act
@@ -63,7 +63,7 @@ afterData);
       approvedAt: new Date("2024-01-15T14:30:00Z"),
     };
     const event = createMockDocumentUpdatedEvent("registrations/{registrationId}", registrationId, beforeData,
-afterData);
+      afterData);
 
 
     // Act
@@ -96,7 +96,7 @@ afterData);
       cancellationReason: "Schedule conflict",
     };
     const event = createMockDocumentUpdatedEvent("registrations/{registrationId}", registrationId, beforeData,
-afterData);
+      afterData);
 
 
     // Act
@@ -127,7 +127,7 @@ afterData);
       teamChangeReason: "Balancing team sizes",
     };
     const event = createMockDocumentUpdatedEvent("registrations/{registrationId}", registrationId, beforeData,
-afterData);
+      afterData);
 
 
     // Act
@@ -158,7 +158,7 @@ afterData);
       leagueChangeReason: "Age group adjustment",
     };
     const event = createMockDocumentUpdatedEvent("registrations/{registrationId}", registrationId, beforeData,
-afterData);
+      afterData);
 
 
     // Act
@@ -187,7 +187,7 @@ afterData);
       notes: "Updated contact information",
     };
     const event = createMockDocumentUpdatedEvent("registrations/{registrationId}", registrationId, beforeData,
-afterData);
+      afterData);
 
 
     // Act
@@ -263,7 +263,7 @@ afterData);
       notes: "Special accommodations approved and arranged",
     };
     const event = createMockDocumentUpdatedEvent("registrations/{registrationId}", registrationId, beforeData,
-afterData);
+      afterData);
 
 
     // Act

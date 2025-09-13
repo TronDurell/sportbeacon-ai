@@ -265,8 +265,8 @@ export const TrainerHomeView: React.FC = () => {
                                             key={insight.id}
                                             insight={{
                                                 ...insight,
-                                                metric: insight.metric || 'performance',
-                                                timestamp: insight.timestamp || new Date()
+                                                metric: typeof insight.metric === 'number' ? insight.metric : 0,
+                                                timestamp: typeof insight.timestamp === 'string' ? insight.timestamp : new Date().toISOString()
                                             }}
                                             onAction={() => trainerAPI.acknowledgeInsight(insight.id)}
                                             compact={isMobile}
@@ -325,6 +325,10 @@ export const TrainerHomeView: React.FC = () => {
                                 role: askAssistant.data.role === 'user' ? 'trainer' : 'ai'
                             }] : []}
                             isLoading={askAssistant.isLoading}
+                            onSendMessage={handleAskAssistant}
+                            onStartRecording={() => {}}
+                            onStopRecording={() => {}}
+                            isRecording={false}
                             compact={isMobile}
                         />
                     </Card>
@@ -339,7 +343,7 @@ export const TrainerHomeView: React.FC = () => {
                                     key={item.id}
                                     item={{
                                         ...item,
-                                        timestamp: new Date(item.timestamp)
+                                        timestamp: typeof item.timestamp === 'string' ? item.timestamp : new Date(item.timestamp).toISOString()
                                     }}
                                                                         onInteract={(type) => 
                                         trainerAPI.interactWithPost(item.id, type)

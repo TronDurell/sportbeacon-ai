@@ -24,14 +24,14 @@ import {
   Database,
   Wifi,
   Cpu,
-  Memory,
+  // Memory, // Icon not found in lucide-react
   BarChart3,
   RefreshCw,
   Play,
   Pause,
   Square
 } from 'lucide-react';
-import type { DataFlow, PerformanceMetric, ValidationResult } from '../../services/dataFlowValidator';
+import type { DataFlow, PerformanceMetrics, ValidationResult } from '../../services/dataFlowValidator';
 
 // Data Flow Monitor Props
 interface DataFlowMonitorProps {
@@ -394,7 +394,7 @@ export const DataFlowMonitor: React.FC<DataFlowMonitorProps> = ({
                       {flow.flowType.replace('_', ' ')}
                     </p>
                     <p className="text-xs text-gray-600">
-                      {formatDuration(flow.totalDuration)} • {flow.events.length} events
+                      {Math.round(flow.totalDuration)}ms • {flow.events.length} events
                     </p>
                   </div>
                 </div>
@@ -520,7 +520,7 @@ export const DataFlowChart: React.FC<{
                   {flow.flowType.replace('_', ' ')}
                 </span>
                 <span className="text-xs text-gray-500">
-                  {formatDuration(flow.totalDuration)}
+                  {Math.round(flow.totalDuration)}ms
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-1 mt-1">

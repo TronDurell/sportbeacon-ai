@@ -338,29 +338,4 @@ export interface TransactionOptions {
   timeout?: number;
 }
 
-// Export all types
-export type {
-  Player,
-  Achievement,
-  PlayerStats,
-  PlayerPreferences,
-  Coach,
-  Certification,
-  CoachAvailability,
-  Drill,
-  Report,
-  ReportMetrics,
-  Attachment,
-  VideoAnnotation,
-  SearchFilters,
-  User,
-  Session,
-  SessionDrill,
-  Notification,
-  Analytics,
-  FirestoreError,
-  QueryResult,
-  ListenerOptions,
-  BatchOperation,
-  TransactionOptions
-}; 
+// All types are already exported inline above 

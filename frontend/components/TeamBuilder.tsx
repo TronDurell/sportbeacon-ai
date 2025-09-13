@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { useDrop } from 'react-dnd';
+// import { useDrop } from 'react-dnd';
 import AthleteCard from './AthleteCard';
 
 export default function TeamBuilder({ players, onAssignPlayer }) {

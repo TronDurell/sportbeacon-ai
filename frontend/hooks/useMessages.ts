@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase'; // Ensure this path is correct
+import { db } from '../firebase/init';
 
-export default function useMessages(conversationId) {
-  const [messages, setMessages] = useState([]);
+export default function useMessages(conversationId: string) {
+  const [messages, setMessages] = useState<any[]>([]);
 
   useEffect(() => {
     if (!conversationId) return;
@@ -17,7 +17,7 @@ export default function useMessages(conversationId) {
     return () => unsubscribe();
   }, [conversationId]);
 
-  const sendMessage = async (text, senderId) => {
+  const sendMessage = async (text: string, senderId: string) => {
     await addDoc(collection(db, 'messages'), {
       conversationId,
       text,

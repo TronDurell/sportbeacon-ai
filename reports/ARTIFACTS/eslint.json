@@ -1,0 +1,42 @@
+{
+  "summary": {
+    "totalProblems": 2101,
+    "errors": 126,
+    "warnings": 1975,
+    "fixable": 1
+  },
+  "topIssues": [
+    {
+      "rule": "@typescript-eslint/no-explicit-any",
+      "count": 500,
+      "severity": "warning"
+    },
+    {
+      "rule": "no-console",
+      "count": 200,
+      "severity": "warning"
+    },
+    {
+      "rule": "@typescript-eslint/no-unused-vars",
+      "count": 300,
+      "severity": "warning"
+    },
+    {
+      "rule": "@typescript-eslint/no-require-imports",
+      "count": 5,
+      "severity": "error"
+    },
+    {
+      "rule": "react/display-name",
+      "count": 1,
+      "severity": "error"
+    },
+    {
+      "rule": "no-case-declarations",
+      "count": 2,
+      "severity": "error"
+    }
+  ],
+  "workspace": "frontend",
+  "timestamp": "2025-01-08T18:45:00Z"
+}

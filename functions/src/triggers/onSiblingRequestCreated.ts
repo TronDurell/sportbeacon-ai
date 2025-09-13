@@ -1,10 +1,8 @@
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
-import {initializeApp} from "firebase-admin/app";
 import {getFirestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 
-// Initialize Firebase Admin
-initializeApp();
+// Get Firestore instance (Firebase Admin already initialized in main index.ts)
 const db = getFirestore();
 
 /**

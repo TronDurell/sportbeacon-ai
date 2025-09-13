@@ -14,6 +14,8 @@ export interface Badge {
     earned: boolean;
     earnedDate?: string;
     category: 'achievement' | 'skill' | 'social' | 'challenge';
+    sound?: string;
+    animation?: string;
 }
 
 const BadgeContainer = styled(Paper)(({ theme }) => ({

@@ -1,16 +1,16 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import PlayerLayout from '../layouts/PlayerLayout';
-import CoachLayout from '../layouts/CoachLayout';
-import ParentLayout from '../layouts/ParentLayout';
-import AdminLayout from '../layouts/AdminLayout';
-import MissionAnalyticsPanel from '../../modules/AdminTools/MissionAnalyticsPanel';
-import LiberationStatsDashboard from '../../modules/AdminTools/LiberationStatsDashboard';
-import RecAdminHub from '../../modules/TownRecSystem/RecAdminHub';
-import RecAuditPanel from '../../modules/AdminTools/RecAuditPanel';
-import TownCarySandbox from '../../modules/TownRecSystem/TownCarySandbox';
-import UnifiedDashboard from '../modules/Dashboard/UnifiedDashboard';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import PlayerLayout from "../layouts/PlayerLayout";
+import CoachLayout from "../layouts/CoachLayout";
+import ParentLayout from "../layouts/ParentLayout";
+import AdminLayout from "../layouts/AdminLayout";
+import MissionAnalyticsPanel from "../../modules/AdminTools/MissionAnalyticsPanel";
+import LiberationStatsDashboard from "../../modules/AdminTools/LiberationStatsDashboard";
+import RecAdminHub from "../../modules/TownRecSystem/RecAdminHub";
+import RecAuditPanel from "../../modules/AdminTools/RecAuditPanel";
+import TownCarySandbox from "../../modules/TownRecSystem/TownCarySandbox";
+import UnifiedDashboard from "../modules/Dashboard/UnifiedDashboard";
 
 const RoleRouter: React.FC = () => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -45,29 +45,29 @@ const RoleRouter: React.FC = () => {
   }
 
   // Check if user has Town Staff role
-  const hasTownStaffRole = ['TownStaff', 'RecDirector', 'RecCoordinator'].includes(user.role);
+  const hasTownStaffRole = ["TownStaff", "RecDirector", "RecCoordinator"].includes(user.role);
 
   return (
     <Router>
       <Routes>
         {/* Player Routes */}
         <Route path="/player/*" element={
-          user.role === 'player' ? <PlayerLayout /> : <Navigate to="/" replace />
+          user.role === "player" ? <PlayerLayout /> : <Navigate to="/" replace />
         } />
         
         {/* Coach Routes */}
         <Route path="/coach/*" element={
-          user.role === 'coach' ? <CoachLayout /> : <Navigate to="/" replace />
+          user.role === "coach" ? <CoachLayout /> : <Navigate to="/" replace />
         } />
         
         {/* Parent Routes */}
         <Route path="/parent/*" element={
-          user.role === 'parent' ? <ParentLayout /> : <Navigate to="/" replace />
+          user.role === "parent" ? <ParentLayout /> : <Navigate to="/" replace />
         } />
         
         {/* Admin Routes */}
         <Route path="/admin/*" element={
-          user.role === 'admin' ? (
+          user.role === "admin" ? (
             <AdminLayout>
               <Routes>
                 <Route path="/" element={<UnifiedDashboard />} />

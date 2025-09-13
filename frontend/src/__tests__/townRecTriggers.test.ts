@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 
 // Mock Firebase Admin
 const mockFirestore = {
@@ -40,7 +40,7 @@ const mockFunctions = {
 };
 
 // Mock the triggers module
-jest.mock('../../backend/functions/townRecTriggers', () => ({
+jest.mock("../../backend/functions/townRecTriggers", () => ({
   checkWaitlist: jest.fn(),
   groupSiblings: jest.fn(),
   ageExceptionRequest: jest.fn(),
@@ -56,9 +56,9 @@ import {
   notifyParent,
   assignTeam,
   logAuditTrail
-} from '../../backend/functions/townRecTriggers';
+} from "../../backend/functions/townRecTriggers";
 
-describe('Town Rec Firestore Triggers', () => {
+describe("Town Rec Firestore Triggers", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -70,39 +70,39 @@ describe('Town Rec Firestore Triggers', () => {
     mockDoc.collection.mockReturnValue(mockCollection);
   });
 
-  describe('checkWaitlist', () => {
+  describe("checkWaitlist", () => {
     const mockRegistrationData = {
-      childId: 'child123',
-      leagueId: 'league456',
-      parentId: 'parent789',
+      childId: "child123",
+      leagueId: "league456",
+      parentId: "parent789",
       timestamp: new Date(),
-      status: 'registered'
+      status: "registered"
     };
 
-    test('should promote waitlist entry when spot becomes available', async () => {
+    test("should promote waitlist entry when spot becomes available", async () => {
       // Mock waitlist entry
       const mockWaitlistEntry = {
-        id: 'waitlist123',
-        childId: 'child123',
-        leagueId: 'league456',
-        parentId: 'parent789',
+        id: "waitlist123",
+        childId: "child123",
+        leagueId: "league456",
+        parentId: "parent789",
         priority: 1,
-        timestamp: new Date('2024-01-01'),
-        status: 'waiting'
+        timestamp: new Date("2024-01-01"),
+        status: "waiting"
       };
 
       // Mock league data
       const mockLeague = {
-        id: 'league456',
+        id: "league456",
         maxPlayers: 12,
         currentPlayers: 11,
-        waitlistPolicy: 'auto_promote'
+        waitlistPolicy: "auto_promote"
       };
 
       // Setup mocks
       mockCollection.where.mockReturnValue(mockCollection);
       mockCollection.get.mockResolvedValue({
-        docs: [{ data: () => mockWaitlistEntry, id: 'waitlist123' }]
+        docs: [{ data: () => mockWaitlistEntry, id: "waitlist123" }]
       });
 
       mockDoc.get.mockResolvedValue({
@@ -120,39 +120,39 @@ describe('Town Rec Firestore Triggers', () => {
       expect(mockBatch.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          status: 'promoted',
+          status: "promoted",
           promotedAt: expect.any(Date)
         })
       );
 
       // Verify notification was sent
       expect(notifyParent).toHaveBeenCalledWith(
-        'parent789',
-        'waitlist_promoted',
+        "parent789",
+        "waitlist_promoted",
         expect.objectContaining({
-          childId: 'child123',
-          leagueId: 'league456'
+          childId: "child123",
+          leagueId: "league456"
         })
       );
 
       // Verify audit trail was logged
       expect(logAuditTrail).toHaveBeenCalledWith(
-        'waitlist_promoted',
+        "waitlist_promoted",
         expect.objectContaining({
-          waitlistId: 'waitlist123',
-          childId: 'child123',
-          leagueId: 'league456'
+          waitlistId: "waitlist123",
+          childId: "child123",
+          leagueId: "league456"
         })
       );
     });
 
-    test('should not promote waitlist when league is full', async () => {
+    test("should not promote waitlist when league is full", async () => {
       // Mock league at capacity
       const mockLeague = {
-        id: 'league456',
+        id: "league456",
         maxPlayers: 12,
         currentPlayers: 12,
-        waitlistPolicy: 'auto_promote'
+        waitlistPolicy: "auto_promote"
       };
 
       mockDoc.get.mockResolvedValue({
@@ -167,25 +167,25 @@ describe('Town Rec Firestore Triggers', () => {
       expect(notifyParent).not.toHaveBeenCalled();
     });
 
-    test('should handle multiple waitlist entries with priority', async () => {
+    test("should handle multiple waitlist entries with priority", async () => {
       const mockWaitlistEntries = [
         {
-          id: 'waitlist1',
-          childId: 'child1',
-          leagueId: 'league456',
-          parentId: 'parent1',
+          id: "waitlist1",
+          childId: "child1",
+          leagueId: "league456",
+          parentId: "parent1",
           priority: 2,
-          timestamp: new Date('2024-01-01'),
-          status: 'waiting'
+          timestamp: new Date("2024-01-01"),
+          status: "waiting"
         },
         {
-          id: 'waitlist2',
-          childId: 'child2',
-          leagueId: 'league456',
-          parentId: 'parent2',
+          id: "waitlist2",
+          childId: "child2",
+          leagueId: "league456",
+          parentId: "parent2",
           priority: 1,
-          timestamp: new Date('2024-01-02'),
-          status: 'waiting'
+          timestamp: new Date("2024-01-02"),
+          status: "waiting"
         }
       ];
 
@@ -197,10 +197,10 @@ describe('Town Rec Firestore Triggers', () => {
       });
 
       const mockLeague = {
-        id: 'league456',
+        id: "league456",
         maxPlayers: 12,
         currentPlayers: 11,
-        waitlistPolicy: 'auto_promote'
+        waitlistPolicy: "auto_promote"
       };
 
       mockDoc.get.mockResolvedValue({
@@ -214,28 +214,28 @@ describe('Town Rec Firestore Triggers', () => {
       expect(mockBatch.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          status: 'promoted'
+          status: "promoted"
         })
       );
     });
   });
 
-  describe('groupSiblings', () => {
+  describe("groupSiblings", () => {
     const mockSiblingData = {
-      childId: 'child123',
-      siblingId: 'sibling456',
-      leagueId: 'league789',
-      parentId: 'parent123'
+      childId: "child123",
+      siblingId: "sibling456",
+      leagueId: "league789",
+      parentId: "parent123"
     };
 
-    test('should group siblings in same team when possible', async () => {
+    test("should group siblings in same team when possible", async () => {
       // Mock team data
       const mockTeam = {
-        id: 'team123',
-        leagueId: 'league789',
+        id: "team123",
+        leagueId: "league789",
         currentPlayers: 8,
         maxPlayers: 12,
-        players: ['child123']
+        players: ["child123"]
       };
 
       mockDoc.get.mockResolvedValue({
@@ -251,23 +251,23 @@ describe('Town Rec Firestore Triggers', () => {
       expect(mockBatch.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          players: expect.arrayContaining(['sibling456'])
+          players: expect.arrayContaining(["sibling456"])
         })
       );
 
       // Verify notification was sent
       expect(notifyParent).toHaveBeenCalledWith(
-        'parent123',
-        'siblings_grouped',
+        "parent123",
+        "siblings_grouped",
         expect.objectContaining({
-          childId: 'child123',
-          siblingId: 'sibling456',
-          teamId: 'team123'
+          childId: "child123",
+          siblingId: "sibling456",
+          teamId: "team123"
         })
       );
     });
 
-    test('should create new team when no suitable team available', async () => {
+    test("should create new team when no suitable team available", async () => {
       // Mock no available teams
       mockCollection.where.mockReturnValue(mockCollection);
       mockCollection.get.mockResolvedValue({
@@ -282,56 +282,56 @@ describe('Town Rec Firestore Triggers', () => {
       expect(mockBatch.set).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          players: ['child123', 'sibling456'],
-          leagueId: 'league789'
+          players: ["child123", "sibling456"],
+          leagueId: "league789"
         })
       );
     });
 
-    test('should handle sibling conflicts', async () => {
+    test("should handle sibling conflicts", async () => {
       // Mock conflicting sibling request
       const mockConflict = {
-        id: 'conflict123',
-        childId: 'child123',
-        siblingId: 'sibling456',
-        status: 'conflict',
-        reason: 'Different age groups'
+        id: "conflict123",
+        childId: "child123",
+        siblingId: "sibling456",
+        status: "conflict",
+        reason: "Different age groups"
       };
 
       mockCollection.where.mockReturnValue(mockCollection);
       mockCollection.get.mockResolvedValue({
-        docs: [{ data: () => mockConflict, id: 'conflict123' }]
+        docs: [{ data: () => mockConflict, id: "conflict123" }]
       });
 
       await groupSiblings(mockSiblingData);
 
       // Verify conflict was logged
       expect(logAuditTrail).toHaveBeenCalledWith(
-        'sibling_conflict',
+        "sibling_conflict",
         expect.objectContaining({
-          childId: 'child123',
-          siblingId: 'sibling456',
-          reason: 'Different age groups'
+          childId: "child123",
+          siblingId: "sibling456",
+          reason: "Different age groups"
         })
       );
     });
   });
 
-  describe('ageExceptionRequest', () => {
+  describe("ageExceptionRequest", () => {
     const mockAgeExceptionData = {
-      childId: 'child123',
-      leagueId: 'league456',
-      parentId: 'parent789',
+      childId: "child123",
+      leagueId: "league456",
+      parentId: "parent789",
       requestedAge: 7,
       actualAge: 6,
-      reason: 'Advanced skills',
+      reason: "Advanced skills",
       timestamp: new Date()
     };
 
-    test('should auto-approve age exceptions within policy limits', async () => {
+    test("should auto-approve age exceptions within policy limits", async () => {
       // Mock league policy allowing age exceptions
       const mockLeague = {
-        id: 'league456',
+        id: "league456",
         ageExceptionPolicy: {
           maxMonthsUnder: 6,
           autoApprove: true,
@@ -352,27 +352,27 @@ describe('Town Rec Firestore Triggers', () => {
       expect(mockBatch.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          status: 'approved',
+          status: "approved",
           approvedAt: expect.any(Date),
-          approvedBy: 'system'
+          approvedBy: "system"
         })
       );
 
       // Verify notification
       expect(notifyParent).toHaveBeenCalledWith(
-        'parent789',
-        'age_exception_approved',
+        "parent789",
+        "age_exception_approved",
         expect.objectContaining({
-          childId: 'child123',
-          leagueId: 'league456'
+          childId: "child123",
+          leagueId: "league456"
         })
       );
     });
 
-    test('should require director approval for exceptions outside policy', async () => {
+    test("should require director approval for exceptions outside policy", async () => {
       // Mock league policy requiring director approval
       const mockLeague = {
-        id: 'league456',
+        id: "league456",
         ageExceptionPolicy: {
           maxMonthsUnder: 3,
           autoApprove: false,
@@ -391,27 +391,27 @@ describe('Town Rec Firestore Triggers', () => {
       expect(mockBatch.set).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          type: 'age_override',
-          status: 'pending_approval',
+          type: "age_override",
+          status: "pending_approval",
           requiresDirectorApproval: true
         })
       );
 
       // Verify notification to director
       expect(notifyParent).toHaveBeenCalledWith(
-        'director',
-        'age_exception_pending',
+        "director",
+        "age_exception_pending",
         expect.objectContaining({
-          childId: 'child123',
-          leagueId: 'league456'
+          childId: "child123",
+          leagueId: "league456"
         })
       );
     });
 
-    test('should reject age exceptions outside allowed range', async () => {
+    test("should reject age exceptions outside allowed range", async () => {
       // Mock league policy with strict age requirements
       const mockLeague = {
-        id: 'league456',
+        id: "league456",
         ageExceptionPolicy: {
           maxMonthsUnder: 0,
           autoApprove: false,
@@ -430,32 +430,32 @@ describe('Town Rec Firestore Triggers', () => {
       expect(mockBatch.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          status: 'denied',
+          status: "denied",
           deniedAt: expect.any(Date),
-          deniedBy: 'system',
-          reason: 'Age exception not allowed'
+          deniedBy: "system",
+          reason: "Age exception not allowed"
         })
       );
     });
   });
 
-  describe('notifyParent', () => {
+  describe("notifyParent", () => {
     const mockNotificationData = {
-      parentId: 'parent123',
-      type: 'registration_confirmed',
+      parentId: "parent123",
+      type: "registration_confirmed",
       data: {
-        childId: 'child123',
-        leagueId: 'league456',
-        teamId: 'team789'
+        childId: "child123",
+        leagueId: "league456",
+        teamId: "team789"
       }
     };
 
-    test('should send email notification', async () => {
+    test("should send email notification", async () => {
       // Mock parent data
       const mockParent = {
-        id: 'parent123',
-        email: 'parent@example.com',
-        name: 'John Doe',
+        id: "parent123",
+        email: "parent@example.com",
+        name: "John Doe",
         notificationPreferences: {
           email: true,
           sms: false,
@@ -470,25 +470,25 @@ describe('Town Rec Firestore Triggers', () => {
 
       mockBatch.set.mockReturnValue(mockBatch);
 
-      await notifyParent('parent123', 'registration_confirmed', mockNotificationData.data);
+      await notifyParent("parent123", "registration_confirmed", mockNotificationData.data);
 
       // Verify notification was created
       expect(mockBatch.set).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          parentId: 'parent123',
-          type: 'registration_confirmed',
-          status: 'pending',
+          parentId: "parent123",
+          type: "registration_confirmed",
+          status: "pending",
           createdAt: expect.any(Date)
         })
       );
     });
 
-    test('should handle notification preferences', async () => {
+    test("should handle notification preferences", async () => {
       const mockParent = {
-        id: 'parent123',
-        email: 'parent@example.com',
-        phone: '555-1234',
+        id: "parent123",
+        email: "parent@example.com",
+        phone: "555-1234",
         notificationPreferences: {
           email: false,
           sms: true,
@@ -501,35 +501,35 @@ describe('Town Rec Firestore Triggers', () => {
         exists: true
       });
 
-      await notifyParent('parent123', 'waitlist_promoted', {});
+      await notifyParent("parent123", "waitlist_promoted", {});
 
       // Verify SMS notification was created instead of email
       expect(mockBatch.set).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          channel: 'sms',
-          phone: '555-1234'
+          channel: "sms",
+          phone: "555-1234"
         })
       );
     });
   });
 
-  describe('assignTeam', () => {
+  describe("assignTeam", () => {
     const mockAssignmentData = {
-      childId: 'child123',
-      leagueId: 'league456',
-      teamId: 'team789',
-      position: 'forward'
+      childId: "child123",
+      leagueId: "league456",
+      teamId: "team789",
+      position: "forward"
     };
 
-    test('should assign child to team', async () => {
+    test("should assign child to team", async () => {
       // Mock team data
       const mockTeam = {
-        id: 'team789',
-        leagueId: 'league456',
+        id: "team789",
+        leagueId: "league456",
         currentPlayers: 10,
         maxPlayers: 12,
-        players: ['child1', 'child2']
+        players: ["child1", "child2"]
       };
 
       mockDoc.get.mockResolvedValue({
@@ -545,7 +545,7 @@ describe('Town Rec Firestore Triggers', () => {
       expect(mockBatch.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          players: expect.arrayContaining(['child123']),
+          players: expect.arrayContaining(["child123"]),
           currentPlayers: 11
         })
       );
@@ -554,21 +554,21 @@ describe('Town Rec Firestore Triggers', () => {
       expect(mockBatch.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          teamId: 'team789',
-          position: 'forward',
+          teamId: "team789",
+          position: "forward",
           assignedAt: expect.any(Date)
         })
       );
     });
 
-    test('should handle team at capacity', async () => {
+    test("should handle team at capacity", async () => {
       // Mock team at capacity
       const mockTeam = {
-        id: 'team789',
-        leagueId: 'league456',
+        id: "team789",
+        leagueId: "league456",
         currentPlayers: 12,
         maxPlayers: 12,
-        players: ['child1', 'child2', 'child3', 'child4', 'child5', 'child6', 'child7', 'child8', 'child9', 'child10', 'child11', 'child12']
+        players: ["child1", "child2", "child3", "child4", "child5", "child6", "child7", "child8", "child9", "child10", "child11", "child12"]
       };
 
       mockDoc.get.mockResolvedValue({
@@ -580,127 +580,127 @@ describe('Town Rec Firestore Triggers', () => {
 
       // Verify error was logged
       expect(logAuditTrail).toHaveBeenCalledWith(
-        'team_assignment_failed',
+        "team_assignment_failed",
         expect.objectContaining({
-          childId: 'child123',
-          teamId: 'team789',
-          reason: 'Team at capacity'
+          childId: "child123",
+          teamId: "team789",
+          reason: "Team at capacity"
         })
       );
     });
   });
 
-  describe('logAuditTrail', () => {
-    test('should log audit events with proper metadata', async () => {
+  describe("logAuditTrail", () => {
+    test("should log audit events with proper metadata", async () => {
       const mockAuditData = {
-        action: 'registration_created',
-        userId: 'user123',
-        targetId: 'registration456',
+        action: "registration_created",
+        userId: "user123",
+        targetId: "registration456",
         metadata: {
-          childId: 'child123',
-          leagueId: 'league456',
+          childId: "child123",
+          leagueId: "league456",
           cost: 150
         }
       };
 
       mockBatch.set.mockReturnValue(mockBatch);
 
-      await logAuditTrail('registration_created', mockAuditData);
+      await logAuditTrail("registration_created", mockAuditData);
 
       // Verify audit trail entry was created
       expect(mockBatch.set).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          action: 'registration_created',
-          userId: 'user123',
-          targetId: 'registration456',
+          action: "registration_created",
+          userId: "user123",
+          targetId: "registration456",
           timestamp: expect.any(Date),
           metadata: mockAuditData.metadata
         })
       );
     });
 
-    test('should include session and request context', async () => {
+    test("should include session and request context", async () => {
       const mockContext = {
-        sessionId: 'session123',
-        requestId: 'request456',
-        ipAddress: '192.168.1.1',
-        userAgent: 'Mozilla/5.0...'
+        sessionId: "session123",
+        requestId: "request456",
+        ipAddress: "192.168.1.1",
+        userAgent: "Mozilla/5.0..."
       };
 
-      await logAuditTrail('policy_updated', { policyId: 'policy123' }, mockContext);
+      await logAuditTrail("policy_updated", { policyId: "policy123" }, mockContext);
 
       expect(mockBatch.set).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          sessionId: 'session123',
-          requestId: 'request456',
-          ipAddress: '192.168.1.1',
-          userAgent: 'Mozilla/5.0...'
+          sessionId: "session123",
+          requestId: "request456",
+          ipAddress: "192.168.1.1",
+          userAgent: "Mozilla/5.0..."
         })
       );
     });
   });
 
-  describe('Error Handling', () => {
-    test('should handle Firestore errors gracefully', async () => {
+  describe("Error Handling", () => {
+    test("should handle Firestore errors gracefully", async () => {
       // Mock Firestore error
-      mockDoc.get.mockRejectedValue(new Error('Firestore connection failed'));
+      mockDoc.get.mockRejectedValue(new Error("Firestore connection failed"));
 
-      await expect(checkWaitlist({ childId: 'child123', leagueId: 'league456' }))
-        .rejects.toThrow('Firestore connection failed');
+      await expect(checkWaitlist({ childId: "child123", leagueId: "league456" }))
+        .rejects.toThrow("Firestore connection failed");
 
       // Verify error was logged
       expect(logAuditTrail).toHaveBeenCalledWith(
-        'trigger_error',
+        "trigger_error",
         expect.objectContaining({
-          function: 'checkWaitlist',
-          error: 'Firestore connection failed'
+          function: "checkWaitlist",
+          error: "Firestore connection failed"
         })
       );
     });
 
-    test('should handle missing data gracefully', async () => {
+    test("should handle missing data gracefully", async () => {
       // Mock missing document
       mockDoc.get.mockResolvedValue({
         data: () => null,
         exists: false
       });
 
-      await checkWaitlist({ childId: 'child123', leagueId: 'league456' });
+      await checkWaitlist({ childId: "child123", leagueId: "league456" });
 
       // Verify error was logged
       expect(logAuditTrail).toHaveBeenCalledWith(
-        'missing_data',
+        "missing_data",
         expect.objectContaining({
-          function: 'checkWaitlist',
+          function: "checkWaitlist",
           missingDocument: expect.any(String)
         })
       );
     });
 
-    test('should retry failed operations', async () => {
+    test("should retry failed operations", async () => {
       // Mock temporary failure then success
       mockBatch.commit
-        .mockRejectedValueOnce(new Error('Temporary failure'))
+        .mockRejectedValueOnce(new Error("Temporary failure"))
         .mockResolvedValueOnce(undefined);
 
-      await checkWaitlist({ childId: 'child123', leagueId: 'league456' });
+      await checkWaitlist({ childId: "child123", leagueId: "league456" });
 
       // Verify retry was attempted
       expect(mockBatch.commit).toHaveBeenCalledTimes(2);
     });
   });
 
-  describe('Performance and Scalability', () => {
-    test('should handle large datasets efficiently', async () => {
+  describe("Performance and Scalability", () => {
+    test("should handle large datasets efficiently", async () => {
       // Mock large waitlist
       const largeWaitlist = Array.from({ length: 1000 }, (_, i) => ({
         id: `waitlist${i}`,
         childId: `child${i}`,
-        leagueId: 'league456',
+        leagueId: "league456",
         priority: i,
-        status: 'waiting'
+        status: "waiting"
       }));
 
       mockCollection.where.mockReturnValue(mockCollection);
@@ -711,19 +711,19 @@ describe('Town Rec Firestore Triggers', () => {
       });
 
       const startTime = Date.now();
-      await checkWaitlist({ childId: 'child123', leagueId: 'league456' });
+      await checkWaitlist({ childId: "child123", leagueId: "league456" });
       const endTime = Date.now();
 
       // Should complete within reasonable time
       expect(endTime - startTime).toBeLessThan(5000);
     });
 
-    test('should batch operations for efficiency', async () => {
+    test("should batch operations for efficiency", async () => {
       // Mock multiple operations
       const operations = [
-        { childId: 'child1', leagueId: 'league1' },
-        { childId: 'child2', leagueId: 'league2' },
-        { childId: 'child3', leagueId: 'league3' }
+        { childId: "child1", leagueId: "league1" },
+        { childId: "child2", leagueId: "league2" },
+        { childId: "child3", leagueId: "league3" }
       ];
 
       // Verify batch was used

@@ -1,4 +1,4 @@
-import * as functionsTest from "firebase-functions-test";
+import functionsTest from "firebase-functions-test";
 import { expect } from "chai";
 import { getPlayer, getPlayerAiAnalysis, getPlayerVideoClips, getPlayerDrillHistory } from "../index";
 
@@ -7,11 +7,11 @@ const test = functionsTest();
 describe("Player Functions", () => {
   let admin: any;
 
-  before(() => {
+  beforeAll(() => {
     admin = test.admin;
   });
 
-  after(() => {
+  afterAll(() => {
     test.cleanup();
   });
 

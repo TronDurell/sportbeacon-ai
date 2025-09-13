@@ -4,9 +4,11 @@ import { useAuth } from '../hooks/useAuth';
 import type {
   CreateTipRequest,
   TipResponse,
-  TipTransactionDocument,
-  CreatorProfileDocument,
   TipStatistics
+} from '../src/types/monetization';
+import type {
+  TipTransactionDocument,
+  CreatorProfileDocument
 } from '../firebase/types';
 
 /**
@@ -53,7 +55,10 @@ export class TipService {
       
       if (response.success) {
         return {
+          id: response.data.sessionId,
           tipId: response.data.sessionId,
+          status: "pending" as const,
+          createdAt: new Date().toISOString(),
           checkoutUrl: response.data.url,
           amount: response.data.amount,
           currency: response.data.currency,

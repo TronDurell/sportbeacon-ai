@@ -28,6 +28,8 @@ import type {
   PayoutResponse,
   EarningsExportOptions,
   EarningsExport,
+} from '../src/types/monetization';
+import type {
   TipTransactionDocument,
   CreatorProfileDocument
 } from '../firebase/types';
@@ -44,6 +46,7 @@ import type {
   EarningsExportOptions as MonetizationEarningsExportOptions,
   EarningsExport as MonetizationEarningsExport
 } from '../types/monetization';
+import type { CurrencyCode } from '../src/types/monetization';
 
 /**
  * Monetization service for earnings management and analytics
@@ -110,6 +113,7 @@ export class MonetizationService {
       const pendingEarnings = Math.max(0, creatorData.tipEarnings - (lastPayout?.amount || 0));
 
       const summary: EarningsSummary = {
+        total: creatorData.tipEarnings,
         totalEarnings: creatorData.tipEarnings,
         totalTips: creatorData.totalTips,
         averageTip: creatorData.averageTip,
@@ -121,7 +125,10 @@ export class MonetizationService {
           amount: lastPayout.amount,
           date: lastPayout.createdAt,
           status: lastPayout.status
-        } : undefined
+        } : undefined,
+        currency: 'USD' as CurrencyCode,
+        periodStart: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        periodEnd: new Date().toISOString()
       };
 
       return summary;
@@ -162,10 +169,11 @@ export class MonetizationService {
           case 'daily':
             key = date.toISOString().split('T')[0];
             break;
-          case 'weekly':
+          case 'weekly': {
             const weekStart = new Date(date.getTime() - (date.getDay() * 24 * 60 * 60 * 1000));
             key = weekStart.toISOString().split('T')[0];
             break;
+          }
           case 'monthly':
             key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             break;
@@ -193,7 +201,11 @@ export class MonetizationService {
 
       return {
         period,
-        data
+        data,
+        tipsTotal: data.reduce((sum, item) => sum + item.earnings, 0),
+        adShareTotal: 0,
+        subsTotal: 0,
+        currency: 'USD' as CurrencyCode
       };
 
     } catch (error) {

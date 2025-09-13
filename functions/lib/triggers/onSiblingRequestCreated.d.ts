@@ -25,7 +25,7 @@
  * - Parent preferences for separate team placement
  * - Waitlist position differences affecting pairing
  */
-export declare const onSiblingRequestCreated: import("firebase-functions/core").CloudFunction<import("firebase-functions/v2/firestore").FirestoreEvent<import("firebase-functions/v2/firestore").QueryDocumentSnapshot | undefined, {
+export declare const onSiblingRequestCreated: import("firebase-functions/core").CloudFunction<import("firebase-functions/v2/firestore").FirestoreEvent<import("firebase-functions/v2/firestore").QueryDocumentSnapshot, {
     townId: string;
     requestId: string;
 }>>;

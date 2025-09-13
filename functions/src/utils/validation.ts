@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // VALIDATION UTILITIES
@@ -82,7 +82,7 @@ export const Schemas = {
     password: z.string().min(6),
     firstName: z.string().min(1),
     lastName: z.string().min(1),
-    role: z.enum(['admin', 'director', 'coach', 'parent', 'player', 'staff'])
+    role: z.enum(["admin", "director", "coach", "parent", "player", "staff"])
   }),
 
   // Player schemas
@@ -136,13 +136,13 @@ export const Schemas = {
     id: z.string(),
     name: z.string(),
     season: z.string(),
-    status: z.enum(['active', 'inactive', 'completed'])
+    status: z.enum(["active", "inactive", "completed"])
   }),
 
   CreateLeague: z.object({
     name: z.string().min(1),
     season: z.string(),
-    status: z.enum(['active', 'inactive', 'completed']).default('active')
+    status: z.enum(["active", "inactive", "completed"]).default("active")
   }),
 
   // Game schemas
@@ -152,7 +152,7 @@ export const Schemas = {
     awayTeamId: z.string(),
     leagueId: z.string(),
     scheduledDate: z.any(),
-    status: z.enum(['scheduled', 'in_progress', 'completed', 'cancelled'])
+    status: z.enum(["scheduled", "in_progress", "completed", "cancelled"])
   }),
 
   CreateGame: z.object({
@@ -160,7 +160,7 @@ export const Schemas = {
     awayTeamId: z.string(),
     leagueId: z.string(),
     scheduledDate: z.any(),
-    status: z.enum(['scheduled', 'in_progress', 'completed', 'cancelled']).default('scheduled')
+    status: z.enum(["scheduled", "in_progress", "completed", "cancelled"]).default("scheduled")
   }),
 
   // Venue schemas
@@ -182,13 +182,13 @@ export const Schemas = {
     id: z.string(),
     amount: z.number(),
     currency: z.string(),
-    status: z.enum(['pending', 'completed', 'failed', 'refunded']),
+    status: z.enum(["pending", "completed", "failed", "refunded"]),
     userId: z.string()
   }),
 
   CreatePayment: z.object({
     amount: z.number().positive(),
-    currency: z.string().default('usd'),
+    currency: z.string().default("usd"),
     userId: z.string()
   }),
 
@@ -198,7 +198,7 @@ export const Schemas = {
     userId: z.string(),
     title: z.string(),
     message: z.string(),
-    type: z.enum(['info', 'warning', 'error', 'success']),
+    type: z.enum(["info", "warning", "error", "success"]),
     read: z.boolean().default(false)
   }),
 
@@ -206,7 +206,7 @@ export const Schemas = {
     userId: z.string(),
     title: z.string(),
     message: z.string(),
-    type: z.enum(['info', 'warning', 'error', 'success']).default('info')
+    type: z.enum(["info", "warning", "error", "success"]).default("info")
   }),
 
   // API Response schema

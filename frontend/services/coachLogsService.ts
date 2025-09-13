@@ -44,7 +44,7 @@ export class CoachLogsService {
       const docRef = await addDoc(logsRef, {
         ...logData,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        updatedAt: serverTimestamp() as any,
         createdBy: userId,
         updatedBy: userId
       });
@@ -84,7 +84,7 @@ export class CoachLogsService {
       const logRef = doc(db, COACH_LOGS_COLLECTION, userId, 'logs', logId);
       await updateDoc(logRef, {
         ...updates,
-        updatedAt: serverTimestamp(),
+        updatedAt: serverTimestamp() as any,
         updatedBy: userId
       });
     } catch (error) {
@@ -149,7 +149,7 @@ export class CoachLogsService {
   /**
    * Get logs for a specific player
    */
-  async getPlayerLogs(userId: string, playerId: string, limit?: number): Promise<CoachLogDocument[]> {
+  async getPlayerLogs(userId: string, playerId: string, limitCount?: number): Promise<CoachLogDocument[]> {
     try {
       let q = query(
         this.getUserLogsRef(userId),
@@ -157,8 +157,8 @@ export class CoachLogsService {
         orderBy('date', 'desc')
       );
       
-      if (limit) {
-        q = query(q, limit(limit));
+      if (limitCount) {
+        q = query(q, limit(Number(limitCount)));
       }
       
       const querySnapshot = await getDocs(q);
@@ -265,7 +265,7 @@ export class CoachLogsService {
         feedback: '',
         notes: assignmentData.notes,
         duration: assignmentData.duration,
-        date: serverTimestamp(),
+        date: serverTimestamp() as any,
         status: 'in_progress',
         aiFeedback: {
           suggestions: [],
@@ -277,7 +277,7 @@ export class CoachLogsService {
       batch.set(logRef, {
         ...logData,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        updatedAt: serverTimestamp() as any,
         createdBy: userId,
         updatedBy: userId
       });
@@ -308,7 +308,7 @@ export class CoachLogsService {
         performance: completionData.performance,
         feedback: completionData.feedback,
         status: 'completed',
-        updatedAt: serverTimestamp(),
+        updatedAt: serverTimestamp() as any,
         updatedBy: userId
       };
       
@@ -334,7 +334,7 @@ export class CoachLogsService {
       const logRef = doc(db, COACH_LOGS_COLLECTION, userId, 'logs', logId);
       await updateDoc(logRef, {
         aiFeedback,
-        updatedAt: serverTimestamp(),
+        updatedAt: serverTimestamp() as any,
         updatedBy: userId
       });
     } catch (error) {
@@ -345,7 +345,7 @@ export class CoachLogsService {
   /**
    * Get drill history for a player
    */
-  async getDrillHistory(userId: string, playerId: string, limit?: number): Promise<CoachLogDocument[]> {
+  async getDrillHistory(userId: string, playerId: string, limitCount?: number): Promise<CoachLogDocument[]> {
     try {
       let q = query(
         this.getUserLogsRef(userId),
@@ -354,8 +354,8 @@ export class CoachLogsService {
         orderBy('date', 'desc')
       );
       
-      if (limit) {
-        q = query(q, limit(limit));
+      if (limitCount) {
+        q = query(q, limit(Number(limitCount)));
       }
       
       const querySnapshot = await getDocs(q);

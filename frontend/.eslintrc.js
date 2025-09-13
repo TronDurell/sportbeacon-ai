@@ -21,7 +21,8 @@ module.exports = {
     }
   },
   rules: {
-    '@typescript-eslint/no-unused-vars': 'error',
+    'no-console': ['error', { allow: ['warn', 'error'] }],
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -30,5 +31,14 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn'
   },
+  overrides: [
+    {
+      files: ['**/__tests__/**', '**/*.test.*', '**/*.spec.*'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }]
+      }
+    }
+  ],
   ignorePatterns: ['node_modules/', 'dist/', 'build/', 'coverage/']
-}; 
+};

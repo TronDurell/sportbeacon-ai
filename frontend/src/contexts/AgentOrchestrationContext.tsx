@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface AgentOrchestrationState {
   isActive: boolean;
   currentAgent: string | null;
-  agentStatus: 'idle' | 'processing' | 'error';
+  agentStatus: "idle" | "processing" | "error";
 }
 
 interface AgentOrchestrationContextType extends AgentOrchestrationState {
@@ -20,7 +20,7 @@ const AgentOrchestrationContext = createContext<AgentOrchestrationContextType | 
 export const useAgentOrchestration = () => {
   const context = useContext(AgentOrchestrationContext);
   if (context === undefined) {
-    throw new Error('useAgentOrchestration must be used within an AgentOrchestrationProvider');
+    throw new Error("useAgentOrchestration must be used within an AgentOrchestrationProvider");
   }
   return context;
 };
@@ -33,7 +33,7 @@ export const AgentOrchestrationProvider: React.FC<AgentOrchestrationProviderProp
   const [state, setState] = useState<AgentOrchestrationState>({
     isActive: false,
     currentAgent: null,
-    agentStatus: 'idle'
+    agentStatus: "idle"
   });
 
   const startAgent = async (agentId: string) => {
@@ -41,7 +41,7 @@ export const AgentOrchestrationProvider: React.FC<AgentOrchestrationProviderProp
       ...prev,
       isActive: true,
       currentAgent: agentId,
-      agentStatus: 'processing'
+      agentStatus: "processing"
     }));
     
     // Simulate agent processing
@@ -49,7 +49,7 @@ export const AgentOrchestrationProvider: React.FC<AgentOrchestrationProviderProp
     
     setState(prev => ({
       ...prev,
-      agentStatus: 'idle'
+      agentStatus: "idle"
     }));
   };
 
@@ -58,7 +58,7 @@ export const AgentOrchestrationProvider: React.FC<AgentOrchestrationProviderProp
       ...prev,
       isActive: false,
       currentAgent: null,
-      agentStatus: 'idle'
+      agentStatus: "idle"
     }));
   };
 
@@ -82,7 +82,7 @@ export const AgentOrchestrationProvider: React.FC<AgentOrchestrationProviderProp
   const getSystemHealth = async (): Promise<any> => {
     // Simulate system health check
     await new Promise(resolve => setTimeout(resolve, 500));
-    return { status: 'healthy', agents: ['scheduler', 'notifier'] };
+    return { status: "healthy", agents: ["scheduler", "notifier"] };
   };
 
   const value: AgentOrchestrationContextType = {

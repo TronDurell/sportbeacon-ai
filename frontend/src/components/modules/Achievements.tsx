@@ -1,12 +1,12 @@
-import React from 'react';
-import { Trophy, Star, Target, Award } from 'lucide-react';
+import React from "react";
+import { Trophy, Star, Target, Award } from "lucide-react";
 
 interface Achievement {
   id: string;
   title: string;
   description: string;
   icon: string;
-  category: 'performance' | 'participation' | 'leadership' | 'skill';
+  category: "performance" | "participation" | "leadership" | "skill";
   unlocked: boolean;
   unlockedDate?: Date;
   progress?: number;
@@ -16,51 +16,51 @@ interface Achievement {
 const Achievements: React.FC = () => {
   const achievements: Achievement[] = [
     {
-      id: '1',
-      title: 'First Goal',
-      description: 'Score your first goal in a match',
-      icon: '⚽',
-      category: 'performance',
+      id: "1",
+      title: "First Goal",
+      description: "Score your first goal in a match",
+      icon: "⚽",
+      category: "performance",
       unlocked: true,
-      unlockedDate: new Date('2024-01-15')
+      unlockedDate: new Date("2024-01-15")
     },
     {
-      id: '2',
-      title: 'Perfect Attendance',
-      description: 'Attend 10 consecutive practices',
-      icon: '📅',
-      category: 'participation',
+      id: "2",
+      title: "Perfect Attendance",
+      description: "Attend 10 consecutive practices",
+      icon: "📅",
+      category: "participation",
       unlocked: false,
       progress: 7,
       maxProgress: 10
     },
     {
-      id: '3',
-      title: 'Team Captain',
-      description: 'Be selected as team captain',
-      icon: '👑',
-      category: 'leadership',
+      id: "3",
+      title: "Team Captain",
+      description: "Be selected as team captain",
+      icon: "👑",
+      category: "leadership",
       unlocked: true,
-      unlockedDate: new Date('2024-01-20')
+      unlockedDate: new Date("2024-01-20")
     },
     {
-      id: '4',
-      title: 'Skill Master',
-      description: 'Complete 50 skill drills',
-      icon: '🎯',
-      category: 'skill',
+      id: "4",
+      title: "Skill Master",
+      description: "Complete 50 skill drills",
+      icon: "🎯",
+      category: "skill",
       unlocked: false,
       progress: 32,
       maxProgress: 50
     }
   ];
 
-  const getCategoryIcon = (category: Achievement['category']) => {
+  const getCategoryIcon = (category: Achievement["category"]) => {
     switch (category) {
-      case 'performance': return <Trophy className="w-5 h-5 text-yellow-500" />;
-      case 'participation': return <Star className="w-5 h-5 text-blue-500" />;
-      case 'leadership': return <Award className="w-5 h-5 text-purple-500" />;
-      case 'skill': return <Target className="w-5 h-5 text-green-500" />;
+      case "performance": return <Trophy className="w-5 h-5 text-yellow-500" />;
+      case "participation": return <Star className="w-5 h-5 text-blue-500" />;
+      case "leadership": return <Award className="w-5 h-5 text-purple-500" />;
+      case "skill": return <Target className="w-5 h-5 text-green-500" />;
       default: return <Star className="w-5 h-5 text-gray-500" />;
     }
   };
@@ -83,7 +83,7 @@ const Achievements: React.FC = () => {
           <div
             key={achievement.id}
             className={`bg-white rounded-lg shadow p-6 border-2 ${
-              achievement.unlocked ? 'border-green-200' : 'border-gray-200'
+              achievement.unlocked ? "border-green-200" : "border-gray-200"
             }`}
           >
             <div className="flex items-center justify-between mb-4">

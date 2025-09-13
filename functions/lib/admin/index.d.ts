@@ -1,34 +1,44 @@
-import { TodoFixMe } from "../types";
 export declare const adminGetLeagueStats: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
-    success: boolean;
-    message: string;
-    data?: undefined;
+    success?: boolean;
+    message?: string;
+    error?: any;
+    data?: any;
 } | {
     success: boolean;
-    data: {
-        totalTeams: number;
-        totalPlayers: number;
-        averageTeamSize: number;
-    };
-    message?: undefined;
+    message: string;
+    data: any;
+    errors: {
+        field: string;
+        message: string;
+    }[];
 }>, unknown>;
 export declare const adminUpdateStaffRole: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
-    success: boolean;
-    message: string;
-}>, unknown>;
-export declare const adminGenerateReport: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
-    success: boolean;
-    data: {
-        type: any;
-        dateRange: any;
-        generatedAt: Date;
-        data: TodoFixMe;
-    };
-    message?: undefined;
+    success?: boolean;
+    message?: string;
+    error?: any;
+    data?: any;
 } | {
     success: boolean;
     message: string;
-    data?: undefined;
+    data: any;
+    errors: {
+        field: string;
+        message: string;
+    }[];
+}>, unknown>;
+export declare const adminGenerateReport: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
+    success?: boolean;
+    message?: string;
+    error?: any;
+    data?: any;
+} | {
+    success: boolean;
+    message: string;
+    data: any;
+    errors: {
+        field: string;
+        message: string;
+    }[];
 }>, unknown>;
 export declare const adminUpdateConfig: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
     success: boolean;
@@ -36,24 +46,15 @@ export declare const adminUpdateConfig: import("firebase-functions/v2/https").Ca
 }>, unknown>;
 export declare const adminBulkOperation: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
     success: boolean;
-    data: {
-        registrationId: any;
-        operation: any;
-        success: boolean;
-    }[];
-    message?: undefined;
-} | {
-    success: boolean;
     message: string;
-    data?: undefined;
 }>, unknown>;
-export declare const adminSystemHealth: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
+export declare const adminGetSystemHealth: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
     success: boolean;
     data: {
         database: string;
-        functions: string;
         storage: string;
-        timestamp: Date;
+        functions: string;
+        lastChecked: Date;
     };
     message?: undefined;
 } | {

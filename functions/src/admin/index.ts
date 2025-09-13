@@ -20,11 +20,11 @@ const validateRecDirector = async (context: ApiContext) => {
 
 export const adminGetLeagueStats = onCall(async (data, context) => {
   try {
-    await validateRecDirector(context as ApiContext);
+    await validateRecDirector(context as any);
 
     // Validate input using Zod schema
     const leagueStatsSchema = z.object({
-      leagueId: z.string().uuid('Invalid league ID format')
+      leagueId: z.string().uuid("Invalid league ID format")
     });
     
     const validation = ValidationMiddleware.validateResponse(leagueStatsSchema, data);
@@ -34,7 +34,7 @@ export const adminGetLeagueStats = onCall(async (data, context) => {
         message: "Invalid league ID",
         data: null,
         errors: validation.errors?.errors.map(err => ({
-          field: err.path.join('.'),
+          field: err.path.join("."),
           message: err.message
         }))
       };
@@ -84,15 +84,15 @@ export const adminGetLeagueStats = onCall(async (data, context) => {
 
 export const adminUpdateStaffRole = onCall(async (data, context) => {
   try {
-    const {auth} = await validateRecDirector(context as ApiContext);
+    const {auth} = await validateRecDirector(context as any);
 
     // Validate input using Zod schema
     const staffRoleUpdateSchema = z.object({
-      staffId: z.string().uuid('Invalid staff ID format'),
-      newRole: z.enum(['admin', 'director', 'coach', 'staff'], {
-        errorMap: () => ({ message: 'Invalid role. Must be admin, director, coach, or staff' })
+      staffId: z.string().uuid("Invalid staff ID format"),
+      newRole: z.enum(["admin", "director", "coach", "staff"], {
+        errorMap: () => ({ message: "Invalid role. Must be admin, director, coach, or staff" })
       }),
-      permissions: z.array(z.string()).min(1, 'At least one permission is required')
+      permissions: z.array(z.string()).min(1, "At least one permission is required")
     });
     
     const validation = ValidationMiddleware.validateResponse(staffRoleUpdateSchema, data);
@@ -102,7 +102,7 @@ export const adminUpdateStaffRole = onCall(async (data, context) => {
         message: "Invalid staff role update data",
         data: null,
         errors: validation.errors?.errors.map(err => ({
-          field: err.path.join('.'),
+          field: err.path.join("."),
           message: err.message
         }))
       };
@@ -115,7 +115,7 @@ export const adminUpdateStaffRole = onCall(async (data, context) => {
       role: newRole,
       permissions,
       updatedAt: new Date(),
-      updatedBy: auth.uid,
+      updatedBy: (auth as any).uid,
     });
 
     const result = {success: true, message: "Staff role updated successfully"};
@@ -139,16 +139,16 @@ export const adminUpdateStaffRole = onCall(async (data, context) => {
 
 export const adminGenerateReport = onCall(async (data, context) => {
   try {
-    await validateRecDirector(context as ApiContext);
+    await validateRecDirector(context as any);
 
     // Validate input using Zod schema
     const reportGenerationSchema = z.object({
-      reportType: z.enum(['league', 'team', 'player', 'financial', 'attendance'], {
-        errorMap: () => ({ message: 'Invalid report type. Must be league, team, player, financial, or attendance' })
+      reportType: z.enum(["league", "team", "player", "financial", "attendance"], {
+        errorMap: () => ({ message: "Invalid report type. Must be league, team, player, financial, or attendance" })
       }),
       dateRange: z.object({
-        start: z.string().datetime('Invalid start date format'),
-        end: z.string().datetime('Invalid end date format')
+        start: z.string().datetime("Invalid start date format"),
+        end: z.string().datetime("Invalid end date format")
       }).refine(data => new Date(data.start) < new Date(data.end), {
         message: "Start date must be before end date"
       })
@@ -161,7 +161,7 @@ export const adminGenerateReport = onCall(async (data, context) => {
         message: "Invalid report generation data",
         data: null,
         errors: validation.errors?.errors.map(err => ({
-          field: err.path.join('.'),
+          field: err.path.join("."),
           message: err.message
         }))
       };
@@ -201,18 +201,15 @@ export const adminGenerateReport = onCall(async (data, context) => {
 
 export const adminUpdateConfig = onCall(async (data, context) => {
   try {
-    const {auth} = await validateRecDirector(context as ApiContext);
+    const {auth} = await validateRecDirector(context as any);
 
-    const {configKey, configValue} = data as ApiRequest<{
-      configKey: string;
-      configValue: unknown;
-    }>;
+    const {configKey, configValue} = (data as any);
 
     const configRef = db.collection("adminConfig").doc(configKey);
     await configRef.set({
       value: configValue,
       updatedAt: new Date(),
-      updatedBy: auth.uid,
+      updatedBy: (auth as any).uid,
     });
 
     return {success: true, message: "Config updated successfully"};
@@ -224,55 +221,51 @@ export const adminUpdateConfig = onCall(async (data, context) => {
 
 export const adminBulkOperation = onCall(async (data, context) => {
   try {
-    const {auth} = await validateRecDirector(context as ApiContext);
+    const {auth} = await validateRecDirector(context as any);
 
-    const {operation, registrationIds, parameters} = data as ApiRequest<{
-      operation: string;
-      registrationIds: string[];
-      parameters: Record<string, unknown>;
-    }>;
+    const {operation, registrationIds, parameters} = (data as any);
 
     const batch = db.batch();
 
     switch (operation) {
-      case 'approve':
-        registrationIds.forEach(id => {
-          const ref = db.collection("registrations").doc(id);
-          batch.update(ref, {
-            status: 'approved',
-            approvedAt: new Date(),
-            approvedBy: auth.uid,
-            ...parameters
-          });
+    case "approve":
+      registrationIds.forEach(id => {
+        const ref = db.collection("registrations").doc(id);
+        batch.update(ref, {
+          status: "approved",
+          approvedAt: new Date(),
+          approvedBy: (auth as any).uid,
+          ...parameters
         });
-        break;
+      });
+      break;
 
-      case 'reject':
-        registrationIds.forEach(id => {
-          const ref = db.collection("registrations").doc(id);
-          batch.update(ref, {
-            status: 'rejected',
-            rejectedAt: new Date(),
-            rejectedBy: auth.uid,
-            ...parameters
-          });
+    case "reject":
+      registrationIds.forEach(id => {
+        const ref = db.collection("registrations").doc(id);
+        batch.update(ref, {
+          status: "rejected",
+          rejectedAt: new Date(),
+          rejectedBy: (auth as any).uid,
+          ...parameters
         });
-        break;
+      });
+      break;
 
-      case 'waitlist':
-        registrationIds.forEach(id => {
-          const ref = db.collection("registrations").doc(id);
-          batch.update(ref, {
-            status: 'waitlisted',
-            waitlistedAt: new Date(),
-            waitlistedBy: auth.uid,
-            ...parameters
-          });
+    case "waitlist":
+      registrationIds.forEach(id => {
+        const ref = db.collection("registrations").doc(id);
+        batch.update(ref, {
+          status: "waitlisted",
+          waitlistedAt: new Date(),
+          waitlistedBy: (auth as any).uid,
+          ...parameters
         });
-        break;
+      });
+      break;
 
-      default:
-        throw new Error(`Unknown operation: ${operation}`);
+    default:
+      throw new Error(`Unknown operation: ${operation}`);
     }
 
     await batch.commit();
@@ -286,13 +279,13 @@ export const adminBulkOperation = onCall(async (data, context) => {
 
 export const adminGetSystemHealth = onCall(async (data, context) => {
   try {
-    await validateRecDirector(context as ApiContext);
+    await validateRecDirector(context as any);
 
     // TODO: Implement system health checks
     const health = {
-      database: 'healthy',
-      storage: 'healthy',
-      functions: 'healthy',
+      database: "healthy",
+      storage: "healthy",
+      functions: "healthy",
       lastChecked: new Date(),
     };
 

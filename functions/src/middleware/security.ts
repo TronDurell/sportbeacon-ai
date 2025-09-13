@@ -1,6 +1,6 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-import { db } from '../index';
+import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
+import { db } from "../index";
 
 /**
  * Security middleware for Firebase Functions
@@ -31,29 +31,29 @@ const RATE_LIMITS = {
 
 // Security event types
 const SECURITY_EVENTS = {
-  RATE_LIMIT_EXCEEDED: 'rate_limit_exceeded',
-  INVALID_INPUT: 'invalid_input',
-  SUSPICIOUS_ACTIVITY: 'suspicious_activity',
-  PERMISSION_DENIED: 'permission_denied',
-  API_ACCESS: 'api_access',
-  ERROR_OCCURRED: 'error_occurred',
+  RATE_LIMIT_EXCEEDED: "rate_limit_exceeded",
+  INVALID_INPUT: "invalid_input",
+  SUSPICIOUS_ACTIVITY: "suspicious_activity",
+  PERMISSION_DENIED: "permission_denied",
+  API_ACCESS: "api_access",
+  ERROR_OCCURRED: "error_occurred",
 } as const;
 
 /**
  * Rate limiting middleware
  */
-export const rateLimit = (operation: string, limit: number, window: 'minute' | 'hour' | 'day') => {
-  return async (data: any, context: functions.https.CallableContext) => {
+export const rateLimit = (operation: string, limit: number, window: "minute" | "hour" | "day") => {
+  return async (data: any, context: any) => {
     const userId = context.auth?.uid;
     if (!userId) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+      throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
     }
 
     const now = admin.firestore.Timestamp.now();
     const windowStart = getWindowStart(now, window);
     
     // Check rate limit
-    const rateLimitDoc = await db.collection('rateLimits').doc(userId).get();
+    const rateLimitDoc = await db.collection("rateLimits").doc(userId).get();
     const rateLimitData = rateLimitDoc.exists ? rateLimitDoc.data() : {};
     
     const key = `${operation}_${window}`;
@@ -62,7 +62,7 @@ export const rateLimit = (operation: string, limit: number, window: 'minute' | '
     
     // Reset counter if window has passed
     if (lastReset < windowStart) {
-      await db.collection('rateLimits').doc(userId).update({
+      await db.collection("rateLimits").doc(userId).update({
         [key]: 1,
         [`${key}_reset`]: now
       });
@@ -80,12 +80,12 @@ export const rateLimit = (operation: string, limit: number, window: 'minute' | '
       });
       
       throw new functions.https.HttpsError(
-        'resource-exhausted',
+        "resource-exhausted",
         `Rate limit exceeded for ${operation}. Limit: ${limit} requests per ${window}`
       );
     } else {
       // Increment counter
-      await db.collection('rateLimits').doc(userId).update({
+      await db.collection("rateLimits").doc(userId).update({
         [key]: currentCount + 1
       });
     }
@@ -96,13 +96,13 @@ export const rateLimit = (operation: string, limit: number, window: 'minute' | '
  * Input validation middleware
  */
 export const validateInput = (schema: Record<string, any>) => {
-  return (data: any, context: functions.https.CallableContext) => {
+  return (data: any, context: any) => {
     const errors: string[] = [];
     
     for (const [field, rules] of Object.entries(schema)) {
       const value = data[field];
       
-      if (rules.required && (value === undefined || value === null || value === '')) {
+      if (rules.required && (value === undefined || value === null || value === "")) {
         errors.push(`${field} is required`);
         continue;
       }
@@ -114,7 +114,7 @@ export const validateInput = (schema: Record<string, any>) => {
         }
         
         // String validation
-        if (rules.type === 'string') {
+        if (rules.type === "string") {
           if (rules.minLength && value.length < rules.minLength) {
             errors.push(`${field} must be at least ${rules.minLength} characters`);
           }
@@ -127,7 +127,7 @@ export const validateInput = (schema: Record<string, any>) => {
         }
         
         // Number validation
-        if (rules.type === 'number') {
+        if (rules.type === "number") {
           if (rules.min !== undefined && value < rules.min) {
             errors.push(`${field} must be at least ${rules.min}`);
           }
@@ -137,7 +137,7 @@ export const validateInput = (schema: Record<string, any>) => {
         }
         
         // Array validation
-        if (rules.type === 'array') {
+        if (rules.type === "array") {
           if (rules.minLength && value.length < rules.minLength) {
             errors.push(`${field} must have at least ${rules.minLength} items`);
           }
@@ -158,7 +158,7 @@ export const validateInput = (schema: Record<string, any>) => {
     
     if (errors.length > 0) {
       logSecurityEvent({
-        userId: context.auth?.uid || 'unknown',
+        userId: context.auth?.uid || "unknown",
         event: SECURITY_EVENTS.INVALID_INPUT,
         details: {
           errors,
@@ -167,8 +167,8 @@ export const validateInput = (schema: Record<string, any>) => {
       });
       
       throw new functions.https.HttpsError(
-        'invalid-argument',
-        `Input validation failed: ${errors.join(', ')}`
+        "invalid-argument",
+        `Input validation failed: ${errors.join(", ")}`
       );
     }
   };
@@ -178,9 +178,9 @@ export const validateInput = (schema: Record<string, any>) => {
  * Permission checking middleware
  */
 export const requirePermission = (permission: string) => {
-  return (data: any, context: functions.https.CallableContext) => {
+  return (data: any, context: any) => {
     if (!context.auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+      throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
     }
     
     const userToken = context.auth.token;
@@ -197,7 +197,7 @@ export const requirePermission = (permission: string) => {
       });
       
       throw new functions.https.HttpsError(
-        'permission-denied',
+        "permission-denied",
         `Insufficient permissions. Required: ${permission}`
       );
     }
@@ -208,9 +208,9 @@ export const requirePermission = (permission: string) => {
  * Role checking middleware
  */
 export const requireRole = (role: string) => {
-  return (data: any, context: functions.https.CallableContext) => {
+  return (data: any, context: any) => {
     if (!context.auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+      throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
     }
     
     const userToken = context.auth.token;
@@ -227,7 +227,7 @@ export const requireRole = (role: string) => {
       });
       
       throw new functions.https.HttpsError(
-        'permission-denied',
+        "permission-denied",
         `Insufficient role. Required: ${role}`
       );
     }
@@ -238,8 +238,8 @@ export const requireRole = (role: string) => {
  * Audit logging middleware
  */
 export const auditLog = (operation: string) => {
-  return async (data: any, context: functions.https.CallableContext) => {
-    const userId = context.auth?.uid || 'unknown';
+  return async (data: any, context: any) => {
+    const userId = context.auth?.uid || "unknown";
     
     await logSecurityEvent({
       userId,
@@ -256,22 +256,22 @@ export const auditLog = (operation: string) => {
 /**
  * Error handling middleware
  */
-export const errorHandler = (error: any, context: functions.https.CallableContext) => {
-  const userId = context.auth?.uid || 'unknown';
+export const errorHandler = (error: any, context: any) => {
+  const userId = context.auth?.uid || "unknown";
   
   logSecurityEvent({
     userId,
     event: SECURITY_EVENTS.ERROR_OCCURRED,
     details: {
-      error: error.message || 'Unknown error',
-      code: error.code || 'unknown',
+      error: error.message || "Unknown error",
+      code: error.code || "unknown",
       stack: error.stack ? error.stack.substring(0, 500) : undefined
     }
   });
   
   // Don't expose internal errors to clients
-  if (error.code === 'internal') {
-    throw new functions.https.HttpsError('internal', 'An internal error occurred');
+  if (error.code === "internal") {
+    throw new functions.https.HttpsError("internal", "An internal error occurred");
   }
   
   throw error;
@@ -280,19 +280,19 @@ export const errorHandler = (error: any, context: functions.https.CallableContex
 /**
  * Suspicious activity detection
  */
-export const detectSuspiciousActivity = (data: any, context: functions.https.CallableContext) => {
+export const detectSuspiciousActivity = (data: any, context: any) => {
   const userId = context.auth?.uid;
   if (!userId) return;
   
   const suspiciousPatterns = [
     // Rapid requests
-    { pattern: 'rapid_requests', check: () => checkRapidRequests(userId) },
+    { pattern: "rapid_requests", check: () => checkRapidRequests(userId) },
     // Unusual payment amounts
-    { pattern: 'unusual_payment', check: () => checkUnusualPayment(data) },
+    { pattern: "unusual_payment", check: () => checkUnusualPayment(data) },
     // Multiple failed attempts
-    { pattern: 'failed_attempts', check: () => checkFailedAttempts(userId) },
+    { pattern: "failed_attempts", check: () => checkFailedAttempts(userId) },
     // Geographic anomalies
-    { pattern: 'geographic_anomaly', check: () => checkGeographicAnomaly(context) }
+    { pattern: "geographic_anomaly", check: () => checkGeographicAnomaly(context) }
   ];
   
   for (const pattern of suspiciousPatterns) {
@@ -307,10 +307,10 @@ export const detectSuspiciousActivity = (data: any, context: functions.https.Cal
       });
       
       // For high-risk patterns, block the request
-      if (pattern.pattern === 'rapid_requests' || pattern.pattern === 'failed_attempts') {
+      if (pattern.pattern === "rapid_requests" || pattern.pattern === "failed_attempts") {
         throw new functions.https.HttpsError(
-          'permission-denied',
-          'Suspicious activity detected. Please try again later.'
+          "permission-denied",
+          "Suspicious activity detected. Please try again later."
         );
       }
     }
@@ -319,7 +319,7 @@ export const detectSuspiciousActivity = (data: any, context: functions.https.Cal
 
 // Helper functions
 
-function getWindowStart(now: admin.firestore.Timestamp, window: 'minute' | 'hour' | 'day'): admin.firestore.Timestamp {
+function getWindowStart(now: admin.firestore.Timestamp, window: "minute" | "hour" | "day"): admin.firestore.Timestamp {
   const date = now.toDate();
   const windowSizes = {
     minute: 60 * 1000,
@@ -335,10 +335,10 @@ function getWindowStart(now: admin.firestore.Timestamp, window: 'minute' | 'hour
 
 function checkUserPermission(token: any, permission: string): boolean {
   const permissions = {
-    admin: ['read_all_profiles', 'update_all_profiles', 'delete_profiles', 'manage_users', 'view_analytics', 'manage_content', 'process_payouts', 'view_audit_logs', 'manage_system_settings'],
-    moderator: ['read_all_profiles', 'update_profiles', 'manage_content', 'view_reports', 'moderate_comments', 'view_analytics'],
-    creator: ['read_own_profile', 'update_own_profile', 'create_tips', 'read_public_content', 'upload_own_files', 'receive_tips', 'view_earnings', 'request_payouts', 'manage_creator_profile'],
-    user: ['read_own_profile', 'update_own_profile', 'create_tips', 'read_public_content', 'upload_own_files']
+    admin: ["read_all_profiles", "update_all_profiles", "delete_profiles", "manage_users", "view_analytics", "manage_content", "process_payouts", "view_audit_logs", "manage_system_settings"],
+    moderator: ["read_all_profiles", "update_profiles", "manage_content", "view_reports", "moderate_comments", "view_analytics"],
+    creator: ["read_own_profile", "update_own_profile", "create_tips", "read_public_content", "upload_own_files", "receive_tips", "view_earnings", "request_payouts", "manage_creator_profile"],
+    user: ["read_own_profile", "update_own_profile", "create_tips", "read_public_content", "upload_own_files"]
   };
   
   if (token.admin) return true;
@@ -353,17 +353,17 @@ async function checkRapidRequests(userId: string): Promise<boolean> {
   const now = admin.firestore.Timestamp.now();
   const oneMinuteAgo = admin.firestore.Timestamp.fromDate(new Date(now.toDate().getTime() - 60 * 1000));
   
-  const recentRequests = await db.collection('securityLogs')
-    .where('userId', '==', userId)
-    .where('event', '==', SECURITY_EVENTS.API_ACCESS)
-    .where('timestamp', '>', oneMinuteAgo)
+  const recentRequests = await db.collection("securityLogs")
+    .where("userId", "==", userId)
+    .where("event", "==", SECURITY_EVENTS.API_ACCESS)
+    .where("timestamp", ">", oneMinuteAgo)
     .get();
   
   return recentRequests.size > 30; // More than 30 requests per minute
 }
 
 function checkUnusualPayment(data: any): boolean {
-  if (data.amount && typeof data.amount === 'number') {
+  if (data.amount && typeof data.amount === "number") {
     // Check for unusually large payments
     if (data.amount > 1000000) return true; // $10,000+
     
@@ -378,16 +378,16 @@ async function checkFailedAttempts(userId: string): Promise<boolean> {
   const now = admin.firestore.Timestamp.now();
   const oneHourAgo = admin.firestore.Timestamp.fromDate(new Date(now.toDate().getTime() - 60 * 60 * 1000));
   
-  const failedAttempts = await db.collection('securityLogs')
-    .where('userId', '==', userId)
-    .where('event', 'in', [SECURITY_EVENTS.ERROR_OCCURRED, SECURITY_EVENTS.PERMISSION_DENIED])
-    .where('timestamp', '>', oneHourAgo)
+  const failedAttempts = await db.collection("securityLogs")
+    .where("userId", "==", userId)
+    .where("event", "in", [SECURITY_EVENTS.ERROR_OCCURRED, SECURITY_EVENTS.PERMISSION_DENIED])
+    .where("timestamp", ">", oneHourAgo)
     .get();
   
   return failedAttempts.size > 10; // More than 10 failed attempts per hour
 }
 
-function checkGeographicAnomaly(context: functions.https.CallableContext): boolean {
+function checkGeographicAnomaly(context: any): boolean {
   // This would typically check against user's known locations
   // For now, return false as we don't have location data
   return false;
@@ -399,14 +399,14 @@ async function logSecurityEvent(event: {
   details: any;
 }) {
   try {
-    await db.collection('securityLogs').add({
+    await db.collection("securityLogs").add({
       ...event,
       timestamp: admin.firestore.Timestamp.now(),
-      ipAddress: 'unknown', // Would be extracted from request
-      userAgent: 'unknown' // Would be extracted from request
+      ipAddress: "unknown", // Would be extracted from request
+      userAgent: "unknown" // Would be extracted from request
     });
   } catch (error) {
-    console.error('Failed to log security event:', error);
+    console.error("Failed to log security event:", error);
   }
 }
 
@@ -416,10 +416,10 @@ function sanitizeData(data: any): any {
   const sanitized = { ...data };
   
   // Remove sensitive fields
-  const sensitiveFields = ['password', 'token', 'secret', 'key', 'ssn', 'creditCard'];
+  const sensitiveFields = ["password", "token", "secret", "key", "ssn", "creditCard"];
   for (const field of sensitiveFields) {
     if (sanitized[field]) {
-      sanitized[field] = '[REDACTED]';
+      sanitized[field] = "[REDACTED]";
     }
   }
   

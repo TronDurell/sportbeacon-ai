@@ -29,6 +29,40 @@ A comprehensive admin panel system for municipal Parks & Rec departments managin
 - **Responsive Design** - Mobile-first Tailwind CSS implementation
 - **TypeScript** - Full type safety and IntelliSense support
 
+## 🚀 Quickstart
+
+1. **Clone and Install:**
+   ```bash
+   git clone <repository-url>
+   cd sportbeacon-ai
+   npm ci
+   ```
+
+2. **Environment Setup:**
+   ```bash
+   # Frontend environment
+   cp frontend/env.example frontend/.env
+   # Edit frontend/.env with your Firebase and API keys
+   
+   # Functions environment  
+   cp functions/env.example functions/.env
+   # Edit functions/.env with your Firebase Admin SDK and Stripe keys
+   ```
+
+3. **Run Development:**
+   ```bash
+   # Start Firebase emulators
+   npm run emulate
+   
+   # In another terminal, start frontend
+   cd frontend && npm run dev
+   ```
+
+4. **Build & Test:**
+   ```bash
+   npm run check:all  # Lint, typecheck, test, build
+   ```
+
 ## 🚀 CI/CD Pipeline
 
 Our GitHub Actions pipeline ensures code quality and deployment readiness:
@@ -95,9 +129,17 @@ The badge above shows the current pipeline status. Click to view detailed logs a
 
 4. **Start Development Server**
    ```bash
-   # Frontend development
+   # Frontend development (port 3002)
    cd frontend
    npm run dev
+   
+   # Backend development (port 8000)
+   cd backend
+   uvicorn backend.api:app --host 127.0.0.1 --port 8000
+   
+   # Or use Docker Compose
+   docker compose up -d
+   ```
    
    # Backend development (if applicable)
    cd ../backend

@@ -1,46 +1,46 @@
-import React, { useState } from 'react';
-import { AlertTriangle, Bell, X, Check } from 'lucide-react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React, { useState } from "react";
+import { AlertTriangle, Bell, X, Check } from "lucide-react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface Alert {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'warning' | 'error' | 'success';
+  type: "info" | "warning" | "error" | "success";
   timestamp: Date;
   acknowledged: boolean;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
 }
 
 const Alerts: React.FC = () => {
   const { sendRequest } = useAgentOrchestration();
   const [alerts, setAlerts] = useState<Alert[]>([
     {
-      id: '1',
-      title: 'System Maintenance',
-      message: 'Scheduled maintenance will occur tonight at 2 AM EST.',
-      type: 'info',
+      id: "1",
+      title: "System Maintenance",
+      message: "Scheduled maintenance will occur tonight at 2 AM EST.",
+      type: "info",
       timestamp: new Date(),
       acknowledged: false,
-      priority: 'medium'
+      priority: "medium"
     },
     {
-      id: '2',
-      title: 'High CPU Usage',
-      message: 'Server CPU usage is above 90% for the last 10 minutes.',
-      type: 'warning',
+      id: "2",
+      title: "High CPU Usage",
+      message: "Server CPU usage is above 90% for the last 10 minutes.",
+      type: "warning",
       timestamp: new Date(Date.now() - 300000),
       acknowledged: false,
-      priority: 'high'
+      priority: "high"
     },
     {
-      id: '3',
-      title: 'Backup Completed',
-      message: 'Daily backup completed successfully.',
-      type: 'success',
+      id: "3",
+      title: "Backup Completed",
+      message: "Daily backup completed successfully.",
+      type: "success",
       timestamp: new Date(Date.now() - 3600000),
       acknowledged: true,
-      priority: 'low'
+      priority: "low"
     }
   ]);
 
@@ -50,7 +50,7 @@ const Alerts: React.FC = () => {
     );
     
     await sendRequest({
-      type: 'acknowledge_alert',
+      type: "acknowledge_alert",
       alertId: id
     });
   };
@@ -59,26 +59,26 @@ const Alerts: React.FC = () => {
     setAlerts(prev => prev.filter(alert => alert.id !== id));
     
     await sendRequest({
-      type: 'dismiss_alert',
+      type: "dismiss_alert",
       alertId: id
     });
   };
 
-  const getTypeIcon = (type: Alert['type']) => {
+  const getTypeIcon = (type: Alert["type"]) => {
     switch (type) {
-      case 'success': return <Check className="w-5 h-5 text-green-500" />;
-      case 'warning': return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
-      case 'error': return <X className="w-5 h-5 text-red-500" />;
+      case "success": return <Check className="w-5 h-5 text-green-500" />;
+      case "warning": return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+      case "error": return <X className="w-5 h-5 text-red-500" />;
       default: return <Bell className="w-5 h-5 text-blue-500" />;
     }
   };
 
-  const getPriorityColor = (priority: Alert['priority']) => {
+  const getPriorityColor = (priority: Alert["priority"]) => {
     switch (priority) {
-      case 'high': return 'border-l-red-500';
-      case 'medium': return 'border-l-yellow-500';
-      case 'low': return 'border-l-green-500';
-      default: return 'border-l-gray-500';
+      case "high": return "border-l-red-500";
+      case "medium": return "border-l-yellow-500";
+      case "low": return "border-l-green-500";
+      default: return "border-l-gray-500";
     }
   };
 
@@ -113,9 +113,9 @@ const Alerts: React.FC = () => {
                         <div className="flex items-center space-x-2 mb-1">
                           <h4 className="font-medium text-gray-900">{alert.title}</h4>
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            alert.priority === 'high' ? 'bg-red-100 text-red-800' :
-                            alert.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-green-100 text-green-800'
+                            alert.priority === "high" ? "bg-red-100 text-red-800" :
+                            alert.priority === "medium" ? "bg-yellow-100 text-yellow-800" :
+                            "bg-green-100 text-green-800"
                           }`}>
                             {alert.priority}
                           </span>

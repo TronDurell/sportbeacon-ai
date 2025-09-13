@@ -20,101 +20,8 @@ import { useAuth } from '../contexts/AuthContext';
 import type { Timestamp } from 'firebase/firestore';
 
 // Creator Dashboard Types
-export interface CreatorDashboard {
-  id: string;
-  userId: string;
-  
-  // Overview Metrics
-  overview: {
-    totalEarnings: number;
-    totalTips: number;
-    totalFollowers: number;
-    totalGames: number;
-    winRate: number;
-    averageRating: number;
-    totalViews: number;
-    totalLikes: number;
-  };
-  
-  // Financial Analytics
-  financial: {
-    monthlyEarnings: Array<{ month: string; amount: number }>;
-    earningsBySource: Record<string, number>;
-    pendingPayouts: number;
-    completedPayouts: number;
-    averageTipAmount: number;
-    topTippers: Array<{ userId: string; displayName: string; totalAmount: number }>;
-    payoutHistory: Array<{ date: Timestamp; amount: number; status: string }>;
-  };
-  
-  // Performance Analytics
-  performance: {
-    gamesPlayed: Array<{ date: string; count: number; wins: number }>;
-    winRateBySport: Record<string, number>;
-    performanceTrend: Array<{ date: string; winRate: number; averageScore: number }>;
-    achievements: Array<{ id: string; name: string; earnedAt: Timestamp; description: string }>;
-    recentGames: Array<{ id: string; sport: string; result: 'win' | 'loss' | 'draw'; score: number; date: Timestamp }>;
-  };
-  
-  // Social Analytics
-  social: {
-    followerGrowth: Array<{ date: string; count: number }>;
-    engagementRate: number;
-    topPosts: Array<{ id: string; type: string; views: number; likes: number; date: Timestamp }>;
-    audienceDemographics: Record<string, number>;
-    interactionHistory: Array<{ date: string; followers: number; interactions: number }>;
-  };
-  
-  // Content Analytics
-  content: {
-    totalPosts: number;
-    totalVideos: number;
-    totalImages: number;
-    viewsByContent: Record<string, number>;
-    engagementByContent: Record<string, number>;
-    popularContent: Array<{ id: string; type: string; title: string; views: number; likes: number }>;
-    contentSchedule: Array<{ date: string; type: string; title: string; status: string }>;
-  };
-  
-  // Goals and Targets
-  goals: {
-    monthlyEarningsTarget: number;
-    monthlyFollowersTarget: number;
-    monthlyGamesTarget: number;
-    winRateTarget: number;
-    currentProgress: {
-      earningsProgress: number;
-      followersProgress: number;
-      gamesProgress: number;
-      winRateProgress: number;
-    };
-  };
-  
-  // Settings and Preferences
-  settings: {
-    autoPayout: boolean;
-    payoutThreshold: number;
-    notificationPreferences: {
-      newFollower: boolean;
-      newTip: boolean;
-      newGame: boolean;
-      achievement: boolean;
-      payout: boolean;
-    };
-    privacySettings: {
-      showEarnings: boolean;
-      showFollowers: boolean;
-      showGames: boolean;
-      showRating: boolean;
-    };
-  };
-  
-  // Metadata
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  lastRefreshed: Timestamp;
-  status: 'active' | 'inactive' | 'suspended';
-}
+// Import consolidated CreatorDashboard interface
+import type { CreatorDashboard } from '../types';
 
 // Dashboard Update Types
 export interface DashboardUpdate {
@@ -261,9 +168,9 @@ export class CreatorDashboardService {
           showRating: true
         }
       },
-      createdAt: serverTimestamp() as Timestamp,
-      updatedAt: serverTimestamp() as Timestamp,
-      lastRefreshed: serverTimestamp() as Timestamp,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lastRefreshed: new Date().toISOString(),
       status: 'active',
       ...initialData
     };
@@ -591,7 +498,7 @@ export class CreatorDashboardService {
       recommendedActions.push('Encourage higher tip amounts');
     }
     
-    if (performance.winRate < 0.5) {
+    if ((performance as any).winRate < 0.5) {
       recommendedActions.push('Focus on improving game performance');
     }
 
@@ -699,12 +606,12 @@ export class CreatorDashboardService {
   async batchUpdateDashboards(updates: Array<{ userId: string; updates: DashboardUpdate }>): Promise<void> {
     const batch = writeBatch(db);
 
-    for (const { userId, updates } of updates) {
+    for (const { userId, updates: userUpdates } of updates) {
       const dashboard = await this.getCreatorDashboard(userId);
       if (dashboard) {
         const dashboardRef = doc(db, 'creatorDashboards', dashboard.id);
         batch.update(dashboardRef, {
-          ...updates,
+          ...userUpdates,
           updatedAt: serverTimestamp(),
           lastRefreshed: serverTimestamp()
         });

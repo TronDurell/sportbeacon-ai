@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { DrillLog } from '../../types/DrillLog';
+import { DrillLog } from '../types/DrillLog';
 import Sentry from '../lib/sentry';
 
 export function useDrillLog(playerId: string) {

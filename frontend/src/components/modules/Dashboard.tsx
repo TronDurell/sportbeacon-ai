@@ -1,77 +1,77 @@
-import React from 'react';
+import React from "react";
 import { 
   Calendar, 
   Target, 
   MessageSquare, 
   Activity,
   BarChart3
-} from 'lucide-react';
-import { useAuth } from '../../contexts/AdminAuthContext';
+} from "lucide-react";
+import { useAuth } from "../../contexts/AdminAuthContext";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
 
   const stats = [
     {
-      label: 'Upcoming Events',
-      value: '5',
-      change: '+2',
+      label: "Upcoming Events",
+      value: "5",
+      change: "+2",
       icon: Calendar,
-      color: 'text-blue-600'
+      color: "text-blue-600"
     },
     {
-      label: 'Performance Score',
-      value: '87%',
-      change: '+5%',
+      label: "Performance Score",
+      value: "87%",
+      change: "+5%",
       icon: Target,
-      color: 'text-green-600'
+      color: "text-green-600"
     },
     {
-      label: 'Unread Messages',
-      value: '3',
-      change: '-1',
+      label: "Unread Messages",
+      value: "3",
+      change: "-1",
       icon: MessageSquare,
-      color: 'text-purple-600'
+      color: "text-purple-600"
     },
     {
-      label: 'Active Sessions',
-      value: '12',
-      change: '+3',
+      label: "Active Sessions",
+      value: "12",
+      change: "+3",
       icon: Activity,
-      color: 'text-orange-600'
+      color: "text-orange-600"
     }
   ];
 
   const recentActivity = [
     {
-      id: '1',
-      type: 'practice',
-      title: 'Team Practice Completed',
-      time: '2 hours ago',
-      description: 'Great session focusing on passing drills'
+      id: "1",
+      type: "practice",
+      title: "Team Practice Completed",
+      time: "2 hours ago",
+      description: "Great session focusing on passing drills"
     },
     {
-      id: '2',
-      type: 'game',
-      title: 'Game Scheduled',
-      time: '1 day ago',
-      description: 'Next game vs Eagles on Saturday'
+      id: "2",
+      type: "game",
+      title: "Game Scheduled",
+      time: "1 day ago",
+      description: "Next game vs Eagles on Saturday"
     },
     {
-      id: '3',
-      type: 'message',
-      title: 'New Message from Coach',
-      time: '2 days ago',
-      description: 'Updated training schedule available'
+      id: "3",
+      type: "message",
+      title: "New Message from Coach",
+      time: "2 days ago",
+      description: "Updated training schedule available"
     }
   ];
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'practice': return '⚽';
-      case 'game': return '🏆';
-      case 'message': return '💬';
-      default: return '📅';
+      case "practice": return "⚽";
+      case "game": return "🏆";
+      case "message": return "💬";
+      default: return "📅";
     }
   };
 

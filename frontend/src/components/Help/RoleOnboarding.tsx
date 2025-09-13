@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import { UserRole } from '../../types';
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import { UserRole } from "../../types";
 
 interface RoleOnboardingProps {
   onComplete?: () => void;
@@ -10,9 +10,9 @@ const RoleOnboarding: React.FC<RoleOnboardingProps> = ({ onComplete }) => {
   const { user, updateUser } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    role: user?.role || 'player',
-    experience: '',
-    goals: '',
+    role: user?.role || "player",
+    experience: "",
+    goals: "",
     preferences: {}
   });
 
@@ -29,41 +29,41 @@ const RoleOnboarding: React.FC<RoleOnboardingProps> = ({ onComplete }) => {
   const steps = [
     {
       id: 1,
-      title: 'Choose Your Role',
-      description: 'Select the role that best describes you in the sports community.'
+      title: "Choose Your Role",
+      description: "Select the role that best describes you in the sports community."
     },
     {
       id: 2,
-      title: 'Experience Level',
-      description: 'Tell us about your experience in sports.'
+      title: "Experience Level",
+      description: "Tell us about your experience in sports."
     },
     {
       id: 3,
-      title: 'Goals & Preferences',
-      description: 'What are your goals and preferences?'
+      title: "Goals & Preferences",
+      description: "What are your goals and preferences?"
     }
   ];
 
   const roles: { value: UserRole; label: string; description: string }[] = [
     {
-      value: 'player',
-      label: 'Player',
-      description: 'I am a player participating in sports activities'
+      value: "player",
+      label: "Player",
+      description: "I am a player participating in sports activities"
     },
     {
-      value: 'coach',
-      label: 'Coach',
-      description: 'I coach teams and help players develop'
+      value: "coach",
+      label: "Coach",
+      description: "I coach teams and help players develop"
     },
     {
-      value: 'parent',
-      label: 'Parent',
-      description: 'I am a parent supporting my child\'s sports activities'
+      value: "parent",
+      label: "Parent",
+      description: "I am a parent supporting my child's sports activities"
     },
     {
-      value: 'admin',
-      label: 'Administrator',
-      description: 'I manage leagues, teams, or facilities'
+      value: "admin",
+      label: "Administrator",
+      description: "I manage leagues, teams, or facilities"
     }
   ];
 
@@ -85,14 +85,14 @@ const RoleOnboarding: React.FC<RoleOnboardingProps> = ({ onComplete }) => {
             <div key={step.id} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 currentStep >= step.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-600'
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-600"
               }`}>
                 {step.id}
               </div>
               {index < steps.length - 1 && (
                 <div className={`w-16 h-1 mx-2 ${
-                  currentStep > step.id ? 'bg-blue-500' : 'bg-gray-200'
+                  currentStep > step.id ? "bg-blue-500" : "bg-gray-200"
                 }`} />
               )}
             </div>
@@ -112,8 +112,8 @@ const RoleOnboarding: React.FC<RoleOnboardingProps> = ({ onComplete }) => {
                   key={role.value}
                   className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                     formData.role === role.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
                   onClick={() => setFormData(prev => ({ ...prev, role: role.value }))}
                 >

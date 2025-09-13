@@ -1,0 +1,7 @@
+frontend/dist
+packages/**/dist
+functions/lib
+node_modules
+coverage
+*.config.js
+*.config.ts

@@ -1,6 +1,6 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-import Stripe from 'stripe';
+import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
+import Stripe from "stripe";
 import {
   StripeWebhookEvent,
   TipTransaction,
@@ -11,11 +11,11 @@ import {
   PaymentIntentData,
   CheckoutSessionData,
   PayoutData
-} from './types';
+} from "./types";
 
 // Initialize Stripe with secret key
 const stripe = new Stripe(functions.config().stripe.secret_key, {
-  apiVersion: '2023-10-16',
+  apiVersion: "2023-10-16",
 });
 
 // Initialize Firestore
@@ -27,21 +27,21 @@ const db = admin.firestore();
  */
 export const stripeWebhook = functions.https.onRequest(async (req, res) => {
   try {
-    const sig = req.headers['stripe-signature'] as string;
+    const sig = req.headers["stripe-signature"] as string;
     const webhookSecret = functions.config().stripe.webhook_secret;
     const payload = req.rawBody;
 
     if (!sig || !payload) {
-      console.error('Missing signature or payload');
-      res.status(400).send('Missing signature or payload');
+      console.error("Missing signature or payload");
+      res.status(400).send("Missing signature or payload");
       return;
     }
 
     // Verify webhook signature
     const verificationResult = await verifyWebhookSignature(payload, sig, webhookSecret);
     if (!verificationResult.isValid) {
-      console.error('Invalid webhook signature:', verificationResult.error);
-      res.status(400).send('Invalid signature');
+      console.error("Invalid webhook signature:", verificationResult.error);
+      res.status(400).send("Invalid signature");
       return;
     }
 
@@ -53,7 +53,7 @@ export const stripeWebhook = functions.https.onRequest(async (req, res) => {
     const idempotencyResult = await checkIdempotency(eventId);
     if (!idempotencyResult.shouldProcess) {
       console.log(`Event ${eventId} already processed, skipping`);
-      res.status(200).send('Event already processed');
+      res.status(200).send("Event already processed");
       return;
     }
 
@@ -65,14 +65,14 @@ export const stripeWebhook = functions.https.onRequest(async (req, res) => {
 
     // Send response
     if (processingResult.success) {
-      res.status(200).send('Webhook processed successfully');
+      res.status(200).send("Webhook processed successfully");
     } else {
-      res.status(500).send('Webhook processing failed');
+      res.status(500).send("Webhook processing failed");
     }
 
   } catch (error) {
-    console.error('Webhook processing error:', error);
-    res.status(500).send('Webhook processing error');
+    console.error("Webhook processing error:", error);
+    res.status(500).send("Webhook processing error");
   }
 });
 
@@ -93,7 +93,7 @@ async function verifyWebhookSignature(
   } catch (error) {
     return {
       isValid: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : "Unknown error"
     };
   }
 }
@@ -102,7 +102,7 @@ async function verifyWebhookSignature(
  * Check if event has already been processed (idempotency)
  */
 async function checkIdempotency(eventId: string): Promise<{ shouldProcess: boolean }> {
-  const idempotencyDoc = await db.collection('idempotencyKeys').doc(eventId).get();
+  const idempotencyDoc = await db.collection("idempotencyKeys").doc(eventId).get();
   
   if (idempotencyDoc.exists) {
     return { shouldProcess: false };
@@ -131,7 +131,7 @@ async function markEventProcessed(
     expiresAt
   };
 
-  await db.collection('idempotencyKeys').doc(eventId).set(idempotencyKey);
+  await db.collection("idempotencyKeys").doc(eventId).set(idempotencyKey);
 }
 
 /**
@@ -147,39 +147,39 @@ async function processWebhookEvent(
 
   try {
     switch (eventType) {
-      case 'checkout.session.completed':
-        processed = await handleCheckoutSessionCompleted(event.data.object as CheckoutSessionData);
-        actions.push('checkout_session_completed');
-        break;
+    case "checkout.session.completed":
+      processed = await handleCheckoutSessionCompleted(event.data.object as CheckoutSessionData);
+      actions.push("checkout_session_completed");
+      break;
 
-      case 'payment_intent.succeeded':
-        processed = await handlePaymentIntentSucceeded(event.data.object as PaymentIntentData);
-        actions.push('payment_intent_succeeded');
-        break;
+    case "payment_intent.succeeded":
+      processed = await handlePaymentIntentSucceeded(event.data.object as PaymentIntentData);
+      actions.push("payment_intent_succeeded");
+      break;
 
-      case 'payment_intent.payment_failed':
-        processed = await handlePaymentIntentFailed(event.data.object as PaymentIntentData);
-        actions.push('payment_intent_failed');
-        break;
+    case "payment_intent.payment_failed":
+      processed = await handlePaymentIntentFailed(event.data.object as PaymentIntentData);
+      actions.push("payment_intent_failed");
+      break;
 
-      case 'payout.paid':
-        processed = await handlePayoutPaid(event.data.object as PayoutData);
-        actions.push('payout_paid');
-        break;
+    case "payout.paid":
+      processed = await handlePayoutPaid(event.data.object as PayoutData);
+      actions.push("payout_paid");
+      break;
 
-      case 'payout.failed':
-        processed = await handlePayoutFailed(event.data.object as PayoutData);
-        actions.push('payout_failed');
-        break;
+    case "payout.failed":
+      processed = await handlePayoutFailed(event.data.object as PayoutData);
+      actions.push("payout_failed");
+      break;
 
-      default:
-        console.log(`Unhandled event type: ${eventType}`);
-        processed = true; // Mark as processed to avoid reprocessing
-        actions.push('unhandled_event');
+    default:
+      console.log(`Unhandled event type: ${eventType}`);
+      processed = true; // Mark as processed to avoid reprocessing
+      actions.push("unhandled_event");
     }
 
   } catch (err) {
-    error = err instanceof Error ? err.message : 'Unknown error';
+    error = err instanceof Error ? err.message : "Unknown error";
     console.error(`Error processing ${eventType}:`, error);
   }
 
@@ -201,15 +201,15 @@ async function handleCheckoutSessionCompleted(session: CheckoutSessionData): Pro
     const { tipId, fromUserId, toUserId } = session.metadata;
     
     if (!tipId || !fromUserId || !toUserId) {
-      console.error('Missing required metadata in checkout session');
+      console.error("Missing required metadata in checkout session");
       return false;
     }
 
     // Update tip transaction status
-    const tipRef = db.collection('tips').doc(tipId);
+    const tipRef = db.collection("tips").doc(tipId);
     await tipRef.update({
-      status: 'succeeded',
-      paymentIntentId: session.payment_intent as string,
+      status: "succeeded",
+      paymentIntentId: (session as any).payment_intent as string,
       updatedAt: admin.firestore.Timestamp.now()
     });
 
@@ -223,7 +223,7 @@ async function handleCheckoutSessionCompleted(session: CheckoutSessionData): Pro
     return true;
 
   } catch (error) {
-    console.error('Error handling checkout session completed:', error);
+    console.error("Error handling checkout session completed:", error);
     return false;
   }
 }
@@ -236,12 +236,12 @@ async function handlePaymentIntentSucceeded(paymentIntent: PaymentIntentData): P
     const { tipId } = paymentIntent.metadata;
     
     if (!tipId) {
-      console.log('Payment intent not associated with a tip');
+      console.log("Payment intent not associated with a tip");
       return true; // Not an error, just not a tip
     }
 
     // Update tip transaction with payment intent ID
-    const tipRef = db.collection('tips').doc(tipId);
+    const tipRef = db.collection("tips").doc(tipId);
     await tipRef.update({
       paymentIntentId: paymentIntent.id,
       updatedAt: admin.firestore.Timestamp.now()
@@ -251,7 +251,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: PaymentIntentData): P
     return true;
 
   } catch (error) {
-    console.error('Error handling payment intent succeeded:', error);
+    console.error("Error handling payment intent succeeded:", error);
     return false;
   }
 }
@@ -264,14 +264,14 @@ async function handlePaymentIntentFailed(paymentIntent: PaymentIntentData): Prom
     const { tipId } = paymentIntent.metadata;
     
     if (!tipId) {
-      console.log('Payment intent not associated with a tip');
+      console.log("Payment intent not associated with a tip");
       return true; // Not an error, just not a tip
     }
 
     // Update tip transaction status
-    const tipRef = db.collection('tips').doc(tipId);
+    const tipRef = db.collection("tips").doc(tipId);
     await tipRef.update({
-      status: 'failed',
+      status: "failed",
       updatedAt: admin.firestore.Timestamp.now()
     });
 
@@ -279,7 +279,7 @@ async function handlePaymentIntentFailed(paymentIntent: PaymentIntentData): Prom
     return true;
 
   } catch (error) {
-    console.error('Error handling payment intent failed:', error);
+    console.error("Error handling payment intent failed:", error);
     return false;
   }
 }
@@ -292,12 +292,12 @@ async function handlePayoutPaid(payout: PayoutData): Promise<boolean> {
     const { userId } = payout.metadata;
     
     if (!userId) {
-      console.log('Payout not associated with a user');
+      console.log("Payout not associated with a user");
       return true;
     }
 
     // Update creator's payout record
-    await db.collection('payouts').doc(payout.id).set({
+    await db.collection("payouts").doc(payout.id).set({
       id: payout.id,
       userId,
       amount: payout.amount,
@@ -311,7 +311,7 @@ async function handlePayoutPaid(payout: PayoutData): Promise<boolean> {
     return true;
 
   } catch (error) {
-    console.error('Error handling payout paid:', error);
+    console.error("Error handling payout paid:", error);
     return false;
   }
 }
@@ -324,12 +324,12 @@ async function handlePayoutFailed(payout: PayoutData): Promise<boolean> {
     const { userId } = payout.metadata;
     
     if (!userId) {
-      console.log('Payout not associated with a user');
+      console.log("Payout not associated with a user");
       return true;
     }
 
     // Update creator's payout record
-    await db.collection('payouts').doc(payout.id).set({
+    await db.collection("payouts").doc(payout.id).set({
       id: payout.id,
       userId,
       amount: payout.amount,
@@ -345,7 +345,7 @@ async function handlePayoutFailed(payout: PayoutData): Promise<boolean> {
     return true;
 
   } catch (error) {
-    console.error('Error handling payout failed:', error);
+    console.error("Error handling payout failed:", error);
     return false;
   }
 }
@@ -354,7 +354,7 @@ async function handlePayoutFailed(payout: PayoutData): Promise<boolean> {
  * Update creator's earnings
  */
 async function updateCreatorEarnings(creatorId: string, amount: number): Promise<void> {
-  const creatorRef = db.collection('creatorProfiles').doc(creatorId);
+  const creatorRef = db.collection("creatorProfiles").doc(creatorId);
   
   await creatorRef.update({
     tipEarnings: admin.firestore.FieldValue.increment(amount),
@@ -383,10 +383,10 @@ async function sendTipNotification(
 ): Promise<void> {
   try {
     // Create notification in Firestore
-    await db.collection('notifications').add({
+    await db.collection("notifications").add({
       userId: creatorId,
-      type: 'tip_received',
-      title: 'New Tip Received!',
+      type: "tip_received",
+      title: "New Tip Received!",
       message: `You received a $${(amount / 100).toFixed(2)} tip`,
       data: {
         fromUserId,
@@ -400,7 +400,7 @@ async function sendTipNotification(
     // TODO: Send push notification if implemented
     console.log(`Tip notification sent to creator ${creatorId}`);
   } catch (error) {
-    console.error('Error sending tip notification:', error);
+    console.error("Error sending tip notification:", error);
   }
 }
 
@@ -410,10 +410,10 @@ async function sendTipNotification(
 async function sendPayoutFailedNotification(userId: string, amount: number): Promise<void> {
   try {
     // Create notification in Firestore
-    await db.collection('notifications').add({
+    await db.collection("notifications").add({
       userId,
-      type: 'payout_failed',
-      title: 'Payout Failed',
+      type: "payout_failed",
+      title: "Payout Failed",
       message: `Your payout of $${(amount / 100).toFixed(2)} failed. Please check your payment details.`,
       data: {
         amount,
@@ -425,6 +425,6 @@ async function sendPayoutFailedNotification(userId: string, amount: number): Pro
 
     console.log(`Payout failed notification sent to user ${userId}`);
   } catch (error) {
-    console.error('Error sending payout failed notification:', error);
+    console.error("Error sending payout failed notification:", error);
   }
 } 

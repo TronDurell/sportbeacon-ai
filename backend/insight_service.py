@@ -10,37 +10,8 @@ class PlayerInsightService:
 
     def analyze_player_stats(self, stats: List[PlayerStatRecord]) -> PlayerAnalysisResponse:
         """Analyze player statistics to generate insights."""
-        # Convert stats to DataFrame
-        df = pd.DataFrame([stat.dict() for stat in stats])
-        
-        # Sort by game date to ensure chronological order
-        df = df.sort_values('game_date')
-        
-        # Generate normalized stats
-        normalized_stats = self.player_engine.normalize_stats(df)
-        
-        # Get the player name from the most recent entry
-        player_name = df.iloc[-1].player_name
-        
-        # Calculate all insights
-        top_skills = self.player_engine.identify_top_skills(normalized_stats)
-        growth_areas = self.player_engine.get_growth_areas(normalized_stats)
-        recent_trends = self.player_engine.calculate_player_trends(normalized_stats)
-        
-        # Get the most recent normalized stats
-        latest_stats = {
-            col: float(normalized_stats[col].iloc[-1])
-            for col in self.player_engine._stats_columns
-            if col in normalized_stats.columns
-        }
-        
-        return PlayerAnalysisResponse(
-            player_name=player_name,
-            normalized_stats=latest_stats,
-            top_skills=top_skills,
-            growth_areas=growth_areas,
-            recent_trends=recent_trends
-        )
+        # Use the real PlayerInsightEngine's analyze_player_performance method
+        return self.player_engine.analyze_player_performance(stats)
 
     def get_top_winners(
         self,
@@ -57,22 +28,36 @@ class PlayerInsightService:
         
         for player_id in unique_players:
             player_games = player_data[player_data['player_id'] == player_id]
-            win_rate = self.player_engine.calculate_win_rate(
-                player_games,
-                time_period=timedelta(days=time_period_days)
-            )
             
-            if len(player_games) > 0:
-                latest_game = player_games.iloc[-1]
-                player_stats.append({
-                    'player_id': player_id,
-                    'player_name': latest_game['player_name'],
-                    'win_rate': win_rate,
-                    'games_played': len(player_games),
-                    'avg_points': player_games['points'].mean(),
-                    'avg_assists': player_games['assists'].mean(),
-                    'avg_rebounds': player_games['rebounds'].mean()
-                })
+            # Convert DataFrame rows to PlayerStatRecord objects
+            player_records = []
+            for _, row in player_games.iterrows():
+                player_records.append(PlayerStatRecord(
+                    player_id=int(row['player_id']),
+                    player_name=row['player_name'],
+                    game_date=row['game_date'],
+                    points=float(row['points']),
+                    assists=float(row['assists']),
+                    rebounds=float(row['rebounds']),
+                    steals=float(row['steals']),
+                    blocks=float(row['blocks']),
+                    field_goal_percentage=float(row['field_goal_percentage']),
+                    three_point_percentage=float(row['three_point_percentage']),
+                    result=row['result']
+                ))
+            
+            # Use the real engine to get insights
+            insights = self.player_engine.get_player_insights(player_records)
+            
+            player_stats.append({
+                'player_id': player_id,
+                'player_name': insights.player_name,
+                'win_rate': insights.win_rate,
+                'games_played': insights.games_played,
+                'avg_points': insights.avg_points,
+                'avg_assists': insights.avg_assists,
+                'avg_rebounds': insights.avg_rebounds
+            })
         
         # Sort by win rate and get top players
         return sorted(

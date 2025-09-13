@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { realApiService } from '../../services/realApiService';
+import React, { useState, useEffect } from "react";
+import { realApiService } from "../../services/realApiService";
 
 interface ProcurementItem {
   id: string;
@@ -21,7 +21,7 @@ interface PurchaseOrder {
   id: string;
   items: ProcurementItem[];
   totalAmount: number;
-  status: 'pending' | 'approved' | 'shipped' | 'delivered';
+  status: "pending" | "approved" | "shipped" | "delivered";
   createdAt: Date;
 }
 
@@ -40,9 +40,9 @@ const BulkProcurementPortal: React.FC = () => {
     setLoading(true);
     try {
       const [itemsResponse, vendorsResponse, ordersResponse] = await Promise.all([
-        realApiService.query('procurementItems', { sortBy: 'name' }),
-        realApiService.query('vendors', { sortBy: 'name' }),
-        realApiService.query('purchaseOrders', { sortBy: 'createdAt', sortOrder: 'desc' })
+        realApiService.query("procurementItems", { sortBy: "name" }),
+        realApiService.query("vendors", { sortBy: "name" }),
+        realApiService.query("purchaseOrders", { sortBy: "createdAt", sortOrder: "desc" })
       ]);
 
       setItems((itemsResponse.data as ProcurementItem[]) || []);
@@ -64,7 +64,7 @@ const BulkProcurementPortal: React.FC = () => {
 
   const handleBulkOrder = async () => {
     if (selectedItems.length === 0) {
-      alert('Please select items to order');
+      alert("Please select items to order");
       return;
     }
 
@@ -76,17 +76,17 @@ const BulkProcurementPortal: React.FC = () => {
       const orderData = {
         items: selectedItemDetails,
         totalAmount,
-        status: 'pending'
+        status: "pending"
       };
 
-      const response = await realApiService.create('purchaseOrders', orderData);
+      const response = await realApiService.create("purchaseOrders", orderData);
       
       setPurchaseOrders(prev => [response.data as PurchaseOrder, ...prev]);
       setSelectedItems([]);
       
-      alert('Bulk order created successfully!');
+      alert("Bulk order created successfully!");
     } catch (error) {
-      alert('Failed to create bulk order. Please try again.');
+      alert("Failed to create bulk order. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -94,11 +94,11 @@ const BulkProcurementPortal: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-blue-100 text-blue-800';
-      case 'shipped': return 'bg-purple-100 text-purple-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "pending": return "bg-yellow-100 text-yellow-800";
+      case "approved": return "bg-blue-100 text-blue-800";
+      case "shipped": return "bg-purple-100 text-purple-800";
+      case "delivered": return "bg-green-100 text-green-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -141,8 +141,8 @@ const BulkProcurementPortal: React.FC = () => {
                   key={item.id}
                   className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                     selectedItems.includes(item.id)
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
                   onClick={() => handleItemToggle(item.id)}
                 >
@@ -156,9 +156,9 @@ const BulkProcurementPortal: React.FC = () => {
                     <div className="text-right">
                       <p className="font-bold text-blue-600">${item.unitPrice}</p>
                       <span className={`text-xs px-2 py-1 rounded-full ${
-                        item.inStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        item.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                       }`}>
-                        {item.inStock ? 'In Stock' : 'Out of Stock'}
+                        {item.inStock ? "In Stock" : "Out of Stock"}
                       </span>
                     </div>
                   </div>
@@ -181,7 +181,7 @@ const BulkProcurementPortal: React.FC = () => {
                       {[...Array(5)].map((_, i) => (
                         <span
                           key={i}
-                          className={`text-sm ${i < vendor.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                          className={`text-sm ${i < vendor.rating ? "text-yellow-400" : "text-gray-300"}`}
                         >
                           ★
                         </span>

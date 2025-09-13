@@ -257,7 +257,7 @@ export const generateMockData = () => {
     id: `pay-${i + 1}`,
     customerName: faker.person.fullName(),
     customerEmail: faker.internet.email(),
-    amount: faker.number.float({ min: 50, max: 300, precision: 0.01 }),
+    amount: faker.number.float({ min: 50, max: 300, fractionDigits: 2 }),
     date: faker.date.recent({ days: 90 }).toISOString(),
     status: faker.helpers.arrayElement(['completed', 'pending', 'failed', 'refunded']),
     paymentMethod: faker.helpers.arrayElement(['credit_card', 'debit_card', 'bank_transfer']),
@@ -274,7 +274,7 @@ export const generateMockData = () => {
   const refunds = Array.from({ length: 20 }, (_, i) => ({
     id: `refund-${i + 1}`,
     paymentId: `pay-${faker.number.int({ min: 1, max: 150 })}`,
-    amount: faker.number.float({ min: 25, max: 150, precision: 0.01 }),
+    amount: faker.number.float({ min: 25, max: 150, fractionDigits: 2 }),
     reason: faker.helpers.arrayElement([
       'Player injury - unable to participate',
       'Schedule conflict',

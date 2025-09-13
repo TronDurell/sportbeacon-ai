@@ -10,9 +10,9 @@
 // ============================================================================
 
 export interface MemoryLeakDetector {
-  trackSubscription: (id: string, type: 'firebase' | 'websocket' | 'event' | 'timer') => void;
+  trackSubscription: (id: string, type: "firebase" | "websocket" | "event" | "timer") => void;
   untrackSubscription: (id: string) => void;
-  trackTimer: (id: string, type: 'interval' | 'timeout') => void;
+  trackTimer: (id: string, type: "interval" | "timeout") => void;
   clearTimer: (id: string) => void;
   trackEventListener: (element: EventTarget, event: string, handler: EventListener) => void;
   removeEventListener: (element: EventTarget, event: string, handler: EventListener) => void;
@@ -72,7 +72,7 @@ class MemoryLeakDetectorImpl implements MemoryLeakDetector {
   // SUBSCRIPTION TRACKING
   // ============================================================================
 
-  trackSubscription(id: string, type: 'firebase' | 'websocket' | 'event' | 'timer'): void {
+  trackSubscription(id: string, type: "firebase" | "websocket" | "event" | "timer"): void {
     if (!this.config.enableTracking) return;
 
     this.subscriptions.set(id, {
@@ -103,7 +103,7 @@ class MemoryLeakDetectorImpl implements MemoryLeakDetector {
   // TIMER TRACKING
   // ============================================================================
 
-  trackTimer(id: string, type: 'interval' | 'timeout'): void {
+  trackTimer(id: string, type: "interval" | "timeout"): void {
     if (!this.config.enableTracking) return;
 
     this.timers.set(id, {
@@ -252,7 +252,7 @@ class MemoryLeakDetectorImpl implements MemoryLeakDetector {
     this.eventListeners.clear();
     
     if (this.config.enableWarnings) {
-      console.log('[MemoryLeakDetector] Cleaned up all tracked resources');
+      console.log("[MemoryLeakDetector] Cleaned up all tracked resources");
     }
   }
 
@@ -262,13 +262,13 @@ class MemoryLeakDetectorImpl implements MemoryLeakDetector {
 
   private setupPeriodicChecks(): void {
     // Check for potential memory leaks every 30 seconds in development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       setInterval(() => {
         const report = this.generateReport();
         
         if (report.potentialLeaks.length > 0) {
-          console.warn('[MemoryLeakDetector] Potential memory leaks detected:', report.potentialLeaks);
-          console.warn('[MemoryLeakDetector] Recommendations:', report.recommendations);
+          console.warn("[MemoryLeakDetector] Potential memory leaks detected:", report.potentialLeaks);
+          console.warn("[MemoryLeakDetector] Recommendations:", report.recommendations);
         }
       }, 30000); // 30 seconds
     }
@@ -279,7 +279,7 @@ class MemoryLeakDetectorImpl implements MemoryLeakDetector {
 // HOOKS
 // ============================================================================
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 export const useMemoryLeakDetector = (componentName: string, config?: Partial<MemoryLeakConfig>): MemoryLeakDetector => {
   const detectorRef = useRef<MemoryLeakDetector | null>(null);
@@ -288,7 +288,7 @@ export const useMemoryLeakDetector = (componentName: string, config?: Partial<Me
     if (!detectorRef.current) {
       detectorRef.current = new MemoryLeakDetectorImpl({
         ...config,
-        enableWarnings: process.env.NODE_ENV === 'development'
+        enableWarnings: process.env.NODE_ENV === "development"
       });
     }
 
@@ -324,7 +324,7 @@ export const createSafeInterval = (
   delay: number,
   id: string
 ): number => {
-  detector.trackTimer(id, 'interval');
+  detector.trackTimer(id, "interval");
   const intervalId = setInterval(() => {
     callback();
   }, delay);
@@ -335,7 +335,7 @@ export const createSafeInterval = (
     timerId: intervalId
   });
 
-  return intervalId;
+  return intervalId as any;
 };
 
 export const createSafeTimeout = (
@@ -344,7 +344,7 @@ export const createSafeTimeout = (
   delay: number,
   id: string
 ): number => {
-  detector.trackTimer(id, 'timeout');
+  detector.trackTimer(id, "timeout");
   const timeoutId = setTimeout(() => {
     detector.clearTimer(id);
     callback();
@@ -356,7 +356,7 @@ export const createSafeTimeout = (
     timerId: timeoutId
   });
 
-  return timeoutId;
+  return timeoutId as any;
 };
 
 export const addSafeEventListener = (

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { useAuth } from '../../contexts/AdminAuthContext';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { useAuth } from "../../contexts/AdminAuthContext";
 import { 
   TrendingUp, 
   Target, 
@@ -11,7 +11,7 @@ import {
   Download,
   Filter,
   Zap
-} from 'lucide-react';
+} from "lucide-react";
 
 interface LiberationStats {
   summaryMetrics: SummaryMetrics;
@@ -117,7 +117,7 @@ interface TrendData {
   metric: string;
   value: number;
   change: number;
-  direction: 'up' | 'down' | 'stable';
+  direction: "up" | "down" | "stable";
 }
 
 interface TimeSeriesData {
@@ -129,7 +129,7 @@ interface TimeSeriesData {
 }
 
 interface FilterOptions {
-  dateRange: '7d' | '30d' | '90d' | '1y';
+  dateRange: "7d" | "30d" | "90d" | "1y";
   role: string;
   sessionType: string;
 }
@@ -139,9 +139,9 @@ const LiberationStatsDashboard: React.FC = () => {
   
   const [liberationStats, setLiberationStats] = useState<LiberationStats | null>(null);
   const [filters, setFilters] = useState<FilterOptions>({
-    dateRange: '30d',
-    role: 'all',
-    sessionType: 'all'
+    dateRange: "30d",
+    role: "all",
+    sessionType: "all"
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -156,7 +156,7 @@ const LiberationStatsDashboard: React.FC = () => {
           avgScrollSessionDuration: 18.5,
           scrollLoopInterventions: 2847,
           timeSaved: 1240,
-          mostEffectiveNudge: 'Coach Nudge - Training',
+          mostEffectiveNudge: "Coach Nudge - Training",
           clickThroughRate: 68
         },
         scrollBehavior: {
@@ -187,66 +187,66 @@ const LiberationStatsDashboard: React.FC = () => {
             }
           },
           sessionTypes: {
-            'Training': 45,
-            'Learning': 28,
-            'Scouting': 12,
-            'Planning': 10,
-            'Social': 5
+            "Training": 45,
+            "Learning": 28,
+            "Scouting": 12,
+            "Planning": 10,
+            "Social": 5
           },
           scrollPatterns: [
-            { pattern: 'Rapid Scrolling', frequency: 1240, avgDuration: 8.5, recoveryRate: 45 },
-            { pattern: 'Passive Browsing', frequency: 892, avgDuration: 15.2, recoveryRate: 68 },
-            { pattern: 'Content Hunting', frequency: 567, avgDuration: 12.8, recoveryRate: 72 },
-            { pattern: 'Social Scrolling', frequency: 234, avgDuration: 25.3, recoveryRate: 38 }
+            { pattern: "Rapid Scrolling", frequency: 1240, avgDuration: 8.5, recoveryRate: 45 },
+            { pattern: "Passive Browsing", frequency: 892, avgDuration: 15.2, recoveryRate: 68 },
+            { pattern: "Content Hunting", frequency: 567, avgDuration: 12.8, recoveryRate: 72 },
+            { pattern: "Social Scrolling", frequency: 234, avgDuration: 25.3, recoveryRate: 38 }
           ]
         },
         interventionMetrics: {
           totalInterventions: 2847,
           interventionsByType: {
-            'coach_nudge': 1240,
-            'scroll_break': 892,
-            'intent_reminder': 567,
-            'achievement_celebration': 148
+            "coach_nudge": 1240,
+            "scroll_break": 892,
+            "intent_reminder": 567,
+            "achievement_celebration": 148
           },
           successRates: {
-            'coach_nudge': 68,
-            'scroll_break': 52,
-            'intent_reminder': 75,
-            'achievement_celebration': 88
+            "coach_nudge": 68,
+            "scroll_break": 52,
+            "intent_reminder": 75,
+            "achievement_celebration": 88
           },
           responseTimes: {
-            'coach_nudge': 45,
-            'scroll_break': 120,
-            'intent_reminder': 30,
-            'achievement_celebration': 15
+            "coach_nudge": 45,
+            "scroll_break": 120,
+            "intent_reminder": 30,
+            "achievement_celebration": 15
           },
           topNudges: [
-            { nudgeType: 'Coach Nudge - Training', served: 456, clicked: 324, successRate: 71, avgResponseTime: 42 },
-            { nudgeType: 'Scroll Break - Learning', served: 234, clicked: 156, successRate: 67, avgResponseTime: 85 },
-            { nudgeType: 'Intent Reminder - Planning', served: 189, clicked: 142, successRate: 75, avgResponseTime: 28 },
-            { nudgeType: 'Achievement Celebration', served: 98, clicked: 87, successRate: 89, avgResponseTime: 12 }
+            { nudgeType: "Coach Nudge - Training", served: 456, clicked: 324, successRate: 71, avgResponseTime: 42 },
+            { nudgeType: "Scroll Break - Learning", served: 234, clicked: 156, successRate: 67, avgResponseTime: 85 },
+            { nudgeType: "Intent Reminder - Planning", served: 189, clicked: 142, successRate: 75, avgResponseTime: 28 },
+            { nudgeType: "Achievement Celebration", served: 98, clicked: 87, successRate: 89, avgResponseTime: 12 }
           ]
         },
         engagementAnalytics: {
           alertsClicked: [
-            { alertType: 'Start Workout', clicks: 324, role: 'player', timestamp: Date.now() - 86400000 },
-            { alertType: 'Log Progress', clicks: 234, role: 'player', timestamp: Date.now() - 172800000 },
-            { alertType: 'Plan Training', clicks: 156, role: 'coach', timestamp: Date.now() - 259200000 },
-            { alertType: 'Check Schedule', clicks: 98, role: 'parent', timestamp: Date.now() - 345600000 },
-            { alertType: 'Review Metrics', clicks: 67, role: 'admin', timestamp: Date.now() - 432000000 }
+            { alertType: "Start Workout", clicks: 324, role: "player", timestamp: Date.now() - 86400000 },
+            { alertType: "Log Progress", clicks: 234, role: "player", timestamp: Date.now() - 172800000 },
+            { alertType: "Plan Training", clicks: 156, role: "coach", timestamp: Date.now() - 259200000 },
+            { alertType: "Check Schedule", clicks: 98, role: "parent", timestamp: Date.now() - 345600000 },
+            { alertType: "Review Metrics", clicks: 67, role: "admin", timestamp: Date.now() - 432000000 }
           ],
           sessionsByIntent: [
-            { intent: 'train', sessions: 456, avgDuration: 22.3, actionsTaken: 324 },
-            { intent: 'learn', sessions: 234, avgDuration: 18.7, actionsTaken: 189 },
-            { intent: 'create', sessions: 156, avgDuration: 28.5, actionsTaken: 134 },
-            { intent: 'explore', sessions: 98, avgDuration: 15.2, actionsTaken: 67 },
-            { intent: 'connect', sessions: 67, avgDuration: 12.8, actionsTaken: 45 }
+            { intent: "train", sessions: 456, avgDuration: 22.3, actionsTaken: 324 },
+            { intent: "learn", sessions: 234, avgDuration: 18.7, actionsTaken: 189 },
+            { intent: "create", sessions: 156, avgDuration: 28.5, actionsTaken: 134 },
+            { intent: "explore", sessions: 98, avgDuration: 15.2, actionsTaken: 67 },
+            { intent: "connect", sessions: 67, avgDuration: 12.8, actionsTaken: 45 }
           ],
           engagementByRole: [
-            { role: 'player', totalSessions: 1240, activeSessions: 892, avgEngagement: 72, topActions: ['Start Workout', 'Log Progress', 'Find Game'] },
-            { role: 'coach', totalSessions: 456, activeSessions: 378, avgEngagement: 83, topActions: ['Plan Training', 'Review Players', 'Team Meeting'] },
-            { role: 'parent', totalSessions: 892, activeSessions: 567, avgEngagement: 64, topActions: ['Check Schedule', 'Connect Coach', 'Join Community'] },
-            { role: 'admin', totalSessions: 259, activeSessions: 234, avgEngagement: 90, topActions: ['Review Metrics', 'Handle Alerts', 'User Management'] }
+            { role: "player", totalSessions: 1240, activeSessions: 892, avgEngagement: 72, topActions: ["Start Workout", "Log Progress", "Find Game"] },
+            { role: "coach", totalSessions: 456, activeSessions: 378, avgEngagement: 83, topActions: ["Plan Training", "Review Players", "Team Meeting"] },
+            { role: "parent", totalSessions: 892, activeSessions: 567, avgEngagement: 64, topActions: ["Check Schedule", "Connect Coach", "Join Community"] },
+            { role: "admin", totalSessions: 259, activeSessions: 234, avgEngagement: 90, topActions: ["Review Metrics", "Handle Alerts", "User Management"] }
           ],
           autopilotUsage: {
             totalUsers: 567,
@@ -257,52 +257,52 @@ const LiberationStatsDashboard: React.FC = () => {
         },
         roleInsights: [
           {
-            role: 'player',
+            role: "player",
             strugglingUsers: 45,
             topPerformers: 234,
-            recommendations: ['Increase training-focused nudges', 'Add more achievement celebrations', 'Optimize drill recommendations'],
+            recommendations: ["Increase training-focused nudges", "Add more achievement celebrations", "Optimize drill recommendations"],
             trends: [
-              { metric: 'Engagement Rate', value: 72, change: 8, direction: 'up' },
-              { metric: 'Session Duration', value: 22.3, change: -2, direction: 'down' },
-              { metric: 'Recovery Actions', value: 892, change: 15, direction: 'up' }
+              { metric: "Engagement Rate", value: 72, change: 8, direction: "up" },
+              { metric: "Session Duration", value: 22.3, change: -2, direction: "down" },
+              { metric: "Recovery Actions", value: 892, change: 15, direction: "up" }
             ]
           },
           {
-            role: 'coach',
+            role: "coach",
             strugglingUsers: 12,
             topPerformers: 156,
-            recommendations: ['Enhance planning tools', 'Improve team analytics', 'Add collaboration features'],
+            recommendations: ["Enhance planning tools", "Improve team analytics", "Add collaboration features"],
             trends: [
-              { metric: 'Engagement Rate', value: 83, change: 12, direction: 'up' },
-              { metric: 'Session Duration', value: 28.7, change: 5, direction: 'up' },
-              { metric: 'Recovery Actions', value: 378, change: 23, direction: 'up' }
+              { metric: "Engagement Rate", value: 83, change: 12, direction: "up" },
+              { metric: "Session Duration", value: 28.7, change: 5, direction: "up" },
+              { metric: "Recovery Actions", value: 378, change: 23, direction: "up" }
             ]
           },
           {
-            role: 'parent',
+            role: "parent",
             strugglingUsers: 28,
             topPerformers: 134,
-            recommendations: ['Simplify communication tools', 'Add safety check reminders', 'Improve community features'],
+            recommendations: ["Simplify communication tools", "Add safety check reminders", "Improve community features"],
             trends: [
-              { metric: 'Engagement Rate', value: 64, change: -3, direction: 'down' },
-              { metric: 'Session Duration', value: 15.2, change: 1, direction: 'up' },
-              { metric: 'Recovery Actions', value: 567, change: 8, direction: 'up' }
+              { metric: "Engagement Rate", value: 64, change: -3, direction: "down" },
+              { metric: "Session Duration", value: 15.2, change: 1, direction: "up" },
+              { metric: "Recovery Actions", value: 567, change: 8, direction: "up" }
             ]
           },
           {
-            role: 'admin',
+            role: "admin",
             strugglingUsers: 3,
             topPerformers: 43,
-            recommendations: ['Add advanced analytics', 'Improve system monitoring', 'Enhance user management tools'],
+            recommendations: ["Add advanced analytics", "Improve system monitoring", "Enhance user management tools"],
             trends: [
-              { metric: 'Engagement Rate', value: 90, change: 5, direction: 'up' },
-              { metric: 'Session Duration', value: 35.1, change: 8, direction: 'up' },
-              { metric: 'Recovery Actions', value: 234, change: 18, direction: 'up' }
+              { metric: "Engagement Rate", value: 90, change: 5, direction: "up" },
+              { metric: "Session Duration", value: 35.1, change: 8, direction: "up" },
+              { metric: "Recovery Actions", value: 234, change: 18, direction: "up" }
             ]
           }
         ],
         timeSeriesData: Array.from({ length: 30 }, (_, i) => ({
-          date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split('T')[0],
+          date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split("T")[0],
           interventions: Math.floor(Math.random() * 100) + 50,
           recoveries: Math.floor(Math.random() * 60) + 30,
           engagement: Math.floor(Math.random() * 20) + 70,
@@ -321,7 +321,7 @@ const LiberationStatsDashboard: React.FC = () => {
     if (!liberationStats) return;
     
     const csvContent = [
-      'Liberation Stats Summary',
+      "Liberation Stats Summary",
       `Total Users,${liberationStats.summaryMetrics.totalUsers}`,
       `Active Users,${liberationStats.summaryMetrics.activeUsers}`,
       `Intent Declaration Rate,${liberationStats.summaryMetrics.intentDeclarationRate}%`,
@@ -330,24 +330,24 @@ const LiberationStatsDashboard: React.FC = () => {
       `Time Saved,${liberationStats.summaryMetrics.timeSaved} minutes`,
       `Most Effective Nudge,${liberationStats.summaryMetrics.mostEffectiveNudge}`,
       `Click Through Rate,${liberationStats.summaryMetrics.clickThroughRate}%`,
-      '',
-      'Role Breakdown',
-      'Role,Avg Session Duration,Scroll Interventions,Recovery Actions,Engagement Rate',
+      "",
+      "Role Breakdown",
+      "Role,Avg Session Duration,Scroll Interventions,Recovery Actions,Engagement Rate",
       ...Object.entries(liberationStats.scrollBehavior.roleBreakdown).map(([role, data]) => 
         `${role},${data.avgSessionDuration},${data.scrollInterventions},${data.recoveryActions},${data.engagementRate}%`
       )
-    ].join('\n');
+    ].join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `liberation-stats-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `liberation-stats-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== "admin") {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-gray-500">Access restricted to administrators</p>
@@ -625,7 +625,7 @@ const LiberationStatsDashboard: React.FC = () => {
                       <div key={type} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                          <p className="font-medium">{type.replace('_', ' ')}</p>
+                          <p className="font-medium">{type.replace("_", " ")}</p>
                         </div>
                         <div className="text-right">
                           <p className="font-semibold">{count}</p>
@@ -645,7 +645,7 @@ const LiberationStatsDashboard: React.FC = () => {
                       <div key={type} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                          <p className="font-medium">{type.replace('_', ' ')}</p>
+                          <p className="font-medium">{type.replace("_", " ")}</p>
                         </div>
                         <div className="text-right">
                           <p className="font-semibold">{time}s</p>
@@ -745,11 +745,11 @@ const LiberationStatsDashboard: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <span className="font-semibold">{trend.value}</span>
                             <span className={`flex items-center gap-1 ${
-                              trend.direction === 'up' ? 'text-green-600' : 
-                              trend.direction === 'down' ? 'text-red-600' : 'text-gray-600'
+                              trend.direction === "up" ? "text-green-600" : 
+                              trend.direction === "down" ? "text-red-600" : "text-gray-600"
                             }`}>
-                              {trend.direction === 'up' ? <TrendingUp className="w-3 h-3" /> :
-                               trend.direction === 'down' ? <TrendingUp className="w-3 h-3 rotate-180" /> :
+                              {trend.direction === "up" ? <TrendingUp className="w-3 h-3" /> :
+                               trend.direction === "down" ? <TrendingUp className="w-3 h-3 rotate-180" /> :
                                <span>-</span>}
                               {trend.change}%
                             </span>

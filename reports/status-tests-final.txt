@@ -1,0 +1,48 @@
+Test Results Summary:
+====================
+
+Test Suites: 17 failed, 17 total
+Tests: 60 failed, 60 total
+Snapshots: 0 total
+Time: 33.269 s
+
+Key Issues:
+===========
+
+1. Firebase Emulator Connection Issues:
+   - FetchError: request to http://127.0.0.1:8080/emulator/v1/projects/sportbeaconai-test:securityRules failed, reason: connect ECONNREFUSED 127.0.0.1:8080
+   - ENOENT: no such file or directory, open 'C:\Users\cultu\iCloudDrive\CuratorSportsBeacon\sportbeacon-ai\functions\src\firestore.rules'
+
+2. Firebase App Initialization Issues:
+   - The default Firebase app already exists. This means you called initializeApp() more than once without providing an app name as the second argument.
+
+3. TypeScript Errors in Test Files:
+   - Property 'test' does not exist on type 'ScheduleFunction'
+   - Expected 2 arguments, but got 1 (monthlyAnalyticsReport)
+   - This expression is not callable (functionsTest import issues)
+   - Cannot find name 'before' and 'after'
+
+4. Test Environment Setup Issues:
+   - testEnv.cleanup() is undefined
+   - Missing firestore.rules file in functions/src/
+
+Root Cause Analysis:
+===================
+
+The test failures are primarily due to:
+1. Firebase emulator not running (ECONNREFUSED 127.0.0.1:8080)
+2. Missing firestore.rules file in the functions/src directory
+3. Firebase app initialization conflicts in test files
+4. Incorrect Firebase Functions test setup and imports
+5. Missing test environment configuration
+
+Recommendations:
+================
+
+1. Start Firebase emulator before running tests
+2. Copy firestore.rules to functions/src/ directory
+3. Fix Firebase app initialization in test files
+4. Update Firebase Functions test imports and setup
+5. Implement proper test environment cleanup
+
+Status: BLOCKED - Tests cannot run without emulator and proper configuration

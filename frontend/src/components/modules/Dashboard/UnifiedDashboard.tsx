@@ -1,21 +1,21 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../contexts/AdminAuthContext';
-import { useSmartLayer } from '../../../contexts/SmartLayerContext';
-import { useAgentOrchestration } from '../../../contexts/AgentOrchestrationContext';
-import { useInsightsScan } from '../../../hooks/useInsightsScan';
-import { useScrollIntentEngine } from '../../../hooks/ScrollIntentEngine';
-import SmartAlert from '../../SmartAlert';
-import ScrollInterventionModal from '../../ScrollInterventionModal';
-import IntentTrigger from '../../IntentTrigger';
-import PlayerDashboard from './PlayerDashboard';
-import CoachDashboard from './CoachDashboard';
-import ParentDashboard from './ParentDashboard';
-import AdminDashboard from './AdminDashboard';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../../contexts/AdminAuthContext";
+import { useSmartLayer } from "../../../contexts/SmartLayerContext";
+import { useAgentOrchestration } from "../../../contexts/AgentOrchestrationContext";
+import { useInsightsScan } from "../../../hooks/useInsightsScan";
+import { useScrollIntentEngine } from "../../../hooks/ScrollIntentEngine";
+import SmartAlert from "../../SmartAlert";
+import ScrollInterventionModal from "../../ScrollInterventionModal";
+import IntentTrigger from "../../IntentTrigger";
+import PlayerDashboard from "./PlayerDashboard";
+import CoachDashboard from "./CoachDashboard";
+import ParentDashboard from "./ParentDashboard";
+import AdminDashboard from "./AdminDashboard";
 import { 
   AlertCircle,
   Trophy
-} from 'lucide-react';
+} from "lucide-react";
 
 const UnifiedDashboard: React.FC = () => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -30,14 +30,14 @@ const UnifiedDashboard: React.FC = () => {
     hasDeclaredIntent
   } = useSmartLayer();
   const { sendRequest } = useAgentOrchestration();
-  const { insights, dismissInsight } = useInsightsScan(user?.role || 'player', autopilot);
+  const { insights, dismissInsight } = useInsightsScan(user?.role || "player", autopilot);
   
   // Initialize scroll intent engine
   useScrollIntentEngine();
 
   const handleInterventionAction = (action: any) => {
     sendRequest({
-      type: 'scroll_intervention_action',
+      type: "scroll_intervention_action",
       context: action.aiPrompt,
       data: { action, intervention: currentIntervention }
     });
@@ -90,13 +90,13 @@ const UnifiedDashboard: React.FC = () => {
   // Role-based dashboard rendering
   const renderRoleDashboard = () => {
     switch (user.role) {
-      case 'player':
+      case "player":
         return <PlayerDashboard />;
-      case 'coach':
+      case "coach":
         return <CoachDashboard />;
-      case 'parent':
+      case "parent":
         return <ParentDashboard />;
-      case 'admin':
+      case "admin":
         return <AdminDashboard />;
       default:
         return (
@@ -172,7 +172,7 @@ const UnifiedDashboard: React.FC = () => {
             
             <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">
-                {user.firstName?.charAt(0) || 'U'}
+                {user.firstName?.charAt(0) || "U"}
               </span>
             </div>
           </div>
@@ -193,12 +193,12 @@ const UnifiedDashboard: React.FC = () => {
                 ...a,
                 onClick: () => {
                   if (a.aiPrompt) {
-                    sendRequest({ type: 'autopilot_action', context: a.aiPrompt, data: alert });
+                    sendRequest({ type: "autopilot_action", context: a.aiPrompt, data: alert });
                   }
-                  if (a.label === 'Dismiss' || a.variant === 'ghost') {
+                  if (a.label === "Dismiss" || a.variant === "ghost") {
                     dismissInsight(alert.id);
                   }
-                  if (a.label === 'Remind me later') {
+                  if (a.label === "Remind me later") {
                     dismissInsight(alert.id);
                   }
                 }

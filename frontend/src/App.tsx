@@ -1,108 +1,87 @@
-import { useEffect, useState } from 'react';
-import { AdminAuthProvider } from './contexts/AdminAuthContext';
-import { AgentOrchestrationProvider } from './contexts/AgentOrchestrationContext';
-import { SmartLayerProvider } from './contexts/SmartLayerContext';
-import RoleRouter from './components/routing/RoleRouter';
-import SmartAlerts from './components/SmartAlerts';
-import { validateEnvironment, logValidationResults } from './utils/environmentValidation';
-import { ToastContainer } from 'react-toastify';
-import ErrorBoundary from './components/ErrorBoundary';
-import 'react-toastify/dist/ReactToastify.css';
-import './App.css';
+import React, { Suspense, lazy, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import ErrorBoundaryWithMonitoring from "./components/ErrorBoundaryWithMonitoring";
+import webVitalsReporter from "./lib/webVitals";
+import { useMemory } from "./hooks/useMemory";
+import "./App.css";
+
+// Lazy load pages for code splitting
+const Health = lazy(() => import("./pages/Health"));
+const Insights = lazy(() => import("./pages/Insights"));
+const Drills = lazy(() => import("./pages/Drills"));
+const Matchmaking = lazy(() => import("./pages/Matchmaking"));
+const Winners = lazy(() => import("./pages/Winners"));
+const PlaceProfile = lazy(() => import("./pages/PlaceProfile"));
+
+// Loading component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+  </div>
+);
 
 function App() {
-  const [environmentValid, setEnvironmentValid] = useState<boolean | null>(null);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  // Initialize memory SDK for session tracking (disabled for now to prevent NO_FCP)
+  const { captureSessionStart } = useMemory({ enabled: false, autoCapture: false });
 
   useEffect(() => {
-    // Validate environment on app startup
-    try {
-      const validation = validateEnvironment();
-      setEnvironmentValid(validation.isValid);
-      
-      if (!validation.isValid) {
-        setValidationError(`Environment validation failed: ${validation.errors.join(', ')}`);
-        }
-      
-      // Log validation results in development
-      if (import.meta.env.DEV) {
-        logValidationResults();
-      }
-    } catch (error) {
-      setEnvironmentValid(false);
-      setValidationError(`Environment validation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
+    // Initialize Web Vitals monitoring
+    webVitalsReporter.initialize();
   }, []);
 
-  // Show loading state while validating environment
-  if (environmentValid === null) {
-    return (
-      <ErrorBoundary context="Environment Validation">
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Initializing SportBeaconAI...</p>
-          </div>
-        </div>
-      </ErrorBoundary>
-    );
-  }
-
-  // Show error state if environment validation failed
-  if (!environmentValid) {
-    return (
-      <ErrorBoundary context="Environment Configuration">
-        <div className="min-h-screen flex items-center justify-center bg-red-50">
-          <div className="max-w-md mx-auto text-center p-6 bg-white rounded-lg shadow-lg border border-red-200">
-            <div className="text-red-600 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h1>
-            <p className="text-gray-600 mb-4">
-              SportBeaconAI cannot start due to missing or invalid configuration.
-            </p>
-            {validationError && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-                <p className="text-sm text-red-800">{validationError}</p>
-              </div>
-            )}
-            <div className="text-sm text-gray-500">
-              <p>Please check your environment configuration and try again.</p>
-              <p className="mt-2">Contact support if the problem persists.</p>
-            </div>
-          </div>
-        </div>
-      </ErrorBoundary>
-    );
-  }
-
-  // Main application with error boundary
   return (
-    <ErrorBoundary context="SportBeaconAI Application">
-      <AdminAuthProvider>
-        <AgentOrchestrationProvider>
-          <SmartLayerProvider>
-            <div className="App">
-              <RoleRouter />
-              <SmartAlerts />
-              <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-              />
+    <ErrorBoundaryWithMonitoring>
+      <Router>
+        <div className="App">
+        {/* Navigation */}
+        <nav className="bg-gray-800 text-white p-4">
+          <div className="container mx-auto">
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-bold">SportBeacon AI</h1>
+              <div className="flex space-x-4">
+                <Link to="/" className="hover:text-gray-300 transition-colors">
+                  Health
+                </Link>
+                <Link to="/insights" className="hover:text-gray-300 transition-colors">
+                  Insights
+                </Link>
+                <Link to="/drills" className="hover:text-gray-300 transition-colors">
+                  Drills
+                </Link>
+                <Link to="/matchmaking" className="hover:text-gray-300 transition-colors">
+                  Matchmaking
+                </Link>
+                <Link to="/winners" className="hover:text-gray-300 transition-colors">
+                  Winners
+                </Link>
+                <Link to="/places/godbold-park-court-2" className="hover:text-gray-300 transition-colors">
+                  Places
+                </Link>
+              </div>
             </div>
-          </SmartLayerProvider>
-        </AgentOrchestrationProvider>
-      </AdminAuthProvider>
-    </ErrorBoundary>
+          </div>
+        </nav>
+
+        {/* Routes */}
+        <main>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/" element={<Health />} />
+              <Route path="/insights" element={<Insights />} />
+              <Route path="/drills" element={<Drills />} />
+              <Route path="/matchmaking" element={<Matchmaking />} />
+              <Route path="/winners" element={<Winners />} />
+              <Route path="/places/:locationId" element={<PlaceProfile />} />
+            </Routes>
+          </Suspense>
+        </main>
+
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt />
+        </div>
+      </Router>
+    </ErrorBoundaryWithMonitoring>
   );
 }
 

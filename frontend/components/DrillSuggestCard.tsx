@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Typography } from '@mui/material';
 import { useDrillSuggestions } from '../hooks/useDrillSuggestions';
 
-export default function DrillSuggestCard({ stats }) {
+export default function DrillSuggestCard({ stats }: { stats: any }) {
   const drills = useDrillSuggestions(stats);
 
   return (

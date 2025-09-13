@@ -19,11 +19,13 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/init';
 import type {
-  VideoAnnotationDocument,
+  VideoAnnotationDocument
+} from '../firebase/types';
+import type {
   AnnotationPoint,
   AnnotationData,
   AnnotationMetadata
-} from '../firebase/types';
+} from '../src/types/monetization';
 
 /**
  * Annotation service for Firestore operations
@@ -46,8 +48,8 @@ export class AnnotationService {
       
       const annotation: VideoAnnotationDocument = {
         id: annotationId,
-        videoId,
         ...annotationData,
+        videoId,
         createdAt: serverTimestamp() as any,
         updatedAt: serverTimestamp() as any,
         createdBy: userId,
@@ -238,8 +240,8 @@ export class AnnotationService {
         
         const annotation: VideoAnnotationDocument = {
           id: annotationId,
-          videoId,
           ...annotationData,
+          videoId,
           createdAt: serverTimestamp() as any,
           updatedAt: serverTimestamp() as any,
           createdBy: userId,
@@ -288,8 +290,8 @@ export class AnnotationService {
         
         // Simple text search in annotation content
         const searchLower = searchTerm.toLowerCase();
-        const contentLower = annotation.data.content?.toLowerCase() || '';
-        const titleLower = annotation.data.title?.toLowerCase() || '';
+        const contentLower = annotation.data?.content?.toLowerCase() || '';
+        const titleLower = annotation.data?.title?.toLowerCase() || '';
         
         if (contentLower.includes(searchLower) || titleLower.includes(searchLower)) {
           annotations.push(annotation);
@@ -324,13 +326,13 @@ export class AnnotationService {
       
       annotations.forEach((annotation) => {
         // Calculate duration if start and end times are available
-        if (annotation.data.startTime && annotation.data.endTime) {
+        if (annotation.data?.startTime && annotation.data?.endTime) {
           const duration = annotation.data.endTime - annotation.data.startTime;
           stats.totalDuration += duration;
         }
         
         // Count annotation types
-        const type = annotation.data.type || 'unknown';
+        const type = annotation.data?.type || 'unknown';
         stats.annotationTypes[type] = (stats.annotationTypes[type] || 0) + 1;
       });
       

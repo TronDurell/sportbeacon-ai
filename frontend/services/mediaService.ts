@@ -23,7 +23,7 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { storage, db } from '../lib/firebase';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../src/contexts/AdminAuthContext';
 import type {
   MediaMetadata,
   MediaUploadTask,
@@ -271,6 +271,7 @@ export class MediaService {
   async uploadFile(
     file: File,
     category: MediaCategory,
+    userId: string,
     metadata: Partial<MediaMetadata> = {}
   ): Promise<MediaUploadTask> {
     // Validate file
@@ -279,13 +280,10 @@ export class MediaService {
       throw new Error(validation.error);
     }
 
-    // Get current user
-    const { user } = useAuth();
-    if (!user) {
-      throw new Error('User not authenticated');
+    // User ID should be passed as parameter to avoid React hooks in class methods
+    if (!userId) {
+      throw new Error('User ID is required');
     }
-
-    const userId = user.uid;
     const mediaType = this.getMediaType(file);
     const uploadId = `${Date.now()}_${Math.random().toString(36).substring(2)}`;
 
@@ -392,9 +390,23 @@ export class MediaService {
 
           // Save metadata to Firestore
           const mediaId = await this.saveMediaMetadata({
-            ...mediaUploadTask.metadata,
+            id: mediaUploadTask.id,
+            fileName: mediaUploadTask.metadata.fileName || 'unknown',
+            originalName: mediaUploadTask.metadata.originalName || 'unknown',
+            fileSize: mediaUploadTask.metadata.fileSize || 0,
+            mimeType: mediaUploadTask.metadata.mimeType || 'application/octet-stream',
+            mediaType: mediaUploadTask.metadata.mediaType || 'image',
+            category: mediaUploadTask.metadata.category || 'content',
+            status: 'completed',
             downloadUrl: downloadURL,
-            status: 'completed'
+            uploadedBy: userId,
+            uploadedAt: new Date().toISOString(),
+            tags: mediaUploadTask.metadata.tags || [],
+            description: mediaUploadTask.metadata.description || '',
+            isPublic: mediaUploadTask.metadata.isPublic || false,
+            shareCount: 0,
+            downloadCount: 0,
+            customMetadata: mediaUploadTask.metadata.customMetadata || {}
           });
 
           // Upload thumbnail if exists
@@ -514,13 +526,9 @@ export class MediaService {
   }
 
   // Search Media
-  async searchMedia(filters: MediaSearchFilters, limit: number = 20): Promise<MediaMetadata[]> {
-    const { user } = useAuth();
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
+  async searchMedia(filters: MediaSearchFilters, userId: string, limitCount: number = 20): Promise<MediaMetadata[]> {
 
-    let q = query(collection(db, 'media'), orderBy('uploadedAt', 'desc'), limit(limit));
+    let q = query(collection(db, 'media'), orderBy('uploadedAt', 'desc'), limit(limitCount));
 
     // Apply filters
     if (filters.uploadedBy) {
@@ -564,13 +572,13 @@ export class MediaService {
       if (filters.maxSize && data.fileSize > filters.maxSize) return;
 
       if (filters.dateRange) {
-        const uploadDate = data.uploadedAt.toDate();
+        const uploadDate = new Date(data.uploadedAt);
         if (uploadDate < filters.dateRange.start.toDate() || uploadDate > filters.dateRange.end.toDate()) {
           return;
         }
       }
 
-      media.push({ id: doc.id, ...data });
+      media.push({ ...data, id: doc.id });
     });
 
     return media;
@@ -582,17 +590,12 @@ export class MediaService {
     if (category) {
       filters.categories = [category];
     }
-    return this.searchMedia(filters);
+    return this.searchMedia(filters, userId);
   }
 
   // Get Media Analytics
-  async getMediaAnalytics(): Promise<MediaAnalytics> {
-    const { user } = useAuth();
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-
-    const userMedia = await this.getUserMedia(user.uid);
+  async getMediaAnalytics(userId: string): Promise<MediaAnalytics> {
+    const userMedia = await this.getUserMedia(userId);
     
     const totalFiles = userMedia.length;
     const totalSize = userMedia.reduce((sum, media) => sum + media.fileSize, 0);
@@ -714,7 +717,7 @@ export class MediaService {
 
   // Clear completed uploads
   clearCompletedUploads(): void {
-    for (const [uploadId, uploadTask] of this.uploadTasks.entries()) {
+    for (const [uploadId, uploadTask] of Array.from(this.uploadTasks.entries())) {
       if (uploadTask.status === 'completed' || uploadTask.status === 'failed') {
         this.uploadTasks.delete(uploadId);
       }

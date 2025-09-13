@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   MessageCircle, 
   Send, 
-  Search, 
   MapPin, 
   Calendar, 
   Users, 
@@ -13,21 +12,16 @@ import {
   Globe,
   ChevronDown,
   ChevronUp,
-  Filter,
-  RefreshCw,
   BookOpen,
-  HelpCircle,
   Settings,
-  X,
   CheckCircle,
-  AlertCircle,
   Info
-} from 'lucide-react';
-import CivicAgent, { CivicQuery, CivicResponse, MunicipalityConfig } from '../../lib/ai/CivicAgent';
+} from "lucide-react";
+import CivicAgent, { CivicQuery, CivicResponse } from "../../lib/ai/CivicAgent";
 
 interface ChatMessage {
   id: string;
-  type: 'user' | 'assistant';
+  type: "user" | "assistant";
   content: string;
   timestamp: Date;
   response?: CivicResponse;
@@ -40,17 +34,17 @@ interface CivicAgentUIProps {
 }
 
 const CivicAgentUI: React.FC<CivicAgentUIProps> = ({ 
-  municipalityName = 'Cary',
+  municipalityName = "Cary",
   leaguePolicies = [],
-  adminRole = 'public'
+  adminRole = "public"
 }) => {
   const [agent, setAgent] = useState<CivicAgent | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showFacilities, setShowFacilities] = useState(false);
   const [showPolicies, setShowPolicies] = useState(false);
 
@@ -66,7 +60,7 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
     civicAgent.getOnboardingAssistant().then(response => {
       const welcomeMessage: ChatMessage = {
         id: Date.now().toString(),
-        type: 'assistant',
+        type: "assistant",
         content: response.answer,
         timestamp: new Date(),
         response
@@ -81,7 +75,7 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
 
   // Auto-scroll to bottom
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSendMessage = async (content: string) => {
@@ -89,13 +83,13 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
-      type: 'user',
+      type: "user",
       content: content.trim(),
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    setInputValue("");
     setIsLoading(true);
 
     try {
@@ -112,7 +106,7 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
       
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        type: 'assistant',
+        type: "assistant",
         content: response.answer,
         timestamp: new Date(),
         response
@@ -122,8 +116,8 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
     } catch (error) {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again or contact our office for assistance.',
+        type: "assistant",
+        content: "Sorry, I encountered an error. Please try again or contact our office for assistance.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -132,19 +126,19 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
     }
   };
 
-  const determineQueryType = (content: string): 'policy' | 'registration' | 'facility' | 'recommendation' | 'general' => {
+  const determineQueryType = (content: string): "policy" | "registration" | "facility" | "recommendation" | "general" => {
     const lowerContent = content.toLowerCase();
     
-    if (lowerContent.includes('policy') || lowerContent.includes('refund') || lowerContent.includes('cost') || lowerContent.includes('age')) {
-      return 'policy';
-    } else if (lowerContent.includes('register') || lowerContent.includes('sign up') || lowerContent.includes('join')) {
-      return 'registration';
-    } else if (lowerContent.includes('facility') || lowerContent.includes('location') || lowerContent.includes('where')) {
-      return 'facility';
-    } else if (lowerContent.includes('recommend') || lowerContent.includes('suggest') || lowerContent.includes('best')) {
-      return 'recommendation';
+    if (lowerContent.includes("policy") || lowerContent.includes("refund") || lowerContent.includes("cost") || lowerContent.includes("age")) {
+      return "policy";
+    } else if (lowerContent.includes("register") || lowerContent.includes("sign up") || lowerContent.includes("join")) {
+      return "registration";
+    } else if (lowerContent.includes("facility") || lowerContent.includes("location") || lowerContent.includes("where")) {
+      return "facility";
+    } else if (lowerContent.includes("recommend") || lowerContent.includes("suggest") || lowerContent.includes("best")) {
+      return "recommendation";
     } else {
-      return 'general';
+      return "general";
     }
   };
 
@@ -159,7 +153,7 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
     }
     
     // Extract sport
-    const sports = ['soccer', 'basketball', 'baseball', 'football', 'volleyball', 'tennis', 'swimming'];
+    const sports = ["soccer", "basketball", "baseball", "football", "volleyball", "tennis", "swimming"];
     for (const sport of sports) {
       if (lowerContent.includes(sport)) {
         context.sport = sport;
@@ -168,48 +162,48 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
     }
     
     // Extract skill level
-    if (lowerContent.includes('beginner')) context.skillLevel = 'beginner';
-    else if (lowerContent.includes('intermediate')) context.skillLevel = 'intermediate';
-    else if (lowerContent.includes('advanced')) context.skillLevel = 'advanced';
+    if (lowerContent.includes("beginner")) context.skillLevel = "beginner";
+    else if (lowerContent.includes("intermediate")) context.skillLevel = "intermediate";
+    else if (lowerContent.includes("advanced")) context.skillLevel = "advanced";
     
     return context;
   };
 
   const quickActions = [
     {
-      title: 'Registration',
+      title: "Registration",
       icon: Users,
       questions: [
-        'How do I register my child for soccer?',
-        'What are the registration deadlines?',
-        'How much does it cost to register?'
+        "How do I register my child for soccer?",
+        "What are the registration deadlines?",
+        "How much does it cost to register?"
       ]
     },
     {
-      title: 'Policies',
+      title: "Policies",
       icon: BookOpen,
       questions: [
-        'What is the refund policy?',
-        'What are the age requirements?',
-        'Do you offer sibling discounts?'
+        "What is the refund policy?",
+        "What are the age requirements?",
+        "Do you offer sibling discounts?"
       ]
     },
     {
-      title: 'Facilities',
+      title: "Facilities",
       icon: MapPin,
       questions: [
-        'Where are the soccer fields located?',
-        'What facilities are available?',
-        'What are the facility hours?'
+        "Where are the soccer fields located?",
+        "What facilities are available?",
+        "What are the facility hours?"
       ]
     },
     {
-      title: 'Recommendations',
+      title: "Recommendations",
       icon: Star,
       questions: [
-        'What league is best for my 8-year-old?',
-        'Can you recommend a sport for beginners?',
-        'What programs are available for teenagers?'
+        "What league is best for my 8-year-old?",
+        "Can you recommend a sport for beginners?",
+        "What programs are available for teenagers?"
       ]
     }
   ];
@@ -274,13 +268,13 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
                       className={`max-w-[80%] p-3 rounded-lg ${
-                        message.type === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-900'
+                        message.type === "user"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 text-gray-900"
                       }`}
                     >
                       <p className="text-sm">{message.content}</p>
@@ -336,8 +330,8 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
                   <div className="bg-gray-100 text-gray-900 p-3 rounded-lg">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                     </div>
                   </div>
                 </motion.div>
@@ -354,7 +348,7 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage(inputValue)}
                   placeholder="Ask about registration, policies, facilities..."
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -380,7 +374,7 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
                 {quickActions.map((category) => (
                   <div key={category.title}>
                     <button
-                      onClick={() => setSelectedCategory(selectedCategory === category.title ? '' : category.title)}
+                      onClick={() => setSelectedCategory(selectedCategory === category.title ? "" : category.title)}
                       className="flex items-center justify-between w-full p-2 text-left hover:bg-gray-50 rounded-lg"
                     >
                       <div className="flex items-center gap-2">
@@ -452,8 +446,8 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
                   onClick={() => setShowFacilities(!showFacilities)}
                   className={`flex-1 px-3 py-2 text-xs rounded-lg ${
                     showFacilities 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? "bg-blue-600 text-white" 
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
                   Facilities
@@ -462,8 +456,8 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
                   onClick={() => setShowPolicies(!showPolicies)}
                   className={`flex-1 px-3 py-2 text-xs rounded-lg ${
                     showPolicies 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? "bg-blue-600 text-white" 
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
                   Policies

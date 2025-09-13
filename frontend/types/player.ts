@@ -1,46 +1,6 @@
 import { Insight, DrillSchedule } from './index';
 import { PlayerEvaluation } from './scout';
-
-export interface PlayerProfile {
-    id: string;
-    name: string;
-    avatar: string;
-    age: number;
-    team: string;
-    sport: string;
-    level: string;
-    xp: {
-        current: number;
-        total: number;
-        level: number;
-        progress: number;
-    };
-    badges: {
-        earned: Array<{
-            id: string;
-            name: string;
-            icon: string;
-            earnedAt: string;
-        }>;
-        inProgress: Array<{
-            id: string;
-            name: string;
-            icon: string;
-            progress: number;
-            requirement: number;
-        }>;
-    };
-    stats: {
-        drillsCompleted: number;
-        totalTime: number;
-        averagePerformance: number;
-        consistency: number;
-    };
-    recentActivity: {
-        drills: DrillSchedule[];
-        insights: Insight[];
-    };
-}
+import type { PlayerProfile } from './index';
 
 export interface DrillDetail {
     id: string;

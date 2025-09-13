@@ -1,11 +1,11 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Target, MapPin, Users, Brain } from 'lucide-react';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Target, MapPin, Users, Brain } from "lucide-react";
 
 interface ScrollInterventionAction {
   label: string;
   aiPrompt: string;
-  variant: 'primary' | 'secondary' | 'ghost';
+  variant: "primary" | "secondary" | "ghost";
 }
 
 interface ScrollInterventionModalProps {
@@ -123,18 +123,18 @@ const ScrollInterventionModal: React.FC<ScrollInterventionModalProps> = ({
                     onClose();
                   }}
                   className={`w-full p-4 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 ${
-                    action.variant === 'primary'
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                      : action.variant === 'secondary'
-                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-                      : 'text-gray-600 hover:bg-gray-50'
+                    action.variant === "primary"
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl"
+                      : action.variant === "secondary"
+                      ? "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                      : "text-gray-600 hover:bg-gray-50"
                   }`}
                 >
                   <div className="flex items-center justify-center gap-2">
-                    {action.label === 'Start a Drill' && <Target className="w-4 h-4" />}
-                    {action.label === 'Find Nearby Gym' && <MapPin className="w-4 h-4" />}
-                    {action.label === 'Find Teammates' && <Users className="w-4 h-4" />}
-                    {action.label === 'What did I learn?' && <Brain className="w-4 h-4" />}
+                    {action.label === "Start a Drill" && <Target className="w-4 h-4" />}
+                    {action.label === "Find Nearby Gym" && <MapPin className="w-4 h-4" />}
+                    {action.label === "Find Teammates" && <Users className="w-4 h-4" />}
+                    {action.label === "What did I learn?" && <Brain className="w-4 h-4" />}
                     {action.label}
                   </div>
                 </motion.button>

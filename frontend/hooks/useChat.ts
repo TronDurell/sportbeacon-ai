@@ -196,7 +196,7 @@ export const useChat = (): UseChatReturn => {
         roomId,
         senderId: userId,
         senderName: user?.displayName || 'Unknown User',
-        senderAvatar: user?.photoURL,
+        senderAvatar: user?.photoURL || undefined,
         content: content.trim(),
         messageType: 'text',
         readBy: [userId],
@@ -346,7 +346,7 @@ export const useChat = (): UseChatReturn => {
     if (!userId) return;
 
     try {
-      await ChatService.updateUserPresence(userId, status, currentRoom?.id);
+      await ChatService.updateUserPresence(userId, status as any, currentRoom?.id);
     } catch (err) {
       console.error('Error updating presence:', err);
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Timeline, TimelineItem, TimelineSeparator, TimelineDot, TimelineContent } from '@mui/lab';
+// import { Timeline, TimelineItem, TimelineSeparator, TimelineDot, TimelineContent } from '@mui/lab';
 import { Typography } from '@mui/material';
 import { useDrillLog } from '@/hooks/useDrillLog';
 
@@ -10,19 +10,14 @@ export default function DrillLogTimeline({ playerId }: { playerId: string }) {
   if (error) return <Typography color="error">Failed to load drill logs</Typography>;
 
   return (
-    <Timeline>
-      {drills.map((drill, idx) => (
-        <TimelineItem key={idx}>
-          <TimelineSeparator>
-            <TimelineDot color="primary" />
-          </TimelineSeparator>
-          <TimelineContent>
-            <Typography variant="body2">{drill.date}</Typography>
-            <Typography variant="h6">{drill.type}</Typography>
-            <Typography>{drill.description}</Typography>
-          </TimelineContent>
-        </TimelineItem>
+    <div>
+      {drills.map((drill: any, idx: number) => (
+        <div key={idx} style={{ marginBottom: '16px', padding: '8px', border: '1px solid #ccc' }}>
+          <Typography variant="body2">{drill.date || 'No date'}</Typography>
+          <Typography variant="h6">{drill.type || 'No type'}</Typography>
+          <Typography>{drill.description || 'No description'}</Typography>
+        </div>
       ))}
-    </Timeline>
+    </div>
   );
 } 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export default function useEvaluationRubric() {
-  const [rubric, setRubric] = useState([]);
+  const [rubric, setRubric] = useState<any[]>([]);
   useEffect(() => {
     // Load categories and weightings
     const loadedRubric = [

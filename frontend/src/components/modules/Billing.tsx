@@ -1,33 +1,33 @@
-import React from 'react';
-import { CreditCard, Receipt } from 'lucide-react';
+import React from "react";
+import { CreditCard, Receipt } from "lucide-react";
 
 const Billing: React.FC = () => {
   const billingData = {
-    currentPlan: 'Pro Plan',
-    nextBilling: '2024-02-15',
-    amount: '$99.00',
+    currentPlan: "Pro Plan",
+    nextBilling: "2024-02-15",
+    amount: "$99.00",
     usage: {
       users: 45,
       limit: 100,
-      storage: '2.3GB',
-      storageLimit: '10GB'
+      storage: "2.3GB",
+      storageLimit: "10GB"
     }
   };
 
   const payments = [
     {
-      id: '1',
-      description: 'Pro Plan',
+      id: "1",
+      description: "Pro Plan",
       amount: 99.00,
-      date: new Date('2024-01-15'),
-      status: 'completed'
+      date: new Date("2024-01-15"),
+      status: "completed"
     },
     {
-      id: '2',
-      description: 'Pro Plan',
+      id: "2",
+      description: "Pro Plan",
       amount: 99.00,
-      date: new Date('2024-01-10'),
-      status: 'completed'
+      date: new Date("2024-01-10"),
+      status: "completed"
     }
   ];
 
@@ -81,7 +81,7 @@ const Billing: React.FC = () => {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="bg-green-600 h-2 rounded-full" 
-                    style={{ width: '23%' }}
+                    style={{ width: "23%" }}
                   ></div>
                 </div>
               </div>

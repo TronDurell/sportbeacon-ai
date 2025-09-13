@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface AdminDashboardProps {
   className?: string;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ className = '' }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ className = "" }) => {
   const { user } = useAuth();
   const { getSystemHealth } = useAgentOrchestration();
   const [systemHealth, setSystemHealth] = useState<any>(null);
@@ -29,48 +29,48 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ className = '' }) => {
 
   const stats = [
     {
-      title: 'Total Users',
-      value: '1,234',
-      change: '+12%',
-      changeType: 'positive'
+      title: "Total Users",
+      value: "1,234",
+      change: "+12%",
+      changeType: "positive"
     },
     {
-      title: 'Active Leagues',
-      value: '45',
-      change: '+5%',
-      changeType: 'positive'
+      title: "Active Leagues",
+      value: "45",
+      change: "+5%",
+      changeType: "positive"
     },
     {
-      title: 'Total Teams',
-      value: '156',
-      change: '+8%',
-      changeType: 'positive'
+      title: "Total Teams",
+      value: "156",
+      change: "+8%",
+      changeType: "positive"
     },
     {
-      title: 'System Status',
-      value: systemHealth?.status || 'Loading...',
-      change: '',
-      changeType: 'neutral'
+      title: "System Status",
+      value: systemHealth?.status || "Loading...",
+      change: "",
+      changeType: "neutral"
     }
   ];
 
   const recentActivities = [
     {
-      id: '1',
-      type: 'user_registration',
-      message: 'New user registered: John Doe',
+      id: "1",
+      type: "user_registration",
+      message: "New user registered: John Doe",
       timestamp: new Date(Date.now() - 3600000)
     },
     {
-      id: '2',
-      type: 'league_created',
-      message: 'New league created: Spring Soccer League',
+      id: "2",
+      type: "league_created",
+      message: "New league created: Spring Soccer League",
       timestamp: new Date(Date.now() - 7200000)
     },
     {
-      id: '3',
-      type: 'game_scheduled',
-      message: 'Game scheduled: Team Alpha vs Team Beta',
+      id: "3",
+      type: "game_scheduled",
+      message: "Game scheduled: Team Alpha vs Team Beta",
       timestamp: new Date(Date.now() - 10800000)
     }
   ];
@@ -112,9 +112,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ className = '' }) => {
                 </div>
                 {stat.change && (
                   <span className={`text-sm font-medium ${
-                    stat.changeType === 'positive' ? 'text-green-600' :
-                    stat.changeType === 'negative' ? 'text-red-600' :
-                    'text-gray-600'
+                    stat.changeType === "positive" ? "text-green-600" :
+                    stat.changeType === "negative" ? "text-red-600" :
+                    "text-gray-600"
                   }`}>
                     {stat.change}
                   </span>
@@ -134,9 +134,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ className = '' }) => {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">Status:</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  systemHealth.status === 'healthy' ? 'bg-green-100 text-green-800' :
-                  systemHealth.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
+                  systemHealth.status === "healthy" ? "bg-green-100 text-green-800" :
+                  systemHealth.status === "warning" ? "bg-yellow-100 text-yellow-800" :
+                  "bg-red-100 text-red-800"
                 }`}>
                   {systemHealth.status}
                 </span>

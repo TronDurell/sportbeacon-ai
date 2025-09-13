@@ -142,7 +142,7 @@ export class DataFlowValidator {
         condition: (flow) => {
           const tipEvents = flow.events.filter(e => e.eventName.includes('tip'));
           const tipData = tipEvents.find(e => e.data?.amount);
-          return tipData && tipData.data.amount > 0;
+          return Boolean(tipData && tipData.data.amount > 0);
         },
         message: 'Tip amount validation passed',
         severity: 'critical'
@@ -174,7 +174,7 @@ export class DataFlowValidator {
         id: 'security_1',
         name: 'User Authentication',
         type: 'security',
-        condition: (flow) => flow.userId && flow.userId.length > 0,
+        condition: (flow) => Boolean(flow.userId && flow.userId.length > 0),
         message: 'User authentication validated',
         severity: 'critical'
       },

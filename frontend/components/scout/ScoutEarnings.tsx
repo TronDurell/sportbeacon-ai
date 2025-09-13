@@ -5,7 +5,7 @@ import {
   Skeleton,
 } from '@mui/material';
 import { CreatorInvoiceTable } from './CreatorInvoiceTable';
-import { CreatorAnalytics } from '../earnings/CreatorAnalytics';
+// import { CreatorAnalytics } from '../earnings/CreatorAnalytics'; // Moved to ScoutDashboard
 
 interface ScoutEarningsProps {
   profileId: string;

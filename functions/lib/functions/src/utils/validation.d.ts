@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 export interface ValidationResult<T = unknown> {
     success: boolean;
     data?: T;
@@ -50,13 +50,13 @@ export declare const Schemas: {
         role: z.ZodEnum<["admin", "director", "coach", "parent", "player", "staff"]>;
     }, "strip", z.ZodTypeAny, {
         email: string;
-        role: "admin" | "director" | "coach" | "parent" | "player" | "staff";
+        role: "player" | "coach" | "admin" | "parent" | "director" | "staff";
         password: string;
         firstName: string;
         lastName: string;
     }, {
         email: string;
-        role: "admin" | "director" | "coach" | "parent" | "player" | "staff";
+        role: "player" | "coach" | "admin" | "parent" | "director" | "staff";
         password: string;
         firstName: string;
         lastName: string;
@@ -69,16 +69,16 @@ export declare const Schemas: {
         position: z.ZodOptional<z.ZodString>;
         teamId: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         dateOfBirth: string;
         position?: string | undefined;
         teamId?: string | undefined;
     }, {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         dateOfBirth: string;
         position?: string | undefined;
         teamId?: string | undefined;
@@ -109,17 +109,17 @@ export declare const Schemas: {
         position: z.ZodOptional<z.ZodString>;
         teamId: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
+        position?: string | undefined;
+        teamId?: string | undefined;
         firstName?: string | undefined;
         lastName?: string | undefined;
         dateOfBirth?: string | undefined;
-        position?: string | undefined;
-        teamId?: string | undefined;
     }, {
+        position?: string | undefined;
+        teamId?: string | undefined;
         firstName?: string | undefined;
         lastName?: string | undefined;
         dateOfBirth?: string | undefined;
-        position?: string | undefined;
-        teamId?: string | undefined;
     }>;
     Team: z.ZodObject<{
         id: z.ZodString;
@@ -127,13 +127,13 @@ export declare const Schemas: {
         leagueId: z.ZodString;
         players: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         name: string;
+        id: string;
         leagueId: string;
         players?: string[] | undefined;
     }, {
-        id: string;
         name: string;
+        id: string;
         leagueId: string;
         players?: string[] | undefined;
     }>;
@@ -156,12 +156,12 @@ export declare const Schemas: {
         players: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         name?: string | undefined;
-        leagueId?: string | undefined;
         players?: string[] | undefined;
+        leagueId?: string | undefined;
     }, {
         name?: string | undefined;
-        leagueId?: string | undefined;
         players?: string[] | undefined;
+        leagueId?: string | undefined;
     }>;
     League: z.ZodObject<{
         id: z.ZodString;
@@ -169,14 +169,14 @@ export declare const Schemas: {
         season: z.ZodString;
         status: z.ZodEnum<["active", "inactive", "completed"]>;
     }, "strip", z.ZodTypeAny, {
-        status: "active" | "completed" | "inactive";
-        id: string;
         name: string;
+        status: "active" | "inactive" | "completed";
+        id: string;
         season: string;
     }, {
-        status: "active" | "completed" | "inactive";
-        id: string;
         name: string;
+        status: "active" | "inactive" | "completed";
+        id: string;
         season: string;
     }>;
     CreateLeague: z.ZodObject<{
@@ -184,13 +184,13 @@ export declare const Schemas: {
         season: z.ZodString;
         status: z.ZodDefault<z.ZodEnum<["active", "inactive", "completed"]>>;
     }, "strip", z.ZodTypeAny, {
-        status: "active" | "completed" | "inactive";
         name: string;
+        status: "active" | "inactive" | "completed";
         season: string;
     }, {
         name: string;
         season: string;
-        status?: "active" | "completed" | "inactive" | undefined;
+        status?: "active" | "inactive" | "completed" | undefined;
     }>;
     Game: z.ZodObject<{
         id: z.ZodString;
@@ -200,14 +200,14 @@ export declare const Schemas: {
         scheduledDate: z.ZodAny;
         status: z.ZodEnum<["scheduled", "in_progress", "completed", "cancelled"]>;
     }, "strip", z.ZodTypeAny, {
-        status: "completed" | "cancelled" | "scheduled" | "in_progress";
+        status: "cancelled" | "completed" | "scheduled" | "in_progress";
         id: string;
         leagueId: string;
         homeTeamId: string;
         awayTeamId: string;
         scheduledDate?: any;
     }, {
-        status: "completed" | "cancelled" | "scheduled" | "in_progress";
+        status: "cancelled" | "completed" | "scheduled" | "in_progress";
         id: string;
         leagueId: string;
         homeTeamId: string;
@@ -221,7 +221,7 @@ export declare const Schemas: {
         scheduledDate: z.ZodAny;
         status: z.ZodDefault<z.ZodEnum<["scheduled", "in_progress", "completed", "cancelled"]>>;
     }, "strip", z.ZodTypeAny, {
-        status: "completed" | "cancelled" | "scheduled" | "in_progress";
+        status: "cancelled" | "completed" | "scheduled" | "in_progress";
         leagueId: string;
         homeTeamId: string;
         awayTeamId: string;
@@ -230,7 +230,7 @@ export declare const Schemas: {
         leagueId: string;
         homeTeamId: string;
         awayTeamId: string;
-        status?: "completed" | "cancelled" | "scheduled" | "in_progress" | undefined;
+        status?: "cancelled" | "completed" | "scheduled" | "in_progress" | undefined;
         scheduledDate?: any;
     }>;
     Venue: z.ZodObject<{
@@ -239,14 +239,14 @@ export declare const Schemas: {
         address: z.ZodString;
         capacity: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         name: string;
         address: string;
+        id: string;
         capacity?: number | undefined;
     }, {
-        id: string;
         name: string;
         address: string;
+        id: string;
         capacity?: number | undefined;
     }>;
     CreateVenue: z.ZodObject<{
@@ -269,29 +269,29 @@ export declare const Schemas: {
         status: z.ZodEnum<["pending", "completed", "failed", "refunded"]>;
         userId: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        status: "completed" | "pending" | "failed" | "refunded";
-        id: string;
-        amount: number;
         currency: string;
+        status: "failed" | "pending" | "completed" | "refunded";
+        id: string;
         userId: string;
+        amount: number;
     }, {
-        status: "completed" | "pending" | "failed" | "refunded";
-        id: string;
-        amount: number;
         currency: string;
+        status: "failed" | "pending" | "completed" | "refunded";
+        id: string;
         userId: string;
+        amount: number;
     }>;
     CreatePayment: z.ZodObject<{
         amount: z.ZodNumber;
         currency: z.ZodDefault<z.ZodString>;
         userId: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        amount: number;
         currency: string;
         userId: string;
-    }, {
         amount: number;
+    }, {
         userId: string;
+        amount: number;
         currency?: string | undefined;
     }>;
     Notification: z.ZodObject<{
@@ -302,18 +302,18 @@ export declare const Schemas: {
         type: z.ZodEnum<["info", "warning", "error", "success"]>;
         read: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        type: "info" | "error" | "warning" | "success";
-        message: string;
-        id: string;
-        userId: string;
+        type: "error" | "warning" | "info" | "success";
         title: string;
+        id: string;
+        message: string;
         read: boolean;
-    }, {
-        type: "info" | "error" | "warning" | "success";
-        message: string;
-        id: string;
         userId: string;
+    }, {
+        type: "error" | "warning" | "info" | "success";
         title: string;
+        id: string;
+        message: string;
+        userId: string;
         read?: boolean | undefined;
     }>;
     CreateNotification: z.ZodObject<{
@@ -322,15 +322,15 @@ export declare const Schemas: {
         message: z.ZodString;
         type: z.ZodDefault<z.ZodEnum<["info", "warning", "error", "success"]>>;
     }, "strip", z.ZodTypeAny, {
-        type: "info" | "error" | "warning" | "success";
+        type: "error" | "warning" | "info" | "success";
+        title: string;
         message: string;
         userId: string;
-        title: string;
     }, {
+        title: string;
         message: string;
         userId: string;
-        title: string;
-        type?: "info" | "error" | "warning" | "success" | undefined;
+        type?: "error" | "warning" | "info" | "success" | undefined;
     }>;
     ApiResponse: z.ZodObject<{
         success: z.ZodBoolean;
@@ -340,13 +340,13 @@ export declare const Schemas: {
     }, "strip", z.ZodTypeAny, {
         message: string;
         success: boolean;
-        error?: any;
         data?: any;
+        error?: any;
     }, {
         message: string;
         success: boolean;
-        error?: any;
         data?: any;
+        error?: any;
     }>;
     UserSearchSchema: z.ZodObject<{
         query: z.ZodOptional<z.ZodString>;
@@ -354,15 +354,15 @@ export declare const Schemas: {
         limit: z.ZodDefault<z.ZodNumber>;
         offset: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         offset: number;
+        limit: number;
         role?: string | undefined;
         query?: string | undefined;
     }, {
+        offset?: number | undefined;
         role?: string | undefined;
         query?: string | undefined;
         limit?: number | undefined;
-        offset?: number | undefined;
     }>;
     PlayerSearchSchema: z.ZodObject<{
         query: z.ZodOptional<z.ZodString>;
@@ -371,17 +371,17 @@ export declare const Schemas: {
         limit: z.ZodDefault<z.ZodNumber>;
         offset: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         offset: number;
+        limit: number;
         position?: string | undefined;
-        teamId?: string | undefined;
         query?: string | undefined;
+        teamId?: string | undefined;
     }, {
         position?: string | undefined;
-        teamId?: string | undefined;
-        query?: string | undefined;
-        limit?: number | undefined;
         offset?: number | undefined;
+        query?: string | undefined;
+        teamId?: string | undefined;
+        limit?: number | undefined;
     }>;
     TeamSearchSchema: z.ZodObject<{
         query: z.ZodOptional<z.ZodString>;
@@ -389,15 +389,15 @@ export declare const Schemas: {
         limit: z.ZodDefault<z.ZodNumber>;
         offset: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         offset: number;
-        leagueId?: string | undefined;
+        limit: number;
         query?: string | undefined;
+        leagueId?: string | undefined;
     }, {
-        leagueId?: string | undefined;
-        query?: string | undefined;
-        limit?: number | undefined;
         offset?: number | undefined;
+        query?: string | undefined;
+        leagueId?: string | undefined;
+        limit?: number | undefined;
     }>;
     LeagueSearchSchema: z.ZodObject<{
         query: z.ZodOptional<z.ZodString>;
@@ -405,15 +405,15 @@ export declare const Schemas: {
         limit: z.ZodDefault<z.ZodNumber>;
         offset: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         offset: number;
+        limit: number;
         status?: string | undefined;
         query?: string | undefined;
     }, {
+        offset?: number | undefined;
         status?: string | undefined;
         query?: string | undefined;
         limit?: number | undefined;
-        offset?: number | undefined;
     }>;
     GameSearchSchema: z.ZodObject<{
         teamId: z.ZodOptional<z.ZodString>;
@@ -422,30 +422,30 @@ export declare const Schemas: {
         limit: z.ZodDefault<z.ZodNumber>;
         offset: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         offset: number;
+        limit: number;
         status?: string | undefined;
         teamId?: string | undefined;
         leagueId?: string | undefined;
     }, {
+        offset?: number | undefined;
         status?: string | undefined;
         teamId?: string | undefined;
         leagueId?: string | undefined;
         limit?: number | undefined;
-        offset?: number | undefined;
     }>;
     VenueSearchSchema: z.ZodObject<{
         query: z.ZodOptional<z.ZodString>;
         limit: z.ZodDefault<z.ZodNumber>;
         offset: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         offset: number;
+        limit: number;
         query?: string | undefined;
     }, {
+        offset?: number | undefined;
         query?: string | undefined;
         limit?: number | undefined;
-        offset?: number | undefined;
     }>;
     PaymentSearchSchema: z.ZodObject<{
         userId: z.ZodOptional<z.ZodString>;
@@ -453,15 +453,15 @@ export declare const Schemas: {
         limit: z.ZodDefault<z.ZodNumber>;
         offset: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         offset: number;
+        limit: number;
         status?: string | undefined;
         userId?: string | undefined;
     }, {
+        offset?: number | undefined;
         status?: string | undefined;
         userId?: string | undefined;
         limit?: number | undefined;
-        offset?: number | undefined;
     }>;
     NotificationSearchSchema: z.ZodObject<{
         userId: z.ZodOptional<z.ZodString>;
@@ -470,17 +470,17 @@ export declare const Schemas: {
         limit: z.ZodDefault<z.ZodNumber>;
         offset: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         offset: number;
+        limit: number;
         type?: string | undefined;
-        userId?: string | undefined;
         read?: boolean | undefined;
+        userId?: string | undefined;
     }, {
         type?: string | undefined;
-        userId?: string | undefined;
-        read?: boolean | undefined;
-        limit?: number | undefined;
         offset?: number | undefined;
+        read?: boolean | undefined;
+        userId?: string | undefined;
+        limit?: number | undefined;
     }>;
     PaginatedResponse: z.ZodObject<{
         data: z.ZodArray<z.ZodAny, "many">;
@@ -489,16 +489,16 @@ export declare const Schemas: {
         offset: z.ZodNumber;
         hasMore: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
-        data: any[];
-        limit: number;
         offset: number;
+        data: any[];
         total: number;
+        limit: number;
         hasMore: boolean;
     }, {
-        data: any[];
-        limit: number;
         offset: number;
+        data: any[];
         total: number;
+        limit: number;
         hasMore: boolean;
     }>;
     NotificationsPaginatedResponse: z.ZodObject<{
@@ -508,17 +508,17 @@ export declare const Schemas: {
         offset: z.ZodNumber;
         hasMore: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         offset: number;
         total: number;
-        hasMore: boolean;
         notifications: any[];
+        limit: number;
+        hasMore: boolean;
     }, {
-        limit: number;
         offset: number;
         total: number;
-        hasMore: boolean;
         notifications: any[];
+        limit: number;
+        hasMore: boolean;
     }>;
 };
 //# sourceMappingURL=validation.d.ts.map

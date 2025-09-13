@@ -1,5 +1,8 @@
 export type InteractionType = 'like' | 'comment' | 'share';
 
+// Re-export scout types
+export type { ScoutNote, PlayerEvaluation } from './scout';
+
 export interface DrillFeedback {
     enjoyment: number;
     difficulty: number;
@@ -31,52 +34,78 @@ export interface DrillDetail {
     updatedAt: string;
 }
 
+// Player interface for trainer API
 export interface Player {
     id: string;
-    name: string;
-    avatar: string;
-    sport: string;
-    level: string;
-    lastActive: string;
-    weeklyProgress: {
-        drillsCompleted: number;
-        totalDrills: number;
-        performance: number;
-    };
-    insights: Array<{
-        type: 'fatigue' | 'performance_drop' | 'improvement';
-        severity: number;
-        message: string;
-    }>;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    age: number;
+    position: string;
+    team: { id: string; name: string };
+    skills: Array<{ name: string; level: number }>;
+    scoutRating: number;
+    createdAt: Date;
+    updatedAt: Date;
+    // Additional properties for compatibility
+    name?: string;
+    avatar?: string;
+    sport?: string;
+    level?: string;
+    weeklyProgress?: number;
 }
 
 export interface Insight {
     id: string;
-    playerId: string;
-    type: 'fatigue' | 'performance_drop' | 'improvement';
-    severity: number;
+    type: 'improvement' | 'fatigue' | 'performance_drop' | string; // Allow string for flexibility
+    content: string;
+    metric: number; // Changed from string to number for consistency
+    timestamp: DateString; // Standardized to DateString
+    severity: 'HIGH' | 'MEDIUM' | 'LOW';
     message: string;
-    createdAt: string;
     acknowledged: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface FeedItem {
     id: string;
     type: string;
     content: string;
-    timestamp: string;
-    author: {
-        id: string;
-        name: string;
-        avatar: string;
+    author: { id: string; name: string; avatar: string } | string; // Support both formats
+    timestamp: DateString; // Standardized to DateString
+    likes: number;
+    comments: number;
+    shares: number;
+    createdAt: string;
+    updatedAt: string;
+    stats: {
+        views: number;
+        likes: number;
+        shares: number;
+        comments: number;
+    };
+    userInteraction: {
+        liked: boolean;
+        shared: boolean;
+        bookmarked: boolean;
     };
 }
 
+// Message interface - consolidated single source of truth
 export interface Message {
     id: string;
+    senderId: string;
+    recipientId: string;
     content: string;
-    role: 'user' | 'assistant';
-    timestamp: string;
+    type: 'text' | 'image' | 'file' | 'system';
+    status: 'sent' | 'delivered' | 'read' | 'unread';
+    timestamp: DateString;
+    createdAt: DateString;
+    updatedAt?: DateString;
+    role?: 'user' | 'trainer' | 'ai';
+    metadata?: Record<string, any>;
 }
 
 export interface DrillSchedule {
@@ -109,62 +138,176 @@ export interface APIError {
     details?: Record<string, any>;
 }
 
+// Standardized date type - use ISO string format consistently
+export type DateString = string; // ISO 8601 date string format
+export type ISODate = string; // Alias for clarity
+
+// Consolidated PlayerProfile interface - single source of truth
 export interface PlayerProfile {
+    // Core identification
     id: string;
+    userId: string;
+    
+    // Basic information
     firstName: string;
     lastName: string;
+    displayName?: string;
     email: string;
     phone: string;
-    dateOfBirth: string;
+    phoneNumber?: string; // Legacy compatibility
+    dateOfBirth: DateString; // Standardized to ISO date string
+    avatar?: string;
+    bio?: string;
+    location?: string;
+    age?: number;
+    
+    // Sports information
+    sport?: string;
+    sports?: {
+        primary: string;
+        secondary?: string[];
+        positions: string[];
+        experience: 'beginner' | 'intermediate' | 'advanced' | 'professional';
+        yearsPlaying: number;
+    };
     position: string;
     skillLevel: string;
-    team: string;
-    school: string;
-    location: string;
-    bio: string;
-    avatar: string;
+    level?: string; // Legacy compatibility
+    
+    // Team and organization
+    team: string | { id: string; name: string };
+    school?: string;
+    
+    // Status and preferences
     isActive: boolean;
-    emergencyContact: {
-        name: string;
-        phone: string;
-        relationship: string;
-    };
-    preferences: {
+    preferences?: {
         notifications: boolean;
         publicProfile: boolean;
         shareStats: boolean;
     };
-    // Legacy fields for backward compatibility
-    name?: string;
-    level?: number;
+    
+    // Scout-specific properties
+    scoutRating?: number;
+    potential?: number;
+    
+    // Emergency contact
+    emergencyContact?: {
+        name: string;
+        phone: string;
+        relationship: string;
+    };
+    
+    // Experience and progression
     xp?: {
         current: number;
-        nextLevel: number;
+        total?: number;
+        level?: number;
+        nextLevel?: number;
+        progress?: number;
     };
+    
+    // Performance metrics
     stats?: {
-        completedDrills: number;
+        completedDrills?: number;
+        drillsCompleted?: number; // Legacy compatibility
         averagePerformance: number;
-        streak: number;
+        streak?: number;
         totalTime: number;
+        consistency?: number;
+        gamesPlayed?: number;
+        wins?: number;
+        losses?: number;
     };
-    recentDrills?: {
-        id: string;
-        name: string;
-        date: string;
-        performance: number;
-    }[];
-    insights?: {
-        type: 'improvement' | 'achievement' | 'suggestion';
-        message: string;
-        date: string;
-    }[];
+    
+    // Performance tracking
+    performance?: {
+        totalGames: number;
+        wins: number;
+        losses: number;
+        winRate: number;
+        averageScore: number;
+        bestScore: number;
+        totalPoints: number;
+        achievements: string[];
+    };
+    
+    // Skills and abilities
+    skills?: Record<string, {
+        level: number;
+        experience?: number;
+    }>;
+    
+    // Achievements and badges
+    achievements?: string[];
     badges?: {
         id: string;
         name: string;
         icon: string;
         progress: number;
         unlocked: boolean;
+        earned?: Array<{
+            id: string;
+            name: string;
+            icon: string;
+            earnedAt: string;
+        }>;
+        inProgress?: Array<{
+            id: string;
+            name: string;
+            icon: string;
+            progress: number;
+            requirement: number;
+        }>;
+    };
+    
+    // Social features
+    social?: {
+        followers: number;
+        following: number;
+        isVerified: boolean;
+        isPublic: boolean;
+        allowMessages: boolean;
+        allowTips: boolean;
+    };
+    
+    // Financial information
+    financial?: {
+        totalEarnings: number;
+        totalTips: number;
+        stripeAccountId?: string;
+        payoutEnabled: boolean;
+        preferredPayoutMethod: 'stripe' | 'paypal' | 'bank';
+    };
+    
+    // Activity tracking
+    recentDrills?: {
+        id: string;
+        name: string;
+        date: DateString;
+        performance: number;
     }[];
+    recentActivity?: {
+        drills: any[]; // Will be properly typed later
+        insights: any[]; // Will be properly typed later
+    };
+    
+    // Insights and recommendations
+    insights?: {
+        type: 'improvement' | 'achievement' | 'suggestion';
+        message: string;
+        date: DateString;
+    }[];
+    
+    // Legacy compatibility fields
+    name?: string; // Maps to displayName or firstName + lastName
+    
+    // Timestamps
+    createdAt: DateString;
+    updatedAt: DateString;
+    
+    // Document metadata (for Firestore)
+    createdBy?: string;
+    updatedBy?: string;
 }
 
 // Video Annotation Types
@@ -176,6 +319,61 @@ export interface VideoAnnotation {
     notes?: string;
     color: string;
     visible: boolean;
+}
+
+// Badge interface
+export interface Badge {
+    id: string;
+    name: string;
+    icon: string;
+    description: string;
+    category: string;
+    requirements: {
+        type: string;
+        value: number;
+        description: string;
+    };
+    rewards: {
+        xp: number;
+        title?: string;
+        color?: string;
+    };
+    unlocked: boolean;
+    progress: number;
+    earnedAt?: DateString;
+}
+
+// Video Metadata interface
+export interface VideoMetadata {
+    id: string;
+    title: string;
+    description: string;
+    duration: number;
+    thumbnail: string;
+    uploadDate: DateString;
+    views: number;
+    likes: number;
+    tags: string[];
+    category: string;
+    quality: '720p' | '1080p' | '4K';
+    fileSize: number;
+    mimeType: string;
+    status: 'processing' | 'ready' | 'failed';
+}
+
+// Tip Response interface
+export interface TipResponse {
+    id: string;
+    tipId: string;
+    recipientId: string;
+    senderId: string;
+    amount: number;
+    currency: string;
+    message?: string;
+    status: 'pending' | 'completed' | 'failed' | 'refunded';
+    createdAt: DateString;
+    completedAt?: DateString;
+    transactionId?: string;
 }
 
 // Search and Filter Types
@@ -239,4 +437,185 @@ export interface PerformanceStats {
     blocks: number;
     gamesPlayed: number;
     improvement: number;
+}
+
+// Missing interfaces that were referenced in errors
+export interface Tip {
+    id: string;
+    tipId: string; // Stripe payment intent ID
+    fromUserId: string;
+    toUserId: string;
+    fromUserProfile?: {
+        displayName: string;
+        avatar?: string;
+    };
+    toUserProfile?: {
+        displayName: string;
+        avatar?: string;
+    };
+    
+    // Tip Details
+    amount: number; // Amount in cents
+    currency: string;
+    message?: string;
+    isAnonymous: boolean;
+    
+    // Stripe Integration
+    stripePaymentIntentId: string;
+    stripeTransferId?: string;
+    stripeAccountId?: string;
+    
+    // Status and Processing
+    status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded' | 'cancelled';
+    processingFee: number;
+    platformFee: number;
+    creatorAmount: number; // Amount after fees
+    
+    // Metadata
+    createdAt: DateString;
+    updatedAt: DateString;
+    processedAt?: DateString;
+    refundedAt?: DateString;
+    
+    // Analytics
+    category?: string;
+    tags?: string[];
+    source: 'web' | 'mobile' | 'api';
+}
+
+export interface CreatorDashboard {
+    id: string;
+    userId: string;
+    
+    // Overview Metrics
+    overview: {
+        totalEarnings: number;
+        totalTips: number;
+        totalFollowers: number;
+        totalGames: number;
+        winRate: number;
+        averageRating: number;
+        totalViews: number;
+        totalLikes: number;
+    };
+    
+    // Financial Analytics
+    financial: {
+        monthlyEarnings: Array<{ month: string; amount: number }>;
+        earningsBySource: Record<string, number>;
+        pendingPayouts: number;
+        completedPayouts: number;
+        averageTipAmount: number;
+        topTippers: Array<{ userId: string; displayName: string; totalAmount: number }>;
+        payoutHistory: Array<{ date: DateString; amount: number; status: string }>;
+    };
+    
+    // Performance Analytics
+    performance: {
+        gamesPlayed: Array<{ date: string; count: number; wins: number }>;
+        winRateBySport: Record<string, number>;
+        performanceTrend: Array<{ date: string; winRate: number; averageScore: number }>;
+        achievements: Array<{ id: string; name: string; earnedAt: DateString; description: string }>;
+        recentGames: Array<{ id: string; sport: string; result: 'win' | 'loss' | 'draw'; score: number; date: DateString }>;
+    };
+    
+    // Social Analytics
+    social: {
+        followerGrowth: Array<{ date: string; count: number }>;
+        engagementRate: number;
+        topPosts: Array<{ id: string; type: string; views: number; likes: number; date: DateString }>;
+        audienceDemographics: Record<string, number>;
+        interactionHistory: Array<{ date: string; followers: number; interactions: number }>;
+    };
+    
+    // Content Analytics
+    content: {
+        totalPosts: number;
+        totalVideos: number;
+        totalImages: number;
+        viewsByContent: Record<string, number>;
+        engagementByContent: Record<string, number>;
+        popularContent: Array<{ id: string; type: string; title: string; views: number; likes: number }>;
+        contentSchedule: Array<{ date: string; type: string; title: string; status: string }>;
+    };
+    
+    // Goals and Targets
+    goals: {
+        monthlyEarningsTarget: number;
+        monthlyFollowersTarget: number;
+        monthlyGamesTarget: number;
+        winRateTarget: number;
+        currentProgress: {
+            earningsProgress: number;
+            followersProgress: number;
+            gamesProgress: number;
+            winRateProgress: number;
+        };
+    };
+    
+    // Settings and Preferences
+    settings: {
+        autoPayout: boolean;
+        payoutThreshold: number;
+        notificationPreferences: {
+            newFollower: boolean;
+            newTip: boolean;
+            newGame: boolean;
+            achievement: boolean;
+            payout: boolean;
+        };
+        privacySettings: {
+            showEarnings: boolean;
+            showFollowers: boolean;
+            showGames: boolean;
+            showRating: boolean;
+        };
+    };
+    
+    // Metadata
+    createdAt: DateString;
+    updatedAt: DateString;
+    lastRefreshed: DateString;
+    status: 'active' | 'inactive' | 'suspended';
+}
+
+export interface MediaMetadata {
+    id: string;
+    userId: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+    mediaType: 'image' | 'video' | 'audio' | 'document';
+    category: 'profile' | 'content' | 'training' | 'general';
+    url: string;
+    thumbnailUrl?: string;
+    duration?: number;
+    width?: number;
+    height?: number;
+    tags: string[];
+    description?: string;
+    isPublic: boolean;
+    viewCount: number;
+    likeCount: number;
+    shareCount: number;
+    downloadCount: number;
+    customMetadata?: Record<string, any>;
+    createdAt: DateString;
+    updatedAt: DateString;
+}
+
+// PlayerDetailsModalProps interface
+export interface PlayerDetailsModalProps {
+    open: boolean;
+    onClose: () => void;
+    player: Player;
+    drillHistory?: DrillDetail[];
+    isMobile?: boolean;
+}
+
+// AIAssistantPanelProps interface
+export interface AIAssistantPanelProps {
+    responses: Message[];
+    onSendMessage: (message: string) => void;
+    isLoading?: boolean;
 }

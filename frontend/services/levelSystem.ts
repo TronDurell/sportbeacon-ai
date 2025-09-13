@@ -60,9 +60,9 @@ class LevelSystem {
         rewards?: LevelThreshold['rewards'];
     }> {
         const oldLevel = profile.level;
-        const { level } = this.calculateLevel(profile.xp.current);
+        const { level } = this.calculateLevel(profile.xp?.current || 0);
 
-        if (level > oldLevel) {
+        if (level > (typeof oldLevel === 'string' ? parseInt(oldLevel) || 0 : oldLevel || 0)) {
             const threshold = LEVEL_THRESHOLDS[level - 1];
             
             // If there are rewards, process them

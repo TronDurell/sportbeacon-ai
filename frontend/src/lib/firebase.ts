@@ -1,14 +1,14 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Runtime check for Firebase API key
 const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
 if (!apiKey) {
-  throw new Error('❌ Missing Firebase API key! Check your .env.local and Vite config.');
+  throw new Error("❌ Missing Firebase API key! Check your .env.local and Vite config.");
 }
-console.log('Loaded Firebase Key:', apiKey);
+console.log("Loaded Firebase Key:", apiKey);
 
 // Firebase configuration
 const firebaseConfig = {

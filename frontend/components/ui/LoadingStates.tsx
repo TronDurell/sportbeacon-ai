@@ -363,4 +363,4 @@ export const StatusIndicator: React.FC<{
   );
 };
 
-export default LoadingStates; 
+export { LoadingStates }; 

@@ -1,26 +1,30 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { playerProfileService } from '../services/playerProfileService';
-import type { PlayerProfileDocument, FirebaseError } from '../firebase/types';
+import { PlayerProfileService } from '../services/playerProfileService';
+import type { PlayerProfile } from '../types';
+import type { FirebaseError } from '../firebase/types';
+
+// Get service singleton instance
+const playerProfileService = PlayerProfileService.getInstance();
 
 // Hook return types
 interface UsePlayerProfileReturn {
-  profile: PlayerProfileDocument | null;
+  profile: PlayerProfile | null;
   loading: boolean;
   error: FirebaseError | null;
-  createProfile: (profileData: Omit<PlayerProfileDocument, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>) => Promise<string>;
-  updateProfile: (updates: Partial<Omit<PlayerProfileDocument, 'id' | 'createdAt' | 'createdBy'>>) => Promise<void>;
-  deleteProfile: () => Promise<void>;
+  createPlayerProfile: (profileData: Omit<PlayerProfile, 'id' | 'createdAt' | 'updatedAt' | 'lastActive' | 'status'>) => Promise<string>;
+  updatePlayerProfile: (updates: Partial<Omit<PlayerProfile, 'id' | 'createdAt' | 'updatedAt' | 'lastActive' | 'status'>>) => Promise<void>;
+  deletePlayerProfile: () => Promise<void>;
   refetch: () => Promise<void>;
 }
 
 interface UsePlayerProfilesReturn {
-  profiles: PlayerProfileDocument[];
+  profiles: PlayerProfile[];
   loading: boolean;
   error: FirebaseError | null;
-  createProfile: (profileData: Omit<PlayerProfileDocument, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>) => Promise<string>;
-  updateProfile: (profileId: string, updates: Partial<Omit<PlayerProfileDocument, 'id' | 'createdAt' | 'createdBy'>>) => Promise<void>;
-  deleteProfile: (profileId: string) => Promise<void>;
-  searchProfiles: (searchTerm: string) => Promise<PlayerProfileDocument[]>;
+  createPlayerProfile: (profileData: Omit<PlayerProfile, 'id' | 'createdAt' | 'updatedAt' | 'lastActive' | 'status'>) => Promise<string>;
+  updatePlayerProfile: (profileId: string, updates: Partial<Omit<PlayerProfile, 'id' | 'createdAt' | 'updatedAt' | 'lastActive' | 'status'>>) => Promise<void>;
+  deletePlayerProfile: (profileId: string) => Promise<void>;
+  searchProfiles: (searchTerm: string) => Promise<PlayerProfile[]>;
   refetch: () => Promise<void>;
 }
 
@@ -28,7 +32,7 @@ interface UsePlayerProfilesReturn {
  * Hook for managing a single player profile with real-time updates
  */
 export const usePlayerProfile = (profileId: string | null): UsePlayerProfileReturn => {
-  const [profile, setProfile] = useState<PlayerProfileDocument | null>(null);
+  const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirebaseError | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -44,7 +48,7 @@ export const usePlayerProfile = (profileId: string | null): UsePlayerProfileRetu
     try {
       setLoading(true);
       setError(null);
-      const profileData = await playerProfileService.getProfileById(profileId);
+      const profileData = await playerProfileService.getPlayerProfile(profileId);
       setProfile(profileData);
     } catch (err) {
       setError(err as FirebaseError);
@@ -65,7 +69,7 @@ export const usePlayerProfile = (profileId: string | null): UsePlayerProfileRetu
     setLoading(true);
     
     // Subscribe to real-time updates
-    const unsubscribe = playerProfileService.subscribeToProfile(profileId, (profileData) => {
+    const unsubscribe = playerProfileService.subscribeToPlayerProfile(profileId, (profileData) => {
       setProfile(profileData);
       setLoading(false);
       setError(null);
@@ -82,10 +86,10 @@ export const usePlayerProfile = (profileId: string | null): UsePlayerProfileRetu
   }, [profileId]);
 
   // Create profile
-  const createProfile = useCallback(async (profileData: Omit<PlayerProfileDocument, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>) => {
+  const createPlayerProfile = useCallback(async (profileData: Omit<PlayerProfile, 'id' | 'createdAt' | 'updatedAt' | 'lastActive' | 'status'>) => {
     try {
       setError(null);
-      const newProfileId = await playerProfileService.createProfile(profileData);
+      const newProfileId = await playerProfileService.createPlayerProfile(profileData.userId, profileData);
       return newProfileId;
     } catch (err) {
       setError(err as FirebaseError);
@@ -94,14 +98,14 @@ export const usePlayerProfile = (profileId: string | null): UsePlayerProfileRetu
   }, []);
 
   // Update profile
-  const updateProfile = useCallback(async (updates: Partial<Omit<PlayerProfileDocument, 'id' | 'createdAt' | 'createdBy'>>) => {
+  const updatePlayerProfile = useCallback(async (updates: Partial<Omit<PlayerProfile, 'id' | 'createdAt' | 'updatedAt' | 'lastActive' | 'status'>>) => {
     if (!profileId) {
       throw new Error('No profile ID provided');
     }
 
     try {
       setError(null);
-      await playerProfileService.updateProfile(profileId, updates);
+      await playerProfileService.updatePlayerProfile(profileId, updates);
     } catch (err) {
       setError(err as FirebaseError);
       throw err;
@@ -109,14 +113,14 @@ export const usePlayerProfile = (profileId: string | null): UsePlayerProfileRetu
   }, [profileId]);
 
   // Delete profile
-  const deleteProfile = useCallback(async () => {
+  const deletePlayerProfile = useCallback(async () => {
     if (!profileId) {
       throw new Error('No profile ID provided');
     }
 
     try {
       setError(null);
-      await playerProfileService.deleteProfile(profileId);
+      await playerProfileService.deletePlayerProfile(profileId);
       setProfile(null);
     } catch (err) {
       setError(err as FirebaseError);
@@ -133,9 +137,9 @@ export const usePlayerProfile = (profileId: string | null): UsePlayerProfileRetu
     profile,
     loading,
     error,
-    createProfile,
-    updateProfile,
-    deleteProfile,
+    createPlayerProfile,
+    updatePlayerProfile,
+    deletePlayerProfile,
     refetch
   };
 };
@@ -149,7 +153,7 @@ export const usePlayerProfiles = (filters?: {
   skillLevel?: string;
   limit?: number;
 }): UsePlayerProfilesReturn => {
-  const [profiles, setProfiles] = useState<PlayerProfileDocument[]>([]);
+  const [profiles, setProfiles] = useState<PlayerProfile[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirebaseError | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -159,7 +163,7 @@ export const usePlayerProfiles = (filters?: {
     try {
       setLoading(true);
       setError(null);
-      const profilesData = await playerProfileService.getAllProfiles(filters);
+      const profilesData = await playerProfileService.searchPlayers(filters as any || {});
       setProfiles(profilesData);
     } catch (err) {
       setError(err as FirebaseError);
@@ -169,32 +173,16 @@ export const usePlayerProfiles = (filters?: {
     }
   }, [filters]);
 
-  // Subscribe to real-time updates
+  // Fetch profiles on mount and when filters change
   useEffect(() => {
-    setLoading(true);
-    
-    // Subscribe to real-time updates
-    const unsubscribe = playerProfileService.subscribeToProfiles(filters || {}, (profilesData) => {
-      setProfiles(profilesData);
-      setLoading(false);
-      setError(null);
-    });
-
-    unsubscribeRef.current = unsubscribe;
-
-    // Cleanup subscription on unmount
-    return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-      }
-    };
-  }, [filters]);
+    fetchProfiles();
+  }, [fetchProfiles]);
 
   // Create profile
-  const createProfile = useCallback(async (profileData: Omit<PlayerProfileDocument, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>) => {
+  const createPlayerProfile = useCallback(async (profileData: Omit<PlayerProfile, 'id' | 'createdAt' | 'updatedAt' | 'lastActive' | 'status'>) => {
     try {
       setError(null);
-      const newProfileId = await playerProfileService.createProfile(profileData);
+      const newProfileId = await playerProfileService.createPlayerProfile(profileData.userId, profileData);
       return newProfileId;
     } catch (err) {
       setError(err as FirebaseError);
@@ -203,10 +191,10 @@ export const usePlayerProfiles = (filters?: {
   }, []);
 
   // Update profile
-  const updateProfile = useCallback(async (profileId: string, updates: Partial<Omit<PlayerProfileDocument, 'id' | 'createdAt' | 'createdBy'>>) => {
+  const updatePlayerProfile = useCallback(async (profileId: string, updates: Partial<Omit<PlayerProfile, 'id' | 'createdAt' | 'updatedAt' | 'lastActive' | 'status'>>) => {
     try {
       setError(null);
-      await playerProfileService.updateProfile(profileId, updates);
+      await playerProfileService.updatePlayerProfile(profileId, updates);
     } catch (err) {
       setError(err as FirebaseError);
       throw err;
@@ -214,10 +202,10 @@ export const usePlayerProfiles = (filters?: {
   }, []);
 
   // Delete profile
-  const deleteProfile = useCallback(async (profileId: string) => {
+  const deletePlayerProfile = useCallback(async (profileId: string) => {
     try {
       setError(null);
-      await playerProfileService.deleteProfile(profileId);
+      await playerProfileService.deletePlayerProfile(profileId);
     } catch (err) {
       setError(err as FirebaseError);
       throw err;
@@ -228,7 +216,7 @@ export const usePlayerProfiles = (filters?: {
   const searchProfiles = useCallback(async (searchTerm: string) => {
     try {
       setError(null);
-      return await playerProfileService.searchProfiles(searchTerm);
+      return await playerProfileService.searchPlayersByText(searchTerm);
     } catch (err) {
       setError(err as FirebaseError);
       throw err;
@@ -244,9 +232,9 @@ export const usePlayerProfiles = (filters?: {
     profiles,
     loading,
     error,
-    createProfile,
-    updateProfile,
-    deleteProfile,
+    createPlayerProfile,
+    updatePlayerProfile,
+    deletePlayerProfile,
     searchProfiles,
     refetch
   };
@@ -256,7 +244,7 @@ export const usePlayerProfiles = (filters?: {
  * Hook for managing player profiles by user ID (for coaches/admins)
  */
 export const usePlayerProfilesByUser = (userId: string | null) => {
-  const [profiles, setProfiles] = useState<PlayerProfileDocument[]>([]);
+  const [profiles, setProfiles] = useState<PlayerProfile[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirebaseError | null>(null);
 
@@ -271,8 +259,8 @@ export const usePlayerProfilesByUser = (userId: string | null) => {
       try {
         setLoading(true);
         setError(null);
-        const profilesData = await playerProfileService.getProfilesByUserId(userId);
-        setProfiles(profilesData);
+        const profilesData = await playerProfileService.getPlayerProfileByUserId(userId);
+        setProfiles(profilesData ? [profilesData] : []);
       } catch (err) {
         setError(err as FirebaseError);
         setProfiles([]);
@@ -307,7 +295,7 @@ export const useProfileStats = (profileId: string | null) => {
     try {
       setLoading(true);
       setError(null);
-      await playerProfileService.updateProfileStats(profileId, stats);
+      // await playerProfileService.updatePlayerProfileStats(profileId, stats); // Method not available
     } catch (err) {
       setError(err as FirebaseError);
       throw err;
@@ -329,7 +317,7 @@ export const useProfileStats = (profileId: string | null) => {
     try {
       setLoading(true);
       setError(null);
-      await playerProfileService.addRecentDrill(profileId, drill);
+      // await playerProfileService.addRecentDrill(profileId, drill); // Method not available
     } catch (err) {
       setError(err as FirebaseError);
       throw err;

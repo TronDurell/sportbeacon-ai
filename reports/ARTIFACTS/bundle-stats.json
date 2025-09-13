@@ -1,0 +1,33 @@
+{
+  "buildTime": "3.44s",
+  "totalSize": "636.47 kB",
+  "gzippedSize": "174.12 kB",
+  "largestModules": [
+    {
+      "name": "PlaceProfile-B4NWJk77.js",
+      "size": "428.07 kB",
+      "gzipped": "103.48 kB",
+      "percentage": 67.2
+    },
+    {
+      "name": "vendor-D3F3s8fL.js", 
+      "size": "141.77 kB",
+      "gzipped": "45.52 kB",
+      "percentage": 22.3
+    },
+    {
+      "name": "router-BVqqV3in.js",
+      "size": "31.91 kB", 
+      "gzipped": "11.85 kB",
+      "percentage": 5.0
+    },
+    {
+      "name": "index-DUe4wFlU.js",
+      "size": "20.29 kB",
+      "gzipped": "7.19 kB", 
+      "percentage": 3.2
+    }
+  ],
+  "warnings": [],
+  "timestamp": "2025-01-08T18:50:00Z"
+}

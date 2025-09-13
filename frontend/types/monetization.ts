@@ -287,23 +287,4 @@ export interface MonetizationService {
   getMilestones: (userId: string) => Promise<EarningsMilestone[]>;
 }
 
-// Export all types
-export type {
-  EarningsSummary,
-  EarningsBreakdown,
-  PayoutInfo,
-  PayoutSettings,
-  TransactionAnalytics,
-  RevenueSources,
-  TaxInfo,
-  EarningsNotifications,
-  EarningsMilestone,
-  DashboardConfig,
-  EarningsUpdate,
-  PayoutRequest,
-  PayoutResponse,
-  EarningsExportOptions,
-  EarningsExport,
-  UseMonetizationReturn,
-  MonetizationService
-}; 
+// All types are already exported inline above 

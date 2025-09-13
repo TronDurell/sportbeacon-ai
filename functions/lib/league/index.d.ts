@@ -3,17 +3,18 @@
  * Creates a new league with divisions and rules
  */
 export declare const createLeague: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
-    success: boolean;
-    message: string;
-    data: {
-        leagueId: any;
-    };
-    error?: undefined;
+    success?: boolean;
+    message?: string;
+    error?: any;
+    data?: any;
 } | {
     success: boolean;
     message: string;
-    error: unknown;
-    data?: undefined;
+    data: any;
+    errors: {
+        field: string;
+        message: string;
+    }[];
 }>, unknown>;
 /**
  * League Function: Update League
@@ -26,7 +27,7 @@ export declare const updateLeague: import("firebase-functions/v2/https").Callabl
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
 }>, unknown>;
 /**
  * League Function: Get League Overview
@@ -43,7 +44,7 @@ export declare const getLeagueOverview: import("firebase-functions/v2/https").Ca
             status: any;
             divisions: any;
             totalTeams: number;
-            totalPlayers: number;
+            totalPlayers: any;
             schedule: any;
             rules: any;
         };
@@ -52,7 +53,7 @@ export declare const getLeagueOverview: import("firebase-functions/v2/https").Ca
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -80,7 +81,7 @@ export declare const getLeagueStandings: import("firebase-functions/v2/https").C
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -98,7 +99,7 @@ export declare const getLeagueSchedule: import("firebase-functions/v2/https").Ca
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -110,20 +111,13 @@ export declare const generateLeagueSchedule: import("firebase-functions/v2/https
     message: string;
     data: {
         gamesGenerated: number;
-        schedule: {
-            leagueId: any;
-            homeTeam: string;
-            awayTeam: string;
-            date: Date;
-            venue: any;
-            status: string;
-        }[];
+        schedule: any[];
     };
     error?: undefined;
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -149,7 +143,7 @@ export declare const getLeagueStatistics: import("firebase-functions/v2/https").
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 //# sourceMappingURL=index.d.ts.map

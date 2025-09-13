@@ -1,507 +1,335 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // ============================================================================
-    // HELPER FUNCTIONS - Validation and security utilities
-    // ============================================================================
-    
-    // Check if user is authenticated
-    function isAuthenticated() {
+
+    /* ==========
+       Helpers
+       ========== */
+    function signedIn() {
       return request.auth != null;
     }
-    
-    // Check if user is the owner of the document
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+
+    // Custom claims expected: { tid: "<tenantId>", role: "admin|coach|parent|athlete|agent-service", sv?: true }
+    function role()        { return request.auth.token.role; }
+    function isAdmin()     { return role() == 'admin'; }
+    function isCoach()     { return role() == 'coach'; }
+    function isAthlete()   { return role() == 'athlete'; }
+    function isAgentService() { return role() == 'agent-service'; }
+    function tenantId()    { return request.auth.token.tid; }
+
+    // Validate the path tenant matches the caller's tenant
+    function inTenantPath(tid) {
+      return signedIn() && tid == tenantId();
     }
-    
-    // Check if user is an admin
-    function isAdmin() {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+
+    function isOwner(ownerField) {
+      return signedIn() && request.auth.uid == ownerField;
     }
-    
-    // Check if user is a director
-    function isDirector() {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director';
+
+    // Allow only server (Cloud Functions) to write specific docs (sv == true custom claim)
+    function serverOnly() {
+      return request.auth != null && request.auth.token.sv == true;
     }
-    
-    // Check if user is a coach
-    function isCoach() {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach';
+
+    // ISO 8601 date string (yyyy-mm-dd or full timestamp) – "DateString" validation
+    function isISODateString(v) {
+      return v is string
+        && v.matches('^\\d{4}-\\d{2}-\\d{2}([T ]\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z?)?$');
     }
-    
-    // Check if user is a town staff member
-    function isTownStaff() {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'townStaff';
+
+    // CreatedAt/UpdatedAt guards (UpdatedAt set by server functions)
+    function validCreateTs() {
+      return isISODateString(request.resource.data.createdAt);
     }
-    
-    // Check if user is a league coach
-    function isLeagueCoach(leagueId) {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/leagues/$(leagueId)/coaches/$(request.auth.uid));
+    function validUpdateTs() {
+      return isISODateString(request.resource.data.updatedAt);
     }
-    
-    // Check if user is a team coach
-    function isTeamCoach(teamId) {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/teams/$(teamId)) &&
-             get(/databases/$(database)/documents/teams/$(teamId)).data.coachId == request.auth.uid;
-    }
-    
-    // Check if user has organization access
-    function hasOrganizationAccess(organizationId) {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
-    }
-    
-    // ============================================================================
-    // VALIDATION FUNCTIONS - Data integrity and security
-    // ============================================================================
-    
-    // Check if document has required fields
-    function hasRequiredFields(data, requiredFields) {
-      return requiredFields.hasAll(data.keys());
-    }
-    
-    // Validate email format
-    function isValidEmail(email) {
-      return email.matches('^[^@]+@[^@]+\\.[^@]+$');
-    }
-    
-    // Validate UUID format
-    function isValidUUID(uuid) {
-      return uuid.matches('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
-    }
-    
-    // Validate date format
-    function isValidDate(date) {
-      return date is timestamp;
-    }
-    
-    // Sanitize string input
-    function sanitizeString(str) {
-      return str is string && str.size() > 0 && str.size() <= 1000;
-    }
-    
-    // Rate limiting function with proper implementation
-    function checkRateLimit() {
-      // Get current user ID
-      let userId = request.auth.uid;
-      if (userId == null) {
-        return false; // No rate limiting for unauthenticated users (they're already blocked)
-      }
-      
-      // Get rate limit document for this user
-      let rateLimitDoc = get(/databases/$(database)/documents/rateLimits/$(userId));
-      let currentTime = request.time.toMillis();
-      
-      // Initialize rate limit data if it doesn't exist
-      let requestCount = 0;
-      let lastRequest = 0;
-      
-      if (rateLimitDoc != null) {
-        requestCount = rateLimitDoc.data.count || 0;
-        lastRequest = rateLimitDoc.data.lastRequest || 0;
-      }
-      
-      // Reset counter if more than 1 minute has passed
-      let windowSize = 60000; // 1 minute in milliseconds
-      if (currentTime - lastRequest > windowSize) {
-        requestCount = 0;
-      }
-      
-      // Check if user is under the rate limit (100 requests per minute)
-      let maxRequests = 100;
-      if (requestCount >= maxRequests) {
-        return false; // Rate limit exceeded
-      }
-      
-      // Update rate limit data (this will be committed if the request is allowed)
-      // Note: In Firestore rules, we can't write to other documents, so we rely on
-      // the client to update the rate limit data after successful requests
-      return true;
-    }
-    
-    // Rate limit tracking function (called by client after successful requests)
-    function updateRateLimit() {
-      let userId = request.auth.uid;
-      if (userId == null) {
-        return false;
-      }
-      
-      let currentTime = request.time.toMillis();
-      let rateLimitData = {
-        count: 1,
-        lastRequest: currentTime,
-        updatedAt: currentTime
-      };
-      
-      // Get existing rate limit data
-      let existingDoc = get(/databases/$(database)/documents/rateLimits/$(userId));
-      if (existingDoc != null) {
-        let existingData = existingDoc.data;
-        let lastRequest = existingData.lastRequest || 0;
-        let windowSize = 60000; // 1 minute
-        
-        // Reset counter if window has passed
-        if (currentTime - lastRequest > windowSize) {
-          rateLimitData.count = 1;
-        } else {
-          rateLimitData.count = (existingData.count || 0) + 1;
-        }
-      }
-      
-      return true;
-    }
-    
-    // ============================================================================
-    // USERS COLLECTION - Personal data with strict access control
-    // ============================================================================
-    
-    match /users/{userId} {
-      // Read: User can read their own data, admins/directors can read all
-      allow read: if isOwner(userId) || isAdmin() || isDirector();
-      
-      // Create: User can create their own profile with rate limiting
-      allow create: if isAuthenticated() && isOwner(userId) && validateUserProfile() && checkRateLimit();
-      
-      // Update: User can update their own data, admins can update any with rate limiting
-      allow update: if (isOwner(userId) || isAdmin()) && validateUserProfile() && checkRateLimit();
-      
-      // Delete: Only admins can delete users
-      allow delete: if isAdmin();
-      
-      // Validate user profile data
-      function validateUserProfile() {
-        let profile = request.resource.data;
-        return hasRequiredFields(profile, ['email', 'role', 'createdAt', 'updatedAt']) &&
-               isValidEmail(profile.email) &&
-               profile.role in ['admin', 'director', 'coach', 'townStaff', 'athlete'] &&
-               isValidDate(profile.createdAt) &&
-               isValidDate(profile.updatedAt) &&
-               sanitizeString(profile.firstName) &&
-               sanitizeString(profile.lastName);
+
+    /* ==============================
+       Tenanted hierarchy
+       /tenants/{tid}/...
+       ============================== */
+
+    // ATHLETES (profile records managed by admins/coaches; readable by everyone in tenant)
+    match /tenants/{tid}/athletes/{athleteId} {
+      allow read: if inTenantPath(tid);                                // tenant-wide readable
+      allow create, update: if inTenantPath(tid) && (isAdmin() || isCoach()) && validUpdate();
+      allow delete: if inTenantPath(tid) && isAdmin();
+
+      function validUpdate() {
+        // minimal schema checks; tighten as needed
+        return request.resource.data.keys().hasAll(['name','sport','teamId','createdAt'])
+          && isISODateString(request.resource.data.createdAt)
+          && (!('updatedAt' in request.resource.data) || validUpdateTs());
       }
     }
-    
-    // ============================================================================
-    // LEAGUES COLLECTION - League management with role-based access
-    // ============================================================================
-    
-    match /leagues/{leagueId} {
-      // Read: Authenticated users can read league info within their organization
-      allow read: if isAuthenticated() && hasOrganizationAccess(resource.data.organizationId);
-      
-      // Create: Only directors and admins can create leagues with rate limiting and org access
-      allow create: if isDirector() && validateLeague() && checkRateLimit() && hasOrganizationAccess(request.resource.data.organizationId);
-      
-      // Update: Directors, admins, and league coaches can update with rate limiting and org access
-      allow update: if (isDirector() || isLeagueCoach(leagueId)) && validateLeague() && checkRateLimit() && hasOrganizationAccess(resource.data.organizationId);
-      
-      // Delete: Only admins can delete leagues
-      allow delete: if isAdmin();
-      
-      // Validate league data
-      function validateLeague() {
-        let league = request.resource.data;
-        return hasRequiredFields(league, ['name', 'sport', 'ageGroup', 'createdAt', 'updatedAt']) &&
-               sanitizeString(league.name) &&
-               league.sport in ['soccer', 'basketball', 'baseball', 'football', 'hockey', 'tennis', 'volleyball', 'lacrosse'] &&
-               league.ageGroup in ['u6', 'u8', 'u10', 'u12', 'u14', 'u16', 'u18', 'adult'] &&
-               isValidDate(league.createdAt) &&
-               isValidDate(league.updatedAt) &&
-               league.maxTeams > 0 &&
-               league.maxPlayersPerTeam > 0 &&
-               league.minPlayersPerTeam > 0;
+
+    // STATS (game/performance stats; admins/coaches write; read tenant-wide)
+    match /tenants/{tid}/stats/{statId} {
+      allow read: if inTenantPath(tid);
+      allow create: if inTenantPath(tid) && (isAdmin() || isCoach()) && validCreateTs();
+      allow update: if inTenantPath(tid) && (isAdmin() || isCoach()) && validUpdateTs();
+      allow delete: if inTenantPath(tid) && isAdmin();
+    }
+
+    // FEEDBACK (human-in-the-loop signals; append-only by owner; readable by owner+admins)
+    match /tenants/{tid}/feedback/{feedbackId} {
+      allow read: if inTenantPath(tid) && (isAdmin() || isOwner(resource.data.userId));
+      allow create: if inTenantPath(tid)
+                    && isOwner(request.resource.data.userId)
+                    && validCreateTs();
+      allow update, delete: if false;  // append-only
+    }
+
+    // MEMORY EVENTS (per-user learning stream; append-only; readable by owner+admins)
+    match /tenants/{tid}/memory/{uid}/events/{eventId} {
+      allow read: if inTenantPath(tid) && (isAdmin() || request.auth.uid == uid);
+      allow create: if inTenantPath(tid)
+                    && request.auth.uid == uid
+                    && validCreateMemoryEvent();
+      allow update, delete: if false;  // append-only
+
+      function validCreateMemoryEvent() {
+        return request.resource.data.keys().hasAny(['type','payload','createdAt','source'])
+          && validCreateTs();
       }
     }
-    
-    // ============================================================================
-    // TEAMS COLLECTION - Team management with coach access
-    // ============================================================================
-    
-    match /teams/{teamId} {
-      // Read: Authenticated users can read team info
-      allow read: if isAuthenticated();
-      
-      // Create: Coaches, directors, and admins can create teams
-      allow create: if isCoach() && validateTeam();
-      
-      // Update: Team coaches, directors, and admins can update
-      allow update: if (isTeamCoach(teamId) || isDirector()) && validateTeam();
-      
-      // Delete: Only admins can delete teams
-      allow delete: if isAdmin();
-      
-      // Validate team data
-      function validateTeam() {
-        let team = request.resource.data;
-        return hasRequiredFields(team, ['name', 'leagueId', 'coachId', 'createdAt', 'updatedAt']) &&
-               sanitizeString(team.name) &&
-               isValidUUID(team.leagueId) &&
-               isValidUUID(team.coachId) &&
-               isValidDate(team.createdAt) &&
-               isValidDate(team.updatedAt);
+
+    // NIGHTLY SNAPSHOTS (aggregated memory; server-only)
+    match /tenants/{tid}/memorySnapshots/{snapId} {
+      allow read: if inTenantPath(tid) && isAdmin();
+      allow create, update, delete: if inTenantPath(tid) && serverOnly();
+    }
+
+    // SECURITY EVENTS / AUDIT TRAIL (server-only write, no client read)
+    match /tenants/{tid}/securityEvents/{eventId} {
+      allow read: if false;
+      allow create: if inTenantPath(tid) && serverOnly() && validCreateTs();
+      allow update, delete: if false;
+    }
+
+    // ADMIN QUEUE (verification/triage; admins read/write; others read own tasks only when assigned)
+    match /tenants/{tid}/adminQueue/{taskId} {
+      allow read: if inTenantPath(tid) && (
+                    isAdmin() ||
+                    (request.auth.uid == resource.data.assigneeId)
+                  );
+      allow create, update, delete: if inTenantPath(tid) && isAdmin();
+    }
+
+    /* ==============================
+       Agentic Features Collections
+       ============================== */
+
+    // STATS SUBMISSIONS (agent verification workflow)
+    match /stats_submissions/{submissionId} {
+      allow read: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService() ||
+                    (isAthlete() && request.auth.uid == resource.data.playerId)
+                  );
+      allow create: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAthlete()
+                  ) && validSubmission();
+      allow update: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService()
+                  );
+      allow delete: if signedIn() && isAdmin();
+
+      function validSubmission() {
+        return request.resource.data.keys().hasAll(['playerId', 'teamId', 'stats', 'status', 'submittedAt'])
+          && request.resource.data.status == 'pending'
+          && request.resource.data.playerId is string
+          && request.resource.data.teamId is string
+          && request.resource.data.stats is list;
       }
     }
-    
-    // ============================================================================
-    // PLAYERS COLLECTION - Player profiles with privacy protection
-    // ============================================================================
-    
-    match /players/{playerId} {
-      // Read: Player can read their own data, coaches can read their team's players, admins/directors can read all
-      allow read: if isOwner(playerId) || 
-        (isCoach() && isPlayerInCoachTeam(playerId)) || 
-        isAdmin() || 
-        isDirector();
-      
-      // Create: Players can create their own profile, coaches can create for their team
-      allow create: if (isOwner(playerId) || isCoach()) && validatePlayer();
-      
-      // Update: Player can update their own data, coaches can update their team's players, admins can update any
-      allow update: if (isOwner(playerId) || 
-        (isCoach() && isPlayerInCoachTeam(playerId)) || 
-        isAdmin()) && validatePlayer();
-      
-      // Delete: Only admins can delete players
-      allow delete: if isAdmin();
-      
-      // Check if player is in coach's team
-      function isPlayerInCoachTeam(playerId) {
-        return exists(/databases/$(database)/documents/teams/{teamId}/players/$(playerId)) &&
-               isTeamCoach(teamId);
-      }
-      
-      // Validate player data
-      function validatePlayer() {
-        let player = request.resource.data;
-        return hasRequiredFields(player, ['firstName', 'lastName', 'email', 'dateOfBirth', 'createdAt', 'updatedAt']) &&
-               sanitizeString(player.firstName) &&
-               sanitizeString(player.lastName) &&
-               isValidEmail(player.email) &&
-               isValidDate(player.dateOfBirth) &&
-               isValidDate(player.createdAt) &&
-               isValidDate(player.updatedAt) &&
-               player.age > 0 &&
-               player.age < 100;
+
+    // PLAYER STATS (individual stat records)
+    match /players/{playerId}/stats/{statId} {
+      allow read: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService() ||
+                    (isAthlete() && request.auth.uid == playerId)
+                  );
+      allow create: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAthlete() ||
+                    isAgentService()
+                  ) && validStat();
+      allow update: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService()
+                  );
+      allow delete: if signedIn() && isAdmin();
+
+      function validStat() {
+        return request.resource.data.keys().hasAll(['type', 'value', 'unit', 'timestamp'])
+          && request.resource.data.type is string
+          && request.resource.data.value is number
+          && request.resource.data.unit is string
+          && isISODateString(request.resource.data.timestamp);
       }
     }
-    
-    // ============================================================================
-    // REGISTRATIONS COLLECTION - Registration management with parent access
-    // ============================================================================
-    
-    match /registrations/{registrationId} {
-      // Read: Parent can read their child's registration, coaches can read their team's registrations, admins/directors can read all
-      allow read: if isOwner(resource.data.parentId) || 
-        (isCoach() && isRegistrationInCoachTeam(registrationId)) || 
-        isAdmin() || 
-        isDirector();
-      
-      // Create: Parents can create registrations for their children
-      allow create: if isAuthenticated() && isOwner(request.resource.data.parentId) && validateRegistration();
-      
-      // Update: Parent can update their child's registration, admins/directors can update any
-      allow update: if (isOwner(resource.data.parentId) || isAdmin() || isDirector()) && validateRegistration();
-      
-      // Delete: Only admins can delete registrations
-      allow delete: if isAdmin();
-      
-      // Check if registration is for coach's team
-      function isRegistrationInCoachTeam(registrationId) {
-        let registration = get(/databases/$(database)/documents/registrations/$(registrationId)).data;
-        return exists(/databases/$(database)/documents/teams/{teamId}/players/$(registration.playerId)) &&
-               isTeamCoach(teamId);
-      }
-      
-      // Validate registration data
-      function validateRegistration() {
-        let registration = request.resource.data;
-        return hasRequiredFields(registration, ['playerId', 'parentId', 'leagueId', 'status', 'createdAt']) &&
-               isValidUUID(registration.playerId) &&
-               isValidUUID(registration.parentId) &&
-               isValidUUID(registration.leagueId) &&
-               registration.status in ['pending', 'approved', 'rejected', 'waitlisted'] &&
-               isValidDate(registration.createdAt);
-      }
+
+    // AGENT AUDIT LOGS (agent activity tracking)
+    match /agent_audit/{auditId} {
+      allow read: if signedIn() && (isAdmin() || isAgentService());
+      allow create: if signedIn() && isAgentService();
+      allow update, delete: if false; // append-only
     }
-    
-    // ============================================================================
-    // GAMES COLLECTION - Game management with referee access
-    // ============================================================================
-    
-    match /games/{gameId} {
-      // Read: Authenticated users can read game info
-      allow read: if isAuthenticated();
-      
-      // Create: Coaches, directors, and admins can create games
-      allow create: if (isCoach() || isDirector() || isAdmin()) && validateGame();
-      
-      // Update: Game coaches, directors, and admins can update
-      allow update: if (isGameCoach(gameId) || isDirector() || isAdmin()) && validateGame();
-      
-      // Delete: Only admins can delete games
-      allow delete: if isAdmin();
-      
-      // Check if user is a game coach
-      function isGameCoach(gameId) {
-        let game = get(/databases/$(database)/documents/games/$(gameId)).data;
-        return isTeamCoach(game.homeTeamId) || isTeamCoach(game.awayTeamId);
-      }
-      
-      // Validate game data
-      function validateGame() {
-        let game = request.resource.data;
-        return hasRequiredFields(game, ['homeTeamId', 'awayTeamId', 'date', 'location', 'createdAt']) &&
-               isValidUUID(game.homeTeamId) &&
-               isValidUUID(game.awayTeamId) &&
-               isValidDate(game.date) &&
-               sanitizeString(game.location) &&
-               isValidDate(game.createdAt);
-      }
+
+    // KPI CACHE (cached KPI calculations)
+    match /kpi_cache/{cacheId} {
+      allow read: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService()
+                  );
+      allow create, update: if signedIn() && (
+                    isAdmin() || 
+                    isAgentService()
+                  );
+      allow delete: if signedIn() && isAdmin();
     }
-    
-    // ============================================================================
-    // MESSAGES COLLECTION - Communication with privacy protection
-    // ============================================================================
-    
-    match /messages/{messageId} {
-      // Read: Users can read messages they sent or received
-      allow read: if isAuthenticated() && 
-        (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
-      
-      // Create: Authenticated users can send messages
-      allow create: if isAuthenticated() && 
-        request.resource.data.senderId == request.auth.uid && 
-        validateMessage();
-      
-      // Update: Only sender can update their messages
-      allow update: if isAuthenticated() && 
-        resource.data.senderId == request.auth.uid && 
-        validateMessage();
-      
-      // Delete: Only sender or recipient can delete messages
-      allow delete: if isAuthenticated() && 
-        (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
-      
-      // Validate message data
-      function validateMessage() {
-        let message = request.resource.data;
-        return hasRequiredFields(message, ['senderId', 'recipientId', 'content', 'createdAt']) &&
-               isValidUUID(message.senderId) &&
-               isValidUUID(message.recipientId) &&
-               sanitizeString(message.content) &&
-               message.content.size() <= 1000 &&
-               isValidDate(message.createdAt);
-      }
+
+    // TEAM REPORTS (generated reports)
+    match /team_reports/{reportId} {
+      allow read: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService()
+                  );
+      allow create, update: if signedIn() && (
+                    isAdmin() || 
+                    isAgentService()
+                  );
+      allow delete: if signedIn() && isAdmin();
     }
-    
-    // ============================================================================
-    // EXCEPTION REQUESTS COLLECTION - DEI and accessibility
-    // ============================================================================
-    
-    match /exception_requests/{requestId} {
-      // Read: Parent can read their own requests, admins/directors can read all
-      allow read: if isOwner(resource.data.parentId) || isAdmin() || isDirector();
-      
-      // Create: Parents can create exception requests
-      allow create: if isAuthenticated() && 
-        isOwner(request.resource.data.parentId) && 
-        validateExceptionRequest();
-      
-      // Update: Parent can update their own requests, admins/directors can update any
-      allow update: if (isOwner(resource.data.parentId) || isAdmin() || isDirector()) && 
-        validateExceptionRequest();
-      
-      // Delete: Only admins can delete exception requests
-      allow delete: if isAdmin();
-      
-      // Validate exception request data
-      function validateExceptionRequest() {
-        let request = request.resource.data;
-        return hasRequiredFields(request, ['parentId', 'childId', 'leagueId', 'reason', 'status', 'createdAt']) &&
-               isValidUUID(request.parentId) &&
-               isValidUUID(request.childId) &&
-               isValidUUID(request.leagueId) &&
-               sanitizeString(request.reason) &&
-               request.reason.size() <= 2000 &&
-               request.status in ['pending', 'approved', 'denied'] &&
-               isValidDate(request.createdAt);
-      }
+
+    // EXPORT JOBS (data export tracking)
+    match /export_jobs/{jobId} {
+      allow read: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService() ||
+                    (request.auth.uid == resource.data.requestedBy)
+                  );
+      allow create, update: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService()
+                  );
+      allow delete: if signedIn() && isAdmin();
     }
-    
-    // ============================================================================
-    // AUDIT LOGS COLLECTION - Security and compliance
-    // ============================================================================
-    
-    match /audit_logs/{logId} {
-      // Read: Only admins and directors can read audit logs
-      allow read: if isAdmin() || isDirector();
-      
-      // Create: System can create audit logs (write-only)
-      allow create: if true;
-      
-      // Update: No updates allowed
-      allow update: if false;
-      
-      // Delete: Only admins can delete audit logs
-      allow delete: if isAdmin();
+
+    // EXPORT FILES (exported data files)
+    match /export_files/{fileId} {
+      allow read: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService() ||
+                    (request.auth.uid == resource.data.requestedBy)
+                  );
+      allow create, update: if signedIn() && (
+                    isAdmin() || 
+                    isAgentService()
+                  );
+      allow delete: if signedIn() && isAdmin();
     }
-    
-    // ============================================================================
-    // NOTIFICATIONS COLLECTION - User notifications
-    // ============================================================================
-    
+
+    // NOTIFICATIONS (agent-generated notifications)
     match /notifications/{notificationId} {
-      // Read: User can read their own notifications
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      
-      // Create: System can create notifications
-      allow create: if true;
-      
-      // Update: User can mark their notifications as read
-      allow update: if isAuthenticated() && 
-        resource.data.userId == request.auth.uid && 
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
-      
-      // Delete: User can delete their own notifications
-      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService() ||
+                    (request.auth.uid == resource.data.userId)
+                  );
+      allow create, update: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService()
+                  );
+      allow delete: if signedIn() && (
+                    isAdmin() || 
+                    (request.auth.uid == resource.data.userId)
+                  );
     }
-    
-    // ============================================================================
-    // RATE LIMITS COLLECTION - Rate limiting data
-    // ============================================================================
-    
-    match /rateLimits/{userId} {
-      // Read: Users can read their own rate limit data
-      allow read: if isAuthenticated() && isOwner(userId);
-      
-      // Create: Users can create their own rate limit data
-      allow create: if isAuthenticated() && isOwner(userId);
-      
-      // Update: Users can update their own rate limit data
-      allow update: if isAuthenticated() && isOwner(userId);
-      
-      // Delete: Only admins can delete rate limit data
-      allow delete: if isAdmin();
+
+    // NOTIFICATION LOGS (notification audit trail)
+    match /notification_logs/{logId} {
+      allow read: if signedIn() && (isAdmin() || isAgentService());
+      allow create: if signedIn() && isAgentService();
+      allow update, delete: if false; // append-only
     }
-    
-    // ============================================================================
-    // DEFAULT DENY - Security by default
-    // ============================================================================
-    
-    // Deny all other access
+
+    // MEMORY (agent memory storage)
+    match /memory/{memoryId} {
+      allow read: if signedIn() && (
+                    isAdmin() || 
+                    isAgentService() ||
+                    (isCoach() && resource.data.scope == 'team') ||
+                    (isAthlete() && resource.data.scope == 'player' && request.auth.uid in resource.data.key)
+                  );
+      allow create, update: if signedIn() && (
+                    isAdmin() || 
+                    isAgentService()
+                  );
+      allow delete: if signedIn() && isAdmin();
+    }
+
+    // MEMORY LOGS (memory operation audit)
+    match /memory_logs/{logId} {
+      allow read: if signedIn() && (isAdmin() || isAgentService());
+      allow create: if signedIn() && isAgentService();
+      allow update, delete: if false; // append-only
+    }
+
+    // AGENT STATES (persistent agent state)
+    match /agent_states/{agentId} {
+      allow read: if signedIn() && (isAdmin() || isAgentService());
+      allow create, update: if signedIn() && isAgentService();
+      allow delete: if signedIn() && isAdmin();
+    }
+
+    // AGENT ACTIVITIES (agent activity logs)
+    match /agent_activities/{activityId} {
+      allow read: if signedIn() && (isAdmin() || isAgentService());
+      allow create: if signedIn() && isAgentService();
+      allow update, delete: if false; // append-only
+    }
+
+    // ADMIN TASKS (agent-created admin tasks)
+    match /admin_tasks/{taskId} {
+      allow read: if signedIn() && (
+                    isAdmin() || 
+                    isCoach() || 
+                    isAgentService()
+                  );
+      allow create, update: if signedIn() && (
+                    isAdmin() || 
+                    isAgentService()
+                  );
+      allow delete: if signedIn() && isAdmin();
+    }
+
+    // RATE LIMITS (rate limiting data)
+    match /rate_limits/{limitId} {
+      allow read: if signedIn() && (isAdmin() || isAgentService());
+      allow create, update: if signedIn() && isAgentService();
+      allow delete: if signedIn() && (isAdmin() || isAgentService());
+    }
+
+    // DEFAULT DENY
     match /{document=**} {
       allow read, write: if false;
     }

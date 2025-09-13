@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Typography, Button } from '@mui/material';
 
-export default function EventCard({ event, onRsvp }) {
+export default function EventCard({ event, onRsvp }: { event: any, onRsvp: any }) {
   return (
     <Card sx={{ mb: 2, p: 2 }}>
       <Typography variant="h6">{event.name}</Typography>

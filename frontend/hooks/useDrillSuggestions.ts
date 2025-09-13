@@ -6,14 +6,14 @@ interface Suggestion {
   suggestionReason: string;
 }
 
-export function useDrillSuggestions(stats): Suggestion[] {
+export function useDrillSuggestions(stats: any): Suggestion[] {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
   useEffect(() => {
     // Simulate AI processing
     const generateSuggestions = () => {
       // Example logic to generate suggestions based on stats
-      const drills = stats.map(stat => ({
+      const drills = stats.map((stat: any) => ({
         name: `Improve ${stat.name}`,
         focus: stat.weakness,
         suggestionReason: `Focus on improving ${stat.weakness} to enhance ${stat.name}`

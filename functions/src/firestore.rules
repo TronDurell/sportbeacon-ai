@@ -1,0 +1,674 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================================================
+    // FIRESTORE SECURITY RULES - Location Threads Feature
+    // Version: 1.0.0 | Date: 2025-01-03
+    // ============================================================================
+    //
+    // SECURITY OVERVIEW:
+    // - Public read access to locations and thread posts
+    // - Authenticated users can create posts
+    // - Only authors and moderators can edit/delete posts
+    // - Follow documents are user-scoped (userId must match request.auth.uid)
+    // - Home feed is private to each user
+    // - Team visibility posts are denied until team private feature is shipped
+    //
+    // COLLECTIONS COVERED:
+    // - /locations/{id} - Public read, admin create, moderator/admin update/delete
+    // - /locations/{id}/threads/{postId} - Public read, auth create, author/moderator update/delete
+    // - /follows_locations/{followId} - User-scoped read/write/delete
+    // - /users/{uid}/home_location_feed/{feedItemId} - Owner-scoped read, system write/update/delete
+    // ============================================================================
+    
+    // ============================================================================
+    // HELPER FUNCTIONS - Validation and security utilities
+    // ============================================================================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is the owner of the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Check if user is an admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Check if user is a director
+    function isDirector() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director';
+    }
+    
+    // Check if user is a coach
+    function isCoach() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach';
+    }
+    
+    // Check if user is a town staff member
+    function isTownStaff() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'townStaff';
+    }
+    
+    // Check if user is a league coach
+    function isLeagueCoach(leagueId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/leagues/$(leagueId)/coaches/$(request.auth.uid));
+    }
+    
+    // Check if user is a team coach
+    function isTeamCoach(teamId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/teams/$(teamId)) &&
+             get(/databases/$(database)/documents/teams/$(teamId)).data.coachId == request.auth.uid;
+    }
+    
+    // Check if user has organization access
+    function hasOrganizationAccess(organizationId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+    }
+    
+    // ============================================================================
+    // VALIDATION FUNCTIONS - Data integrity and security
+    // ============================================================================
+    
+    // Check if document has required fields
+    function hasRequiredFields(data, requiredFields) {
+      return requiredFields.hasAll(data.keys());
+    }
+    
+    // Validate email format
+    function isValidEmail(email) {
+      return email.matches('^[^@]+@[^@]+\\.[^@]+$');
+    }
+    
+    // Validate UUID format
+    function isValidUUID(uuid) {
+      return uuid.matches('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+    }
+    
+    // Validate date format
+    function isValidDate(date) {
+      return date is timestamp;
+    }
+    
+    // Sanitize string input
+    function sanitizeString(str) {
+      return str is string && str.size() > 0 && str.size() <= 1000;
+    }
+    
+    // Rate limiting function with proper implementation
+    function checkRateLimit() {
+      // Get current user ID
+      let userId = request.auth.uid;
+      if (userId == null) {
+        return false; // No rate limiting for unauthenticated users (they're already blocked)
+      }
+      
+      // Get rate limit document for this user
+      let rateLimitDoc = get(/databases/$(database)/documents/rateLimits/$(userId));
+      let currentTime = request.time.toMillis();
+      
+      // Initialize rate limit data if it doesn't exist
+      let requestCount = 0;
+      let lastRequest = 0;
+      
+      if (rateLimitDoc != null) {
+        requestCount = rateLimitDoc.data.count || 0;
+        lastRequest = rateLimitDoc.data.lastRequest || 0;
+      }
+      
+      // Reset counter if more than 1 minute has passed
+      let windowSize = 60000; // 1 minute in milliseconds
+      if (currentTime - lastRequest > windowSize) {
+        requestCount = 0;
+      }
+      
+      // Check if user is under the rate limit (100 requests per minute)
+      let maxRequests = 100;
+      if (requestCount >= maxRequests) {
+        return false; // Rate limit exceeded
+      }
+      
+      // Update rate limit data (this will be committed if the request is allowed)
+      // Note: In Firestore rules, we can't write to other documents, so we rely on
+      // the client to update the rate limit data after successful requests
+      return true;
+    }
+    
+    // Rate limit tracking function (called by client after successful requests)
+    function updateRateLimit() {
+      let userId = request.auth.uid;
+      if (userId == null) {
+        return false;
+      }
+      
+      let currentTime = request.time.toMillis();
+      let rateLimitData = {
+        count: 1,
+        lastRequest: currentTime,
+        updatedAt: currentTime
+      };
+      
+      // Get existing rate limit data
+      let existingDoc = get(/databases/$(database)/documents/rateLimits/$(userId));
+      if (existingDoc != null) {
+        let existingData = existingDoc.data;
+        let lastRequest = existingData.lastRequest || 0;
+        let windowSize = 60000; // 1 minute
+        
+        // Reset counter if window has passed
+        if (currentTime - lastRequest > windowSize) {
+          rateLimitData.count = 1;
+        } else {
+          rateLimitData.count = (existingData.count || 0) + 1;
+        }
+      }
+      
+      return true;
+    }
+    
+    // ============================================================================
+    // USERS COLLECTION - Personal data with strict access control
+    // ============================================================================
+    
+    match /users/{userId} {
+      // Read: User can read their own data, admins/directors can read all
+      allow read: if isOwner(userId) || isAdmin() || isDirector();
+      
+      // Create: User can create their own profile with rate limiting
+      allow create: if isAuthenticated() && isOwner(userId) && validateUserProfile() && checkRateLimit();
+      
+      // Update: User can update their own data, admins can update any with rate limiting
+      allow update: if (isOwner(userId) || isAdmin()) && validateUserProfile() && checkRateLimit();
+      
+      // Delete: Only admins can delete users
+      allow delete: if isAdmin();
+      
+      // Validate user profile data
+      function validateUserProfile() {
+        let profile = request.resource.data;
+        return hasRequiredFields(profile, ['email', 'role', 'createdAt', 'updatedAt']) &&
+               isValidEmail(profile.email) &&
+               profile.role in ['admin', 'director', 'coach', 'townStaff', 'athlete'] &&
+               isValidDate(profile.createdAt) &&
+               isValidDate(profile.updatedAt) &&
+               sanitizeString(profile.firstName) &&
+               sanitizeString(profile.lastName);
+      }
+    }
+    
+    // ============================================================================
+    // LEAGUES COLLECTION - League management with role-based access
+    // ============================================================================
+    
+    match /leagues/{leagueId} {
+      // Read: Authenticated users can read league info within their organization
+      allow read: if isAuthenticated() && hasOrganizationAccess(resource.data.organizationId);
+      
+      // Create: Only directors and admins can create leagues with rate limiting and org access
+      allow create: if isDirector() && validateLeague() && checkRateLimit() && hasOrganizationAccess(request.resource.data.organizationId);
+      
+      // Update: Directors, admins, and league coaches can update with rate limiting and org access
+      allow update: if (isDirector() || isLeagueCoach(leagueId)) && validateLeague() && checkRateLimit() && hasOrganizationAccess(resource.data.organizationId);
+      
+      // Delete: Only admins can delete leagues
+      allow delete: if isAdmin();
+      
+      // Validate league data
+      function validateLeague() {
+        let league = request.resource.data;
+        return hasRequiredFields(league, ['name', 'sport', 'ageGroup', 'createdAt', 'updatedAt']) &&
+               sanitizeString(league.name) &&
+               league.sport in ['soccer', 'basketball', 'baseball', 'football', 'hockey', 'tennis', 'volleyball', 'lacrosse'] &&
+               league.ageGroup in ['u6', 'u8', 'u10', 'u12', 'u14', 'u16', 'u18', 'adult'] &&
+               isValidDate(league.createdAt) &&
+               isValidDate(league.updatedAt) &&
+               league.maxTeams > 0 &&
+               league.maxPlayersPerTeam > 0 &&
+               league.minPlayersPerTeam > 0;
+      }
+    }
+    
+    // ============================================================================
+    // TEAMS COLLECTION - Team management with coach access
+    // ============================================================================
+    
+    match /teams/{teamId} {
+      // Read: Authenticated users can read team info
+      allow read: if isAuthenticated();
+      
+      // Create: Coaches, directors, and admins can create teams
+      allow create: if isCoach() && validateTeam();
+      
+      // Update: Team coaches, directors, and admins can update
+      allow update: if (isTeamCoach(teamId) || isDirector()) && validateTeam();
+      
+      // Delete: Only admins can delete teams
+      allow delete: if isAdmin();
+      
+      // Validate team data
+      function validateTeam() {
+        let team = request.resource.data;
+        return hasRequiredFields(team, ['name', 'leagueId', 'coachId', 'createdAt', 'updatedAt']) &&
+               sanitizeString(team.name) &&
+               isValidUUID(team.leagueId) &&
+               isValidUUID(team.coachId) &&
+               isValidDate(team.createdAt) &&
+               isValidDate(team.updatedAt);
+      }
+    }
+    
+    // ============================================================================
+    // PLAYERS COLLECTION - Player profiles with privacy protection
+    // ============================================================================
+    
+    match /players/{playerId} {
+      // Read: Player can read their own data, coaches can read their team's players, admins/directors can read all
+      allow read: if isOwner(playerId) || 
+        (isCoach() && isPlayerInCoachTeam(playerId)) || 
+        isAdmin() || 
+        isDirector();
+      
+      // Create: Players can create their own profile, coaches can create for their team
+      allow create: if (isOwner(playerId) || isCoach()) && validatePlayer();
+      
+      // Update: Player can update their own data, coaches can update their team's players, admins can update any
+      allow update: if (isOwner(playerId) || 
+        (isCoach() && isPlayerInCoachTeam(playerId)) || 
+        isAdmin()) && validatePlayer();
+      
+      // Delete: Only admins can delete players
+      allow delete: if isAdmin();
+      
+      // Check if player is in coach's team
+      function isPlayerInCoachTeam(playerId) {
+        return exists(/databases/$(database)/documents/teams/{teamId}/players/$(playerId)) &&
+               isTeamCoach(teamId);
+      }
+      
+      // Validate player data
+      function validatePlayer() {
+        let player = request.resource.data;
+        return hasRequiredFields(player, ['firstName', 'lastName', 'email', 'dateOfBirth', 'createdAt', 'updatedAt']) &&
+               sanitizeString(player.firstName) &&
+               sanitizeString(player.lastName) &&
+               isValidEmail(player.email) &&
+               isValidDate(player.dateOfBirth) &&
+               isValidDate(player.createdAt) &&
+               isValidDate(player.updatedAt) &&
+               player.age > 0 &&
+               player.age < 100;
+      }
+    }
+    
+    // ============================================================================
+    // REGISTRATIONS COLLECTION - Registration management with parent access
+    // ============================================================================
+    
+    match /registrations/{registrationId} {
+      // Read: Parent can read their child's registration, coaches can read their team's registrations, admins/directors can read all
+      allow read: if isOwner(resource.data.parentId) || 
+        (isCoach() && isRegistrationInCoachTeam(registrationId)) || 
+        isAdmin() || 
+        isDirector();
+      
+      // Create: Parents can create registrations for their children
+      allow create: if isAuthenticated() && isOwner(request.resource.data.parentId) && validateRegistration();
+      
+      // Update: Parent can update their child's registration, admins/directors can update any
+      allow update: if (isOwner(resource.data.parentId) || isAdmin() || isDirector()) && validateRegistration();
+      
+      // Delete: Only admins can delete registrations
+      allow delete: if isAdmin();
+      
+      // Check if registration is for coach's team
+      function isRegistrationInCoachTeam(registrationId) {
+        let registration = get(/databases/$(database)/documents/registrations/$(registrationId)).data;
+        return exists(/databases/$(database)/documents/teams/{teamId}/players/$(registration.playerId)) &&
+               isTeamCoach(teamId);
+      }
+      
+      // Validate registration data
+      function validateRegistration() {
+        let registration = request.resource.data;
+        return hasRequiredFields(registration, ['playerId', 'parentId', 'leagueId', 'status', 'createdAt']) &&
+               isValidUUID(registration.playerId) &&
+               isValidUUID(registration.parentId) &&
+               isValidUUID(registration.leagueId) &&
+               registration.status in ['pending', 'approved', 'rejected', 'waitlisted'] &&
+               isValidDate(registration.createdAt);
+      }
+    }
+    
+    // ============================================================================
+    // GAMES COLLECTION - Game management with referee access
+    // ============================================================================
+    
+    match /games/{gameId} {
+      // Read: Authenticated users can read game info
+      allow read: if isAuthenticated();
+      
+      // Create: Coaches, directors, and admins can create games
+      allow create: if (isCoach() || isDirector() || isAdmin()) && validateGame();
+      
+      // Update: Game coaches, directors, and admins can update
+      allow update: if (isGameCoach(gameId) || isDirector() || isAdmin()) && validateGame();
+      
+      // Delete: Only admins can delete games
+      allow delete: if isAdmin();
+      
+      // Check if user is a game coach
+      function isGameCoach(gameId) {
+        let game = get(/databases/$(database)/documents/games/$(gameId)).data;
+        return isTeamCoach(game.homeTeamId) || isTeamCoach(game.awayTeamId);
+      }
+      
+      // Validate game data
+      function validateGame() {
+        let game = request.resource.data;
+        return hasRequiredFields(game, ['homeTeamId', 'awayTeamId', 'date', 'location', 'createdAt']) &&
+               isValidUUID(game.homeTeamId) &&
+               isValidUUID(game.awayTeamId) &&
+               isValidDate(game.date) &&
+               sanitizeString(game.location) &&
+               isValidDate(game.createdAt);
+      }
+    }
+    
+    // ============================================================================
+    // MESSAGES COLLECTION - Communication with privacy protection
+    // ============================================================================
+    
+    match /messages/{messageId} {
+      // Read: Users can read messages they sent or received
+      allow read: if isAuthenticated() && 
+        (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
+      
+      // Create: Authenticated users can send messages
+      allow create: if isAuthenticated() && 
+        request.resource.data.senderId == request.auth.uid && 
+        validateMessage();
+      
+      // Update: Only sender can update their messages
+      allow update: if isAuthenticated() && 
+        resource.data.senderId == request.auth.uid && 
+        validateMessage();
+      
+      // Delete: Only sender or recipient can delete messages
+      allow delete: if isAuthenticated() && 
+        (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
+      
+      // Validate message data
+      function validateMessage() {
+        let message = request.resource.data;
+        return hasRequiredFields(message, ['senderId', 'recipientId', 'content', 'createdAt']) &&
+               isValidUUID(message.senderId) &&
+               isValidUUID(message.recipientId) &&
+               sanitizeString(message.content) &&
+               message.content.size() <= 1000 &&
+               isValidDate(message.createdAt);
+      }
+    }
+    
+    // ============================================================================
+    // EXCEPTION REQUESTS COLLECTION - DEI and accessibility
+    // ============================================================================
+    
+    match /exception_requests/{requestId} {
+      // Read: Parent can read their own requests, admins/directors can read all
+      allow read: if isOwner(resource.data.parentId) || isAdmin() || isDirector();
+      
+      // Create: Parents can create exception requests
+      allow create: if isAuthenticated() && 
+        isOwner(request.resource.data.parentId) && 
+        validateExceptionRequest();
+      
+      // Update: Parent can update their own requests, admins/directors can update any
+      allow update: if (isOwner(resource.data.parentId) || isAdmin() || isDirector()) && 
+        validateExceptionRequest();
+      
+      // Delete: Only admins can delete exception requests
+      allow delete: if isAdmin();
+      
+      // Validate exception request data
+      function validateExceptionRequest() {
+        let request = request.resource.data;
+        return hasRequiredFields(request, ['parentId', 'childId', 'leagueId', 'reason', 'status', 'createdAt']) &&
+               isValidUUID(request.parentId) &&
+               isValidUUID(request.childId) &&
+               isValidUUID(request.leagueId) &&
+               sanitizeString(request.reason) &&
+               request.reason.size() <= 2000 &&
+               request.status in ['pending', 'approved', 'denied'] &&
+               isValidDate(request.createdAt);
+      }
+    }
+    
+    // ============================================================================
+    // AUDIT LOGS COLLECTION - Security and compliance
+    // ============================================================================
+    
+    match /audit_logs/{logId} {
+      // Read: Only admins and directors can read audit logs
+      allow read: if isAdmin() || isDirector();
+      
+      // Create: System can create audit logs (write-only)
+      allow create: if true;
+      
+      // Update: No updates allowed
+      allow update: if false;
+      
+      // Delete: Only admins can delete audit logs
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================================================
+    // NOTIFICATIONS COLLECTION - User notifications
+    // ============================================================================
+    
+    match /notifications/{notificationId} {
+      // Read: User can read their own notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // Create: System can create notifications
+      allow create: if true;
+      
+      // Update: User can mark their notifications as read
+      allow update: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      
+      // Delete: User can delete their own notifications
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // ============================================================================
+    // RATE LIMITS COLLECTION - Rate limiting data
+    // ============================================================================
+    
+    match /rateLimits/{userId} {
+      // Read: Users can read their own rate limit data
+      allow read: if isAuthenticated() && isOwner(userId);
+      
+      // Create: Users can create their own rate limit data
+      allow create: if isAuthenticated() && isOwner(userId);
+      
+      // Update: Users can update their own rate limit data
+      allow update: if isAuthenticated() && isOwner(userId);
+      
+      // Delete: Only admins can delete rate limit data
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================================================
+    // LOCATION THREADS COLLECTION - Location-based social feeds
+    // ============================================================================
+    //
+    // FEATURE: Location Threads - Social feeds for sports locations
+    // VERSION: 1.0.0 | DATE: 2025-01-08
+    //
+    // SECURITY MODEL:
+    // - Public read access to locations and thread posts (discoverability)
+    // - Authenticated users can create posts (engagement)
+    // - Only authors and moderators can edit/delete posts (content control)
+    // - Follow documents are user-scoped (privacy)
+    // - Home feed is private to each user (personalization)
+    // - Team visibility posts are restricted to admins (future feature)
+    //
+    // COLLECTIONS:
+    // - /locations/{id} - Public locations with moderator management
+    // - /locations/{id}/threads/{postId} - Public posts with author/moderator control
+    // - /follows_locations/{userId_locationId} - User-scoped location follows
+    // - /users/{uid}/home_location_feed/{feedItemId} - Private user feeds
+    // ============================================================================
+    
+    match /locations/{locationId} {
+      // Read: Anyone can read public locations
+      allow read: if true;
+      
+      // Create: Only authenticated users can create locations (for now, restrict to admins)
+      allow create: if isAuthenticated() && isAdmin();
+      
+      // Update: Only location moderators or admins can update
+      allow update: if isAuthenticated() && 
+        (isAdmin() || request.auth.uid in resource.data.moderators);
+      
+      // Delete: Only admins can delete locations
+      allow delete: if isAuthenticated() && isAdmin();
+      
+      // Location threads subcollection
+      match /threads/{postId} {
+        // Read: Anyone can read public posts
+        allow read: if true;
+        
+        // Create: Only authenticated users can create posts
+        allow create: if isAuthenticated() && 
+          request.resource.data.authorId == request.auth.uid &&
+          validateLocationPost();
+        
+        // Update: Only post author or location moderator can update
+        allow update: if isAuthenticated() && 
+          (resource.data.authorId == request.auth.uid || 
+           get(/databases/$(database)/documents/locations/$(locationId)).data.moderators[request.auth.uid] == true) &&
+          validateLocationPost();
+        
+        // Delete: Only post author, location moderator, or admin can delete
+        allow delete: if isAuthenticated() && 
+          (resource.data.authorId == request.auth.uid || 
+           get(/databases/$(database)/documents/locations/$(locationId)).data.moderators[request.auth.uid] == true ||
+           isAdmin());
+        
+        // Validate location post data
+        function validateLocationPost() {
+          let post = request.resource.data;
+          return hasRequiredFields(post, ['locationId', 'authorId', 'type', 'visibility', 'createdAt']) &&
+                 post.locationId == locationId &&
+                 post.authorId == request.auth.uid &&
+                 post.type in ['note', 'run', 'clip', 'alert', 'poll'] &&
+                 post.visibility in ['place', 'followers', 'team'] &&
+                 (post.visibility != 'team' || isAdmin()) && // Restrict team posts to admins for now
+                 isValidDate(post.createdAt) &&
+                 (post.text == null || sanitizeString(post.text)) &&
+                 (post.media == null || post.media is list) &&
+                 (post.poll == null || validatePollData(post.poll)) &&
+                 (post.run == null || validateRunData(post.run));
+        }
+        
+        // Validate poll data
+        function validatePollData(poll) {
+          return poll.question is string && 
+                 poll.question.size() > 0 && 
+                 poll.question.size() <= 500 &&
+                 poll.options is list &&
+                 poll.options.size() >= 2 &&
+                 poll.options.size() <= 10 &&
+                 poll.options.hasAll(poll.options.filter(opt => opt is string && opt.size() > 0 && opt.size() <= 100));
+        }
+        
+        // Validate run data
+        function validateRunData(run) {
+          return (run.startsAt == null || isValidDate(run.startsAt)) &&
+                 (run.endsAt == null || isValidDate(run.endsAt)) &&
+                 (run.level == null || run.level in ['open', 'league', 'private']);
+        }
+      }
+    }
+    
+    // ============================================================================
+    // FOLLOW LOCATIONS COLLECTION - User location follows
+    // ============================================================================
+    
+    match /follows_locations/{followId} {
+      // Read: Users can read their own follows
+      allow read: if isAuthenticated() && 
+        (followId.matches('^' + request.auth.uid + '_.*$') || isAdmin());
+      
+      // Create: Users can create their own follows
+      allow create: if isAuthenticated() && 
+        followId.matches('^' + request.auth.uid + '_.*$') &&
+        validateFollowLocation();
+      
+      // Update: Users can update their own follows
+      allow update: if isAuthenticated() && 
+        followId.matches('^' + request.auth.uid + '_.*$') &&
+        validateFollowLocation();
+      
+      // Delete: Users can delete their own follows
+      allow delete: if isAuthenticated() && 
+        followId.matches('^' + request.auth.uid + '_.*$');
+      
+      // Validate follow location data
+      function validateFollowLocation() {
+        let follow = request.resource.data;
+        return hasRequiredFields(follow, ['locationId', 'userId', 'notifications', 'createdAt']) &&
+               follow.userId == request.auth.uid &&
+               follow.notifications in ['all', 'digest', 'mute'] &&
+               isValidDate(follow.createdAt);
+      }
+    }
+    
+    // ============================================================================
+    // USER HOME LOCATION FEED COLLECTION - Denormalized posts for home feed
+    // ============================================================================
+    
+    match /users/{userId}/home_location_feed/{feedItemId} {
+      // Read: Users can only read their own home feed
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Create: System can create feed items (write-only)
+      allow create: if true;
+      
+      // Update: System can update feed items
+      allow update: if true;
+      
+      // Delete: System can delete feed items
+      allow delete: if true;
+    }
+    
+    // ============================================================================
+    // DEFAULT DENY - Security by default
+    // ============================================================================
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

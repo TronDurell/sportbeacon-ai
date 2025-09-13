@@ -70,13 +70,13 @@ class BadgeService {
         return badge.unlockConditions.reduce((progress, condition) => {
             switch (condition.type) {
                 case 'xp':
-                    return Math.min(profile.xp.current, condition.threshold);
+                    return Math.min(profile.xp?.current || 0, condition.threshold);
                 case 'drillCount':
-                    return Math.min(profile.stats.completedDrills, condition.threshold);
+                    return Math.min(profile.stats?.completedDrills || 0, condition.threshold);
                 case 'skillLevel':
-                    return condition.skillName && profile.skills?.[condition.skillName]?.level || 0;
+                    return condition.skillName && (profile as any).skills?.[condition.skillName]?.level || 0;
                 case 'achievement':
-                    return profile.achievements?.includes(condition.achievementId || '') ? 1 : 0;
+                    return (profile as any).achievements?.includes(condition.achievementId || '') ? 1 : 0;
                 default:
                     return 0;
             }

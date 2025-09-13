@@ -9,7 +9,7 @@ import {
   UploadTaskSnapshot
 } from 'firebase/storage';
 import { storage } from '../firebase/init';
-import type { VideoUploadProgress, VideoMetadata, VideoFile } from '../firebase/types';
+import type { VideoUploadProgress, VideoMetadata, VideoFile } from '../src/types/monetization';
 
 /**
  * Video upload service for Firebase Storage
@@ -46,7 +46,6 @@ export class VideoService {
         customMetadata: {
           originalName: file.name,
           uploadedBy: userId,
-          uploadedAt: new Date().toISOString(),
           fileSize: file.size.toString(),
           contentType: file.type
         }
@@ -76,6 +75,9 @@ export class VideoService {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
             
             const metadata: VideoMetadata = {
+              width: 1920,
+              height: 1080,
+              durationSec: 0,
               videoId,
               fileName,
               originalName: file.name,
@@ -83,11 +85,7 @@ export class VideoService {
               contentType: file.type,
               downloadURL,
               storagePath,
-              uploadedBy: userId,
-              uploadedAt: new Date().toISOString(),
-              duration: 0, // Will be updated when video is processed
-              thumbnailURL: '', // Will be generated during processing
-              status: 'uploaded'
+              uploadedBy: userId
             };
 
             return { videoId, downloadURL, metadata };
@@ -105,6 +103,9 @@ export class VideoService {
       const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
       
       const metadata: VideoMetadata = {
+        width: 1920,
+        height: 1080,
+        durationSec: 0,
         videoId,
         fileName,
         originalName: file.name,
@@ -112,11 +113,7 @@ export class VideoService {
         contentType: file.type,
         downloadURL,
         storagePath,
-        uploadedBy: userId,
-        uploadedAt: new Date().toISOString(),
-        duration: 0,
-        thumbnailURL: '',
-        status: 'uploaded'
+        uploadedBy: userId
       };
 
       return { videoId, downloadURL, metadata };
@@ -167,6 +164,9 @@ export class VideoService {
         try {
           const downloadURL = await getDownloadURL(itemRef);
           const videoFile: VideoFile = {
+            fileName: itemRef.name,
+            mimeType: 'video/mp4', // Default, would need metadata for actual type
+            sizeBytes: 0, // Would need metadata to get actual size
             name: itemRef.name,
             fullPath: itemRef.fullPath,
             downloadURL,

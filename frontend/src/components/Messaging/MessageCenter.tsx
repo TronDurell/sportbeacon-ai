@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import { Message, MessageType, MessageStatus } from '../../types';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import { Message, MessageType, MessageStatus } from "../../types";
 
 interface MessageCenterProps {
   className?: string;
 }
 
-const MessageCenter: React.FC<MessageCenterProps> = ({ className = '' }) => {
+const MessageCenter: React.FC<MessageCenterProps> = ({ className = "" }) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -24,24 +24,26 @@ const MessageCenter: React.FC<MessageCenterProps> = ({ className = '' }) => {
       // Mock data for now
       const mockMessages: Message[] = [
         {
-          id: '1',
-          senderId: 'coach-1',
-          recipientId: user?.id || '',
-          content: 'Great game yesterday! Your performance was outstanding.',
-          type: 'text',
-          status: 'read',
-          createdAt: new Date(Date.now() - 86400000),
-          updatedAt: new Date(Date.now() - 86400000)
+          id: "1",
+          senderId: "coach-1",
+          recipientId: user?.id || "",
+          content: "Great game yesterday! Your performance was outstanding.",
+          type: "text",
+          status: "read",
+          timestamp: new Date(Date.now() - 86400000).toISOString(),
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          updatedAt: new Date(Date.now() - 86400000).toISOString()
         },
         {
-          id: '2',
-          senderId: 'admin-1',
-          recipientId: user?.id || '',
-          content: 'Practice is cancelled tomorrow due to weather.',
-          type: 'system',
-          status: 'unread',
-          createdAt: new Date(Date.now() - 3600000),
-          updatedAt: new Date(Date.now() - 3600000)
+          id: "2",
+          senderId: "admin-1",
+          recipientId: user?.id || "",
+          content: "Practice is cancelled tomorrow due to weather.",
+          type: "system",
+          status: "unread",
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          createdAt: new Date(Date.now() - 3600000).toISOString(),
+          updatedAt: new Date(Date.now() - 3600000).toISOString()
         }
       ];
       setMessages(mockMessages);
@@ -58,17 +60,18 @@ const MessageCenter: React.FC<MessageCenterProps> = ({ className = '' }) => {
     try {
       const message: Message = {
         id: Date.now().toString(),
-        senderId: user?.id || '',
-        recipientId: 'recipient-id',
+        senderId: user?.id || "",
+        recipientId: "recipient-id",
         content: newMessage,
-        type: 'text',
-        status: 'sent',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        type: "text",
+        status: "sent",
+        timestamp: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
 
       setMessages(prev => [message, ...prev]);
-      setNewMessage('');
+      setNewMessage("");
     } catch (error) {
       }
   };
@@ -76,35 +79,36 @@ const MessageCenter: React.FC<MessageCenterProps> = ({ className = '' }) => {
   const markAsRead = async (messageId: string) => {
     setMessages(prev =>
       prev.map(msg =>
-        msg.id === messageId ? { ...msg, status: 'read' as MessageStatus } : msg
+        msg.id === messageId ? { ...msg, status: "read" as MessageStatus } : msg
       )
     );
   };
 
   const getMessageTypeIcon = (type: MessageType) => {
     switch (type) {
-      case 'system':
-        return '🔔';
-      case 'image':
-        return '📷';
-      case 'file':
-        return '📎';
+      case "system":
+        return "🔔";
+      case "image":
+        return "📷";
+      case "file":
+        return "📎";
       default:
-        return '💬';
+        return "💬";
     }
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
     const now = new Date();
-    const diff = now.getTime() - date.getTime();
+    const diff = now.getTime() - dateObj.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     
     if (days === 0) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     } else if (days === 1) {
-      return 'Yesterday';
+      return "Yesterday";
     } else {
-      return date.toLocaleDateString();
+      return dateObj.toLocaleDateString();
     }
   };
 
@@ -113,7 +117,7 @@ const MessageCenter: React.FC<MessageCenterProps> = ({ className = '' }) => {
       <div className="p-4 border-b">
         <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
         <p className="text-sm text-gray-600">
-          {messages.filter(m => m.status === 'unread').length} unread messages
+          {messages.filter(m => m.status === "unread").length} unread messages
         </p>
       </div>
 
@@ -133,11 +137,11 @@ const MessageCenter: React.FC<MessageCenterProps> = ({ className = '' }) => {
                   <div
                     key={message.id}
                     className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
-                      message.status === 'unread' ? 'bg-blue-50' : ''
+                      message.status === "unread" ? "bg-blue-50" : ""
                     }`}
                     onClick={() => {
                       setSelectedMessage(message);
-                      if (message.status === 'unread') {
+                      if (message.status === "unread") {
                         markAsRead(message.id);
                       }
                     }}
@@ -147,7 +151,7 @@ const MessageCenter: React.FC<MessageCenterProps> = ({ className = '' }) => {
                         <span className="text-lg">{getMessageTypeIcon(message.type)}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {message.senderId === user?.id ? 'You' : 'Coach'}
+                            {message.senderId === user?.id ? "You" : "Coach"}
                           </p>
                           <p className="text-sm text-gray-600 truncate">
                             {message.content}
@@ -158,7 +162,7 @@ const MessageCenter: React.FC<MessageCenterProps> = ({ className = '' }) => {
                         {formatDate(message.createdAt)}
                       </div>
                     </div>
-                    {message.status === 'unread' && (
+                    {message.status === "unread" && (
                       <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
                     )}
                   </div>
@@ -178,7 +182,7 @@ const MessageCenter: React.FC<MessageCenterProps> = ({ className = '' }) => {
                     <span className="text-lg">{getMessageTypeIcon(selectedMessage.type)}</span>
                     <div>
                       <p className="font-medium text-gray-900">
-                        {selectedMessage.senderId === user?.id ? 'You' : 'Coach'}
+                        {selectedMessage.senderId === user?.id ? "You" : "Coach"}
                       </p>
                       <p className="text-sm text-gray-500">
                         {formatDate(selectedMessage.createdAt)}

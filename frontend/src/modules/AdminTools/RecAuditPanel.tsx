@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Shield, 
   Users, 
@@ -26,17 +26,17 @@ import {
   BarChart3,
   PieChart,
   Activity
-} from 'lucide-react';
-import { toast } from 'react-toastify';
-import { useI18n } from '../../lib/i18n';
+} from "lucide-react";
+import { toast } from "react-toastify";
+import { useI18n } from "../../lib/i18n";
 
 // Mock types and interfaces
 interface TownRecRequest {
   id: string;
-  type: 'WAITLIST' | 'AGE_OVERRIDE' | 'SIBLING_PAIRING';
+  type: "WAITLIST" | "AGE_OVERRIDE" | "SIBLING_PAIRING";
   childId: string;
   leagueId: string;
-  status: 'PENDING' | 'APPROVED' | 'DENIED';
+  status: "PENDING" | "APPROVED" | "DENIED";
   adminNote?: string;
   timestamp: Date;
   parentName: string;
@@ -57,66 +57,66 @@ interface TownRecPolicy {
 
 // Mock user and group check
 const useCurrentUser = () => ({
-  id: 'admin1',
-  email: 'admin@cary.gov',
-  groups: ['testGroups.caryAdminTest'],
-  role: 'TownStaff' as const,
-  permissions: ['read', 'write', 'approve', 'override']
+  id: "admin1",
+  email: "admin@cary.gov",
+  groups: ["testGroups.caryAdminTest"],
+  role: "TownStaff" as const,
+  permissions: ["read", "write", "approve", "override"]
 });
 
 // Mock data
 const mockRequests: TownRecRequest[] = [
   {
-    id: '1',
-    type: 'AGE_OVERRIDE',
-    childId: 'child1',
-    leagueId: 'league1',
-    status: 'PENDING',
-    adminNote: 'Child is 4 months under age limit but shows advanced skills',
-    timestamp: new Date('2024-01-15'),
-    parentName: 'Sarah Johnson',
-    childName: 'Alex Johnson',
+    id: "1",
+    type: "AGE_OVERRIDE",
+    childId: "child1",
+    leagueId: "league1",
+    status: "PENDING",
+    adminNote: "Child is 4 months under age limit but shows advanced skills",
+    timestamp: new Date("2024-01-15"),
+    parentName: "Sarah Johnson",
+    childName: "Alex Johnson",
     childAge: 5,
-    leagueName: 'U8 Soccer'
+    leagueName: "U8 Soccer"
   },
   {
-    id: '2',
-    type: 'SIBLING_PAIRING',
-    childId: 'child2',
-    leagueId: 'league2',
-    status: 'APPROVED',
-    adminNote: 'Siblings matched successfully',
-    timestamp: new Date('2024-01-14'),
-    parentName: 'Mike Davis',
-    childName: 'Emma Davis',
+    id: "2",
+    type: "SIBLING_PAIRING",
+    childId: "child2",
+    leagueId: "league2",
+    status: "APPROVED",
+    adminNote: "Siblings matched successfully",
+    timestamp: new Date("2024-01-14"),
+    parentName: "Mike Davis",
+    childName: "Emma Davis",
     childAge: 7,
-    leagueName: 'U10 Basketball'
+    leagueName: "U10 Basketball"
   },
   {
-    id: '3',
-    type: 'WAITLIST',
-    childId: 'child3',
-    leagueId: 'league3',
-    status: 'PENDING',
-    adminNote: 'League full, waiting for spot',
-    timestamp: new Date('2024-01-13'),
-    parentName: 'Lisa Chen',
-    childName: 'Ryan Chen',
+    id: "3",
+    type: "WAITLIST",
+    childId: "child3",
+    leagueId: "league3",
+    status: "PENDING",
+    adminNote: "League full, waiting for spot",
+    timestamp: new Date("2024-01-13"),
+    parentName: "Lisa Chen",
+    childName: "Ryan Chen",
     childAge: 9,
-    leagueName: 'U12 Baseball'
+    leagueName: "U12 Baseball"
   }
 ];
 
 const RecAuditPanel: React.FC = () => {
   const { t } = useI18n();
   const user = useCurrentUser();
-  const [activeTab, setActiveTab] = useState<'waitlist' | 'siblings' | 'ageOverrides' | 'approvals' | 'sandbox'>('waitlist');
+  const [activeTab, setActiveTab] = useState<"waitlist" | "siblings" | "ageOverrides" | "approvals" | "sandbox">("waitlist");
   const [requests, setRequests] = useState<TownRecRequest[]>(mockRequests);
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'DENIED'>('ALL');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "PENDING" | "APPROVED" | "DENIED">("ALL");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Check if user has access to Town Rec features
-  if (!user.groups.includes('testGroups.caryAdminTest')) {
+  if (!user.groups.includes("testGroups.caryAdminTest")) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -130,8 +130,8 @@ const RecAuditPanel: React.FC = () => {
 
   // Filter requests based on status and search
   const filteredRequests = requests.filter(request => {
-    const matchesStatus = filterStatus === 'ALL' || request.status === filterStatus;
-    const matchesSearch = searchTerm === '' || 
+    const matchesStatus = filterStatus === "ALL" || request.status === filterStatus;
+    const matchesSearch = searchTerm === "" || 
       request.parentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.childName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.leagueName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -139,7 +139,7 @@ const RecAuditPanel: React.FC = () => {
   });
 
   // Handle admin actions
-  const handleAction = async (action: string, requestId: string, decision?: 'APPROVED' | 'DENIED', note?: string) => {
+  const handleAction = async (action: string, requestId: string, decision: string, note?: string) => {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -147,7 +147,7 @@ const RecAuditPanel: React.FC = () => {
       // Update local state
       setRequests(prev => prev.map(req => 
         req.id === requestId 
-          ? { ...req, status: decision || req.status, adminNote: note || req.adminNote }
+          ? { ...req, status: (decision || req.status) as any, adminNote: note || req.adminNote }
           : req
       ));
 
@@ -169,7 +169,7 @@ const RecAuditPanel: React.FC = () => {
       data,
       timestamp: new Date(),
       userId: user?.id,
-      sessionId: sessionStorage.getItem('sessionId')
+      sessionId: sessionStorage.getItem("sessionId")
     };
     
     // TODO: Send to audit log service
@@ -177,11 +177,11 @@ const RecAuditPanel: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'waitlist', label: t('admin.waitlistExceptions'), icon: Users },
-    { id: 'siblings', label: t('admin.siblingPairing'), icon: Users },
-    { id: 'ageOverrides', label: t('admin.ageOverrideRequests'), icon: AlertTriangle },
-    { id: 'approvals', label: t('admin.approvalQueue'), icon: CheckCircle },
-    { id: 'sandbox', label: t('admin.sandboxTestSubmit'), icon: Settings }
+    { id: "waitlist", label: t("admin.waitlistExceptions"), icon: Users },
+    { id: "siblings", label: t("admin.siblingPairing"), icon: Users },
+    { id: "ageOverrides", label: t("admin.ageOverrideRequests"), icon: AlertTriangle },
+    { id: "approvals", label: t("admin.approvalQueue"), icon: CheckCircle },
+    { id: "sandbox", label: t("admin.sandboxTestSubmit"), icon: Settings }
   ];
 
   return (
@@ -190,7 +190,7 @@ const RecAuditPanel: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t('admin.townRecAuditPanel')}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t("admin.townRecAuditPanel")}</h1>
             <p className="text-gray-600 mt-1">Town of Cary Parks & Recreation Administration</p>
           </div>
           <div className="flex items-center gap-4">
@@ -200,7 +200,7 @@ const RecAuditPanel: React.FC = () => {
             </div>
             <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
               <Settings className="w-4 h-4" />
-              {t('common.settings')}
+              {t("common.settings")}
             </button>
           </div>
         </div>
@@ -214,7 +214,7 @@ const RecAuditPanel: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder={t('common.search')}
+                placeholder={t("common.search")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -226,17 +226,17 @@ const RecAuditPanel: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value as any)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="ALL">{t('common.all')}</option>
-            <option value="PENDING">{t('admin.pending')}</option>
-            <option value="APPROVED">{t('admin.approved')}</option>
-            <option value="DENIED">{t('admin.denied')}</option>
+            <option value="ALL">{t("common.all")}</option>
+            <option value="PENDING">{t("admin.pending")}</option>
+            <option value="APPROVED">{t("admin.approved")}</option>
+            <option value="DENIED">{t("admin.denied")}</option>
           </select>
           <button
             onClick={() => window.location.reload()}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             <RefreshCw className="w-4 h-4" />
-            {t('common.refresh')}
+            {t("common.refresh")}
           </button>
         </div>
       </div>
@@ -253,8 +253,8 @@ const RecAuditPanel: React.FC = () => {
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -275,31 +275,31 @@ const RecAuditPanel: React.FC = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {activeTab === 'waitlist' && (
+              {activeTab === "waitlist" && (
                 <WaitlistExceptions 
-                  requests={filteredRequests.filter(r => r.type === 'WAITLIST')}
+                  requests={filteredRequests.filter(r => r.type === "WAITLIST")}
                   onAction={handleAction}
                 />
               )}
-              {activeTab === 'siblings' && (
+              {activeTab === "siblings" && (
                 <SiblingPairing 
-                  requests={filteredRequests.filter(r => r.type === 'SIBLING_PAIRING')}
+                  requests={filteredRequests.filter(r => r.type === "SIBLING_PAIRING")}
                   onAction={handleAction}
                 />
               )}
-              {activeTab === 'ageOverrides' && (
+              {activeTab === "ageOverrides" && (
                 <AgeOverrideRequests 
-                  requests={filteredRequests.filter(r => r.type === 'AGE_OVERRIDE')}
+                  requests={filteredRequests.filter(r => r.type === "AGE_OVERRIDE")}
                   onAction={handleAction}
                 />
               )}
-              {activeTab === 'approvals' && (
+              {activeTab === "approvals" && (
                 <ApprovalQueue 
-                  requests={filteredRequests.filter(r => r.status === 'PENDING')}
+                  requests={filteredRequests.filter(r => r.status === "PENDING")}
                   onAction={handleAction}
                 />
               )}
-              {activeTab === 'sandbox' && (
+              {activeTab === "sandbox" && (
                 <SandboxTestSubmit onAction={handleAction} />
               )}
             </motion.div>
@@ -311,7 +311,7 @@ const RecAuditPanel: React.FC = () => {
 };
 
 // Sub-tab Components
-const WaitlistExceptions: React.FC<{ requests: TownRecRequest[], onAction: Function }> = ({ requests, onAction }) => (
+const WaitlistExceptions: React.FC<{ requests: TownRecRequest[], onAction: (action: string, requestId: string, decision: string, note?: string) => void }> = ({ requests, onAction }) => (
   <div data-testid="waitlistExceptions">
     <div className="flex items-center justify-between mb-4">
       <h3 className="text-lg font-medium text-gray-900">Waitlist Exceptions</h3>
@@ -327,7 +327,7 @@ const WaitlistExceptions: React.FC<{ requests: TownRecRequest[], onAction: Funct
   </div>
 );
 
-const SiblingPairing: React.FC<{ requests: TownRecRequest[], onAction: Function }> = ({ requests, onAction }) => (
+const SiblingPairing: React.FC<{ requests: TownRecRequest[], onAction: (action: string, requestId: string, decision: string, note?: string) => void }> = ({ requests, onAction }) => (
   <div data-testid="siblingPairing">
     <div className="flex items-center justify-between mb-4">
       <h3 className="text-lg font-medium text-gray-900">Sibling Pairing</h3>
@@ -343,7 +343,7 @@ const SiblingPairing: React.FC<{ requests: TownRecRequest[], onAction: Function 
   </div>
 );
 
-const AgeOverrideRequests: React.FC<{ requests: TownRecRequest[], onAction: Function }> = ({ requests, onAction }) => (
+const AgeOverrideRequests: React.FC<{ requests: TownRecRequest[], onAction: (action: string, requestId: string, decision: string, note?: string) => void }> = ({ requests, onAction }) => (
   <div data-testid="ageOverrideRequests">
     <div className="flex items-center justify-between mb-4">
       <h3 className="text-lg font-medium text-gray-900">Age Override Requests</h3>
@@ -359,7 +359,7 @@ const AgeOverrideRequests: React.FC<{ requests: TownRecRequest[], onAction: Func
   </div>
 );
 
-const ApprovalQueue: React.FC<{ requests: TownRecRequest[], onAction: Function }> = ({ requests, onAction }) => (
+const ApprovalQueue: React.FC<{ requests: TownRecRequest[], onAction: (action: string, requestId: string, decision: string, note?: string) => void }> = ({ requests, onAction }) => (
   <div data-testid="approvalQueue">
     <div className="flex items-center justify-between mb-4">
       <h3 className="text-lg font-medium text-gray-900">Approval Queue</h3>
@@ -375,7 +375,7 @@ const ApprovalQueue: React.FC<{ requests: TownRecRequest[], onAction: Function }
   </div>
 );
 
-const SandboxTestSubmit: React.FC<{ onAction: Function }> = ({ onAction }) => (
+const SandboxTestSubmit: React.FC<{ onAction: (action: string, requestId: string, decision: string, note?: string) => void }> = ({ onAction }) => (
   <div data-testid="sandboxTestSubmit">
     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
       <h3 className="text-lg font-medium text-yellow-900 mb-4">Sandbox Test Environment</h3>
@@ -384,21 +384,21 @@ const SandboxTestSubmit: React.FC<{ onAction: Function }> = ({ onAction }) => (
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
-          onClick={() => onAction('testWaitlist', 'test-1')}
+          onClick={() => onAction("testWaitlist", "test-1", "APPROVED")}
           className="p-4 bg-white border border-yellow-300 rounded-lg hover:bg-yellow-50"
         >
           <Users className="w-8 h-8 text-blue-500 mx-auto mb-2" />
           <p className="text-sm font-medium">Test Waitlist</p>
         </button>
         <button
-          onClick={() => onAction('testSibling', 'test-2')}
+          onClick={() => onAction("testSibling", "test-2", "APPROVED")}
           className="p-4 bg-white border border-yellow-300 rounded-lg hover:bg-yellow-50"
         >
           <Users className="w-8 h-8 text-green-500 mx-auto mb-2" />
           <p className="text-sm font-medium">Test Sibling Pairing</p>
         </button>
         <button
-          onClick={() => onAction('testAgeOverride', 'test-3')}
+          onClick={() => onAction("testAgeOverride", "test-3", "APPROVED")}
           className="p-4 bg-white border border-yellow-300 rounded-lg hover:bg-yellow-50"
         >
           <AlertTriangle className="w-8 h-8 text-orange-500 mx-auto mb-2" />
@@ -410,7 +410,7 @@ const SandboxTestSubmit: React.FC<{ onAction: Function }> = ({ onAction }) => (
 );
 
 // Request List Component
-const RequestList: React.FC<{ requests: TownRecRequest[], onAction: Function }> = ({ requests, onAction }) => (
+const RequestList: React.FC<{ requests: TownRecRequest[], onAction: (action: string, requestId: string, decision: string, note?: string) => void }> = ({ requests, onAction }) => (
   <div className="space-y-4">
     {requests.length === 0 ? (
       <div className="text-center py-8">
@@ -426,24 +426,24 @@ const RequestList: React.FC<{ requests: TownRecRequest[], onAction: Function }> 
 );
 
 // Request Card Component
-const RequestCard: React.FC<{ request: TownRecRequest, onAction: Function }> = ({ request, onAction }) => {
+const RequestCard: React.FC<{ request: TownRecRequest, onAction: (action: string, requestId: string, decision: string, note?: string) => void }> = ({ request, onAction }) => {
   const [showDetails, setShowDetails] = useState(false);
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState("");
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'APPROVED': return 'text-green-600 bg-green-100';
-      case 'DENIED': return 'text-red-600 bg-red-100';
-      case 'PENDING': return 'text-yellow-600 bg-yellow-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case "APPROVED": return "text-green-600 bg-green-100";
+      case "DENIED": return "text-red-600 bg-red-100";
+      case "PENDING": return "text-yellow-600 bg-yellow-100";
+      default: return "text-gray-600 bg-gray-100";
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'WAITLIST': return <Users className="w-4 h-4" />;
-      case 'SIBLING_PAIRING': return <Users className="w-4 h-4" />;
-      case 'AGE_OVERRIDE': return <AlertTriangle className="w-4 h-4" />;
+      case "WAITLIST": return <Users className="w-4 h-4" />;
+      case "SIBLING_PAIRING": return <Users className="w-4 h-4" />;
+      case "AGE_OVERRIDE": return <AlertTriangle className="w-4 h-4" />;
       default: return <FileText className="w-4 h-4" />;
     }
   };
@@ -470,7 +470,7 @@ const RequestCard: React.FC<{ request: TownRecRequest, onAction: Function }> = (
             </div>
             <div>
               <span className="text-gray-500">Type:</span>
-              <p className="font-medium">{request.type.replace('_', ' ')}</p>
+              <p className="font-medium">{request.type.replace("_", " ")}</p>
             </div>
             <div>
               <span className="text-gray-500">Date:</span>
@@ -490,16 +490,16 @@ const RequestCard: React.FC<{ request: TownRecRequest, onAction: Function }> = (
           >
             <Eye className="w-4 h-4" />
           </button>
-          {request.status === 'PENDING' && (
+          {request.status === "PENDING" && (
             <>
               <button
-                onClick={() => onAction('approve', request.id, 'APPROVED', note)}
+                onClick={() => onAction("approve", request.id, "APPROVED", note)}
                 className="p-2 text-green-600 hover:text-green-700"
               >
                 <CheckCircle className="w-4 h-4" />
               </button>
               <button
-                onClick={() => onAction('deny', request.id, 'DENIED', note)}
+                onClick={() => onAction("deny", request.id, "DENIED", note)}
                 className="p-2 text-red-600 hover:text-red-700"
               >
                 <XCircle className="w-4 h-4" />

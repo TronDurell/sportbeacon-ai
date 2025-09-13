@@ -158,7 +158,7 @@ export class SecurityValidator {
     }
     
     // Check file type
-    if (!limits.ALLOWED_TYPES.includes(file.type)) {
+    if (!limits.ALLOWED_TYPES.includes(file.type as any)) {
       return {
         isValid: false,
         error: `File type ${file.type} is not allowed. Allowed types: ${limits.ALLOWED_TYPES.join(', ')}`
@@ -293,10 +293,10 @@ export class SecurityValidator {
     requiredPermission: string
   ): boolean {
     const allPermissions = userRoles.flatMap(role => 
-      USER_PERMISSIONS[role as keyof typeof USER_PERMISSIONS] || []
+      (USER_PERMISSIONS as any)[role] || []
     );
     
-    return allPermissions.includes(requiredPermission);
+    return allPermissions.includes(requiredPermission as any);
   }
 
   /**
@@ -363,14 +363,4 @@ export const SECURITY_EVENTS = {
   MAINTENANCE_MODE: 'maintenance_mode',
 } as const;
 
-// Export all security configurations
-export type {
-  FILE_LIMITS,
-  PAYMENT_LIMITS,
-  RATE_LIMITS,
-  USER_ROLES,
-  USER_PERMISSIONS,
-  CONTENT_MODERATION,
-  DATA_RETENTION,
-  SECURITY_EVENTS
-}; 
+// Export all security configurations as types only 

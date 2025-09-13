@@ -1,5 +1,5 @@
-import React from 'react';
-import { Trophy } from 'lucide-react';
+import React from "react";
+import { Trophy } from "lucide-react";
 
 interface League {
   id: string;
@@ -7,7 +7,7 @@ interface League {
   sport: string;
   season: string;
   teamCount: number;
-  status: 'active' | 'inactive' | 'draft';
+  status: "active" | "inactive" | "draft";
   startDate: Date;
   endDate: Date;
 }
@@ -15,24 +15,24 @@ interface League {
 const Leagues: React.FC = () => {
   const leagues: League[] = [
     {
-      id: '1',
-      name: 'Spring Soccer League',
-      sport: 'Soccer',
-      season: 'Spring 2024',
+      id: "1",
+      name: "Spring Soccer League",
+      sport: "Soccer",
+      season: "Spring 2024",
       teamCount: 12,
-      status: 'active',
-      startDate: new Date('2024-03-01'),
-      endDate: new Date('2024-05-31')
+      status: "active",
+      startDate: new Date("2024-03-01"),
+      endDate: new Date("2024-05-31")
     },
     {
-      id: '2',
-      name: 'Summer Basketball',
-      sport: 'Basketball',
-      season: 'Summer 2024',
+      id: "2",
+      name: "Summer Basketball",
+      sport: "Basketball",
+      season: "Summer 2024",
       teamCount: 8,
-      status: 'draft',
-      startDate: new Date('2024-06-01'),
-      endDate: new Date('2024-08-31')
+      status: "draft",
+      startDate: new Date("2024-06-01"),
+      endDate: new Date("2024-08-31")
     }
   ];
 
@@ -52,9 +52,9 @@ const Leagues: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <Trophy className="w-8 h-8 text-yellow-500" />
               <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                league.status === 'active' ? 'bg-green-100 text-green-800' :
-                league.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
+                league.status === "active" ? "bg-green-100 text-green-800" :
+                league.status === "draft" ? "bg-yellow-100 text-yellow-800" :
+                "bg-red-100 text-red-800"
               }`}>
                 {league.status}
               </span>

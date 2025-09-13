@@ -1,6 +1,7 @@
-import {initializeTestEnvironment} from "@firebase/rules-unit-testing";
-import {getFirestore, connectFirestoreEmulator} from "firebase-admin/firestore";
-import {initializeApp} from "firebase-admin/app";
+import { initTestApp } from "../../../testenv/firebase";
+
+// Load test environment variables
+import "dotenv/config";
 
 // Mock logger to prevent console output during tests
 jest.mock("firebase-functions/logger", () => ({
@@ -27,45 +28,19 @@ jest.mock("stripe", () => {
   }));
 });
 
-// Global test setup
-beforeAll(async () => {
-  // Initialize Firebase Admin for testing
-  if (!process.env.FIREBASE_PROJECT_ID) {
-    process.env.FIREBASE_PROJECT_ID = "sportbeacon-test";
-  }
+jest.setTimeout(60000);
 
-  // Initialize app if not already initialized
-  try {
-    initializeApp();
-  } catch (error) {
-    // App already initialized
-  }
-
-  // Connect to Firestore emulator
-  const db = getFirestore();
-  try {
-    connectFirestoreEmulator(db, "localhost", 8080);
-  } catch (error) {
-    // Already connected
-  }
+beforeAll(() => {
+  // Set test environment variables
+  process.env.FIREBASE_AUTH_EMULATOR_HOST = "127.0.0.1:9099";
+  process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
+  process.env.FIREBASE_PROJECT_ID = "sportbeaconai-test";
+  process.env.FIREBASE_EMULATORS = "1";
+  
+  // Initialize test app with emulator connections
+  initTestApp(); // one app instance for all tests
 });
 
-// Global test teardown
-afterAll(async () => {
-  // Clean up any remaining connections
+afterEach(async () => {
+  // Per-test cleanup handled in utils if needed
 });
-
-// Helper to clear all Firestore data between tests
-export const clearFirestoreData = async () => {
-  const db = getFirestore();
-  const collections = ["waitlists", "ageOverrides", "siblingPairings", "registrations", "townStaffSessions", "notifications", "townStaffAuditLogs"];
-
-  for (const collectionName of collections) {
-    const snapshot = await db.collection(collectionName).get();
-    const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-    await batch.commit();
-  }
-};

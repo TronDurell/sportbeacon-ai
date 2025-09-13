@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Upload, 
   Play, 
@@ -30,14 +30,14 @@ import {
   SkipForward,
   Repeat,
   Shuffle
-} from 'lucide-react';
+} from "lucide-react";
 
 interface VideoAnalysis {
   id: string;
   videoUrl: string;
   thumbnailUrl: string;
   duration: number;
-  analysisStatus: 'uploading' | 'processing' | 'completed' | 'failed';
+  analysisStatus: "uploading" | "processing" | "completed" | "failed";
   analysisProgress: number;
   motionData: MotionAnalysis;
   feedback: CoachFeedback;
@@ -72,8 +72,8 @@ interface Keypoint {
 interface KeyMoment {
   timestamp: number;
   description: string;
-  importance: 'low' | 'medium' | 'high';
-  category: 'technique' | 'positioning' | 'timing' | 'power';
+  importance: "low" | "medium" | "high";
+  category: "technique" | "positioning" | "timing" | "power";
 }
 
 interface BiomechanicsData {
@@ -99,7 +99,7 @@ interface FeedbackItem {
   timestamp: number;
   category: string;
   message: string;
-  severity: 'low' | 'medium' | 'high';
+  severity: "low" | "medium" | "high";
   visualMarker?: { x: number; y: number };
 }
 
@@ -107,7 +107,7 @@ interface RecommendedDrill {
   id: string;
   name: string;
   description: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
   duration: number;
   focus: string[];
   videoUrl?: string;
@@ -127,7 +127,7 @@ interface PlayerStats {
   totalSessions: number;
   averageSessionTime: number;
   bestScore: number;
-  recentTrend: 'improving' | 'stable' | 'declining';
+  recentTrend: "improving" | "stable" | "declining";
 }
 
 interface PeerComparison {
@@ -166,7 +166,7 @@ const HighlightAICoach: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
-  const [selectedTab, setSelectedTab] = useState<'upload' | 'analysis' | 'feedback' | 'comparison'>('upload');
+  const [selectedTab, setSelectedTab] = useState<"upload" | "analysis" | "feedback" | "comparison">("upload");
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -187,11 +187,11 @@ const HighlightAICoach: React.FC = () => {
   useEffect(() => {
     const mockVideos: VideoAnalysis[] = [
       {
-        id: '1',
-        videoUrl: '/mock-videos/soccer-highlight.mp4',
-        thumbnailUrl: '/mock-thumbnails/soccer-thumb.jpg',
+        id: "1",
+        videoUrl: "/mock-videos/soccer-highlight.mp4",
+        thumbnailUrl: "/mock-thumbnails/soccer-thumb.jpg",
         duration: 120,
-        analysisStatus: 'completed',
+        analysisStatus: "completed",
         analysisProgress: 100,
         motionData: {
           poseEstimation: [],
@@ -201,27 +201,27 @@ const HighlightAICoach: React.FC = () => {
           keyMoments: [
             {
               timestamp: 15,
-              description: 'Excellent ball control and first touch',
-              importance: 'high',
-              category: 'technique'
+              description: "Excellent ball control and first touch",
+              importance: "high",
+              category: "technique"
             },
             {
               timestamp: 45,
-              description: 'Good positioning for the shot',
-              importance: 'medium',
-              category: 'positioning'
+              description: "Good positioning for the shot",
+              importance: "medium",
+              category: "positioning"
             },
             {
               timestamp: 67,
-              description: 'Perfect timing on the strike',
-              importance: 'high',
-              category: 'timing'
+              description: "Perfect timing on the strike",
+              importance: "high",
+              category: "timing"
             }
           ],
           recommendations: [
-            'Work on maintaining balance during acceleration',
-            'Improve left foot control for better versatility',
-            'Focus on consistent follow-through'
+            "Work on maintaining balance during acceleration",
+            "Improve left foot control for better versatility",
+            "Focus on consistent follow-through"
           ],
           biomechanics: {
             jointAngles: {},
@@ -236,51 +236,51 @@ const HighlightAICoach: React.FC = () => {
         feedback: {
           overallScore: 80,
           strengths: [
-            'Excellent ball control',
-            'Good spatial awareness',
-            'Strong finishing ability'
+            "Excellent ball control",
+            "Good spatial awareness",
+            "Strong finishing ability"
           ],
           areasForImprovement: [
-            'Balance during acceleration',
-            'Left foot control',
-            'Consistency in follow-through'
+            "Balance during acceleration",
+            "Left foot control",
+            "Consistency in follow-through"
           ],
           specificFeedback: [
             {
               timestamp: 15,
-              category: 'Technique',
-              message: 'Great first touch, but could improve balance',
-              severity: 'medium'
+              category: "Technique",
+              message: "Great first touch, but could improve balance",
+              severity: "medium"
             },
             {
               timestamp: 45,
-              category: 'Positioning',
-              message: 'Perfect positioning for the shot',
-              severity: 'low'
+              category: "Positioning",
+              message: "Perfect positioning for the shot",
+              severity: "low"
             }
           ],
           drills: [
             {
-              id: 'drill-1',
-              name: 'Balance Training',
-              description: 'Improve balance during acceleration',
-              difficulty: 'intermediate',
+              id: "drill-1",
+              name: "Balance Training",
+              description: "Improve balance during acceleration",
+              difficulty: "intermediate",
               duration: 20,
-              focus: ['balance', 'acceleration']
+              focus: ["balance", "acceleration"]
             },
             {
-              id: 'drill-2',
-              name: 'Left Foot Control',
-              description: 'Enhance left foot ball control',
-              difficulty: 'beginner',
+              id: "drill-2",
+              name: "Left Foot Control",
+              description: "Enhance left foot ball control",
+              difficulty: "beginner",
               duration: 15,
-              focus: ['ball control', 'weak foot']
+              focus: ["ball control", "weak foot"]
             }
           ],
           nextSteps: [
-            'Practice balance exercises 3x per week',
-            'Focus on left foot drills',
-            'Record follow-up video in 2 weeks'
+            "Practice balance exercises 3x per week",
+            "Focus on left foot drills",
+            "Record follow-up video in 2 weeks"
           ]
         },
         comparison: {
@@ -291,7 +291,7 @@ const HighlightAICoach: React.FC = () => {
             totalSessions: 8,
             averageSessionTime: 45,
             bestScore: 82,
-            recentTrend: 'improving'
+            recentTrend: "improving"
           },
           peerComparison: {
             percentile: 85,
@@ -299,19 +299,19 @@ const HighlightAICoach: React.FC = () => {
             totalPlayers: 100,
             similarPlayers: [
               {
-                id: 'player-1',
-                name: 'Alex Johnson',
+                id: "player-1",
+                name: "Alex Johnson",
                 similarity: 92,
                 techniqueScore: 80,
-                strengths: ['ball control', 'finishing']
+                strengths: ["ball control", "finishing"]
               }
             ]
           },
           historicalProgress: [
-            { date: new Date('2024-01-01'), techniqueScore: 65, sessionDuration: 30, drillsCompleted: 5 },
-            { date: new Date('2024-01-15'), techniqueScore: 70, sessionDuration: 40, drillsCompleted: 6 },
-            { date: new Date('2024-02-01'), techniqueScore: 75, sessionDuration: 45, drillsCompleted: 7 },
-            { date: new Date('2024-02-15'), techniqueScore: 78, sessionDuration: 45, drillsCompleted: 8 }
+            { date: new Date("2024-01-01"), techniqueScore: 65, sessionDuration: 30, drillsCompleted: 5 },
+            { date: new Date("2024-01-15"), techniqueScore: 70, sessionDuration: 40, drillsCompleted: 6 },
+            { date: new Date("2024-02-01"), techniqueScore: 75, sessionDuration: 45, drillsCompleted: 7 },
+            { date: new Date("2024-02-15"), techniqueScore: 78, sessionDuration: 45, drillsCompleted: 8 }
           ],
           benchmarks: {
             professional: 95,
@@ -320,8 +320,8 @@ const HighlightAICoach: React.FC = () => {
             recreational: 60
           }
         },
-        createdAt: new Date('2024-02-15'),
-        updatedAt: new Date('2024-02-15')
+        createdAt: new Date("2024-02-15"),
+        updatedAt: new Date("2024-02-15")
       }
     ];
 
@@ -370,9 +370,9 @@ const HighlightAICoach: React.FC = () => {
       const newVideo: VideoAnalysis = {
         id: Date.now().toString(),
         videoUrl: URL.createObjectURL(file),
-        thumbnailUrl: '/mock-thumbnails/new-thumb.jpg',
+        thumbnailUrl: "/mock-thumbnails/new-thumb.jpg",
         duration: 90,
-        analysisStatus: 'processing',
+        analysisStatus: "processing",
         analysisProgress: 0,
         motionData: {
           poseEstimation: [],
@@ -407,7 +407,7 @@ const HighlightAICoach: React.FC = () => {
             totalSessions: 0,
             averageSessionTime: 0,
             bestScore: 0,
-            recentTrend: 'stable'
+            recentTrend: "stable"
           },
           peerComparison: {
             percentile: 0,
@@ -457,7 +457,7 @@ const HighlightAICoach: React.FC = () => {
   const completeAnalysis = (videoId: string) => {
     setUploadedVideos(prev => prev.map(video => 
       video.id === videoId 
-        ? { ...video, analysisStatus: 'completed', analysisProgress: 100 }
+        ? { ...video, analysisStatus: "completed", analysisProgress: 100 }
         : video
     ));
   };
@@ -499,14 +499,14 @@ const HighlightAICoach: React.FC = () => {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const tabs = [
-    { id: 'upload', label: 'Upload', icon: Upload },
-    { id: 'analysis', label: 'Analysis', icon: BarChart3 },
-    { id: 'feedback', label: 'Feedback', icon: Star },
-    { id: 'comparison', label: 'Comparison', icon: Users }
+    { id: "upload", label: "Upload", icon: Upload },
+    { id: "analysis", label: "Analysis", icon: BarChart3 },
+    { id: "feedback", label: "Feedback", icon: Star },
+    { id: "comparison", label: "Comparison", icon: Users }
   ];
 
   return (
@@ -644,8 +644,8 @@ const HighlightAICoach: React.FC = () => {
                     onClick={() => setShowPoseOverlay(!showPoseOverlay)}
                     className={`px-3 py-1 rounded-full text-sm font-medium ${
                       showPoseOverlay 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-600 text-white'
+                        ? "bg-blue-600 text-white" 
+                        : "bg-gray-600 text-white"
                     }`}
                   >
                     Pose Overlay
@@ -658,8 +658,8 @@ const HighlightAICoach: React.FC = () => {
                     onClick={() => setShowFeedbackMarkers(!showFeedbackMarkers)}
                     className={`px-3 py-1 rounded-full text-sm font-medium ${
                       showFeedbackMarkers 
-                        ? 'bg-green-600 text-white' 
-                        : 'bg-gray-600 text-white'
+                        ? "bg-green-600 text-white" 
+                        : "bg-gray-600 text-white"
                     }`}
                   >
                     Feedback
@@ -688,8 +688,8 @@ const HighlightAICoach: React.FC = () => {
                     onClick={() => setCurrentVideo(video)}
                     className={`cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
                       currentVideo?.id === video.id 
-                        ? 'border-blue-500' 
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? "border-blue-500" 
+                        : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     <div className="relative">
@@ -699,13 +699,13 @@ const HighlightAICoach: React.FC = () => {
                         className="w-full h-24 object-cover"
                       />
                       <div className="absolute top-2 right-2">
-                        {video.analysisStatus === 'completed' && (
+                        {video.analysisStatus === "completed" && (
                           <CheckCircle className="w-5 h-5 text-green-500" />
                         )}
-                        {video.analysisStatus === 'processing' && (
+                        {video.analysisStatus === "processing" && (
                           <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                         )}
-                        {video.analysisStatus === 'failed' && (
+                        {video.analysisStatus === "failed" && (
                           <XCircle className="w-5 h-5 text-red-500" />
                         )}
                       </div>
@@ -739,8 +739,8 @@ const HighlightAICoach: React.FC = () => {
                       onClick={() => setSelectedTab(tab.id as any)}
                       className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
                         selectedTab === tab.id
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          ? "border-blue-500 text-blue-600"
+                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -761,7 +761,7 @@ const HighlightAICoach: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {selectedTab === 'upload' && (
+                  {selectedTab === "upload" && (
                     <div className="space-y-4">
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                         <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -788,7 +788,7 @@ const HighlightAICoach: React.FC = () => {
                     </div>
                   )}
 
-                  {selectedTab === 'analysis' && currentVideo && (
+                  {selectedTab === "analysis" && currentVideo && (
                     <div className="space-y-6">
                       <div className="grid grid-cols-3 gap-4">
                         <div className="text-center">
@@ -829,9 +829,9 @@ const HighlightAICoach: React.FC = () => {
                                 </div>
                               </div>
                               <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                moment.importance === 'high' ? 'bg-red-100 text-red-800' :
-                                moment.importance === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-green-100 text-green-800'
+                                moment.importance === "high" ? "bg-red-100 text-red-800" :
+                                moment.importance === "medium" ? "bg-yellow-100 text-yellow-800" :
+                                "bg-green-100 text-green-800"
                               }`}>
                                 {moment.importance}
                               </div>
@@ -854,7 +854,7 @@ const HighlightAICoach: React.FC = () => {
                     </div>
                   )}
 
-                  {selectedTab === 'feedback' && currentVideo && (
+                  {selectedTab === "feedback" && currentVideo && (
                     <div className="space-y-6">
                       <div className="text-center">
                         <div className="text-4xl font-bold text-blue-600 mb-2">
@@ -897,9 +897,9 @@ const HighlightAICoach: React.FC = () => {
                               <div className="flex items-center gap-4 text-xs text-gray-500">
                                 <span>{drill.duration} min</span>
                                 <span className={`px-2 py-1 rounded-full ${
-                                  drill.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
-                                  drill.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                                  'bg-red-100 text-red-800'
+                                  drill.difficulty === "beginner" ? "bg-green-100 text-green-800" :
+                                  drill.difficulty === "intermediate" ? "bg-yellow-100 text-yellow-800" :
+                                  "bg-red-100 text-red-800"
                                 }`}>
                                   {drill.difficulty}
                                 </span>
@@ -911,7 +911,7 @@ const HighlightAICoach: React.FC = () => {
                     </div>
                   )}
 
-                  {selectedTab === 'comparison' && currentVideo && (
+                  {selectedTab === "comparison" && currentVideo && (
                     <div className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-center">

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 interface ScrollIntervention {
   id: string;
@@ -7,7 +7,7 @@ interface ScrollIntervention {
   actions: Array<{
     label: string;
     aiPrompt: string;
-    variant: 'primary' | 'secondary' | 'ghost';
+    variant: "primary" | "secondary" | "ghost";
   }>;
 }
 
@@ -36,16 +36,16 @@ const SmartLayerContext = createContext<SmartLayerContextType | undefined>(undef
 
 export const SmartLayerProvider = ({ children }: { children: ReactNode }) => {
   const [autopilot, setAutopilotState] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('sb_autopilot');
-      return stored === 'true';
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("sb_autopilot");
+      return stored === "true";
     }
     return false;
   });
 
   const [userIntent, setUserIntentState] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('sb_user_intent');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sb_user_intent");
     }
     return null;
   });
@@ -59,12 +59,12 @@ export const SmartLayerProvider = ({ children }: { children: ReactNode }) => {
   const [scrollTime, setScrollTime] = useState(0);
 
   useEffect(() => {
-    localStorage.setItem('sb_autopilot', String(autopilot));
+    localStorage.setItem("sb_autopilot", String(autopilot));
   }, [autopilot]);
 
   useEffect(() => {
     if (userIntent) {
-      localStorage.setItem('sb_user_intent', userIntent);
+      localStorage.setItem("sb_user_intent", userIntent);
     }
   }, [userIntent]);
 
@@ -113,6 +113,6 @@ export const SmartLayerProvider = ({ children }: { children: ReactNode }) => {
 
 export const useSmartLayer = () => {
   const ctx = useContext(SmartLayerContext);
-  if (!ctx) throw new Error('useSmartLayer must be used within SmartLayerProvider');
+  if (!ctx) throw new Error("useSmartLayer must be used within SmartLayerProvider");
   return ctx;
 }; 

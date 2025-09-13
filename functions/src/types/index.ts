@@ -7,7 +7,45 @@ export type CallableContextV2 = CallableResponse<unknown> | undefined;
 // Firebase Functions Type Definitions
 // Import comprehensive types from the main interfaces
 
-export * from '../../../types/interfaces';
+// Temporarily disabled to fix deployment
+// export * from "../../../types/interfaces";
+
+// Additional types needed for functions
+export interface ApiContext {
+  auth?: {
+    uid: string;
+    token: Record<string, any>;
+  };
+  user?: {
+    uid: string;
+    email: string;
+    role: string;
+  };
+}
+
+export interface ApiRequest<T = any> {
+  data: T;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  leagueId: string;
+  coachId: string;
+  players: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface League {
+  id: string;
+  name: string;
+  sport: string;
+  ageGroup: string;
+  season: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // Firebase-specific type extensions
 export interface FirebaseContext {

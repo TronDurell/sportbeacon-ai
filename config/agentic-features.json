@@ -1,0 +1,296 @@
+{
+  "featureFlags": {
+    "AGENTS_ENABLED": {
+      "enabled": false,
+      "description": "Enable agentic features globally",
+      "rolloutPercentage": 0,
+      "environments": {
+        "development": true,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": ["MCP_ENABLED", "ASSISTANT_ENABLED"]
+    },
+    "MCP_ENABLED": {
+      "enabled": false,
+      "description": "Enable Model Context Protocol server",
+      "rolloutPercentage": 0,
+      "environments": {
+        "development": true,
+        "staging": false,
+        "production": false
+      }
+    },
+    "ASSISTANT_ENABLED": {
+      "enabled": false,
+      "description": "Enable Coach's Agent Assistant UI",
+      "rolloutPercentage": 0,
+      "environments": {
+        "development": true,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": ["MCP_ENABLED"]
+    },
+    "VERIFICATION_AGENT_ENABLED": {
+      "enabled": false,
+      "description": "Enable background verification agent",
+      "rolloutPercentage": 0,
+      "environments": {
+        "development": true,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": ["MCP_ENABLED"]
+    },
+    "REPORTING_AGENT_ENABLED": {
+      "enabled": false,
+      "description": "Enable background reporting agent",
+      "rolloutPercentage": 0,
+      "environments": {
+        "development": true,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": ["MCP_ENABLED"]
+    },
+    "AGENT_MEMORY_ENABLED": {
+      "enabled": false,
+      "description": "Enable agent memory and learning capabilities",
+      "rolloutPercentage": 0,
+      "environments": {
+        "development": true,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": ["MCP_ENABLED"]
+    },
+    "AGENT_NOTIFICATIONS_ENABLED": {
+      "enabled": false,
+      "description": "Enable agent-generated notifications",
+      "rolloutPercentage": 0,
+      "environments": {
+        "development": true,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": ["MCP_ENABLED"]
+    }
+  },
+  "deployment": {
+    "stages": [
+      {
+        "name": "development",
+        "description": "Local development environment",
+        "target": "sportbeaconai-dev",
+        "features": {
+          "AGENTS_ENABLED": true,
+          "MCP_ENABLED": true,
+          "ASSISTANT_ENABLED": true,
+          "VERIFICATION_AGENT_ENABLED": true,
+          "REPORTING_AGENT_ENABLED": true,
+          "AGENT_MEMORY_ENABLED": true,
+          "AGENT_NOTIFICATIONS_ENABLED": true
+        }
+      },
+      {
+        "name": "staging",
+        "description": "Staging environment for testing",
+        "target": "sportbeaconai-staging",
+        "features": {
+          "AGENTS_ENABLED": false,
+          "MCP_ENABLED": true,
+          "ASSISTANT_ENABLED": false,
+          "VERIFICATION_AGENT_ENABLED": false,
+          "REPORTING_AGENT_ENABLED": false,
+          "AGENT_MEMORY_ENABLED": false,
+          "AGENT_NOTIFICATIONS_ENABLED": false
+        }
+      },
+      {
+        "name": "production",
+        "description": "Production environment",
+        "target": "sportbeaconai-prod",
+        "features": {
+          "AGENTS_ENABLED": false,
+          "MCP_ENABLED": false,
+          "ASSISTANT_ENABLED": false,
+          "VERIFICATION_AGENT_ENABLED": false,
+          "REPORTING_AGENT_ENABLED": false,
+          "AGENT_MEMORY_ENABLED": false,
+          "AGENT_NOTIFICATIONS_ENABLED": false
+        }
+      }
+    ]
+  },
+  "rollout": {
+    "strategy": "gradual",
+    "phases": [
+      {
+        "name": "Phase 1: Infrastructure",
+        "description": "Deploy MCP server and basic infrastructure",
+        "duration": "1 week",
+        "features": ["MCP_ENABLED"],
+        "rolloutPercentage": 0,
+        "monitoring": {
+          "metrics": ["response_time", "error_rate", "availability"],
+          "thresholds": {
+            "error_rate": 0.01,
+            "response_time": 2000,
+            "availability": 0.99
+          }
+        }
+      },
+      {
+        "name": "Phase 2: Background Agents",
+        "description": "Enable background verification and reporting agents",
+        "duration": "2 weeks",
+        "features": ["VERIFICATION_AGENT_ENABLED", "REPORTING_AGENT_ENABLED"],
+        "rolloutPercentage": 0,
+        "dependencies": ["Phase 1"],
+        "monitoring": {
+          "metrics": ["agent_success_rate", "processing_time", "data_quality"],
+          "thresholds": {
+            "agent_success_rate": 0.95,
+            "processing_time": 5000,
+            "data_quality": 0.98
+          }
+        }
+      },
+      {
+        "name": "Phase 3: User Interface",
+        "description": "Enable Coach's Agent Assistant UI",
+        "duration": "2 weeks",
+        "features": ["ASSISTANT_ENABLED"],
+        "rolloutPercentage": 0,
+        "dependencies": ["Phase 2"],
+        "monitoring": {
+          "metrics": ["user_engagement", "task_completion_rate", "user_satisfaction"],
+          "thresholds": {
+            "user_engagement": 0.7,
+            "task_completion_rate": 0.8,
+            "user_satisfaction": 4.0
+          }
+        }
+      },
+      {
+        "name": "Phase 4: Advanced Features",
+        "description": "Enable memory and advanced agent capabilities",
+        "duration": "3 weeks",
+        "features": ["AGENT_MEMORY_ENABLED", "AGENT_NOTIFICATIONS_ENABLED"],
+        "rolloutPercentage": 0,
+        "dependencies": ["Phase 3"],
+        "monitoring": {
+          "metrics": ["memory_accuracy", "notification_effectiveness", "learning_rate"],
+          "thresholds": {
+            "memory_accuracy": 0.9,
+            "notification_effectiveness": 0.8,
+            "learning_rate": 0.1
+          }
+        }
+      },
+      {
+        "name": "Phase 5: Full Rollout",
+        "description": "Enable all agentic features globally",
+        "duration": "1 week",
+        "features": ["AGENTS_ENABLED"],
+        "rolloutPercentage": 100,
+        "dependencies": ["Phase 4"],
+        "monitoring": {
+          "metrics": ["overall_system_health", "user_adoption", "business_impact"],
+          "thresholds": {
+            "overall_system_health": 0.95,
+            "user_adoption": 0.8,
+            "business_impact": 0.1
+          }
+        }
+      }
+    ]
+  },
+  "monitoring": {
+    "alerts": [
+      {
+        "name": "High Error Rate",
+        "condition": "error_rate > 0.05",
+        "severity": "high",
+        "action": "auto_rollback"
+      },
+      {
+        "name": "Slow Response Time",
+        "condition": "response_time > 5000",
+        "severity": "medium",
+        "action": "scale_up"
+      },
+      {
+        "name": "Agent Failure",
+        "condition": "agent_success_rate < 0.9",
+        "severity": "high",
+        "action": "disable_agent"
+      },
+      {
+        "name": "Memory Usage High",
+        "condition": "memory_usage > 0.9",
+        "severity": "medium",
+        "action": "restart_service"
+      }
+    ],
+    "dashboards": [
+      {
+        "name": "Agent Performance",
+        "url": "/admin/agents/dashboard",
+        "metrics": ["success_rate", "response_time", "throughput"]
+      },
+      {
+        "name": "System Health",
+        "url": "/admin/system/health",
+        "metrics": ["availability", "error_rate", "resource_usage"]
+      },
+      {
+        "name": "User Engagement",
+        "url": "/admin/users/engagement",
+        "metrics": ["active_users", "feature_usage", "satisfaction"]
+      }
+    ]
+  },
+  "rollback": {
+    "triggers": [
+      {
+        "condition": "error_rate > 0.1",
+        "action": "immediate_rollback"
+      },
+      {
+        "condition": "response_time > 10000",
+        "action": "immediate_rollback"
+      },
+      {
+        "condition": "availability < 0.95",
+        "action": "immediate_rollback"
+      }
+    ],
+    "procedures": [
+      {
+        "name": "Disable Feature Flags",
+        "description": "Disable all agentic feature flags",
+        "commands": [
+          "firebase functions:config:set agentic.agents_enabled=false",
+          "firebase functions:config:set agentic.mcp_enabled=false",
+          "firebase functions:config:set agentic.assistant_enabled=false"
+        ]
+      },
+      {
+        "name": "Restore Previous Version",
+        "description": "Deploy previous version of functions",
+        "commands": [
+          "firebase deploy --only functions --project $PROJECT_ID"
+        ]
+      },
+      {
+        "name": "Restore Firestore Rules",
+        "description": "Restore previous Firestore rules",
+        "commands": [
+          "firebase firestore:rules:set backup/firestore.rules --project $PROJECT_ID"
+        ]
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import SmartTile from '../../SmartTile';
-import { useAgentOrchestration } from '../../../contexts/AgentOrchestrationContext';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import SmartTile from "../../SmartTile";
+import { useAgentOrchestration } from "../../../contexts/AgentOrchestrationContext";
 import { 
   Users, 
   TrendingUp, 
@@ -12,7 +12,7 @@ import {
   Activity,
   Award,
   Globe
-} from 'lucide-react';
+} from "lucide-react";
 
 interface AdminData {
   platformStats?: {
@@ -23,31 +23,31 @@ interface AdminData {
   };
   systemAlerts?: Array<{
     id: string;
-    type: 'security' | 'performance' | 'maintenance' | 'user';
+    type: "security" | "performance" | "maintenance" | "user";
     message: string;
-    severity: 'high' | 'medium' | 'low';
+    severity: "high" | "medium" | "low";
     timestamp: string;
   }>;
   pendingActions?: Array<{
     id: string;
     title: string;
     description: string;
-    priority: 'high' | 'medium' | 'low';
-    category: 'user' | 'system' | 'financial' | 'content' | 'security';
+    priority: "high" | "medium" | "low";
+    category: "user" | "system" | "financial" | "content" | "security";
   }>;
   aiInsights?: Array<{
     id: string;
     title: string;
     description: string;
-    impact: 'high' | 'medium' | 'low';
-    category: 'performance' | 'security' | 'user_experience' | 'revenue';
+    impact: "high" | "medium" | "low";
+    category: "performance" | "security" | "user_experience" | "revenue";
   }>;
   recentActivity?: Array<{
     id: string;
     action: string;
     user: string;
     timestamp: string;
-    type: 'login' | 'registration' | 'payment' | 'admin';
+    type: "login" | "registration" | "payment" | "admin";
   }>;
   revenueMetrics?: {
     monthlyRevenue: number;
@@ -91,110 +91,110 @@ const AdminDashboard: React.FC = () => {
         },
         systemAlerts: [
           {
-            id: '1',
-            type: 'security',
-            message: 'Unusual login activity detected',
-            severity: 'high',
-            timestamp: '2 hours ago'
+            id: "1",
+            type: "security",
+            message: "Unusual login activity detected",
+            severity: "high",
+            timestamp: "2 hours ago"
           },
           {
-            id: '2',
-            type: 'performance',
-            message: 'Server response time increased by 15%',
-            severity: 'medium',
-            timestamp: '4 hours ago'
+            id: "2",
+            type: "performance",
+            message: "Server response time increased by 15%",
+            severity: "medium",
+            timestamp: "4 hours ago"
           },
           {
-            id: '3',
-            type: 'maintenance',
-            message: 'Scheduled maintenance in 2 hours',
-            severity: 'low',
-            timestamp: '6 hours ago'
+            id: "3",
+            type: "maintenance",
+            message: "Scheduled maintenance in 2 hours",
+            severity: "low",
+            timestamp: "6 hours ago"
           }
         ],
         pendingActions: [
           {
-            id: '1',
-            title: 'Review suspicious user accounts',
-            description: '5 accounts flagged for review',
-            priority: 'high',
-            category: 'security'
+            id: "1",
+            title: "Review suspicious user accounts",
+            description: "5 accounts flagged for review",
+            priority: "high",
+            category: "security"
           },
           {
-            id: '2',
-            title: 'Approve new coach applications',
-            description: '12 pending coach verifications',
-            priority: 'medium',
-            category: 'user'
+            id: "2",
+            title: "Approve new coach applications",
+            description: "12 pending coach verifications",
+            priority: "medium",
+            category: "user"
           },
           {
-            id: '3',
-            title: 'Update payment processing',
-            description: 'New Stripe integration ready',
-            priority: 'medium',
-            category: 'financial'
+            id: "3",
+            title: "Update payment processing",
+            description: "New Stripe integration ready",
+            priority: "medium",
+            category: "financial"
           },
           {
-            id: '4',
-            title: 'Content moderation review',
-            description: '25 posts awaiting approval',
-            priority: 'low',
-            category: 'content'
+            id: "4",
+            title: "Content moderation review",
+            description: "25 posts awaiting approval",
+            priority: "low",
+            category: "content"
           }
         ],
         aiInsights: [
           {
-            id: '1',
-            title: 'User engagement peak times',
-            description: 'Peak activity between 4-6 PM, consider targeted features',
-            impact: 'high',
-            category: 'user_experience'
+            id: "1",
+            title: "User engagement peak times",
+            description: "Peak activity between 4-6 PM, consider targeted features",
+            impact: "high",
+            category: "user_experience"
           },
           {
-            id: '2',
-            title: 'Revenue optimization opportunity',
-            description: 'Premium features showing 40% conversion potential',
-            impact: 'high',
-            category: 'revenue'
+            id: "2",
+            title: "Revenue optimization opportunity",
+            description: "Premium features showing 40% conversion potential",
+            impact: "high",
+            category: "revenue"
           },
           {
-            id: '3',
-            title: 'System performance trends',
-            description: 'Database queries optimized, 25% faster response times',
-            impact: 'medium',
-            category: 'performance'
+            id: "3",
+            title: "System performance trends",
+            description: "Database queries optimized, 25% faster response times",
+            impact: "medium",
+            category: "performance"
           }
         ],
         recentActivity: [
           {
-            id: '1',
-            action: 'New user registration',
-            user: 'john.doe@email.com',
-            timestamp: '5 minutes ago',
-            type: 'registration'
+            id: "1",
+            action: "New user registration",
+            user: "john.doe@email.com",
+            timestamp: "5 minutes ago",
+            type: "registration"
           },
           {
-            id: '2',
-            action: 'Payment processed',
-            user: 'coach.smith@email.com',
-            timestamp: '12 minutes ago',
-            type: 'payment'
+            id: "2",
+            action: "Payment processed",
+            user: "coach.smith@email.com",
+            timestamp: "12 minutes ago",
+            type: "payment"
           },
           {
-            id: '3',
-            action: 'Admin login',
-            user: 'admin@sportbeacon.com',
-            timestamp: '1 hour ago',
-            type: 'admin'
+            id: "3",
+            action: "Admin login",
+            user: "admin@sportbeacon.com",
+            timestamp: "1 hour ago",
+            type: "admin"
           }
         ],
         revenueMetrics: {
           monthlyRevenue: 125000,
           monthlyGrowth: 23.5,
           topRevenueSources: [
-            { source: 'Premium Subscriptions', amount: 75000, percentage: 60 },
-            { source: 'Tournament Fees', amount: 35000, percentage: 28 },
-            { source: 'Equipment Sales', amount: 15000, percentage: 12 }
+            { source: "Premium Subscriptions", amount: 75000, percentage: 60 },
+            { source: "Tournament Fees", amount: 35000, percentage: 28 },
+            { source: "Equipment Sales", amount: 15000, percentage: 12 }
           ]
         },
         userMetrics: {
@@ -202,10 +202,10 @@ const AdminDashboard: React.FC = () => {
           activeSessions: 8920,
           userSatisfaction: 4.6,
           topUserTypes: [
-            { type: 'Players', count: 8920, percentage: 58 },
-            { type: 'Coaches', count: 1240, percentage: 8 },
-            { type: 'Parents', count: 4260, percentage: 28 },
-            { type: 'Admins', count: 1000, percentage: 6 }
+            { type: "Players", count: 8920, percentage: 58 },
+            { type: "Coaches", count: 1240, percentage: 8 },
+            { type: "Parents", count: 4260, percentage: 28 },
+            { type: "Admins", count: 1000, percentage: 6 }
           ]
         }
       });
@@ -217,7 +217,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleAIAssistance = (context: string) => {
     sendRequest({
-      type: 'admin_assistance',
+      type: "admin_assistance",
       context,
       data: adminData
     });
@@ -301,29 +301,29 @@ const AdminDashboard: React.FC = () => {
           <SmartTile
             title="System Alerts"
             icon={<AlertTriangle className="w-5 h-5" />}
-            status={adminData.systemAlerts?.some(a => a.severity === 'high') ? 'error' : 'warning'}
-            onClickAI={() => handleAIAssistance('system_alerts')}
+            status={adminData.systemAlerts?.some(a => a.severity === "high") ? "error" : "warning"}
+            onClickAI={() => handleAIAssistance("system_alerts")}
             loading={loading}
           >
             <div className="space-y-2">
               {adminData.systemAlerts?.map((alert) => (
                 <div key={alert.id} className={`p-3 rounded-lg ${
-                  alert.severity === 'high' ? 'bg-red-50 border border-red-200' :
-                  alert.severity === 'medium' ? 'bg-yellow-50 border border-yellow-200' :
-                  'bg-blue-50 border border-blue-200'
+                  alert.severity === "high" ? "bg-red-50 border border-red-200" :
+                  alert.severity === "medium" ? "bg-yellow-50 border border-yellow-200" :
+                  "bg-blue-50 border border-blue-200"
                 }`}>
                   <div className="flex items-center justify-between mb-1">
                     <span className={`text-xs font-medium ${
-                      alert.severity === 'high' ? 'text-red-700' :
-                      alert.severity === 'medium' ? 'text-yellow-700' :
-                      'text-blue-700'
+                      alert.severity === "high" ? "text-red-700" :
+                      alert.severity === "medium" ? "text-yellow-700" :
+                      "text-blue-700"
                     }`}>
                       {alert.type.toUpperCase()}
                     </span>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      alert.severity === 'high' ? 'bg-red-200 text-red-800' :
-                      alert.severity === 'medium' ? 'bg-yellow-200 text-yellow-800' :
-                      'bg-blue-200 text-blue-800'
+                      alert.severity === "high" ? "bg-red-200 text-red-800" :
+                      alert.severity === "medium" ? "bg-yellow-200 text-yellow-800" :
+                      "bg-blue-200 text-blue-800"
                     }`}>
                       {alert.severity}
                     </span>
@@ -341,8 +341,8 @@ const AdminDashboard: React.FC = () => {
           <SmartTile
             title="Pending Actions"
             icon={<Settings className="w-5 h-5" />}
-            status={adminData.pendingActions?.some(a => a.priority === 'high') ? 'warning' : 'neutral'}
-            onClickAI={() => handleAIAssistance('pending_actions')}
+            status={adminData.pendingActions?.some(a => a.priority === "high") ? "warning" : "neutral"}
+            onClickAI={() => handleAIAssistance("pending_actions")}
             loading={loading}
           >
             <div className="space-y-2">
@@ -351,20 +351,20 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex items-center justify-between mb-1">
                     <h4 className="font-medium text-gray-900 text-sm">{action.title}</h4>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      action.priority === 'high' ? 'bg-red-100 text-red-700' :
-                      action.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
+                      action.priority === "high" ? "bg-red-100 text-red-700" :
+                      action.priority === "medium" ? "bg-yellow-100 text-yellow-700" :
+                      "bg-green-100 text-green-700"
                     }`}>
                       {action.priority}
                     </span>
                   </div>
                   <p className="text-xs text-gray-600">{action.description}</p>
                   <span className={`text-xs px-2 py-1 rounded mt-1 inline-block ${
-                    action.category === 'security' ? 'bg-red-100 text-red-700' :
-                    action.category === 'user' ? 'bg-blue-100 text-blue-700' :
-                    action.category === 'financial' ? 'bg-green-100 text-green-700' :
-                    action.category === 'content' ? 'bg-purple-100 text-purple-700' :
-                    'bg-gray-100 text-gray-700'
+                    action.category === "security" ? "bg-red-100 text-red-700" :
+                    action.category === "user" ? "bg-blue-100 text-blue-700" :
+                    action.category === "financial" ? "bg-green-100 text-green-700" :
+                    action.category === "content" ? "bg-purple-100 text-purple-700" :
+                    "bg-gray-100 text-gray-700"
                   }`}>
                     {action.category}
                   </span>
@@ -380,7 +380,7 @@ const AdminDashboard: React.FC = () => {
             title="AI Insights"
             icon={<Award className="w-5 h-5" />}
             status="success"
-            onClickAI={() => handleAIAssistance('ai_insights')}
+            onClickAI={() => handleAIAssistance("ai_insights")}
             loading={loading}
           >
             <div className="space-y-3">
@@ -389,19 +389,19 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex items-center justify-between mb-1">
                     <h4 className="font-medium text-green-900 text-sm">{insight.title}</h4>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      insight.impact === 'high' ? 'bg-green-200 text-green-800' :
-                      insight.impact === 'medium' ? 'bg-yellow-200 text-yellow-800' :
-                      'bg-gray-200 text-gray-800'
+                      insight.impact === "high" ? "bg-green-200 text-green-800" :
+                      insight.impact === "medium" ? "bg-yellow-200 text-yellow-800" :
+                      "bg-gray-200 text-gray-800"
                     }`}>
                       {insight.impact}
                     </span>
                   </div>
                   <p className="text-xs text-green-700">{insight.description}</p>
                   <span className={`text-xs px-2 py-1 rounded mt-1 inline-block ${
-                    insight.category === 'user_experience' ? 'bg-blue-100 text-blue-700' :
-                    insight.category === 'revenue' ? 'bg-green-100 text-green-700' :
-                    insight.category === 'performance' ? 'bg-purple-100 text-purple-700' :
-                    'bg-gray-100 text-gray-700'
+                    insight.category === "user_experience" ? "bg-blue-100 text-blue-700" :
+                    insight.category === "revenue" ? "bg-green-100 text-green-700" :
+                    insight.category === "performance" ? "bg-purple-100 text-purple-700" :
+                    "bg-gray-100 text-gray-700"
                   }`}>
                     {insight.category}
                   </span>
@@ -417,7 +417,7 @@ const AdminDashboard: React.FC = () => {
             title="Recent Activity"
             icon={<BarChart3 className="w-5 h-5" />}
             status="neutral"
-            onClickAI={() => handleAIAssistance('recent_activity')}
+            onClickAI={() => handleAIAssistance("recent_activity")}
             loading={loading}
           >
             <div className="space-y-2">
@@ -429,10 +429,10 @@ const AdminDashboard: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <span className={`text-xs px-2 py-1 rounded ${
-                      activity.type === 'registration' ? 'bg-green-100 text-green-700' :
-                      activity.type === 'payment' ? 'bg-blue-100 text-blue-700' :
-                      activity.type === 'admin' ? 'bg-purple-100 text-purple-700' :
-                      'bg-gray-100 text-gray-700'
+                      activity.type === "registration" ? "bg-green-100 text-green-700" :
+                      activity.type === "payment" ? "bg-blue-100 text-blue-700" :
+                      activity.type === "admin" ? "bg-purple-100 text-purple-700" :
+                      "bg-gray-100 text-gray-700"
                     }`}>
                       {activity.type}
                     </span>
@@ -450,7 +450,7 @@ const AdminDashboard: React.FC = () => {
             title="Revenue Metrics"
             icon={<DollarSign className="w-5 h-5" />}
             status="success"
-            onClickAI={() => handleAIAssistance('revenue_metrics')}
+            onClickAI={() => handleAIAssistance("revenue_metrics")}
             loading={loading}
           >
             <div className="space-y-3">
@@ -480,7 +480,7 @@ const AdminDashboard: React.FC = () => {
             title="User Metrics"
             icon={<Globe className="w-5 h-5" />}
             status="info"
-            onClickAI={() => handleAIAssistance('user_metrics')}
+            onClickAI={() => handleAIAssistance("user_metrics")}
             loading={loading}
           >
             <div className="space-y-3">

@@ -140,13 +140,13 @@ export class SecurityService {
    */
   static async getSecurityLogs(
     userId?: string,
-    limit: number = 100
+    limitCount: number = 100
   ): Promise<any[]> {
     try {
       let logsQuery = query(
         collection(db, this.SECURITY_LOG_COLLECTION),
         orderBy('timestamp', 'desc'),
-        limit(Math.min(limit, this.MAX_LOG_ENTRIES))
+        limit(Math.min(limitCount, this.MAX_LOG_ENTRIES))
       );
 
       if (userId) {
@@ -154,7 +154,7 @@ export class SecurityService {
           collection(db, this.SECURITY_LOG_COLLECTION),
           where('userId', '==', userId),
           orderBy('timestamp', 'desc'),
-          limit(Math.min(limit, this.MAX_LOG_ENTRIES))
+          limit(Math.min(limitCount, this.MAX_LOG_ENTRIES))
         );
       }
 

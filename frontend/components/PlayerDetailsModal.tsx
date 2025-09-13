@@ -41,6 +41,13 @@ interface PlayerDetailsModalProps {
     onClose: () => void;
     player: Player;
     drillHistory: DrillDetail[];
+    feedbackStats?: {
+        totalFeedback: number;
+        averageEnjoyment: number;
+        averageDifficulty: number;
+        totalChallenges: number;
+    };
+    isMobile?: boolean;
 }
 
 export const PlayerDetailsModal: React.FC<PlayerDetailsModalProps> = ({

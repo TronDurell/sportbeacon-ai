@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import BaseLayout from './BaseLayout';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import BaseLayout from "./BaseLayout";
 import { 
   Home, 
   Users, 
@@ -12,7 +12,7 @@ import {
   Calendar,
   DollarSign,
   AlertTriangle
-} from 'lucide-react';
+} from "lucide-react";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -22,16 +22,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
-    { name: 'Users', href: '/admin/users', icon: Users },
-    { name: 'Leagues', href: '/admin/leagues', icon: Trophy },
-    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-    { name: 'Reports', href: '/admin/reports', icon: FileText },
-    { name: 'Calendar', href: '/admin/calendar', icon: Calendar },
-    { name: 'Billing', href: '/admin/billing', icon: DollarSign },
-    { name: 'Security', href: '/admin/security', icon: Shield },
-    { name: 'Alerts', href: '/admin/alerts', icon: AlertTriangle },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: "Dashboard", href: "/admin/dashboard", icon: Home },
+    { name: "Users", href: "/admin/users", icon: Users },
+    { name: "Leagues", href: "/admin/leagues", icon: Trophy },
+    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    { name: "Reports", href: "/admin/reports", icon: FileText },
+    { name: "Calendar", href: "/admin/calendar", icon: Calendar },
+    { name: "Billing", href: "/admin/billing", icon: DollarSign },
+    { name: "Security", href: "/admin/security", icon: Shield },
+    { name: "Alerts", href: "/admin/alerts", icon: AlertTriangle },
+    { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
   const sidebarContent = (
@@ -46,8 +46,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             to={item.href}
             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
               isActive
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100'
+                ? "bg-blue-100 text-blue-700"
+                : "text-gray-700 hover:bg-gray-100"
             }`}
           >
             <Icon className="h-5 w-5" />

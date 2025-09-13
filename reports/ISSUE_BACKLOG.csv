@@ -1,0 +1,11 @@
+area,severity,confidence,owner_hint,summary,evidence,fix,eta_days
+TypeScript,CRITICAL,HIGH,Frontend Team,383 TypeScript compilation errors across all workspaces,tsc-frontend.log: 375 errors, tsc-functions.log: 7 errors, tsc-memory-sdk.log: 1 error,Fix module imports, resolve type conflicts, align type definitions,7
+Security,HIGH,HIGH,DevOps Team,6 high-severity security vulnerabilities,axios DoS (CVSS 7.5), tar-fs path traversal (CVSS 7.5), ws DoS (CVSS 7.5),Update vulnerable packages, implement security patches,3
+Testing,CRITICAL,HIGH,QA Team,47/48 test suites failing due to infrastructure issues,test-results.json: 206 failed tests, Firebase auth errors, missing dependencies,Fix Jest/Vitest config, resolve Firebase auth, add missing test deps,5
+Functions,HIGH,HIGH,Backend Team,Firebase Functions build failing due to missing modules,tsc-functions.log: missing memory/client, missing db imports,Create memory client module, fix db imports in postFanout.ts,2
+Linting,HIGH,MEDIUM,Frontend Team,2,101 linting issues (126 errors, 1,975 warnings),eslint.json: 500+ any types, 200+ console.log, 300+ unused vars,Automated fixes for console.log, unused vars, type improvements,3
+Bundle Size,MEDIUM,MEDIUM,Frontend Team,PlaceProfile component is 428KB (67% of bundle),bundle-stats.json: largest module, poor code splitting,Implement code splitting, lazy loading, component optimization,5
+PWA,MEDIUM,LOW,Frontend Team,0/8 Lighthouse PWA checks failing,lhci-results.json: missing service worker, manifest, CSP,Implement basic PWA features, service worker, manifest,7
+Memory SDK,MEDIUM,MEDIUM,Backend Team,Memory SDK build failing due to missing frontend types,tsc-memory-sdk.log: Cannot find module frontend/firebase/types,Resolve frontend types dependency, create shared types package,3
+Dependencies,MEDIUM,HIGH,DevOps Team,25 security vulnerabilities, 6 high-severity,npm-audit.json: axios, firebase, undici vulnerabilities,Update vulnerable packages, implement dependency monitoring,2
+Firestore Rules,LOW,LOW,Backend Team,1 unused function warning in Firestore rules,firebase deploy dry-run: unused function isParent,Remove unused function, clean up rules,1

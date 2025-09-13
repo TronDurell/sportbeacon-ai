@@ -18,8 +18,8 @@ import {
   LinkedIn,
   Email,
 } from '@mui/icons-material';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import { PlayerReportPDF } from '@/components/pdf/PlayerReportPDF';
+// import { PDFDownloadLink } from '@react-pdf/renderer';
+// import { PlayerReportPDF } from '@/components/pdf/PlayerReportPDF';
 import { ScoutPlayer } from '../../types/player';
 
 interface ScoutExportPanelProps {

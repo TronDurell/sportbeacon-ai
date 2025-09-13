@@ -1,125 +1,125 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import { useSmartLayer } from '../../contexts/SmartLayerContext';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import { useSmartLayer } from "../../contexts/SmartLayerContext";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface DrillSession {
-  type: 'Training' | 'Learning' | 'Scouting' | 'Planning' | 'Social' | 'Review';
+  type: "Training" | "Learning" | "Scouting" | "Planning" | "Social" | "Review";
   maxPosts: number;
   role: string;
   description: string;
   ctaOptions: Array<{
     label: string;
     aiPrompt: string;
-    variant: 'primary' | 'secondary' | 'ghost';
+    variant: "primary" | "secondary" | "ghost";
   }>;
 }
 
 const DRILL_SESSION_TYPES: Record<string, DrillSession[]> = {
   player: [
     {
-      type: 'Training',
+      type: "Training",
       maxPosts: 5,
-      role: 'player',
-      description: 'Focus on drills and skill development',
+      role: "player",
+      description: "Focus on drills and skill development",
       ctaOptions: [
-        { label: 'Start Workout', aiPrompt: 'Suggest a drill based on my goals', variant: 'primary' },
-        { label: 'Log Progress', aiPrompt: 'Help me log my training progress', variant: 'secondary' },
-        { label: 'Find Game', aiPrompt: 'Find pickup games near me', variant: 'secondary' }
+        { label: "Start Workout", aiPrompt: "Suggest a drill based on my goals", variant: "primary" },
+        { label: "Log Progress", aiPrompt: "Help me log my training progress", variant: "secondary" },
+        { label: "Find Game", aiPrompt: "Find pickup games near me", variant: "secondary" }
       ]
     },
     {
-      type: 'Learning',
+      type: "Learning",
       maxPosts: 8,
-      role: 'player',
-      description: 'Study techniques and strategies',
+      role: "player",
+      description: "Study techniques and strategies",
       ctaOptions: [
-        { label: 'Practice Skill', aiPrompt: 'Suggest practice drills for what I learned', variant: 'primary' },
-        { label: 'Save Notes', aiPrompt: 'Help me save key insights', variant: 'secondary' },
-        { label: 'Ask Coach', aiPrompt: 'Help me ask my coach about this', variant: 'secondary' }
+        { label: "Practice Skill", aiPrompt: "Suggest practice drills for what I learned", variant: "primary" },
+        { label: "Save Notes", aiPrompt: "Help me save key insights", variant: "secondary" },
+        { label: "Ask Coach", aiPrompt: "Help me ask my coach about this", variant: "secondary" }
       ]
     },
     {
-      type: 'Review',
+      type: "Review",
       maxPosts: 6,
-      role: 'player',
-      description: 'Review highlights and performance',
+      role: "player",
+      description: "Review highlights and performance",
       ctaOptions: [
-        { label: 'Share Highlight', aiPrompt: 'Help me create a highlight post', variant: 'primary' },
-        { label: 'Analyze Footage', aiPrompt: 'Analyze my recent performance', variant: 'secondary' },
-        { label: 'Set Goal', aiPrompt: 'Help me set improvement goals', variant: 'secondary' }
+        { label: "Share Highlight", aiPrompt: "Help me create a highlight post", variant: "primary" },
+        { label: "Analyze Footage", aiPrompt: "Analyze my recent performance", variant: "secondary" },
+        { label: "Set Goal", aiPrompt: "Help me set improvement goals", variant: "secondary" }
       ]
     }
   ],
   coach: [
     {
-      type: 'Planning',
+      type: "Planning",
       maxPosts: 6,
-      role: 'coach',
-      description: 'Plan training sessions and strategies',
+      role: "coach",
+      description: "Plan training sessions and strategies",
       ctaOptions: [
-        { label: 'Create Plan', aiPrompt: 'Help me create a training plan', variant: 'primary' },
-        { label: 'Review Team', aiPrompt: 'Review team performance data', variant: 'secondary' },
-        { label: 'Schedule Meeting', aiPrompt: 'Help me schedule team communication', variant: 'secondary' }
+        { label: "Create Plan", aiPrompt: "Help me create a training plan", variant: "primary" },
+        { label: "Review Team", aiPrompt: "Review team performance data", variant: "secondary" },
+        { label: "Schedule Meeting", aiPrompt: "Help me schedule team communication", variant: "secondary" }
       ]
     },
     {
-      type: 'Scouting',
+      type: "Scouting",
       maxPosts: 8,
-      role: 'coach',
-      description: 'Scout players and analyze opponents',
+      role: "coach",
+      description: "Scout players and analyze opponents",
       ctaOptions: [
-        { label: 'Scout Players', aiPrompt: 'Find potential recruits', variant: 'primary' },
-        { label: 'Analyze Opponent', aiPrompt: 'Analyze upcoming opponent', variant: 'secondary' },
-        { label: 'Generate Report', aiPrompt: 'Create scouting report', variant: 'secondary' }
+        { label: "Scout Players", aiPrompt: "Find potential recruits", variant: "primary" },
+        { label: "Analyze Opponent", aiPrompt: "Analyze upcoming opponent", variant: "secondary" },
+        { label: "Generate Report", aiPrompt: "Create scouting report", variant: "secondary" }
       ]
     }
   ],
   parent: [
     {
-      type: 'Social',
+      type: "Social",
       maxPosts: 7,
-      role: 'parent',
-      description: 'Connect with community and stay informed',
+      role: "parent",
+      description: "Connect with community and stay informed",
       ctaOptions: [
-        { label: 'Check Schedule', aiPrompt: 'Show upcoming events', variant: 'primary' },
-        { label: 'Connect Coach', aiPrompt: 'Help me contact the coach', variant: 'secondary' },
-        { label: 'Join Community', aiPrompt: 'Connect with other parents', variant: 'secondary' }
+        { label: "Check Schedule", aiPrompt: "Show upcoming events", variant: "primary" },
+        { label: "Connect Coach", aiPrompt: "Help me contact the coach", variant: "secondary" },
+        { label: "Join Community", aiPrompt: "Connect with other parents", variant: "secondary" }
       ]
     },
     {
-      type: 'Review',
+      type: "Review",
       maxPosts: 5,
-      role: 'parent',
-      description: 'Review child\'s progress and safety',
+      role: "parent",
+      description: "Review child's progress and safety",
       ctaOptions: [
-        { label: 'Review Progress', aiPrompt: 'Show my child\'s progress', variant: 'primary' },
-        { label: 'Safety Check', aiPrompt: 'Review safety guidelines', variant: 'secondary' },
-        { label: 'Equipment Check', aiPrompt: 'Check equipment needs', variant: 'secondary' }
+        { label: "Review Progress", aiPrompt: "Show my child's progress", variant: "primary" },
+        { label: "Safety Check", aiPrompt: "Review safety guidelines", variant: "secondary" },
+        { label: "Equipment Check", aiPrompt: "Check equipment needs", variant: "secondary" }
       ]
     }
   ],
   admin: [
     {
-      type: 'Planning',
+      type: "Planning",
       maxPosts: 6,
-      role: 'admin',
-      description: 'Manage league operations and metrics',
+      role: "admin",
+      description: "Manage league operations and metrics",
       ctaOptions: [
-        { label: 'Review Metrics', aiPrompt: 'Show league performance metrics', variant: 'primary' },
-        { label: 'Handle Alerts', aiPrompt: 'Review system alerts', variant: 'secondary' },
-        { label: 'User Management', aiPrompt: 'Review user accounts', variant: 'secondary' }
+        { label: "Review Metrics", aiPrompt: "Show league performance metrics", variant: "primary" },
+        { label: "Handle Alerts", aiPrompt: "Review system alerts", variant: "secondary" },
+        { label: "User Management", aiPrompt: "Review user accounts", variant: "secondary" }
       ]
     },
     {
-      type: 'Review',
+      type: "Review",
       maxPosts: 8,
-      role: 'admin',
-      description: 'Review system health and analytics',
+      role: "admin",
+      description: "Review system health and analytics",
       ctaOptions: [
-        { label: 'System Health', aiPrompt: 'Check system performance', variant: 'primary' },
-        { label: 'User Analytics', aiPrompt: 'Review engagement data', variant: 'secondary' },
-        { label: 'Feature Planning', aiPrompt: 'Plan new features', variant: 'secondary' }
+        { label: "System Health", aiPrompt: "Check system performance", variant: "primary" },
+        { label: "User Analytics", aiPrompt: "Review engagement data", variant: "secondary" },
+        { label: "Feature Planning", aiPrompt: "Plan new features", variant: "secondary" }
       ]
     }
   ]
@@ -155,17 +155,17 @@ export const useDrillScrollSessionManager = () => {
     // Select session type based on user intent
     if (userIntent) {
       switch (userIntent) {
-        case 'train':
-          selectedSession = roleSessions.find(s => s.type === 'Training') || roleSessions[0];
+        case "train":
+          selectedSession = roleSessions.find(s => s.type === "Training") || roleSessions[0];
           break;
-        case 'learn':
-          selectedSession = roleSessions.find(s => s.type === 'Learning') || roleSessions[0];
+        case "learn":
+          selectedSession = roleSessions.find(s => s.type === "Learning") || roleSessions[0];
           break;
-        case 'create':
-          selectedSession = roleSessions.find(s => s.type === 'Planning') || roleSessions[0];
+        case "create":
+          selectedSession = roleSessions.find(s => s.type === "Planning") || roleSessions[0];
           break;
-        case 'explore':
-          selectedSession = roleSessions.find(s => s.type === 'Social') || roleSessions[0];
+        case "explore":
+          selectedSession = roleSessions.find(s => s.type === "Social") || roleSessions[0];
           break;
         default:
           selectedSession = roleSessions[0];
@@ -214,8 +214,8 @@ export const useDrillScrollSessionManager = () => {
 
     // Store session data to Firestore (mock for now)
     sendRequest({
-      type: 'drill_session_complete',
-      context: 'growth_session',
+      type: "drill_session_complete",
+      context: "growth_session",
       data: {
         session: completedSession,
         user: user.id,
@@ -238,7 +238,7 @@ export const useDrillScrollSessionManager = () => {
 
     // Send action to AI
     sendRequest({
-      type: 'drill_session_action',
+      type: "drill_session_action",
       context: action.aiPrompt,
       data: {
         action,

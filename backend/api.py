@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 from typing import List, Dict, Optional, Any
 from .models import (
     PlayerStatRecord,
@@ -24,15 +25,23 @@ from .matchmaking_service import MatchmakingService
 from .drill_service import DrillService
 from .highlight_generator import HighlightTaggingEngine
 from .coach_assistant import CoachAssistant
+from .version import __version__
 import os
 from datetime import datetime
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI(title="SportBeacon AI API")
 
 # Security middleware configuration
+frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:3002")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://sportbeacon-ai.web.app"],
+    allow_origins=[frontend_origin],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
@@ -41,6 +50,32 @@ app.add_middleware(
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
+# Prometheus metrics
+Instrumentator().instrument(app).expose(app, include_in_schema=True, should_gzip=True)
+
+# Error handlers
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": "Validation Error",
+            "detail": str(exc),
+            "timestamp": datetime.now().isoformat()
+        }
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal Server Error",
+            "detail": str(exc),
+            "timestamp": datetime.now().isoformat()
+        }
+    )
+
 # Initialize services
 insight_service = PlayerInsightService()
 matchmaking_service = MatchmakingService()
@@ -48,7 +83,16 @@ drill_service = DrillService()
 
 # Initialize services
 highlight_engine = HighlightTaggingEngine()
-coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
+coach_assistant = CoachAssistant()
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring."""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "version": __version__
+    }
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
@@ -209,6 +253,11 @@ async def get_extended_schedule(
         return drill_service.get_extended_schedule(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/test")
+async def test_endpoint():
+    """Test endpoint to verify API is working."""
+    return {"message": "API endpoint working correctly"}
 
 # Sample test data for the analyze endpoint
 SAMPLE_ANALYZE_PAYLOAD = [
@@ -376,4 +425,8 @@ SAMPLE_COACH_QUESTION = {
     "user_id": "user123",
     "question": "How can I improve my three-point shooting?",
     "include_stats": True
-} 
+}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000) 

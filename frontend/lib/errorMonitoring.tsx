@@ -30,4 +30,17 @@ export const withErrorMonitoring = <P extends object>(
       return React.createElement('div', null, 'Error occurred');
     }
   });
+};
+
+// Async function error monitoring
+export const withAsyncErrorMonitoring = async (
+  asyncFn: () => Promise<any>,
+  context?: string
+): Promise<any> => {
+  try {
+    return await asyncFn();
+  } catch (error) {
+    captureDBError(error as Error, { context });
+    throw error;
+  }
 }; 

@@ -1,15 +1,15 @@
-import type { Stripe } from 'stripe';
+import type { Stripe } from "stripe";
 
 // Stripe event types for webhook handling
 export type StripeWebhookEvent = 
-  | 'payment_intent.succeeded'
-  | 'payment_intent.payment_failed'
-  | 'checkout.session.completed'
-  | 'checkout.session.expired'
-  | 'payout.paid'
-  | 'payout.failed'
-  | 'customer.created'
-  | 'customer.updated';
+  | "payment_intent.succeeded"
+  | "payment_intent.payment_failed"
+  | "checkout.session.completed"
+  | "checkout.session.expired"
+  | "payout.paid"
+  | "payout.failed"
+  | "customer.created"
+  | "customer.updated";
 
 // Tip transaction data structure
 export interface TipTransaction {
@@ -20,7 +20,7 @@ export interface TipTransaction {
   toUserId: string;
   paymentIntentId: string;
   checkoutSessionId: string;
-  status: 'pending' | 'succeeded' | 'failed' | 'refunded';
+  status: "pending" | "succeeded" | "failed" | "refunded";
   createdAt: FirebaseFirestore.Timestamp;
   updatedAt: FirebaseFirestore.Timestamp;
   metadata?: {
@@ -106,7 +106,7 @@ export interface PayoutData {
   id: string;
   amount: number;
   currency: string;
-  status: Stripe.Payout.Status;
+  status: string;
   arrival_date: number;
   metadata: {
     userId?: string;
@@ -214,7 +214,7 @@ export interface TipResponse {
 // Tip status update
 export interface TipStatusUpdate {
   tipId: string;
-  status: TipTransaction['status'];
+  status: TipTransaction["status"];
   paymentIntentId?: string;
   errorMessage?: string;
 }
@@ -245,7 +245,7 @@ export interface PayoutRequest {
   amount: number;
   currency: string;
   destination: {
-    type: 'bank_account' | 'card';
+    type: "bank_account" | "card";
     accountId?: string;
     cardId?: string;
   };
@@ -256,7 +256,7 @@ export interface PayoutResponse {
   payoutId: string;
   amount: number;
   currency: string;
-  status: Stripe.Payout.Status;
+  status: string;
   arrivalDate: number;
 }
 

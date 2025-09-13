@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface CoachNudge {
   id: string;
   title: string;
   message: string;
-  type: 'motivation' | 'reminder' | 'suggestion' | 'achievement' | 'warning';
-  priority: 'low' | 'medium' | 'high';
+  type: "motivation" | "reminder" | "suggestion" | "achievement" | "warning";
+  priority: "low" | "medium" | "high";
   actions: Array<{
     label: string;
     aiPrompt: string;
-    variant: 'primary' | 'secondary' | 'ghost';
+    variant: "primary" | "secondary" | "ghost";
   }>;
   expiresAt?: number;
 }
@@ -27,48 +27,48 @@ const CoachNudgeCard: React.FC<CoachNudgeProps> = ({ nudge, onDismiss, onAction 
 
   const getNudgeIcon = (type: string) => {
     switch (type) {
-      case 'motivation':
-        return '🔥';
-      case 'reminder':
-        return '⏰';
-      case 'suggestion':
-        return '💡';
-      case 'achievement':
-        return '🏆';
-      case 'warning':
-        return '⚠️';
+      case "motivation":
+        return "🔥";
+      case "reminder":
+        return "⏰";
+      case "suggestion":
+        return "💡";
+      case "achievement":
+        return "🏆";
+      case "warning":
+        return "⚠️";
       default:
-        return '📢';
+        return "📢";
     }
   };
 
   const getNudgeColor = (type: string, priority: string) => {
-    if (priority === 'high') {
+    if (priority === "high") {
       switch (type) {
-        case 'motivation':
-          return 'bg-gradient-to-r from-orange-500 to-red-500';
-        case 'achievement':
-          return 'bg-gradient-to-r from-yellow-500 to-orange-500';
-        case 'warning':
-          return 'bg-gradient-to-r from-red-500 to-pink-500';
+        case "motivation":
+          return "bg-gradient-to-r from-orange-500 to-red-500";
+        case "achievement":
+          return "bg-gradient-to-r from-yellow-500 to-orange-500";
+        case "warning":
+          return "bg-gradient-to-r from-red-500 to-pink-500";
         default:
-          return 'bg-gradient-to-r from-blue-500 to-purple-500';
+          return "bg-gradient-to-r from-blue-500 to-purple-500";
       }
     }
     
     switch (type) {
-      case 'motivation':
-        return 'bg-orange-100 border-orange-300';
-      case 'reminder':
-        return 'bg-blue-100 border-blue-300';
-      case 'suggestion':
-        return 'bg-green-100 border-green-300';
-      case 'achievement':
-        return 'bg-yellow-100 border-yellow-300';
-      case 'warning':
-        return 'bg-red-100 border-red-300';
+      case "motivation":
+        return "bg-orange-100 border-orange-300";
+      case "reminder":
+        return "bg-blue-100 border-blue-300";
+      case "suggestion":
+        return "bg-green-100 border-green-300";
+      case "achievement":
+        return "bg-yellow-100 border-yellow-300";
+      case "warning":
+        return "bg-red-100 border-red-300";
       default:
-        return 'bg-gray-100 border-gray-300';
+        return "bg-gray-100 border-gray-300";
     }
   };
 
@@ -89,11 +89,11 @@ const CoachNudgeCard: React.FC<CoachNudgeProps> = ({ nudge, onDismiss, onAction 
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -50, scale: 0.9 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className={`relative p-4 rounded-lg border-2 shadow-lg ${getNudgeColor(nudge.type, nudge.priority)}`}
         >
           {/* Priority indicator */}
-          {nudge.priority === 'high' && (
+          {nudge.priority === "high" && (
             <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-pulse" />
           )}
           
@@ -123,11 +123,11 @@ const CoachNudgeCard: React.FC<CoachNudgeProps> = ({ nudge, onDismiss, onAction 
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleAction(action)}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  action.variant === 'primary'
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : action.variant === 'secondary'
-                    ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                    : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                  action.variant === "primary"
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : action.variant === "secondary"
+                    ? "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                    : "bg-transparent text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 {action.label}
@@ -157,7 +157,7 @@ export const CoachNudgeSystem: React.FC = () => {
   const handleNudgeAction = (action: { label: string; aiPrompt: string }) => {
     // Send action to AI orchestration
     sendRequest({
-      type: 'coach_nudge_action',
+      type: "coach_nudge_action",
       context: action.aiPrompt,
       data: { action }
     });
@@ -190,14 +190,14 @@ export const useCoachNudgeGenerator = () => {
   const generateMotivationalNudge = (context: string) => {
     const nudge: CoachNudge = {
       id: `motivation_${Date.now()}`,
-      title: 'Time to Shine!',
+      title: "Time to Shine!",
       message: `You've been scrolling for a while. Ready to ${context}?`,
-      type: 'motivation',
-      priority: 'medium',
+      type: "motivation",
+      priority: "medium",
       actions: [
-        { label: 'Let\'s Go!', aiPrompt: `Help me ${context}`, variant: 'primary' },
-        { label: 'Show Me How', aiPrompt: `Guide me through ${context}`, variant: 'secondary' },
-        { label: 'Not Now', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "Let's Go!", aiPrompt: `Help me ${context}`, variant: "primary" },
+        { label: "Show Me How", aiPrompt: `Guide me through ${context}`, variant: "secondary" },
+        { label: "Not Now", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     };
     setNudges(prev => [...prev, nudge]);
@@ -206,14 +206,14 @@ export const useCoachNudgeGenerator = () => {
   const generateAchievementNudge = (achievement: string) => {
     const nudge: CoachNudge = {
       id: `achievement_${Date.now()}`,
-      title: 'Great Job!',
+      title: "Great Job!",
       message: `You've completed: ${achievement}. Keep up the momentum!`,
-      type: 'achievement',
-      priority: 'high',
+      type: "achievement",
+      priority: "high",
       actions: [
-        { label: 'Share Success', aiPrompt: 'Help me share this achievement', variant: 'primary' },
-        { label: 'Set Next Goal', aiPrompt: 'Help me set my next goal', variant: 'secondary' },
-        { label: 'Continue', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "Share Success", aiPrompt: "Help me share this achievement", variant: "primary" },
+        { label: "Set Next Goal", aiPrompt: "Help me set my next goal", variant: "secondary" },
+        { label: "Continue", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     };
     setNudges(prev => [...prev, nudge]);
@@ -222,14 +222,14 @@ export const useCoachNudgeGenerator = () => {
   const generateReminderNudge = (reminder: string) => {
     const nudge: CoachNudge = {
       id: `reminder_${Date.now()}`,
-      title: 'Friendly Reminder',
+      title: "Friendly Reminder",
       message: reminder,
-      type: 'reminder',
-      priority: 'low',
+      type: "reminder",
+      priority: "low",
       actions: [
-        { label: 'Do It Now', aiPrompt: 'Help me complete this task', variant: 'primary' },
-        { label: 'Schedule Later', aiPrompt: 'Help me schedule this for later', variant: 'secondary' },
-        { label: 'Dismiss', aiPrompt: 'Dismiss this reminder', variant: 'ghost' }
+        { label: "Do It Now", aiPrompt: "Help me complete this task", variant: "primary" },
+        { label: "Schedule Later", aiPrompt: "Help me schedule this for later", variant: "secondary" },
+        { label: "Dismiss", aiPrompt: "Dismiss this reminder", variant: "ghost" }
       ]
     };
     setNudges(prev => [...prev, nudge]);

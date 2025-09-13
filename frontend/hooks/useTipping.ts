@@ -3,9 +3,11 @@ import { useAuth } from './useAuth';
 import TipService from '../services/tipService';
 import type {
   TipResponse,
-  TipTransactionDocument,
-  CreatorProfileDocument,
   TipStatistics
+} from '../src/types/monetization';
+import type {
+  TipTransactionDocument,
+  CreatorProfileDocument
 } from '../firebase/types';
 
 interface UseTippingReturn {

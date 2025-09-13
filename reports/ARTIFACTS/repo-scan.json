@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-01-08T18:44:00Z",
+  "workspaces": [
+    {
+      "name": "frontend",
+      "type": "react-vite",
+      "packageJson": "frontend/package.json",
+      "scripts": ["dev", "build", "preview", "test", "lint", "typecheck"]
+    },
+    {
+      "name": "functions",
+      "type": "firebase-functions",
+      "packageJson": "functions/package.json", 
+      "scripts": ["build", "serve", "shell", "start", "deploy", "logs", "test"]
+    },
+    {
+      "name": "packages/mcp-server",
+      "type": "node-express",
+      "packageJson": "packages/mcp-server/package.json",
+      "scripts": ["dev", "build", "start", "test", "lint", "typecheck"]
+    },
+    {
+      "name": "packages/memory-sdk",
+      "type": "node-library",
+      "packageJson": "packages/memory-sdk/package.json",
+      "scripts": ["build", "test", "lint"]
+    }
+  ],
+  "nodeVersion": "18.x",
+  "typescriptConfigs": [
+    "tsconfig.json",
+    "frontend/tsconfig.json", 
+    "functions/tsconfig.json",
+    "packages/mcp-server/tsconfig.json",
+    "packages/memory-sdk/tsconfig.json"
+  ],
+  "eslintConfigs": [
+    ".eslintrc.js",
+    "frontend/.eslintrc.js",
+    "functions/.eslintrc.js"
+  ],
+  "viteConfig": "frontend/vite.config.ts",
+  "firebaseConfig": "firebase.json",
+  "firestoreRules": "firestore.rules",
+  "firestoreIndexes": "firestore.indexes.json"
+}

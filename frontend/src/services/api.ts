@@ -1,267 +1,182 @@
-// Secure API Service with CSRF Protection and Authentication
-import { auth } from '../lib/firebase';
+// API Client for SportBeacon AI Backend
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-// CSRF token management
-class CSRFManager {
-  private static instance: CSRFManager;
-  private csrfToken: string | null = null;
-  private tokenExpiry: number = 0;
-
-  static getInstance(): CSRFManager {
-    if (!CSRFManager.instance) {
-      CSRFManager.instance = new CSRFManager();
-    }
-    return CSRFManager.instance;
-  }
-
-  async getCSRFToken(): Promise<string> {
-    // Check if token is still valid (1 hour expiry)
-    if (this.csrfToken && Date.now() < this.tokenExpiry) {
-      return this.csrfToken;
-    }
-
-    // Generate new CSRF token
-    const token = this.generateToken();
-    this.csrfToken = token;
-    this.tokenExpiry = Date.now() + (60 * 60 * 1000); // 1 hour
-
-    return token;
-  }
-
-  private generateToken(): string {
-    const array = new Uint8Array(32);
-    crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-  }
-
-  validateToken(token: string): boolean {
-    return this.csrfToken === token;
-  }
+// Types for API requests and responses
+export interface HealthResponse {
+  status: string;
+  service: string;
+  timestamp?: string;
 }
 
-// Input validation utilities
-class InputValidator {
-  static sanitizeString(input: string): string {
-    if (typeof input !== 'string') {
-      throw new Error('Input must be a string');
-    }
-    // Basic XSS prevention
-    return input
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;')
-      .replace(/\//g, '&#x2F;');
-  }
-
-  static validateEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  static validateUUID(uuid: string): boolean {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(uuid);
-  }
-
-  static validateObject(obj: Record<string, unknown>, schema: Record<string, string>): boolean {
-    for (const [key, type] of Object.entries(schema)) {
-      if (!(key in obj)) {
-        throw new Error(`Missing required field: ${key}`);
-      }
-      if (typeof obj[key] !== type) {
-        throw new Error(`Invalid type for ${key}: expected ${type}, got ${typeof obj[key]}`);
-      }
-    }
-    return true;
-  }
+export interface PlayerAnalysisRequest {
+  user_id: string;
+  question: string;
+  include_stats?: boolean;
 }
 
-// Secure API service
-class SecureApiService {
-  private baseUrl: string;
-  private csrfManager: CSRFManager;
+export interface PlayerAnalysisResponse {
+  player_name: string;
+  normalized_stats: Record<string, number>;
+  top_skills: string[];
+  growth_areas: string[];
+  recent_trends: Record<string, number>;
+}
 
-  constructor() {
-    this.baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-    this.csrfManager = CSRFManager.getInstance();
-  }
+export interface TopWinnersRequest {
+  time_period_days: number;
+  limit: number;
+}
 
-  private async getAuthHeaders(): Promise<Record<string, string>> {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
-      'X-XSS-Protection': '1; mode=block',
-    };
+export interface TopWinnersResponse {
+  winners: Array<{
+    id: string;
+    name: string;
+    win_rate: number;
+    games_played: number;
+    avg_points: number;
+    avg_assists: number;
+    avg_rebounds: number;
+    top_skills?: string[];
+    insights?: string[];
+  }>;
+  total_found: number;
+}
 
-    // Add CSRF token
-    const csrfToken = await this.csrfManager.getCSRFToken();
-    headers['X-CSRF-Token'] = csrfToken;
+export interface DrillRecommendationRequest {
+  user_id: string;
+  top_skills: string[];
+  growth_areas: string[];
+  skill_levels: Record<string, number>;
+  min_difficulty: number;
+  max_difficulty: number;
+  max_recommendations: number;
+}
 
-    // Add authentication token
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        const token = await user.getIdToken();
-        headers['Authorization'] = `Bearer ${token}`;
-      } catch (error) {
-        // Continue without auth token, let server handle 401
-      }
-    }
+export interface DrillRecommendationResponse {
+  player_id: string;
+  recommended_drills: Array<{
+    id: string;
+    name: string;
+    description: string;
+    difficulty: number;
+    duration: number;
+    equipment_needed: string[];
+    target_skills: string[];
+  }>;
+  training_notes: string[];
+}
 
-    return headers;
-  }
+export interface MatchmakingRequest {
+  players: Array<{
+    player_id: number;
+    player_name: string;
+    game_date: string;
+    points: number;
+    assists: number;
+    rebounds: number;
+    steals: number;
+    blocks: number;
+    field_goal_percentage: number;
+    three_point_percentage: number;
+    result: "win" | "loss";
+  }>;
+  team_size: 3 | 5;
+  consider_positions: boolean;
+}
 
-  private async request<T>(
-    endpoint: string, 
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
-    const headers = await this.getAuthHeaders();
+export interface MatchmakingResponse {
+  team_a: Array<{
+    id: string;
+    name: string;
+    position: string;
+    skill_scores: Record<string, number>;
+    overall_rating: number;
+  }>;
+  team_b: Array<{
+    id: string;
+    name: string;
+    position: string;
+    skill_scores: Record<string, number>;
+    overall_rating: number;
+  }>;
+  suggested_game_time: string;
+  skill_gap: number;
+  is_balanced: boolean;
+  balance_score: number;
+}
 
+// Error handling wrapper
+async function apiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  try {
     const response = await fetch(url, {
-      ...options,
       headers: {
-        ...headers,
+        "Content-Type": "application/json",
         ...options.headers,
       },
+      ...options,
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText} - ${errorData.message || 'Unknown error'}`
-      );
+      const errorText = await response.text();
+      throw new Error(`API Error ${response.status}: ${errorText}`);
     }
 
-    return response.json();
-  }
-
-  // Town Rec API methods
-  async submitSiblingPairingRequest(data: {
-    parentId: string;
-    siblingIds: string[];
-    leagueId: string;
-    preferences: Record<string, any>;
-  }): Promise<{ requestId: string; status: string }> {
-    // Validate input
-    InputValidator.validateObject(data, {
-      parentId: 'string',
-      siblingIds: 'object',
-      leagueId: 'string',
-      preferences: 'object'
-    });
-
-    if (!Array.isArray(data.siblingIds) || data.siblingIds.length === 0) {
-      throw new Error('siblingIds must be a non-empty array');
-    }
-
-    // Sanitize string inputs
-    const sanitizedData = {
-      ...data,
-      parentId: InputValidator.sanitizeString(data.parentId),
-      leagueId: InputValidator.sanitizeString(data.leagueId),
-    };
-
-    return this.request('/town-rec/sibling-pairing', {
-      method: 'POST',
-      body: JSON.stringify(sanitizedData),
-    });
-  }
-
-  async submitAgeOverrideRequest(data: {
-    playerId: string;
-    parentId: string;
-    leagueId: string;
-    reason: string;
-    supportingDocs?: string[];
-  }): Promise<{ requestId: string; status: string }> {
-    // Validate input
-    InputValidator.validateObject(data, {
-      playerId: 'string',
-      parentId: 'string',
-      leagueId: 'string',
-      reason: 'string'
-    });
-
-    // Sanitize string inputs
-    const sanitizedData = {
-      ...data,
-      playerId: InputValidator.sanitizeString(data.playerId),
-      parentId: InputValidator.sanitizeString(data.parentId),
-      leagueId: InputValidator.sanitizeString(data.leagueId),
-      reason: InputValidator.sanitizeString(data.reason),
-    };
-
-    return this.request('/town-rec/age-override', {
-      method: 'POST',
-      body: JSON.stringify(sanitizedData),
-    });
-  }
-
-  async getWaitlistStatus(playerId: string): Promise<{
-    position: number;
-    estimatedWaitTime: string;
-    status: string;
-  }> {
-    // Validate input
-    if (!InputValidator.validateUUID(playerId)) {
-      throw new Error('Invalid player ID format');
-    }
-
-    const sanitizedPlayerId = InputValidator.sanitizeString(playerId);
-    return this.request(`/town-rec/waitlist/${sanitizedPlayerId}`);
-  }
-
-  async updatePlayerProfile(data: {
-    playerId: string;
-    updates: Record<string, any>;
-  }): Promise<{ success: boolean; message: string }> {
-    // Validate input
-    InputValidator.validateObject(data, {
-      playerId: 'string',
-      updates: 'object'
-    });
-
-    const sanitizedData = {
-      ...data,
-      playerId: InputValidator.sanitizeString(data.playerId),
-    };
-
-    return this.request(`/players/${sanitizedData.playerId}/profile`, {
-      method: 'PUT',
-      body: JSON.stringify(sanitizedData.updates),
-    });
-  }
-
-  // Generic CRUD operations
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
-  }
-
-  async post<T>(endpoint: string, data: Record<string, unknown>): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async put<T>(endpoint: string, data: Record<string, unknown>): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+    return await response.json();
+  } catch (error) {
+    console.error(`API Request failed for ${endpoint}:`, error);
+    throw error;
   }
 }
 
-// Export singleton instance
-export const apiService = new SecureApiService();
+// API Functions
+export const api = {
+  // Health check
+  async getHealth(): Promise<HealthResponse> {
+    return apiRequest<HealthResponse>("/health");
+  },
 
-// Export utilities for external use
-export const getCSRFToken = () => CSRFManager.getInstance().getCSRFToken();
-export const validateInput = InputValidator; 
+  // Player analysis
+  async analyzePlayer(payload: PlayerAnalysisRequest): Promise<PlayerAnalysisResponse> {
+    return apiRequest<PlayerAnalysisResponse>("/api/players/analyze", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // Top winners
+  async getTopWinners(params: TopWinnersRequest): Promise<TopWinnersResponse> {
+    const queryParams = new URLSearchParams({
+      time_period_days: params.time_period_days.toString(),
+      limit: params.limit.toString(),
+    });
+    return apiRequest<TopWinnersResponse>(`/api/players/top-winners?${queryParams}`);
+  },
+
+  // Drill recommendations
+  async getDrillRecommendations(payload: DrillRecommendationRequest): Promise<DrillRecommendationResponse> {
+    return apiRequest<DrillRecommendationResponse>("/api/drills/recommend", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // Matchmaking
+  async createTeams(payload: MatchmakingRequest): Promise<MatchmakingResponse> {
+    return apiRequest<MatchmakingResponse>("/api/matchmaking/create-teams", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // Test endpoint
+  async testEndpoint(): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>("/api/test");
+  },
+};
+
+export default api; 

@@ -1,10 +1,10 @@
-import React from 'react';
-import { Plus, Clock, MapPin } from 'lucide-react';
+import React from "react";
+import { Plus, Clock, MapPin } from "lucide-react";
 
 interface Event {
   id: string;
   title: string;
-  type: 'game' | 'practice' | 'meeting' | 'other';
+  type: "game" | "practice" | "meeting" | "other";
   startTime: Date;
   endTime: Date;
   location: string;
@@ -14,45 +14,45 @@ interface Event {
 const Calendar: React.FC = () => {
   const events: Event[] = [
     {
-      id: '1',
-      title: 'Team Practice',
-      type: 'practice',
-      startTime: new Date('2024-01-25T16:00:00'),
-      endTime: new Date('2024-01-25T18:00:00'),
-      location: 'Main Field',
-      description: 'Regular team practice session'
+      id: "1",
+      title: "Team Practice",
+      type: "practice",
+      startTime: new Date("2024-01-25T16:00:00"),
+      endTime: new Date("2024-01-25T18:00:00"),
+      location: "Main Field",
+      description: "Regular team practice session"
     },
     {
-      id: '2',
-      title: 'Game vs Eagles',
-      type: 'game',
-      startTime: new Date('2024-01-27T14:00:00'),
-      endTime: new Date('2024-01-27T16:00:00'),
-      location: 'Stadium Complex',
-      description: 'Home game against Eagles'
+      id: "2",
+      title: "Game vs Eagles",
+      type: "game",
+      startTime: new Date("2024-01-27T14:00:00"),
+      endTime: new Date("2024-01-27T16:00:00"),
+      location: "Stadium Complex",
+      description: "Home game against Eagles"
     },
     {
-      id: '3',
-      title: 'Team Meeting',
-      type: 'meeting',
-      startTime: new Date('2024-01-26T18:00:00'),
-      endTime: new Date('2024-01-26T19:00:00'),
-      location: 'Team Room',
-      description: 'Weekly team strategy meeting'
+      id: "3",
+      title: "Team Meeting",
+      type: "meeting",
+      startTime: new Date("2024-01-26T18:00:00"),
+      endTime: new Date("2024-01-26T19:00:00"),
+      location: "Team Room",
+      description: "Weekly team strategy meeting"
     }
   ];
 
-  const getEventTypeIcon = (type: Event['type']) => {
+  const getEventTypeIcon = (type: Event["type"]) => {
     switch (type) {
-      case 'game': return '🏆';
-      case 'practice': return '⚽';
-      case 'meeting': return '📋';
-      default: return '📅';
+      case "game": return "🏆";
+      case "practice": return "⚽";
+      case "meeting": return "📋";
+      default: return "📅";
     }
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   return (
@@ -82,7 +82,7 @@ const Calendar: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-7 gap-1 mb-4">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
                 <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
                   {day}
                 </div>
@@ -139,15 +139,15 @@ const Calendar: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">Games</span>
-                <span className="font-medium">{events.filter(e => e.type === 'game').length}</span>
+                <span className="font-medium">{events.filter(e => e.type === "game").length}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Practices</span>
-                <span className="font-medium">{events.filter(e => e.type === 'practice').length}</span>
+                <span className="font-medium">{events.filter(e => e.type === "practice").length}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Meetings</span>
-                <span className="font-medium">{events.filter(e => e.type === 'meeting').length}</span>
+                <span className="font-medium">{events.filter(e => e.type === "meeting").length}</span>
               </div>
             </div>
           </div>

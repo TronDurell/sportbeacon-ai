@@ -1,14 +1,14 @@
-import React, { ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import { useSmartLayer } from '../../contexts/SmartLayerContext';
+import React, { ReactNode } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import { useSmartLayer } from "../../contexts/SmartLayerContext";
 import { 
   Menu, 
   X, 
   Bot, 
   Bell,
   Search
-} from 'lucide-react';
+} from "lucide-react";
 
 interface BaseLayoutProps {
   children: ReactNode;
@@ -21,7 +21,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
   children, 
   sidebarContent, 
   headerContent,
-  className = '' 
+  className = "" 
 }) => {
   const { user } = useAuth();
   const { sidebarCollapsed, toggleSidebar, isAIAssistantOpen, toggleAIAssistant } = useSmartLayer();
@@ -69,8 +69,8 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
               onClick={toggleAIAssistant}
               className={`p-2 rounded-lg transition-colors ${
                 isAIAssistantOpen 
-                  ? 'bg-blue-100 text-blue-600' 
-                  : 'hover:bg-gray-100'
+                  ? "bg-blue-100 text-blue-600" 
+                  : "hover:bg-gray-100"
               }`}
             >
               <Bot className="h-5 w-5" />
@@ -89,7 +89,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
               
               <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
-                  {user?.firstName?.charAt(0) || 'U'}
+                  {user?.firstName?.charAt(0) || "U"}
                 </span>
               </div>
             </div>
@@ -113,7 +113,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               className={`bg-white shadow-sm border-r ${
-                sidebarCollapsed ? 'w-16' : 'w-64'
+                sidebarCollapsed ? "w-16" : "w-64"
               } min-h-screen transition-all duration-300`}
             >
               <div className="p-4">
@@ -125,7 +125,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
 
         {/* Main Content */}
         <main className={`flex-1 transition-all duration-300 ${
-          sidebarContent ? (sidebarCollapsed ? 'ml-16' : 'ml-64') : ''
+          sidebarContent ? (sidebarCollapsed ? "ml-16" : "ml-64") : ""
         }`}>
           <div className="p-6">
             {children}
@@ -137,10 +137,10 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
       <AnimatePresence>
         {isAIAssistantOpen && (
           <motion.div
-            initial={{ x: '100%' }}
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l z-50"
           >
             <div className="flex flex-col h-full">

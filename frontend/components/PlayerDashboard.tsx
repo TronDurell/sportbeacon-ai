@@ -242,11 +242,8 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ playerId }) =>
                         <Grid container spacing={2}>
                             {assignedDrills?.map((drill: DrillDetail) => (
                                 <Grid item xs={12} sm={isMobile ? 12 : 6} key={drill.id}>
-                                    {/* <DrillCard
-                                        drill={drill}
-                                        onStart={() => {/* Handle drill start */}}
-                                        compact={isMobile}
-                                    /> */}
+                                    {/* DrillCard component will be implemented later */}
+                                    <div>Drill: {drill.name}</div>
                                 </Grid>
                             ))}
                         </Grid>

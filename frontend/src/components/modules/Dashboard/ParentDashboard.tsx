@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import SmartTile from '../../SmartTile';
-import { useAgentOrchestration } from '../../../contexts/AgentOrchestrationContext';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import SmartTile from "../../SmartTile";
+import { useAgentOrchestration } from "../../../contexts/AgentOrchestrationContext";
 import { 
   Calendar, 
   Users, 
@@ -10,7 +10,7 @@ import {
   Bell,
   Heart,
   Award
-} from 'lucide-react';
+} from "lucide-react";
 
 interface ParentData {
   children?: Array<{
@@ -31,14 +31,14 @@ interface ParentData {
     date: string;
     location: string;
     childName: string;
-    type: 'game' | 'practice' | 'tournament' | 'meeting';
+    type: "game" | "practice" | "tournament" | "meeting";
   }>;
   notifications?: Array<{
     id: string;
     title: string;
     message: string;
     date: string;
-    type: 'update' | 'reminder' | 'achievement' | 'payment';
+    type: "update" | "reminder" | "achievement" | "payment";
     read: boolean;
   }>;
   payments?: Array<{
@@ -46,13 +46,13 @@ interface ParentData {
     description: string;
     amount: number;
     dueDate: string;
-    status: 'paid' | 'pending' | 'overdue';
+    status: "paid" | "pending" | "overdue";
   }>;
   aiRecommendations?: Array<{
     id: string;
     title: string;
     description: string;
-    category: 'nutrition' | 'equipment' | 'support' | 'development';
+    category: "nutrition" | "equipment" | "support" | "development";
   }>;
   familyStats?: {
     totalChildren: number;
@@ -77,123 +77,123 @@ const ParentDashboard: React.FC = () => {
       setParentData({
         children: [
           {
-            id: '1',
-            name: 'Alex Johnson',
+            id: "1",
+            name: "Alex Johnson",
             age: 12,
-            team: 'U12 Thunder',
-            role: 'Forward',
+            team: "U12 Thunder",
+            role: "Forward",
             nextEvent: {
-              title: 'Team Practice',
-              date: 'Tomorrow, 4:00 PM',
-              location: 'Main Field'
+              title: "Team Practice",
+              date: "Tomorrow, 4:00 PM",
+              location: "Main Field"
             }
           },
           {
-            id: '2',
-            name: 'Sarah Johnson',
+            id: "2",
+            name: "Sarah Johnson",
             age: 10,
-            team: 'U10 Lightning',
-            role: 'Midfielder',
+            team: "U10 Lightning",
+            role: "Midfielder",
             nextEvent: {
-              title: 'Game vs Eagles',
-              date: 'Saturday, 2:00 PM',
-              location: 'Community Stadium'
+              title: "Game vs Eagles",
+              date: "Saturday, 2:00 PM",
+              location: "Community Stadium"
             }
           }
         ],
         upcomingEvents: [
           {
-            id: '1',
-            title: 'Team Practice',
-            date: 'Tomorrow, 4:00 PM',
-            location: 'Main Field',
-            childName: 'Alex Johnson',
-            type: 'practice'
+            id: "1",
+            title: "Team Practice",
+            date: "Tomorrow, 4:00 PM",
+            location: "Main Field",
+            childName: "Alex Johnson",
+            type: "practice"
           },
           {
-            id: '2',
-            title: 'Game vs Eagles',
-            date: 'Saturday, 2:00 PM',
-            location: 'Community Stadium',
-            childName: 'Sarah Johnson',
-            type: 'game'
+            id: "2",
+            title: "Game vs Eagles",
+            date: "Saturday, 2:00 PM",
+            location: "Community Stadium",
+            childName: "Sarah Johnson",
+            type: "game"
           },
           {
-            id: '3',
-            title: 'Parent Meeting',
-            date: 'Next Tuesday, 7:00 PM',
-            location: 'Club House',
-            childName: 'Both',
-            type: 'meeting'
+            id: "3",
+            title: "Parent Meeting",
+            date: "Next Tuesday, 7:00 PM",
+            location: "Club House",
+            childName: "Both",
+            type: "meeting"
           }
         ],
         notifications: [
           {
-            id: '1',
-            title: 'Alex scored a goal!',
-            message: 'Great performance in today\'s practice',
-            date: '2 hours ago',
-            type: 'achievement',
+            id: "1",
+            title: "Alex scored a goal!",
+            message: "Great performance in today's practice",
+            date: "2 hours ago",
+            type: "achievement",
             read: false
           },
           {
-            id: '2',
-            title: 'Payment reminder',
-            message: 'Monthly fee due in 3 days',
-            date: '1 day ago',
-            type: 'payment',
+            id: "2",
+            title: "Payment reminder",
+            message: "Monthly fee due in 3 days",
+            date: "1 day ago",
+            type: "payment",
             read: true
           },
           {
-            id: '3',
-            title: 'Schedule update',
-            message: 'Next game rescheduled to Saturday',
-            date: '2 days ago',
-            type: 'update',
+            id: "3",
+            title: "Schedule update",
+            message: "Next game rescheduled to Saturday",
+            date: "2 days ago",
+            type: "update",
             read: false
           }
         ],
         payments: [
           {
-            id: '1',
-            description: 'Monthly fee - Alex',
+            id: "1",
+            description: "Monthly fee - Alex",
             amount: 85,
-            dueDate: 'Tomorrow',
-            status: 'pending'
+            dueDate: "Tomorrow",
+            status: "pending"
           },
           {
-            id: '2',
-            description: 'Tournament fee - Sarah',
+            id: "2",
+            description: "Tournament fee - Sarah",
             amount: 120,
-            dueDate: 'Next week',
-            status: 'pending'
+            dueDate: "Next week",
+            status: "pending"
           },
           {
-            id: '3',
-            description: 'Equipment fee - Alex',
+            id: "3",
+            description: "Equipment fee - Alex",
             amount: 45,
-            dueDate: 'Last week',
-            status: 'paid'
+            dueDate: "Last week",
+            status: "paid"
           }
         ],
         aiRecommendations: [
           {
-            id: '1',
-            title: 'Nutrition for young athletes',
-            description: 'Optimize your child\'s performance with proper nutrition',
-            category: 'nutrition'
+            id: "1",
+            title: "Nutrition for young athletes",
+            description: "Optimize your child's performance with proper nutrition",
+            category: "nutrition"
           },
           {
-            id: '2',
-            title: 'New cleats needed',
-            description: 'Alex\'s current cleats are showing wear',
-            category: 'equipment'
+            id: "2",
+            title: "New cleats needed",
+            description: "Alex's current cleats are showing wear",
+            category: "equipment"
           },
           {
-            id: '3',
-            title: 'Skill development tips',
-            description: 'Practice drills to improve passing accuracy',
-            category: 'development'
+            id: "3",
+            title: "Skill development tips",
+            description: "Practice drills to improve passing accuracy",
+            category: "development"
           }
         ],
         familyStats: {
@@ -211,7 +211,7 @@ const ParentDashboard: React.FC = () => {
 
   const handleAIAssistance = (context: string) => {
     sendRequest({
-      type: 'parent_assistance',
+      type: "parent_assistance",
       context,
       data: parentData
     });
@@ -296,7 +296,7 @@ const ParentDashboard: React.FC = () => {
             title="My Children"
             icon={<Heart className="w-5 h-5" />}
             status="success"
-            onClickAI={() => handleAIAssistance('children_overview')}
+            onClickAI={() => handleAIAssistance("children_overview")}
             loading={loading}
           >
             <div className="space-y-3">
@@ -331,7 +331,7 @@ const ParentDashboard: React.FC = () => {
             title="Upcoming Events"
             icon={<Calendar className="w-5 h-5" />}
             status="info"
-            onClickAI={() => handleAIAssistance('upcoming_events')}
+            onClickAI={() => handleAIAssistance("upcoming_events")}
             loading={loading}
           >
             <div className="space-y-2">
@@ -340,10 +340,10 @@ const ParentDashboard: React.FC = () => {
                   <div className="flex items-center justify-between mb-1">
                     <h4 className="font-medium text-gray-900 text-sm">{event.title}</h4>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      event.type === 'game' ? 'bg-red-100 text-red-700' :
-                      event.type === 'practice' ? 'bg-blue-100 text-blue-700' :
-                      event.type === 'tournament' ? 'bg-purple-100 text-purple-700' :
-                      'bg-gray-100 text-gray-700'
+                      event.type === "game" ? "bg-red-100 text-red-700" :
+                      event.type === "practice" ? "bg-blue-100 text-blue-700" :
+                      event.type === "tournament" ? "bg-purple-100 text-purple-700" :
+                      "bg-gray-100 text-gray-700"
                     }`}>
                       {event.type}
                     </span>
@@ -362,22 +362,22 @@ const ParentDashboard: React.FC = () => {
           <SmartTile
             title="Notifications"
             icon={<Bell className="w-5 h-5" />}
-            status={parentData.notifications?.some(n => !n.read) ? 'warning' : 'neutral'}
-            onClickAI={() => handleAIAssistance('notifications')}
+            status={parentData.notifications?.some(n => !n.read) ? "warning" : "neutral"}
+            onClickAI={() => handleAIAssistance("notifications")}
             loading={loading}
           >
             <div className="space-y-2">
               {parentData.notifications?.slice(0, 3).map((notification) => (
                 <div key={notification.id} className={`p-3 rounded-lg ${
-                  notification.read ? 'bg-gray-50' : 'bg-yellow-50 border border-yellow-200'
+                  notification.read ? "bg-gray-50" : "bg-yellow-50 border border-yellow-200"
                 }`}>
                   <div className="flex items-center justify-between mb-1">
                     <h4 className="font-medium text-gray-900 text-sm">{notification.title}</h4>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      notification.type === 'achievement' ? 'bg-green-100 text-green-700' :
-                      notification.type === 'payment' ? 'bg-blue-100 text-blue-700' :
-                      notification.type === 'update' ? 'bg-purple-100 text-purple-700' :
-                      'bg-gray-100 text-gray-700'
+                      notification.type === "achievement" ? "bg-green-100 text-green-700" :
+                      notification.type === "payment" ? "bg-blue-100 text-blue-700" :
+                      notification.type === "update" ? "bg-purple-100 text-purple-700" :
+                      "bg-gray-100 text-gray-700"
                     }`}>
                       {notification.type}
                     </span>
@@ -395,8 +395,8 @@ const ParentDashboard: React.FC = () => {
           <SmartTile
             title="Payments"
             icon={<CreditCard className="w-5 h-5" />}
-            status={parentData.payments?.some(p => p.status === 'overdue') ? 'error' : 'neutral'}
-            onClickAI={() => handleAIAssistance('payments')}
+            status={parentData.payments?.some(p => p.status === "overdue") ? "error" : "neutral"}
+            onClickAI={() => handleAIAssistance("payments")}
             loading={loading}
           >
             <div className="space-y-2">
@@ -409,9 +409,9 @@ const ParentDashboard: React.FC = () => {
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-900">${payment.amount}</p>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      payment.status === 'paid' ? 'bg-green-100 text-green-700' :
-                      payment.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-red-100 text-red-700'
+                      payment.status === "paid" ? "bg-green-100 text-green-700" :
+                      payment.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                      "bg-red-100 text-red-700"
                     }`}>
                       {payment.status}
                     </span>
@@ -428,7 +428,7 @@ const ParentDashboard: React.FC = () => {
             title="AI Recommendations"
             icon={<Award className="w-5 h-5" />}
             status="success"
-            onClickAI={() => handleAIAssistance('recommendations')}
+            onClickAI={() => handleAIAssistance("recommendations")}
             loading={loading}
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -437,10 +437,10 @@ const ParentDashboard: React.FC = () => {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-green-900 text-sm">{recommendation.title}</h4>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      recommendation.category === 'nutrition' ? 'bg-green-200 text-green-800' :
-                      recommendation.category === 'equipment' ? 'bg-blue-200 text-blue-800' :
-                      recommendation.category === 'support' ? 'bg-purple-200 text-purple-800' :
-                      'bg-yellow-200 text-yellow-800'
+                      recommendation.category === "nutrition" ? "bg-green-200 text-green-800" :
+                      recommendation.category === "equipment" ? "bg-blue-200 text-blue-800" :
+                      recommendation.category === "support" ? "bg-purple-200 text-purple-800" :
+                      "bg-yellow-200 text-yellow-800"
                     }`}>
                       {recommendation.category}
                     </span>

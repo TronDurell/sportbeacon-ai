@@ -1,15 +1,15 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Bot, ExternalLink, ChevronRight } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { Bot, ExternalLink, ChevronRight } from "lucide-react";
 
 interface SmartTileProps {
   title: string;
   icon?: React.ReactNode;
-  status?: 'success' | 'warning' | 'error' | 'info' | 'neutral';
+  status?: "success" | "warning" | "error" | "info" | "neutral";
   actions?: Array<{
     label: string;
     onClick: () => void;
-    variant?: 'primary' | 'secondary' | 'ghost';
+    variant?: "primary" | "secondary" | "ghost";
   }>;
   onClickAI?: () => void;
   children?: React.ReactNode;
@@ -21,33 +21,33 @@ interface SmartTileProps {
 const SmartTile: React.FC<SmartTileProps> = ({
   title,
   icon,
-  status = 'neutral',
+  status = "neutral",
   actions = [],
   onClickAI,
   children,
-  className = '',
+  className = "",
   loading = false,
   href
 }) => {
   const statusColors = {
-    success: 'border-green-200 bg-green-50',
-    warning: 'border-yellow-200 bg-yellow-50',
-    error: 'border-red-200 bg-red-50',
-    info: 'border-blue-200 bg-blue-50',
-    neutral: 'border-gray-200 bg-white'
+    success: "border-green-200 bg-green-50",
+    warning: "border-yellow-200 bg-yellow-50",
+    error: "border-red-200 bg-red-50",
+    info: "border-blue-200 bg-blue-50",
+    neutral: "border-gray-200 bg-white"
   };
 
   const statusIcons = {
-    success: 'text-green-600',
-    warning: 'text-yellow-600',
-    error: 'text-red-600',
-    info: 'text-blue-600',
-    neutral: 'text-gray-600'
+    success: "text-green-600",
+    warning: "text-yellow-600",
+    error: "text-red-600",
+    info: "text-blue-600",
+    neutral: "text-gray-600"
   };
 
   const handleClick = () => {
     if (href) {
-      window.open(href, '_blank');
+      window.open(href, "_blank");
     }
   };
 
@@ -58,7 +58,7 @@ const SmartTile: React.FC<SmartTileProps> = ({
       className={`
         relative p-6 rounded-xl border transition-all duration-200 cursor-pointer
         ${statusColors[status]}
-        ${href ? 'hover:shadow-md' : ''}
+        ${href ? "hover:shadow-md" : ""}
         ${className}
       `}
       onClick={handleClick}
@@ -73,19 +73,19 @@ const SmartTile: React.FC<SmartTileProps> = ({
           )}
           <div>
             <h3 className="font-semibold text-gray-900">{title}</h3>
-            {status !== 'neutral' && (
+            {status !== "neutral" && (
               <div className="flex items-center gap-1 mt-1">
                 <div className={`w-2 h-2 rounded-full ${
-                  status === 'success' ? 'bg-green-500' :
-                  status === 'warning' ? 'bg-yellow-500' :
-                  status === 'error' ? 'bg-red-500' :
-                  'bg-blue-500'
+                  status === "success" ? "bg-green-500" :
+                  status === "warning" ? "bg-yellow-500" :
+                  status === "error" ? "bg-red-500" :
+                  "bg-blue-500"
                 }`} />
                 <span className={`text-xs capitalize ${
-                  status === 'success' ? 'text-green-700' :
-                  status === 'warning' ? 'text-yellow-700' :
-                  status === 'error' ? 'text-red-700' :
-                  'text-blue-700'
+                  status === "success" ? "text-green-700" :
+                  status === "warning" ? "text-yellow-700" :
+                  status === "error" ? "text-red-700" :
+                  "text-blue-700"
                 }`}>
                   {status}
                 </span>
@@ -143,11 +143,11 @@ const SmartTile: React.FC<SmartTileProps> = ({
                 }}
                 className={`
                   px-3 py-1.5 text-sm rounded-md transition-colors
-                  ${action.variant === 'primary' 
-                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                    : action.variant === 'secondary'
-                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    : 'text-blue-600 hover:bg-blue-50'
+                  ${action.variant === "primary" 
+                    ? "bg-blue-600 text-white hover:bg-blue-700" 
+                    : action.variant === "secondary"
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "text-blue-600 hover:bg-blue-50"
                   }
                 `}
               >

@@ -1,12 +1,12 @@
-import React from 'react';
-import { BarChart3, TrendingUp, Users, Calendar } from 'lucide-react';
+import React from "react";
+import { BarChart3, TrendingUp, Users, Calendar } from "lucide-react";
 
 const Analytics: React.FC = () => {
   const stats = [
-    { label: 'Total Users', value: '1,234', icon: Users, change: '+12%' },
-    { label: 'Active Sessions', value: '456', icon: TrendingUp, change: '+8%' },
-    { label: 'Events This Month', value: '89', icon: Calendar, change: '+15%' },
-    { label: 'Engagement Rate', value: '78%', icon: BarChart3, change: '+5%' }
+    { label: "Total Users", value: "1,234", icon: Users, change: "+12%" },
+    { label: "Active Sessions", value: "456", icon: TrendingUp, change: "+8%" },
+    { label: "Events This Month", value: "89", icon: Calendar, change: "+15%" },
+    { label: "Engagement Rate", value: "78%", icon: BarChart3, change: "+5%" }
   ];
 
   return (

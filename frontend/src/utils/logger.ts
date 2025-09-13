@@ -64,16 +64,16 @@ class Logger {
   private isProduction: boolean;
 
   constructor(config: Partial<LoggerConfig> = {}) {
-    this.isProduction = process.env.NODE_ENV === 'production';
+    this.isProduction = process.env.NODE_ENV === "production";
     
     this.config = {
-      level: this.isProduction ? 'WARN' : 'DEBUG',
+      level: this.isProduction ? "WARN" : "DEBUG",
       enableConsole: !this.isProduction,
       enableRemote: this.isProduction,
       enableLocalStorage: !this.isProduction,
       maxLocalStorageEntries: 100,
-      appName: 'SportBeaconAI',
-      version: '1.0.0',
+      appName: "SportBeaconAI",
+      version: "1.0.0",
       ...config,
     };
 
@@ -93,23 +93,23 @@ class Logger {
   // ============================================================================
 
   debug(message: string, data?: unknown, context?: string): void {
-    this.log('DEBUG', message, data, context);
+    this.log("DEBUG", message, data, context);
   }
 
   info(message: string, data?: unknown, context?: string): void {
-    this.log('INFO', message, data, context);
+    this.log("INFO", message, data, context);
   }
 
   warn(message: string, data?: unknown, context?: string): void {
-    this.log('WARN', message, data, context);
+    this.log("WARN", message, data, context);
   }
 
   error(message: string, error?: Error, data?: unknown, context?: string): void {
-    this.log('ERROR', message, data, context, error);
+    this.log("ERROR", message, data, context, error);
   }
 
   critical(message: string, error?: Error, data?: unknown, context?: string): void {
-    this.log('CRITICAL', message, data, context, error);
+    this.log("CRITICAL", message, data, context, error);
   }
 
   // ============================================================================
@@ -166,21 +166,21 @@ class Logger {
   private logToConsole(entry: LogEntry): void {
     const timestamp = entry.timestamp.toISOString();
     const prefix = `[${timestamp}] [${entry.level}]`;
-    const context = entry.context ? ` [${entry.context}]` : '';
+    const context = entry.context ? ` [${entry.context}]` : "";
 
     switch (entry.level) {
-      case 'DEBUG':
-        console.debug(`${prefix}${context} ${entry.message}`, entry.data || '');
+      case "DEBUG":
+        console.debug(`${prefix}${context} ${entry.message}`, entry.data || "");
         break;
-      case 'INFO':
-        console.info(`${prefix}${context} ${entry.message}`, entry.data || '');
+      case "INFO":
+        console.info(`${prefix}${context} ${entry.message}`, entry.data || "");
         break;
-      case 'WARN':
-        console.warn(`${prefix}${context} ${entry.message}`, entry.data || '');
+      case "WARN":
+        console.warn(`${prefix}${context} ${entry.message}`, entry.data || "");
         break;
-      case 'ERROR':
-      case 'CRITICAL':
-        console.error(`${prefix}${context} ${entry.message}`, entry.error || entry.data || '');
+      case "ERROR":
+      case "CRITICAL":
+        console.error(`${prefix}${context} ${entry.message}`, entry.error || entry.data || "");
         break;
     }
   }
@@ -195,15 +195,15 @@ class Logger {
     // Send to remote logging service (e.g., Sentry, LogRocket, etc.)
     try {
       fetch(this.config.remoteEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...entry,
           appName: this.config.appName,
           version: this.config.version,
-          environment: this.isProduction ? 'production' : 'development',
+          environment: this.isProduction ? "production" : "development",
         }),
       }).catch(() => {
         // Silently fail for remote logging to avoid breaking the app
@@ -227,7 +227,7 @@ class Logger {
         logs.splice(0, logs.length - this.config.maxLocalStorageEntries);
       }
 
-      localStorage.setItem('sportbeacon_logs', JSON.stringify(logs));
+      localStorage.setItem("sportbeacon_logs", JSON.stringify(logs));
     } catch (error) {
       // Silently fail for local storage logging
     }
@@ -235,7 +235,7 @@ class Logger {
 
   private getLocalStorageLogs(): LogEntry[] {
     try {
-      const logs = localStorage.getItem('sportbeacon_logs');
+      const logs = localStorage.getItem("sportbeacon_logs");
       return logs ? JSON.parse(logs) : [];
     } catch {
       return [];
@@ -249,7 +249,7 @@ class Logger {
   private getUserId(): string | undefined {
     try {
       // Get user ID from auth context or localStorage
-      return localStorage.getItem('user_id') || undefined;
+      return localStorage.getItem("user_id") || undefined;
     } catch {
       return undefined;
     }
@@ -258,10 +258,10 @@ class Logger {
   private getSessionId(): string | undefined {
     try {
       // Get session ID from localStorage or generate one
-      let sessionId = localStorage.getItem('session_id');
+      let sessionId = localStorage.getItem("session_id");
       if (!sessionId) {
         sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('session_id', sessionId);
+        localStorage.setItem("session_id", sessionId);
       }
       return sessionId;
     } catch {
@@ -285,15 +285,15 @@ class Logger {
 
     try {
       fetch(this.config.remoteEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           logs,
           appName: this.config.appName,
           version: this.config.version,
-          environment: this.isProduction ? 'production' : 'development',
+          environment: this.isProduction ? "production" : "development",
         }),
       }).catch(() => {
         // Silently fail for batch logging
@@ -318,7 +318,7 @@ class Logger {
       const logs = this.getLocalStorageLogs();
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       const recentLogs = logs.filter(log => new Date(log.timestamp) > oneDayAgo);
-      localStorage.setItem('sportbeacon_logs', JSON.stringify(recentLogs));
+      localStorage.setItem("sportbeacon_logs", JSON.stringify(recentLogs));
     } catch {
       // Silently fail
     }
@@ -334,7 +334,7 @@ class Logger {
 
   clearLogs(): void {
     try {
-      localStorage.removeItem('sportbeacon_logs');
+      localStorage.removeItem("sportbeacon_logs");
     } catch {
       // Silently fail
     }
@@ -359,7 +359,7 @@ export const logger = new Logger();
 // REACT HOOK FOR LOGGING
 // ============================================================================
 
-import { useCallback } from 'react';
+import { useCallback } from "react";
 
 export const useLogger = (context?: string) => {
   const logDebug = useCallback((message: string, data?: unknown) => {

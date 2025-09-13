@@ -57,62 +57,13 @@ export interface FirestoreDocument {
   updatedBy: string;
 }
 
-// Player Profile document
-export interface PlayerProfileDocument extends FirestoreDocument {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth: string;
-  position: string;
-  skillLevel: string;
-  team: string;
-  school: string;
-  location: string;
-  bio: string;
-  avatar: string;
-  isActive: boolean;
-  emergencyContact: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  preferences: {
-    notifications: boolean;
-    publicProfile: boolean;
-    shareStats: boolean;
-  };
-  // Legacy fields for backward compatibility
-  name?: string;
-  level?: number;
-  xp?: {
-    current: number;
-    nextLevel: number;
-  };
-  stats?: {
-    completedDrills: number;
-    averagePerformance: number;
-    streak: number;
-    totalTime: number;
-  };
-  recentDrills?: Array<{
-    id: string;
-    name: string;
-    date: string;
-    performance: number;
-  }>;
-  insights?: Array<{
-    type: 'improvement' | 'achievement' | 'suggestion';
-    message: string;
-    date: string;
-  }>;
-  badges?: Array<{
-    id: string;
-    name: string;
-    icon: string;
-    progress: number;
-    unlocked: boolean;
-  }>;
+// Player Profile document - extends the consolidated PlayerProfile interface
+import type { PlayerProfile } from '../types';
+
+export interface PlayerProfileDocument extends FirestoreDocument, Omit<PlayerProfile, 'createdAt' | 'updatedAt' | 'createdBy'> {
+  // Firestore-specific fields
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
 // Coach Log document
@@ -159,6 +110,14 @@ export interface VideoAnnotationDocument extends FirestoreDocument {
     owner: string;
     sharedWith: string[];
     isPublic: boolean;
+  };
+  // Additional properties for annotation service
+  data?: {
+    content?: string;
+    title?: string;
+    startTime?: number;
+    endTime?: number;
+    type?: string;
   };
 }
 
@@ -297,6 +256,51 @@ export interface BatchOperation {
 }
 
 // Export all Firebase types
+// Additional types for hooks
+export interface TipResponse {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  amount: number;
+  message?: string;
+  createdAt: Timestamp;
+  status: 'pending' | 'completed' | 'failed';
+}
+
+export interface TipStatistics {
+  totalTips: number;
+  totalAmount: number;
+  averageTip: number;
+  topTippers: Array<{
+    userId: string;
+    amount: number;
+    count: number;
+  }>;
+}
+
+export interface VideoUploadProgress {
+  bytesTransferred: number;
+  totalBytes: number;
+  state: 'running' | 'paused' | 'success' | 'canceled' | 'error';
+  metadata?: UploadMetadata;
+}
+
+export interface VideoMetadata {
+  id: string;
+  fileName: string;
+  originalName: string;
+  fileSize: number;
+  mimeType: string;
+  duration?: number;
+  resolution?: {
+    width: number;
+    height: number;
+  };
+  uploadDate: Timestamp;
+  userId: string;
+  status: 'uploading' | 'processing' | 'completed' | 'failed';
+}
+
 export type {
   UserCredential,
   AuthError,

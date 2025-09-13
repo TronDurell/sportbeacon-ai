@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import { UserRole } from '../../types';
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import { UserRole } from "../../types";
 
 interface RegistrationFormProps {
   onSuccess?: () => void;
@@ -10,19 +10,19 @@ interface RegistrationFormProps {
 const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel }) => {
   const { register } = useAuth();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'player' as UserRole,
-    organization: '',
-    phone: '',
-    dateOfBirth: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "player" as UserRole,
+    organization: "",
+    phone: "",
+    dateOfBirth: "",
     emergencyContact: {
-      name: '',
-      phone: '',
-      relationship: ''
+      name: "",
+      phone: "",
+      relationship: ""
     }
   });
 
@@ -33,31 +33,31 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
     const newErrors: Record<string, string> = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = "First name is required";
     }
 
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = "Last name is required";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
-    if (formData.role === 'admin' && !formData.organization.trim()) {
-      newErrors.organization = 'Organization is required for administrators';
+    if (formData.role === "admin" && !formData.organization.trim()) {
+      newErrors.organization = "Organization is required for administrators";
     }
 
     setErrors(newErrors);
@@ -84,7 +84,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
       
       onSuccess?.();
     } catch (error) {
-      setErrors({ general: 'Registration failed. Please try again.' });
+      setErrors({ general: "Registration failed. Please try again." });
     } finally {
       setLoading(false);
     }
@@ -93,30 +93,30 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors(prev => ({ ...prev, [field]: "" }));
     }
   };
 
   const roles: { value: UserRole; label: string; description: string }[] = [
     {
-      value: 'player',
-      label: 'Player',
-      description: 'I am a player participating in sports activities'
+      value: "player",
+      label: "Player",
+      description: "I am a player participating in sports activities"
     },
     {
-      value: 'coach',
-      label: 'Coach',
-      description: 'I coach teams and help players develop'
+      value: "coach",
+      label: "Coach",
+      description: "I coach teams and help players develop"
     },
     {
-      value: 'parent',
-      label: 'Parent',
-      description: 'I am a parent supporting my child\'s sports activities'
+      value: "parent",
+      label: "Parent",
+      description: "I am a parent supporting my child's sports activities"
     },
     {
-      value: 'admin',
-      label: 'Administrator',
-      description: 'I manage leagues, teams, or facilities'
+      value: "admin",
+      label: "Administrator",
+      description: "I manage leagues, teams, or facilities"
     }
   ];
 
@@ -150,9 +150,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
               <input
                 type="text"
                 value={formData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
                 className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.firstName ? 'border-red-300' : 'border-gray-300'
+                  errors.firstName ? "border-red-300" : "border-gray-300"
                 }`}
                 placeholder="Enter your first name"
               />
@@ -168,9 +168,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
               <input
                 type="text"
                 value={formData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                onChange={(e) => handleInputChange("lastName", e.target.value)}
                 className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.lastName ? 'border-red-300' : 'border-gray-300'
+                  errors.lastName ? "border-red-300" : "border-gray-300"
                 }`}
                 placeholder="Enter your last name"
               />
@@ -187,9 +187,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
+              onChange={(e) => handleInputChange("email", e.target.value)}
               className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.email ? 'border-red-300' : 'border-gray-300'
+                errors.email ? "border-red-300" : "border-gray-300"
               }`}
               placeholder="Enter your email address"
             />
@@ -205,7 +205,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
             <input
               type="tel"
               value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
+              onChange={(e) => handleInputChange("phone", e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter your phone number"
             />
@@ -218,7 +218,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
             <input
               type="date"
               value={formData.dateOfBirth}
-              onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+              onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -234,10 +234,10 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
                 key={role.value}
                 className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                   formData.role === role.value
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
-                onClick={() => handleInputChange('role', role.value)}
+                onClick={() => handleInputChange("role", role.value)}
               >
                 <h3 className="font-semibold text-gray-900">{role.label}</h3>
                 <p className="text-sm text-gray-600 mt-1">{role.description}</p>
@@ -245,7 +245,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
             ))}
           </div>
 
-          {formData.role === 'admin' && (
+          {formData.role === "admin" && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Organization *
@@ -253,9 +253,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
               <input
                 type="text"
                 value={formData.organization}
-                onChange={(e) => handleInputChange('organization', e.target.value)}
+                onChange={(e) => handleInputChange("organization", e.target.value)}
                 className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.organization ? 'border-red-300' : 'border-gray-300'
+                  errors.organization ? "border-red-300" : "border-gray-300"
                 }`}
                 placeholder="Enter your organization name"
               />
@@ -277,9 +277,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
             <input
               type="password"
               value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
+              onChange={(e) => handleInputChange("password", e.target.value)}
               className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.password ? 'border-red-300' : 'border-gray-300'
+                errors.password ? "border-red-300" : "border-gray-300"
               }`}
               placeholder="Create a strong password"
             />
@@ -295,9 +295,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
             <input
               type="password"
               value={formData.confirmPassword}
-              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+              onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
               className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                errors.confirmPassword ? "border-red-300" : "border-gray-300"
               }`}
               placeholder="Confirm your password"
             />
@@ -379,7 +379,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, onCancel
             disabled={loading}
             className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </div>
       </form>

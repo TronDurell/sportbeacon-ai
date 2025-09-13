@@ -1,40 +1,41 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
-  "routes": [
+  "headers": [
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer-when-downgrade"
+        }
+      ]
     },
     {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "/manifest.json"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ],
-  "env": {
-    "REACT_APP_API_URL": "@react_app_api_url",
-    "REACT_APP_FIREBASE_API_KEY": "@react_app_firebase_api_key",
-    "REACT_APP_FIREBASE_AUTH_DOMAIN": "@react_app_firebase_auth_domain",
-    "REACT_APP_FIREBASE_PROJECT_ID": "@react_app_firebase_project_id",
-    "REACT_APP_FIREBASE_STORAGE_BUCKET": "@react_app_firebase_storage_bucket",
-    "REACT_APP_FIREBASE_MESSAGING_SENDER_ID": "@react_app_firebase_messaging_sender_id",
-    "REACT_APP_FIREBASE_APP_ID": "@react_app_firebase_app_id",
-    "REACT_APP_STRIPE_PUBLISHABLE_KEY": "@react_app_stripe_publishable_key"
+  "functions": {
+    "app/api/health.ts": {
+      "maxDuration": 10
+    }
   }
 } 

@@ -1,5 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { ErrorHandler, AppError } from '../utils/errorHandler';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { ErrorHandler, AppError } from "../utils/errorHandler";
 
 // ============================================================================
 // ERROR BOUNDARY INTERFACES
@@ -35,7 +35,7 @@ export interface ErrorFallbackProps {
 export const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({ 
   error, 
   resetError, 
-  context = 'Application' 
+  context = "Application" 
 }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -56,7 +56,7 @@ export const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
         <p className="text-gray-600 mb-4">
           Something went wrong. We've been notified and are working to fix the issue.
         </p>
-        {process.env.NODE_ENV === 'development' && (
+        {process.env.NODE_ENV === "development" && (
           <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-4 text-left">
             <p className="text-sm text-gray-800 font-mono break-all">
               {error.message}
@@ -118,7 +118,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log the error to our error handling service
-    const appError = this.errorHandler.handleError(error, this.props.context || 'ErrorBoundary', 'high');
+    const appError = this.errorHandler.handleError(error, this.props.context || "ErrorBoundary", "high");
     
     // Update state with error information
     this.setState({ 
@@ -132,8 +132,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
 
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error, errorInfo);
+    if (process.env.NODE_ENV === "development") {
+      console.error("ErrorBoundary caught an error:", error, errorInfo);
     }
   }
 

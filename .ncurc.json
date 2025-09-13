@@ -1,0 +1,8 @@
+{
+  "reject": [
+    "react",
+    "react-dom", 
+    "typescript"
+  ],
+  "target": "latest"
+}

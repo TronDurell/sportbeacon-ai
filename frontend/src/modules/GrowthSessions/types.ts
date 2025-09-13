@@ -2,7 +2,7 @@
 // Sports Business Intelligence Layer Type Definitions
 
 export interface PlaymakerSession {
-  type: 'Training' | 'Learning' | 'Scouting' | 'Planning' | 'Social' | 'Review';
+  type: "Training" | "Learning" | "Scouting" | "Planning" | "Social" | "Review";
   maxPosts: number;
   role: string;
   startTime: number;
@@ -15,36 +15,36 @@ export interface CoachNudge {
   id: string;
   title: string;
   message: string;
-  type: 'motivation' | 'reminder' | 'suggestion' | 'achievement' | 'warning';
-  priority: 'low' | 'medium' | 'high';
+  type: "motivation" | "reminder" | "suggestion" | "achievement" | "warning";
+  priority: "low" | "medium" | "high";
   actions: Array<{
     label: string;
     aiPrompt: string;
-    variant: 'primary' | 'secondary' | 'ghost';
+    variant: "primary" | "secondary" | "ghost";
   }>;
   expiresAt?: number;
 }
 
 export interface DrillSession {
-  type: 'Training' | 'Learning' | 'Scouting' | 'Planning' | 'Social' | 'Review';
+  type: "Training" | "Learning" | "Scouting" | "Planning" | "Social" | "Review";
   maxPosts: number;
   role: string;
   description: string;
   ctaOptions: Array<{
     label: string;
     aiPrompt: string;
-    variant: 'primary' | 'secondary' | 'ghost';
+    variant: "primary" | "secondary" | "ghost";
   }>;
 }
 
 export interface ScoutContent {
   id: string;
-  type: 'drill' | 'highlight' | 'article' | 'video' | 'event' | 'community';
+  type: "drill" | "highlight" | "article" | "video" | "event" | "community";
   title: string;
   description: string;
   thumbnail?: string;
   tags: string[];
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
   duration: number; // in minutes
   engagement: number; // 0-100
   relevance: number; // 0-100
@@ -78,29 +78,29 @@ export interface LiberationSession {
   interventions: Intervention[];
   actionsTaken: ActionTaken[];
   intent: string;
-  sessionType: 'Training' | 'Learning' | 'Scouting' | 'Planning' | 'Social' | 'Review';
+  sessionType: "Training" | "Learning" | "Scouting" | "Planning" | "Social" | "Review";
 }
 
 export interface ScrollEvent {
   timestamp: number;
   scrollY: number;
-  scrollDirection: 'up' | 'down';
+  scrollDirection: "up" | "down";
   scrollSpeed: number;
   timeSinceLastScroll: number;
 }
 
 export interface Intervention {
   id: string;
-  type: 'coach_nudge' | 'scroll_break' | 'intent_reminder' | 'achievement_celebration';
+  type: "coach_nudge" | "scroll_break" | "intent_reminder" | "achievement_celebration";
   timestamp: number;
   trigger: string;
-  response: 'dismissed' | 'action_taken' | 'ignored';
+  response: "dismissed" | "action_taken" | "ignored";
   timeToResponse: number;
 }
 
 export interface ActionTaken {
   id: string;
-  type: 'drill_started' | 'progress_logged' | 'goal_set' | 'community_engaged' | 'coach_contacted';
+  type: "drill_started" | "progress_logged" | "goal_set" | "community_engaged" | "coach_contacted";
   timestamp: number;
   description: string;
   aiPrompt: string;
@@ -120,56 +120,56 @@ export interface LiberationMetrics {
 }
 
 export interface SessionInsight {
-  type: 'positive' | 'warning' | 'opportunity';
+  type: "positive" | "warning" | "opportunity";
   title: string;
   description: string;
   metric: string;
   value: number;
-  trend: 'up' | 'down' | 'stable';
+  trend: "up" | "down" | "stable";
 }
 
 // Sports Business Constants
 export const SPORTS_ROLES = {
-  PLAYER: 'player',
-  COACH: 'coach', 
-  PARENT: 'parent',
-  ADMIN: 'admin'
+  PLAYER: "player",
+  COACH: "coach", 
+  PARENT: "parent",
+  ADMIN: "admin"
 } as const;
 
 export const SESSION_TYPES = {
-  TRAINING: 'Training',
-  LEARNING: 'Learning',
-  SCOUTING: 'Scouting',
-  PLANNING: 'Planning',
-  SOCIAL: 'Social',
-  REVIEW: 'Review'
+  TRAINING: "Training",
+  LEARNING: "Learning",
+  SCOUTING: "Scouting",
+  PLANNING: "Planning",
+  SOCIAL: "Social",
+  REVIEW: "Review"
 } as const;
 
 export const CONTENT_TYPES = {
-  DRILL: 'drill',
-  HIGHLIGHT: 'highlight',
-  ARTICLE: 'article',
-  VIDEO: 'video',
-  EVENT: 'event',
-  COMMUNITY: 'community'
+  DRILL: "drill",
+  HIGHLIGHT: "highlight",
+  ARTICLE: "article",
+  VIDEO: "video",
+  EVENT: "event",
+  COMMUNITY: "community"
 } as const;
 
 export const DIFFICULTY_LEVELS = {
-  BEGINNER: 'beginner',
-  INTERMEDIATE: 'intermediate',
-  ADVANCED: 'advanced'
+  BEGINNER: "beginner",
+  INTERMEDIATE: "intermediate",
+  ADVANCED: "advanced"
 } as const;
 
 export const NUDGE_TYPES = {
-  MOTIVATION: 'motivation',
-  REMINDER: 'reminder',
-  SUGGESTION: 'suggestion',
-  ACHIEVEMENT: 'achievement',
-  WARNING: 'warning'
+  MOTIVATION: "motivation",
+  REMINDER: "reminder",
+  SUGGESTION: "suggestion",
+  ACHIEVEMENT: "achievement",
+  WARNING: "warning"
 } as const;
 
 export const NUDGE_PRIORITIES = {
-  LOW: 'low',
-  MEDIUM: 'medium',
-  HIGH: 'high'
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high"
 } as const; 

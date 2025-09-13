@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
-export default function FeedFilters({ statFilter, setStatFilter, roleFilter, setRoleFilter }) {
+export default function FeedFilters({ statFilter, setStatFilter, roleFilter, setRoleFilter }: { statFilter: any, setStatFilter: any, roleFilter: any, setRoleFilter: any }) {
   return (
     <Box display="flex" justifyContent="space-between" mb={2}>
       <FormControl variant="outlined" sx={{ minWidth: 120 }}>

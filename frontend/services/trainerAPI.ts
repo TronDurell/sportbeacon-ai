@@ -1,4 +1,4 @@
-import { Player, Insight, FeedItem, Message } from '../types';
+import { Player, Insight, FeedItem, Message } from '../src/types';
 
 export class TrainerAPI {
   async getRoster(trainerId: string): Promise<{ players: Player[] }> {
@@ -28,8 +28,13 @@ export class TrainerAPI {
     return [
       {
         id: '1',
+        senderId: 'ai',
+        recipientId: 'user',
         content: 'Hello, how can I help you today?',
-        role: 'assistant',
+        type: 'text',
+        status: 'sent',
+        createdAt: new Date().toISOString(),
+        role: 'ai',
         timestamp: new Date().toISOString()
       }
     ];
@@ -44,10 +49,26 @@ export class TrainerAPI {
     // Simulate API call
     return {
       id: postId,
+      type: 'post',
       content: 'Sample post',
-      author: { id: '1', name: 'User', avatar: '/avatar.jpg' },
+      author: 'User',
       timestamp: new Date().toISOString(),
-      type: 'post'
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      stats: {
+        views: 0,
+        likes: 0,
+        shares: 0,
+        comments: 0
+      },
+      userInteraction: {
+        liked: false,
+        shared: false,
+        bookmarked: false
+      }
     };
   }
 
@@ -55,8 +76,13 @@ export class TrainerAPI {
     // Simulate API call
     return {
       id: Date.now().toString(),
+      senderId: 'ai',
+      recipientId: 'user',
       content: `Response to: ${question}`,
-      role: 'assistant',
+      type: 'text',
+      status: 'sent',
+      createdAt: new Date().toISOString(),
+      role: 'ai',
       timestamp: new Date().toISOString()
     };
   }

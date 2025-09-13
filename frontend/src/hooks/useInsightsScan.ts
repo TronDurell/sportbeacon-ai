@@ -1,67 +1,67 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export interface Insight {
   id: string;
   title: string;
   message: string;
-  status: 'info' | 'warning' | 'error' | 'success';
+  status: "info" | "warning" | "error" | "success";
   actions: Array<{
     label: string;
     aiPrompt?: string;
-    variant?: 'primary' | 'secondary' | 'ghost';
+    variant?: "primary" | "secondary" | "ghost";
   }>;
 }
 
 const sampleInsights: Record<string, Insight[]> = {
   player: [
     {
-      id: 'player-1',
-      title: 'Missed Training Log',
-      message: 'You missed logging your last training session. Log it now or set a reminder.',
-      status: 'warning',
+      id: "player-1",
+      title: "Missed Training Log",
+      message: "You missed logging your last training session. Log it now or set a reminder.",
+      status: "warning",
       actions: [
-        { label: 'Log it now', aiPrompt: 'Log my last training session', variant: 'primary' },
-        { label: 'Remind me later', aiPrompt: 'Remind me to log training', variant: 'secondary' },
-        { label: 'Dismiss', variant: 'ghost' },
+        { label: "Log it now", aiPrompt: "Log my last training session", variant: "primary" },
+        { label: "Remind me later", aiPrompt: "Remind me to log training", variant: "secondary" },
+        { label: "Dismiss", variant: "ghost" },
       ],
     },
   ],
   coach: [
     {
-      id: 'coach-1',
-      title: 'Schedule Conflict',
-      message: 'Two players have overlapping events this week. View details or let AI suggest a fix.',
-      status: 'error',
+      id: "coach-1",
+      title: "Schedule Conflict",
+      message: "Two players have overlapping events this week. View details or let AI suggest a fix.",
+      status: "error",
       actions: [
-        { label: 'View Details', aiPrompt: 'Show me the conflict details', variant: 'primary' },
-        { label: 'AI Suggest Fix', aiPrompt: 'Suggest a schedule fix', variant: 'secondary' },
-        { label: 'Dismiss', variant: 'ghost' },
+        { label: "View Details", aiPrompt: "Show me the conflict details", variant: "primary" },
+        { label: "AI Suggest Fix", aiPrompt: "Suggest a schedule fix", variant: "secondary" },
+        { label: "Dismiss", variant: "ghost" },
       ],
     },
   ],
   parent: [
     {
-      id: 'parent-1',
-      title: 'Upcoming Payment Due',
-      message: 'Your monthly fee for Alex is due in 2 days. Pay now or set a reminder.',
-      status: 'info',
+      id: "parent-1",
+      title: "Upcoming Payment Due",
+      message: "Your monthly fee for Alex is due in 2 days. Pay now or set a reminder.",
+      status: "info",
       actions: [
-        { label: 'Pay Now', aiPrompt: 'Pay my monthly fee', variant: 'primary' },
-        { label: 'Remind me later', aiPrompt: 'Remind me to pay', variant: 'secondary' },
-        { label: 'Dismiss', variant: 'ghost' },
+        { label: "Pay Now", aiPrompt: "Pay my monthly fee", variant: "primary" },
+        { label: "Remind me later", aiPrompt: "Remind me to pay", variant: "secondary" },
+        { label: "Dismiss", variant: "ghost" },
       ],
     },
   ],
   admin: [
     {
-      id: 'admin-1',
-      title: 'System Alert: Unusual Login',
-      message: 'Unusual login activity detected. View details or let AI investigate.',
-      status: 'error',
+      id: "admin-1",
+      title: "System Alert: Unusual Login",
+      message: "Unusual login activity detected. View details or let AI investigate.",
+      status: "error",
       actions: [
-        { label: 'View Details', aiPrompt: 'Show login alert details', variant: 'primary' },
-        { label: 'AI Investigate', aiPrompt: 'Investigate login alert', variant: 'secondary' },
-        { label: 'Dismiss', variant: 'ghost' },
+        { label: "View Details", aiPrompt: "Show login alert details", variant: "primary" },
+        { label: "AI Investigate", aiPrompt: "Investigate login alert", variant: "secondary" },
+        { label: "Dismiss", variant: "ghost" },
       ],
     },
   ],

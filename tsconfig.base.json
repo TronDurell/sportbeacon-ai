@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "types": ["node"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@shared/*":      ["shared/*"],
+      "@types/*":       ["types/*"],
+      "@frontend/*":    ["frontend/src/*"],
+      "@functions/*":   ["functions/src/*"],
+      "@mcp/*":         ["packages/mcp-server/src/*"],
+      "@memory/*":      ["packages/memory-sdk/src/*"]
+    }
+  }
+}

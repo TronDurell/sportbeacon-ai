@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import SmartTile from '../../SmartTile';
-import { useAgentOrchestration } from '../../../contexts/AgentOrchestrationContext';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import SmartTile from "../../SmartTile";
+import { useAgentOrchestration } from "../../../contexts/AgentOrchestrationContext";
 import { 
   Calendar, 
   Users, 
@@ -11,7 +11,7 @@ import {
   Trophy,
   Clipboard,
   BarChart3
-} from 'lucide-react';
+} from "lucide-react";
 
 interface CoachData {
   nextSession?: {
@@ -30,14 +30,14 @@ interface CoachData {
     id: string;
     title: string;
     dueDate: string;
-    priority: 'high' | 'medium' | 'low';
-    type: 'planning' | 'evaluation' | 'communication' | 'admin';
+    priority: "high" | "medium" | "low";
+    type: "planning" | "evaluation" | "communication" | "admin";
   }>;
   aiInsights?: Array<{
     id: string;
     title: string;
     description: string;
-    impact: 'high' | 'medium' | 'low';
+    impact: "high" | "medium" | "low";
   }>;
   recentEvaluations?: Array<{
     id: string;
@@ -47,9 +47,9 @@ interface CoachData {
   }>;
   alerts?: Array<{
     id: string;
-    type: 'injury' | 'attendance' | 'performance' | 'schedule';
+    type: "injury" | "attendance" | "performance" | "schedule";
     message: string;
-    severity: 'high' | 'medium' | 'low';
+    severity: "high" | "medium" | "low";
   }>;
 }
 
@@ -79,25 +79,25 @@ const CoachDashboard: React.FC = () => {
           teamRank: 2
         },
         pendingTasks: [
-          { id: '1', title: "Review player evaluations", dueDate: "Today", priority: 'high', type: 'evaluation' },
-          { id: '2', title: "Plan next week's training", dueDate: "Tomorrow", priority: 'high', type: 'planning' },
-          { id: '3', title: "Send parent updates", dueDate: "This week", priority: 'medium', type: 'communication' },
-          { id: '4', title: "Update team roster", dueDate: "Next week", priority: 'low', type: 'admin' }
+          { id: "1", title: "Review player evaluations", dueDate: "Today", priority: "high", type: "evaluation" },
+          { id: "2", title: "Plan next week's training", dueDate: "Tomorrow", priority: "high", type: "planning" },
+          { id: "3", title: "Send parent updates", dueDate: "This week", priority: "medium", type: "communication" },
+          { id: "4", title: "Update team roster", dueDate: "Next week", priority: "low", type: "admin" }
         ],
         aiInsights: [
-          { id: '1', title: "Team chemistry improving", description: "Recent group activities showing positive results", impact: 'high' },
-          { id: '2', title: "Focus on defensive positioning", description: "Analysis shows gaps in defensive coverage", impact: 'medium' },
-          { id: '3', title: "Individual player development", description: "3 players ready for advanced training", impact: 'medium' }
+          { id: "1", title: "Team chemistry improving", description: "Recent group activities showing positive results", impact: "high" },
+          { id: "2", title: "Focus on defensive positioning", description: "Analysis shows gaps in defensive coverage", impact: "medium" },
+          { id: "3", title: "Individual player development", description: "3 players ready for advanced training", impact: "medium" }
         ],
         recentEvaluations: [
-          { id: '1', playerName: "Alex Johnson", date: "2 days ago", score: 85 },
-          { id: '2', playerName: "Sarah Chen", date: "3 days ago", score: 92 },
-          { id: '3', playerName: "Mike Davis", date: "4 days ago", score: 78 }
+          { id: "1", playerName: "Alex Johnson", date: "2 days ago", score: 85 },
+          { id: "2", playerName: "Sarah Chen", date: "3 days ago", score: 92 },
+          { id: "3", playerName: "Mike Davis", date: "4 days ago", score: 78 }
         ],
         alerts: [
-          { id: '1', type: 'attendance', message: "5 players missed last session", severity: 'medium' },
-          { id: '2', type: 'performance', message: "Team performance up 15% this month", severity: 'low' },
-          { id: '3', type: 'schedule', message: "Next game rescheduled to Saturday", severity: 'high' }
+          { id: "1", type: "attendance", message: "5 players missed last session", severity: "medium" },
+          { id: "2", type: "performance", message: "Team performance up 15% this month", severity: "low" },
+          { id: "3", type: "schedule", message: "Next game rescheduled to Saturday", severity: "high" }
         ]
       });
       setLoading(false);
@@ -108,7 +108,7 @@ const CoachDashboard: React.FC = () => {
 
   const handleAIAssistance = (context: string) => {
     sendRequest({
-      type: 'coach_assistance',
+      type: "coach_assistance",
       context,
       data: coachData
     });
@@ -193,7 +193,7 @@ const CoachDashboard: React.FC = () => {
             title="Next Training Session"
             icon={<Calendar className="w-5 h-5" />}
             status="info"
-            onClickAI={() => handleAIAssistance('next_session')}
+            onClickAI={() => handleAIAssistance("next_session")}
             loading={loading}
           >
             {coachData.nextSession && (
@@ -216,8 +216,8 @@ const CoachDashboard: React.FC = () => {
           <SmartTile
             title="Pending Tasks"
             icon={<Clipboard className="w-5 h-5" />}
-            status={coachData.pendingTasks?.some(t => t.priority === 'high') ? 'warning' : 'neutral'}
-            onClickAI={() => handleAIAssistance('pending_tasks')}
+            status={coachData.pendingTasks?.some(t => t.priority === "high") ? "warning" : "neutral"}
+            onClickAI={() => handleAIAssistance("pending_tasks")}
             loading={loading}
           >
             <div className="space-y-2">
@@ -229,9 +229,9 @@ const CoachDashboard: React.FC = () => {
                   </div>
                   <div className="flex gap-1">
                     <span className={`text-xs px-2 py-1 rounded ${
-                      task.priority === 'high' ? 'bg-red-100 text-red-700' :
-                      task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
+                      task.priority === "high" ? "bg-red-100 text-red-700" :
+                      task.priority === "medium" ? "bg-yellow-100 text-yellow-700" :
+                      "bg-green-100 text-green-700"
                     }`}>
                       {task.priority}
                     </span>
@@ -251,7 +251,7 @@ const CoachDashboard: React.FC = () => {
             title="AI Insights"
             icon={<Target className="w-5 h-5" />}
             status="success"
-            onClickAI={() => handleAIAssistance('ai_insights')}
+            onClickAI={() => handleAIAssistance("ai_insights")}
             loading={loading}
           >
             <div className="space-y-3">
@@ -260,9 +260,9 @@ const CoachDashboard: React.FC = () => {
                   <div className="flex items-center justify-between mb-1">
                     <h4 className="font-medium text-green-900 text-sm">{insight.title}</h4>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      insight.impact === 'high' ? 'bg-green-200 text-green-800' :
-                      insight.impact === 'medium' ? 'bg-yellow-200 text-yellow-800' :
-                      'bg-gray-200 text-gray-800'
+                      insight.impact === "high" ? "bg-green-200 text-green-800" :
+                      insight.impact === "medium" ? "bg-yellow-200 text-yellow-800" :
+                      "bg-gray-200 text-gray-800"
                     }`}>
                       {insight.impact}
                     </span>
@@ -280,7 +280,7 @@ const CoachDashboard: React.FC = () => {
             title="Recent Evaluations"
             icon={<BarChart3 className="w-5 h-5" />}
             status="neutral"
-            onClickAI={() => handleAIAssistance('evaluations')}
+            onClickAI={() => handleAIAssistance("evaluations")}
             loading={loading}
           >
             <div className="space-y-2">
@@ -291,10 +291,10 @@ const CoachDashboard: React.FC = () => {
                     <p className="text-xs text-gray-500">{evaluation.date}</p>
                   </div>
                   <span className={`text-sm font-bold px-2 py-1 rounded ${
-                    evaluation.score >= 90 ? 'bg-green-100 text-green-700' :
-                    evaluation.score >= 80 ? 'bg-blue-100 text-blue-700' :
-                    evaluation.score >= 70 ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
+                    evaluation.score >= 90 ? "bg-green-100 text-green-700" :
+                    evaluation.score >= 80 ? "bg-blue-100 text-blue-700" :
+                    evaluation.score >= 70 ? "bg-yellow-100 text-yellow-700" :
+                    "bg-red-100 text-red-700"
                   }`}>
                     {evaluation.score}
                   </span>
@@ -309,29 +309,29 @@ const CoachDashboard: React.FC = () => {
           <SmartTile
             title="Team Alerts"
             icon={<AlertTriangle className="w-5 h-5" />}
-            status={coachData.alerts?.some(a => a.severity === 'high') ? 'error' : 'warning'}
-            onClickAI={() => handleAIAssistance('alerts')}
+            status={coachData.alerts?.some(a => a.severity === "high") ? "error" : "warning"}
+            onClickAI={() => handleAIAssistance("alerts")}
             loading={loading}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {coachData.alerts?.map((alert) => (
                 <div key={alert.id} className={`p-3 rounded-lg ${
-                  alert.severity === 'high' ? 'bg-red-50 border border-red-200' :
-                  alert.severity === 'medium' ? 'bg-yellow-50 border border-yellow-200' :
-                  'bg-blue-50 border border-blue-200'
+                  alert.severity === "high" ? "bg-red-50 border border-red-200" :
+                  alert.severity === "medium" ? "bg-yellow-50 border border-yellow-200" :
+                  "bg-blue-50 border border-blue-200"
                 }`}>
                   <div className="flex items-center justify-between mb-1">
                     <span className={`text-xs font-medium ${
-                      alert.severity === 'high' ? 'text-red-700' :
-                      alert.severity === 'medium' ? 'text-yellow-700' :
-                      'text-blue-700'
+                      alert.severity === "high" ? "text-red-700" :
+                      alert.severity === "medium" ? "text-yellow-700" :
+                      "text-blue-700"
                     }`}>
                       {alert.type.toUpperCase()}
                     </span>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      alert.severity === 'high' ? 'bg-red-200 text-red-800' :
-                      alert.severity === 'medium' ? 'bg-yellow-200 text-yellow-800' :
-                      'bg-blue-200 text-blue-800'
+                      alert.severity === "high" ? "bg-red-200 text-red-800" :
+                      alert.severity === "medium" ? "bg-yellow-200 text-yellow-800" :
+                      "bg-blue-200 text-blue-800"
                     }`}>
                       {alert.severity}
                     </span>

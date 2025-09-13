@@ -1,5 +1,5 @@
 import React from 'react';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis } from 'recharts';
+// import { Radar, RadarChart, PolarGrid, PolarAngleAxis } from 'recharts';
 
 export default function TeamRadarChart({ stats }) {
   return (

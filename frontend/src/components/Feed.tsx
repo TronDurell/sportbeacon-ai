@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../contexts/AdminAuthContext';
-import { useSmartLayer } from '../contexts/SmartLayerContext';
-import { useAgentOrchestration } from '../contexts/AgentOrchestrationContext';
+import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../contexts/AdminAuthContext";
+import { useSmartLayer } from "../contexts/SmartLayerContext";
+import { useAgentOrchestration } from "../contexts/AgentOrchestrationContext";
 import { 
   useDrillScrollSessionManager, 
   usePlaymakerIntentEngine,
   useScoutRoleCurationHub,
   useSessionLiberationAnalytics 
-} from '../modules/GrowthSessions';
+} from "../modules/GrowthSessions";
 import { 
   Target, 
   CheckCircle,
@@ -18,16 +18,16 @@ import {
   Clock,
   Users,
   Zap
-} from 'lucide-react';
+} from "lucide-react";
 
 interface FeedPost {
   id: string;
-  type: 'drill' | 'highlight' | 'tip' | 'reminder' | 'alert' | 'achievement' | 'social';
+  type: "drill" | "highlight" | "tip" | "reminder" | "alert" | "achievement" | "social";
   title: string;
   content: string;
   author: string;
   timestamp: number;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
   location?: string;
   tags?: string[];
   engagement?: {
@@ -44,13 +44,13 @@ interface FeedPost {
 
 interface FeedSession {
   id: string;
-  type: 'training' | 'learning' | 'scouting' | 'social' | 'planning';
+  type: "training" | "learning" | "scouting" | "social" | "planning";
   startTime: number;
   duration: number;
   postsViewed: number;
   actionsTaken: number;
   intent: string;
-  status: 'active' | 'completed' | 'interrupted';
+  status: "active" | "completed" | "interrupted";
 }
 
 const Feed: React.FC = () => {
@@ -96,20 +96,20 @@ const Feed: React.FC = () => {
 
     const initializeSession = async () => {
       // Start analytics session
-      const newSessionId = startAnalyticsSession('curated');
+      const newSessionId = startAnalyticsSession("curated");
       setSessionId(newSessionId);
 
       // Create feed session
-      const sessionType = determineSessionType(userIntent || 'explore', user.role);
+      const sessionType = determineSessionType(userIntent || "explore", user.role);
       const feedSession: FeedSession = {
-        id: newSessionId || 'default-session',
+        id: newSessionId || "default-session",
         type: sessionType,
         startTime: Date.now(),
         duration: 0,
         postsViewed: 0,
         actionsTaken: 0,
-        intent: userIntent || 'explore',
-        status: 'active'
+        intent: userIntent || "explore",
+        status: "active"
       };
       setCurrentSession(feedSession);
 
@@ -133,27 +133,27 @@ const Feed: React.FC = () => {
 
       // Trigger intervention if needed
       if (scrollCount > 50 && rapidScrolls > 3) {
-        logIntervention('scroll_timeout', 'excessive_scrolling');
+        logIntervention("scroll_timeout", "excessive_scrolling");
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollCount, rapidScrolls, logIntervention, currentSession, postsViewed]);
 
-  const determineSessionType = (intent: string, role: string): FeedSession['type'] => {
-    if (intent === 'train' || intent === 'workout') return 'training';
-    if (intent === 'learn' || intent === 'study') return 'learning';
-    if (intent === 'scout' || intent === 'evaluate') return 'scouting';
-    if (intent === 'social' || intent === 'connect') return 'social';
-    if (intent === 'plan' || intent === 'organize') return 'planning';
+  const determineSessionType = (intent: string, role: string): FeedSession["type"] => {
+    if (intent === "train" || intent === "workout") return "training";
+    if (intent === "learn" || intent === "study") return "learning";
+    if (intent === "scout" || intent === "evaluate") return "scouting";
+    if (intent === "social" || intent === "connect") return "social";
+    if (intent === "plan" || intent === "organize") return "planning";
     
     // Default based on role
     switch (role) {
-      case 'player': return 'training';
-      case 'coach': return 'scouting';
-      case 'parent': return 'planning';
-      default: return 'learning';
+      case "player": return "training";
+      case "coach": return "scouting";
+      case "parent": return "planning";
+      default: return "learning";
     }
   };
 
@@ -163,15 +163,15 @@ const Feed: React.FC = () => {
     // Generate posts with AI insights
     const posts: FeedPost[] = [
       {
-        id: '1',
-        type: 'drill',
-        title: 'Agility Ladder Workout',
-        content: 'Improve your footwork and speed with this 15-minute ladder drill designed for your skill level...',
-        author: 'Coach Smith',
+        id: "1",
+        type: "drill",
+        title: "Agility Ladder Workout",
+        content: "Improve your footwork and speed with this 15-minute ladder drill designed for your skill level...",
+        author: "Coach Smith",
         timestamp: Date.now() - 3600000,
-        priority: 'high',
-        location: 'Local Gym',
-        tags: ['agility', 'speed', 'footwork'],
+        priority: "high",
+        location: "Local Gym",
+        tags: ["agility", "speed", "footwork"],
         engagement: { likes: 24, comments: 8, shares: 3 },
         aiInsights: {
           relevance: 0.95,
@@ -180,14 +180,14 @@ const Feed: React.FC = () => {
         }
       },
       {
-        id: '2',
-        type: 'highlight',
-        title: 'Team Performance Update',
-        content: 'Great work this week! Team stats show 15% improvement in passing accuracy. Keep up the momentum!',
-        author: 'AI Assistant',
+        id: "2",
+        type: "highlight",
+        title: "Team Performance Update",
+        content: "Great work this week! Team stats show 15% improvement in passing accuracy. Keep up the momentum!",
+        author: "AI Assistant",
         timestamp: Date.now() - 7200000,
-        priority: 'medium',
-        tags: ['performance', 'stats', 'improvement'],
+        priority: "medium",
+        tags: ["performance", "stats", "improvement"],
         engagement: { likes: 18, comments: 5, shares: 2 },
         aiInsights: {
           relevance: 0.87,
@@ -196,14 +196,14 @@ const Feed: React.FC = () => {
         }
       },
       {
-        id: '3',
-        type: 'tip',
-        title: 'Recovery Best Practices',
-        content: 'Remember to stretch for 5 minutes after training to prevent injury and improve flexibility...',
-        author: 'Sports Science',
+        id: "3",
+        type: "tip",
+        title: "Recovery Best Practices",
+        content: "Remember to stretch for 5 minutes after training to prevent injury and improve flexibility...",
+        author: "Sports Science",
         timestamp: Date.now() - 10800000,
-        priority: 'low',
-        tags: ['recovery', 'stretching', 'injury-prevention'],
+        priority: "low",
+        tags: ["recovery", "stretching", "injury-prevention"],
         engagement: { likes: 12, comments: 3, shares: 1 },
         aiInsights: {
           relevance: 0.78,
@@ -212,15 +212,15 @@ const Feed: React.FC = () => {
         }
       },
       {
-        id: '4',
-        type: 'reminder',
-        title: 'Upcoming Game',
-        content: 'Don\'t forget the game tomorrow at 3:00 PM. Bring your gear and arrive 30 minutes early!',
-        author: 'League Admin',
+        id: "4",
+        type: "reminder",
+        title: "Upcoming Game",
+        content: "Don't forget the game tomorrow at 3:00 PM. Bring your gear and arrive 30 minutes early!",
+        author: "League Admin",
         timestamp: Date.now() - 14400000,
-        priority: 'high',
-        location: 'Memorial Field',
-        tags: ['game', 'reminder', 'schedule'],
+        priority: "high",
+        location: "Memorial Field",
+        tags: ["game", "reminder", "schedule"],
         engagement: { likes: 31, comments: 12, shares: 8 },
         aiInsights: {
           relevance: 0.98,
@@ -229,14 +229,14 @@ const Feed: React.FC = () => {
         }
       },
       {
-        id: '5',
-        type: 'achievement',
-        title: 'New Personal Best!',
-        content: 'Congratulations! You\'ve achieved a new personal best in your 100m sprint time.',
-        author: 'Performance Tracker',
+        id: "5",
+        type: "achievement",
+        title: "New Personal Best!",
+        content: "Congratulations! You've achieved a new personal best in your 100m sprint time.",
+        author: "Performance Tracker",
         timestamp: Date.now() - 18000000,
-        priority: 'high',
-        tags: ['achievement', 'personal-best', 'sprint'],
+        priority: "high",
+        tags: ["achievement", "personal-best", "sprint"],
         engagement: { likes: 45, comments: 15, shares: 12 },
         aiInsights: {
           relevance: 0.99,
@@ -270,14 +270,14 @@ const Feed: React.FC = () => {
     await takeDrillAction(action);
     
     // Log successful intervention
-    logIntervention('session_complete', 'user_action');
+    logIntervention("session_complete", "user_action");
     
     // Update session
     if (currentSession) {
       setCurrentSession(prev => prev ? {
         ...prev,
         actionsTaken: prev.actionsTaken + 1,
-        status: 'completed'
+        status: "completed"
       } : null);
     }
     
@@ -289,7 +289,7 @@ const Feed: React.FC = () => {
 
     // Send to AI orchestration
     await sendRequest({
-      type: 'session_action_completed',
+      type: "session_action_completed",
       data: {
         action,
         sessionId,
@@ -299,21 +299,21 @@ const Feed: React.FC = () => {
     });
   }, [takeDrillAction, logIntervention, currentSession, sessionId, endAnalyticsSession, endDrillSession, sendRequest, userIntent]);
 
-  const handleInterventionResponse = useCallback(async (response: 'accept' | 'dismiss') => {
+  const handleInterventionResponse = useCallback(async (response: "accept" | "dismiss") => {
     setShowIntervention(false);
     
-    if (response === 'accept' && interventionData) {
+    if (response === "accept" && interventionData) {
       await handleSessionAction(interventionData.action);
     }
     
-    logIntervention('intervention_response', response);
+    logIntervention("intervention_response", response);
   }, [interventionData, handleSessionAction, logIntervention]);
 
   const sessionProgress = getDrillSessionProgress();
   const sessionCTA = getDrillSessionCTA();
-  const roleInsights = { message: 'You\'re making great progress!' };
+  const roleInsights = { message: "You're making great progress!" };
   const intentRecommendations = [
-    { id: '1', title: 'Recommended Drill', description: 'Try this agility drill' }
+    { id: "1", title: "Recommended Drill", description: "Try this agility drill" }
   ];
 
   if (!user) {
@@ -409,8 +409,8 @@ const Feed: React.FC = () => {
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className={`w-3 h-3 rounded-full ${
-                  post.priority === 'high' ? 'bg-red-500' :
-                  post.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                  post.priority === "high" ? "bg-red-500" :
+                  post.priority === "medium" ? "bg-yellow-500" : "bg-green-500"
                 }`} />
                 <span className="text-sm font-medium text-gray-900">{post.title}</span>
               </div>
@@ -507,13 +507,13 @@ const Feed: React.FC = () => {
               <p className="text-gray-600 mb-6">{interventionData.message}</p>
               <div className="flex gap-3">
                 <button
-                  onClick={() => handleInterventionResponse('accept')}
+                  onClick={() => handleInterventionResponse("accept")}
                   className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
                 >
-                  {interventionData.action?.label || 'Take Action'}
+                  {interventionData.action?.label || "Take Action"}
                 </button>
                 <button
-                  onClick={() => handleInterventionResponse('dismiss')}
+                  onClick={() => handleInterventionResponse("dismiss")}
                   className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
                 >
                   Continue Browsing

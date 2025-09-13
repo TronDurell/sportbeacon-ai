@@ -2,11 +2,11 @@ import React from 'react';
 import { Typography, Slider, Button } from '@mui/material';
 import useEvaluationRubric from '../hooks/useEvaluationRubric';
 
-export default function EvalForm({ evals, setEvals, submitEvaluation }) {
+export default function EvalForm({ evals, setEvals, submitEvaluation }: { evals: any, setEvals: any, submitEvaluation: any }) {
   const rubric = useEvaluationRubric();
 
-  const handleSliderChange = (label) => (event, newValue) => {
-    setEvals((prevEvals) => ({ ...prevEvals, [label]: newValue }));
+  const handleSliderChange = (label: string) => (event: any, newValue: number) => {
+    setEvals((prevEvals: any) => ({ ...prevEvals, [label]: newValue }));
   };
 
   return (

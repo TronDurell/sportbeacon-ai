@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
 import VideoService from '../services/videoService';
-import type { VideoUploadProgress, VideoMetadata } from '../firebase/types';
+import type { VideoUploadProgress, VideoMetadata } from '../src/types/monetization';
 
 interface UseVideoUploadReturn {
   // State

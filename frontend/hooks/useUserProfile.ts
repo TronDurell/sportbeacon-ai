@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase'; // Ensure this path is correct
+import { db } from '../firebase/init';
 
-export default function useUserProfile(userId) {
-  const [profile, setProfile] = useState(null);
+export default function useUserProfile(userId: string) {
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     if (!userId) return;

@@ -1,11 +1,11 @@
-import React from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import React from "react";
+import { render, RenderOptions } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 
 // Custom render function that includes providers
 const customRender = (
   ui: React.ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
+  options?: Omit<RenderOptions, "wrapper">
 ) => {
   return render(ui, { ...options });
 };
@@ -29,13 +29,13 @@ export const checkCheckbox = async (checkbox: HTMLElement) => {
 };
 
 export const submitForm = async (form: HTMLElement) => {
-  const submitButton = form.querySelector('button[type="submit"]');
+  const submitButton = form.querySelector("button[type=\"submit\"]");
   if (submitButton) {
     await userEvent.click(submitButton);
   }
 };
 
 // Re-export everything from testing library
-export * from '@testing-library/react';
+export * from "@testing-library/react";
 export { customRender as render };
 export { userEvent }; 

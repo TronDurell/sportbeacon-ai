@@ -1,7 +1,38 @@
 import { CallableContext } from "firebase-functions/v1/https";
 import { CallableResponse } from "firebase-functions/v2/https";
 export type CallableContextV2 = CallableResponse<unknown> | undefined;
-export * from '../../../types/interfaces';
+export interface ApiContext {
+    auth?: {
+        uid: string;
+        token: Record<string, any>;
+    };
+    user?: {
+        uid: string;
+        email: string;
+        role: string;
+    };
+}
+export interface ApiRequest<T = any> {
+    data: T;
+}
+export interface Team {
+    id: string;
+    name: string;
+    leagueId: string;
+    coachId: string;
+    players: string[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+export interface League {
+    id: string;
+    name: string;
+    sport: string;
+    ageGroup: string;
+    season: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
 export interface FirebaseContext {
     auth: {
         uid: string;

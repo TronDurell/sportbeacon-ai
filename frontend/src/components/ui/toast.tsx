@@ -1,15 +1,15 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface Toast {
   id: string;
   message: string;
-  type: 'success' | 'error' | 'warning' | 'info';
+  type: "success" | "error" | "warning" | "info";
   duration?: number;
 }
 
 interface ToastContextType {
   toasts: Toast[];
-  addToast: (message: string, type: Toast['type'], duration?: number) => void;
+  addToast: (message: string, type: Toast["type"], duration?: number) => void;
   removeToast: (id: string) => void;
   success: (message: string, _duration?: number) => void;
   error: (message: string, _duration?: number) => void;
@@ -22,7 +22,7 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (context === undefined) {
-    throw new Error('useToast must be used within a ToastProvider');
+    throw new Error("useToast must be used within a ToastProvider");
   }
   return context;
 };
@@ -34,7 +34,7 @@ interface ToastProviderProps {
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = (message: string, type: Toast['type'], duration = 5000) => {
+  const addToast = (message: string, type: Toast["type"], duration = 5000) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newToast: Toast = { id, message, type, duration };
     
@@ -53,16 +53,16 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 
   const toast = {
     success: (message: string, _duration?: number) => {
-      addToast(message, 'success');
+      addToast(message, "success");
     },
     error: (message: string, _duration?: number) => {
-      addToast(message, 'error');
+      addToast(message, "error");
     },
     warning: (message: string, _duration?: number) => {
-      addToast(message, 'warning');
+      addToast(message, "warning");
     },
     info: (message: string, _duration?: number) => {
-      addToast(message, 'info');
+      addToast(message, "info");
     }
   };
 
@@ -104,18 +104,18 @@ interface ToastItemProps {
 }
 
 const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
-  const getToastStyles = (type: Toast['type']) => {
+  const getToastStyles = (type: Toast["type"]) => {
     switch (type) {
-      case 'success':
-        return 'bg-green-500 text-white';
-      case 'error':
-        return 'bg-red-500 text-white';
-      case 'warning':
-        return 'bg-yellow-500 text-black';
-      case 'info':
-        return 'bg-blue-500 text-white';
+      case "success":
+        return "bg-green-500 text-white";
+      case "error":
+        return "bg-red-500 text-white";
+      case "warning":
+        return "bg-yellow-500 text-black";
+      case "info":
+        return "bg-blue-500 text-white";
       default:
-        return 'bg-gray-500 text-white';
+        return "bg-gray-500 text-white";
     }
   };
 

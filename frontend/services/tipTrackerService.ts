@@ -20,48 +20,8 @@ import { useAuth } from '../contexts/AuthContext';
 import type { Timestamp } from 'firebase/firestore';
 
 // Tip Types
-export interface Tip {
-  id: string;
-  tipId: string; // Stripe payment intent ID
-  fromUserId: string;
-  toUserId: string;
-  fromUserProfile?: {
-    displayName: string;
-    avatar?: string;
-  };
-  toUserProfile?: {
-    displayName: string;
-    avatar?: string;
-  };
-  
-  // Tip Details
-  amount: number; // Amount in cents
-  currency: string;
-  message?: string;
-  isAnonymous: boolean;
-  
-  // Stripe Integration
-  stripePaymentIntentId: string;
-  stripeTransferId?: string;
-  stripeAccountId?: string;
-  
-  // Status and Processing
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded' | 'cancelled';
-  processingFee: number;
-  platformFee: number;
-  creatorAmount: number; // Amount after fees
-  
-  // Metadata
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  processedAt?: Timestamp;
-  refundedAt?: Timestamp;
-  
-  // Analytics
-  category?: string;
-  tags?: string[];
-  source: 'web' | 'mobile' | 'api';
-}
+// Import consolidated Tip interface
+import type { Tip } from '../types';
 
 // Tip Creation Request
 export interface TipRequest {
@@ -171,8 +131,8 @@ export class TipTrackerService {
       processingFee: stripeFee,
       platformFee: platformFee,
       creatorAmount,
-      createdAt: serverTimestamp() as Timestamp,
-      updatedAt: serverTimestamp() as Timestamp,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       source: 'web'
     };
 
@@ -315,11 +275,11 @@ export class TipTrackerService {
         return;
       }
 
-      if (filters.startDate && tip.createdAt < filters.startDate) {
+      if (filters.startDate && new Date(tip.createdAt) < filters.startDate.toDate()) {
         return;
       }
 
-      if (filters.endDate && tip.createdAt > filters.endDate) {
+      if (filters.endDate && new Date(tip.createdAt) > filters.endDate.toDate()) {
         return;
       }
 
@@ -396,7 +356,7 @@ export class TipTrackerService {
       }
 
       // Count by day
-      const dateKey = tip.createdAt.toDate().toISOString().split('T')[0];
+      const dateKey = new Date(tip.createdAt).toISOString().split('T')[0];
       if (!tipsByDay[dateKey]) {
         tipsByDay[dateKey] = { count: 0, amount: 0 };
       }
@@ -436,7 +396,7 @@ export class TipTrackerService {
 
     // Get recent tips
     const recentTips = tips
-      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10);
 
     return {
@@ -694,7 +654,7 @@ export class TipTrackerService {
         tipsByCategory[tip.category] = (tipsByCategory[tip.category] || 0) + 1;
       }
 
-      const dateKey = tip.createdAt.toDate().toISOString().split('T')[0];
+      const dateKey = new Date(tip.createdAt).toISOString().split('T')[0];
       if (!tipsByDay[dateKey]) {
         tipsByDay[dateKey] = { count: 0, amount: 0 };
       }
@@ -729,7 +689,7 @@ export class TipTrackerService {
       .slice(0, 10);
 
     const recentTips = tips
-      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10);
 
     return {

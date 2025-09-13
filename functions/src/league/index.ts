@@ -1,14 +1,12 @@
 import {onCall} from "firebase-functions/v2/https";
 // Removed unused import
-import {initializeApp} from "firebase-admin/app";
 import {getFirestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {AuthContext, isAuthContext, CallableContextV2} from "../types";
 import { ValidationMiddleware, Schemas } from "../utils/validation";
 import { z } from "zod";
 
-// Initialize Firebase Admin
-initializeApp();
+// Get Firestore instance (Firebase Admin already initialized in main index.ts)
 const db = getFirestore();
 
 // Helper function to validate user authentication
@@ -53,7 +51,7 @@ export const createLeague = onCall(async (data, context) => {
         message: "Invalid league data",
         data: null,
         errors: validation.errors?.errors.map(err => ({
-          field: err.path.join('.'),
+          field: err.path.join("."),
           message: err.message
         }))
       };
@@ -83,11 +81,11 @@ export const createLeague = onCall(async (data, context) => {
       status: "active",
       divisions: [],
       teams: [],
-      rules: leagueData?.rules || {},
+      rules: (leagueData as any)?.rules || {},
       schedule: {
-        startDate: leagueData?.startDate,
-        endDate: leagueData?.endDate,
-        gameDays: leagueData?.gameDays || [],
+        startDate: (leagueData as any)?.startDate,
+        endDate: (leagueData as any)?.endDate,
+        gameDays: (leagueData as any)?.gameDays || [],
       },
     };
 

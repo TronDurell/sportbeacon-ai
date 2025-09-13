@@ -8,7 +8,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useVideoUpload } from '../../hooks/useVideoUpload';
 import AnnotationService from '../../services/annotationService';
-import type { VideoAnnotationDocument, AnnotationData } from '../../firebase/types';
+import type { VideoAnnotationDocument } from '../../firebase/types';
+// import type { AnnotationData } from '../../firebase/types'; // Type not found
 import {
   Box,
   Card,

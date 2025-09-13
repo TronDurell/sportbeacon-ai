@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, UserRole } from '../types';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { User, UserRole } from "../types";
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
@@ -8,15 +8,15 @@ import {
   onAuthStateChanged,
   User as FirebaseUser,
   updateProfile
-} from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { app } from '../lib/firebase';
+} from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { app } from "../lib/firebase";
 import { 
   validateUserRegistration, 
   validateUserLogin,
   formatValidationErrors,
   UserRegistrationData
-} from '../utils/validation';
+} from "../utils/validation";
 
 interface AuthState {
   user: User | null;
@@ -36,7 +36,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AdminAuthProvider');
+    throw new Error("useAuth must be used within an AdminAuthProvider");
   }
   return context;
 };
@@ -83,42 +83,46 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
   const convertFirebaseUser = async (firebaseUser: FirebaseUser): Promise<User> => {
     try {
       // Get user data from Firestore
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
         return {
           id: firebaseUser.uid,
-          email: firebaseUser.email || '',
-          firstName: userData.firstName || '',
-          lastName: userData.lastName || '',
-          role: userData.role || 'athlete',
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || "",
+          displayName: firebaseUser.displayName || `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
+          firstName: userData.firstName || "",
+          lastName: userData.lastName || "",
+          role: userData.role || "athlete",
           organization: userData.organization,
-          createdAt: userData.createdAt?.toDate() || new Date(),
-          updatedAt: userData.updatedAt?.toDate() || new Date()
+          createdAt: (userData.createdAt?.toDate() || new Date()).toISOString(),
+          updatedAt: (userData.updatedAt?.toDate() || new Date()).toISOString()
         };
       } else {
         // Create user document if it doesn't exist
         const newUser: User = {
           id: firebaseUser.uid,
-          email: firebaseUser.email || '',
-          firstName: firebaseUser.displayName?.split(' ')[0] || '',
-          lastName: firebaseUser.displayName?.split(' ').slice(1).join(' ') || '',
-          role: 'player',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || "",
+          displayName: firebaseUser.displayName || "",
+          firstName: firebaseUser.displayName?.split(" ")[0] || "",
+          lastName: firebaseUser.displayName?.split(" ").slice(1).join(" ") || "",
+          role: "player",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         };
         
-        await setDoc(doc(db, 'users', firebaseUser.uid), {
+        await setDoc(doc(db, "users", firebaseUser.uid), {
           ...newUser,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
         
         return newUser;
       }
     } catch (error) {
-      throw new Error('Failed to load user data');
+      throw new Error("Failed to load user data");
     }
   };
 
@@ -158,13 +162,13 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     try {
       // Input validation
       if (!email || !password) {
-        throw new Error('Email and password are required');
+        throw new Error("Email and password are required");
       }
       
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        throw new Error('Invalid email format');
+        throw new Error("Invalid email format");
       }
       
       // Firebase authentication
@@ -176,7 +180,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       
       // Update user role if needed
       if (user.role !== role) {
-        await updateDoc(doc(db, 'users', user.id), {
+        await updateDoc(doc(db, "users", user.id), {
           role,
           updatedAt: new Date()
         });
@@ -193,14 +197,14 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       
       // Handle specific Firebase auth errors
       if (error instanceof Error) {
-        if (error.message.includes('user-not-found')) {
-          throw new Error('User not found. Please check your email and password.');
-        } else if (error.message.includes('wrong-password')) {
-          throw new Error('Incorrect password. Please try again.');
-        } else if (error.message.includes('too-many-requests')) {
-          throw new Error('Too many failed attempts. Please try again later.');
-        } else if (error.message.includes('user-disabled')) {
-          throw new Error('Account has been disabled. Please contact support.');
+        if (error.message.includes("user-not-found")) {
+          throw new Error("User not found. Please check your email and password.");
+        } else if (error.message.includes("wrong-password")) {
+          throw new Error("Incorrect password. Please try again.");
+        } else if (error.message.includes("too-many-requests")) {
+          throw new Error("Too many failed attempts. Please try again later.");
+        } else if (error.message.includes("user-disabled")) {
+          throw new Error("Account has been disabled. Please contact support.");
         }
       }
       
@@ -239,19 +243,21 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       // Create user document in Firestore
       const newUser: User = {
         id: firebaseUser.uid,
+        uid: firebaseUser.uid,
         email: validatedData.email,
+        displayName: `${validatedData.firstName} ${validatedData.lastName}`,
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,
         role: validatedData.role,
         organization: validatedData.organization,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
       
-      await setDoc(doc(db, 'users', firebaseUser.uid), {
+      await setDoc(doc(db, "users", firebaseUser.uid), {
         ...newUser,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
       
       setAuthState({
@@ -264,12 +270,12 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       
       // Handle specific Firebase auth errors
       if (error instanceof Error) {
-        if (error.message.includes('email-already-in-use')) {
-          throw new Error('An account with this email already exists.');
-        } else if (error.message.includes('weak-password')) {
-          throw new Error('Password is too weak. Please choose a stronger password.');
-        } else if (error.message.includes('invalid-email')) {
-          throw new Error('Invalid email address.');
+        if (error.message.includes("email-already-in-use")) {
+          throw new Error("An account with this email already exists.");
+        } else if (error.message.includes("weak-password")) {
+          throw new Error("Password is too weak. Please choose a stronger password.");
+        } else if (error.message.includes("invalid-email")) {
+          throw new Error("Invalid email address.");
         }
       }
       
@@ -297,18 +303,18 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
   const updateUser = async (userData: Partial<User>) => {
     if (!authState.user) {
-      throw new Error('No user logged in');
+      throw new Error("No user logged in");
     }
     
     try {
       // Update Firestore document
-      await updateDoc(doc(db, 'users', authState.user.id), {
+      await updateDoc(doc(db, "users", authState.user.id), {
         ...userData,
-        updatedAt: new Date()
+        updatedAt: new Date().toISOString()
       });
       
       // Update local state
-      const updatedUser = { ...authState.user, ...userData, updatedAt: new Date() };
+      const updatedUser = { ...authState.user, ...userData, updatedAt: new Date().toISOString() };
       setAuthState(prev => ({ ...prev, user: updatedUser }));
       
       // Update Firebase profile if name changed
@@ -321,7 +327,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
         }
       }
     } catch (error) {
-      throw new Error('Failed to update user profile');
+      throw new Error("Failed to update user profile");
     }
   };
 

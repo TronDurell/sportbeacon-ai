@@ -27,7 +27,7 @@ export interface BackendIntegrationState {
   dashboardError: string | null;
   
   // Media State
-  userMedia: MediaMetadata[];
+  userMedia: any[]; // Using any[] to avoid type conflicts
   mediaLoading: boolean;
   mediaError: string | null;
   
@@ -79,7 +79,8 @@ const BackendIntegrationContext = createContext<BackendIntegrationContextType | 
 
 // Provider Component
 export const BackendIntegrationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const auth = useAuth();
+  const user = auth.user;
   
   // State
   const [state, setState] = useState<BackendIntegrationState>({
@@ -207,14 +208,7 @@ export const BackendIntegrationProvider: React.FC<{ children: React.ReactNode }>
             preferredPayoutMethod: 'stripe'
           },
           preferences: {
-            notifications: {
-              email: true,
-              push: true,
-              sms: false,
-              tips: true,
-              achievements: true,
-              matches: true
-            },
+            notifications: true,
             privacy: {
               showEmail: false,
               showPhone: false,
@@ -503,7 +497,7 @@ export const BackendIntegrationProvider: React.FC<{ children: React.ReactNode }>
       if (!user) throw new Error('User not authenticated');
       
       try {
-        const uploadTask = await mediaService.uploadFile(file, category as any);
+        const uploadTask = await mediaService.uploadFile(file, category as any, user.uid);
         return uploadTask.id;
       } catch (error) {
         console.error('Failed to upload media:', error);

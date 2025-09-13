@@ -18,86 +18,7 @@ import {
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import type { Timestamp } from 'firebase/firestore';
-
-// Player Profile Types
-export interface PlayerProfile {
-  id: string;
-  userId: string;
-  displayName: string;
-  email: string;
-  avatar?: string;
-  bio?: string;
-  location?: string;
-  dateOfBirth?: Timestamp;
-  phoneNumber?: string;
-  
-  // Sports Information
-  sports: {
-    primary: string;
-    secondary?: string[];
-    positions: string[];
-    experience: 'beginner' | 'intermediate' | 'advanced' | 'professional';
-    yearsPlaying: number;
-  };
-  
-  // Performance Metrics
-  performance: {
-    totalGames: number;
-    wins: number;
-    losses: number;
-    winRate: number;
-    averageScore: number;
-    bestScore: number;
-    totalPoints: number;
-    achievements: string[];
-  };
-  
-  // Social and Community
-  social: {
-    followers: number;
-    following: number;
-    isVerified: boolean;
-    isPublic: boolean;
-    allowMessages: boolean;
-    allowTips: boolean;
-  };
-  
-  // Financial Information
-  financial: {
-    totalEarnings: number;
-    totalTips: number;
-    stripeAccountId?: string;
-    payoutEnabled: boolean;
-    preferredPayoutMethod: 'stripe' | 'paypal' | 'bank';
-  };
-  
-  // Settings and Preferences
-  preferences: {
-    notifications: {
-      email: boolean;
-      push: boolean;
-      sms: boolean;
-      tips: boolean;
-      achievements: boolean;
-      matches: boolean;
-    };
-    privacy: {
-      showEmail: boolean;
-      showPhone: boolean;
-      showLocation: boolean;
-      showAge: boolean;
-      showEarnings: boolean;
-    };
-    language: string;
-    timezone: string;
-  };
-  
-  // Metadata
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  lastActive: Timestamp;
-  status: 'active' | 'inactive' | 'suspended' | 'deleted';
-}
+import type { PlayerProfile } from '../types';
 
 // Player Profile Update Types
 export interface PlayerProfileUpdate {
@@ -105,7 +26,7 @@ export interface PlayerProfileUpdate {
   avatar?: string;
   bio?: string;
   location?: string;
-  dateOfBirth?: Timestamp;
+  dateOfBirth?: Timestamp | string;
   phoneNumber?: string;
   sports?: Partial<PlayerProfile['sports']>;
   social?: Partial<PlayerProfile['social']>;
@@ -117,7 +38,7 @@ export interface PlayerProfileUpdate {
 export interface PlayerSearchFilters {
   sports?: string[];
   positions?: string[];
-  experience?: PlayerProfile['sports']['experience'][];
+  experience?: ('beginner' | 'intermediate' | 'advanced' | 'professional')[];
   location?: string;
   isVerified?: boolean;
   isPublic?: boolean;
@@ -135,7 +56,7 @@ export interface PlayerAnalytics {
   activePlayers: number;
   verifiedPlayers: number;
   playersBySport: Record<string, number>;
-  playersByExperience: Record<PlayerProfile['sports']['experience'], number>;
+  playersByExperience: Record<'beginner' | 'intermediate' | 'advanced' | 'professional', number>;
   averageWinRate: number;
   totalEarnings: number;
   averageEarnings: number;
@@ -166,14 +87,13 @@ export class PlayerProfileService {
     profileData: Omit<PlayerProfile, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'lastActive' | 'status'>
   ): Promise<string> {
     const profileRef = doc(collection(db, 'playerProfiles'));
+    const now = new Date().toISOString();
     const profile: PlayerProfile = {
       ...profileData,
       id: profileRef.id,
       userId,
-      createdAt: serverTimestamp() as Timestamp,
-      updatedAt: serverTimestamp() as Timestamp,
-      lastActive: serverTimestamp() as Timestamp,
-      status: 'active'
+      createdAt: now,
+      updatedAt: now
     };
 
     await setDoc(profileRef, profile);
@@ -233,7 +153,7 @@ export class PlayerProfileService {
     
     // Calculate win rate if games are updated
     let winRate = undefined;
-    if (performance.totalGames !== undefined && performance.wins !== undefined) {
+    if (performance?.totalGames !== undefined && performance?.wins !== undefined) {
       winRate = performance.wins / performance.totalGames;
     }
 
@@ -287,6 +207,15 @@ export class PlayerProfileService {
   }
 
   // Search Players
+  async searchPlayersByText(searchTerm: string): Promise<PlayerProfile[]> {
+    // Simple text search - in a real app, you'd use Algolia or similar
+    const allProfiles = await this.getTrendingPlayers(100);
+    return allProfiles.filter(profile => 
+      profile.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      profile.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
   async searchPlayers(
     filters: PlayerSearchFilters,
     limitCount: number = 20
@@ -327,30 +256,30 @@ export class PlayerProfileService {
       
       // Apply additional filters that can't be done in Firestore
       if (filters.positions && filters.positions.length > 0) {
-        if (!filters.positions.some(pos => player.sports.positions.includes(pos))) {
+        if (!player.sports?.positions || !filters.positions.some(pos => player.sports.positions.includes(pos))) {
           return;
         }
       }
 
       if (filters.experience && filters.experience.length > 0) {
-        if (!filters.experience.includes(player.sports.experience)) {
+        if (!player.sports?.experience || !filters.experience.includes(player.sports.experience)) {
           return;
         }
       }
 
-      if (filters.minWinRate && player.performance.winRate < filters.minWinRate) {
+      if (filters.minWinRate && player.performance?.winRate && player.performance.winRate < filters.minWinRate) {
         return;
       }
 
-      if (filters.maxWinRate && player.performance.winRate > filters.maxWinRate) {
+      if (filters.maxWinRate && player.performance?.winRate && player.performance.winRate > filters.maxWinRate) {
         return;
       }
 
-      if (filters.minFollowers && player.social.followers < filters.minFollowers) {
+      if (filters.minFollowers && player.social?.followers && player.social.followers < filters.minFollowers) {
         return;
       }
 
-      if (filters.maxFollowers && player.social.followers > filters.maxFollowers) {
+      if (filters.maxFollowers && player.social?.followers && player.social.followers > filters.maxFollowers) {
         return;
       }
 
@@ -424,7 +353,7 @@ export class PlayerProfileService {
 
     // Calculate analytics
     const playersBySport: Record<string, number> = {};
-    const playersByExperience: Record<PlayerProfile['sports']['experience'], number> = {
+    const playersByExperience: Record<'beginner' | 'intermediate' | 'advanced' | 'professional', number> = {
       beginner: 0,
       intermediate: 0,
       advanced: 0,
@@ -437,15 +366,19 @@ export class PlayerProfileService {
 
     activePlayers.forEach(player => {
       // Count by sport
-      const sport = player.sports.primary;
-      playersBySport[sport] = (playersBySport[sport] || 0) + 1;
+      if (player.sports?.primary) {
+        const sport = player.sports.primary;
+        playersBySport[sport] = (playersBySport[sport] || 0) + 1;
+      }
 
       // Count by experience
-      playersByExperience[player.sports.experience]++;
+      if (player.sports?.experience) {
+        playersByExperience[player.sports.experience]++;
+      }
 
       // Calculate win rate
-      if (player.performance.totalGames > 0) {
-        totalWinRate += player.performance.winRate;
+      if (player.performance?.totalGames && player.performance.totalGames > 0) {
+        totalWinRate += player.performance.winRate || 0;
         validWinRates++;
       }
 
@@ -606,7 +539,7 @@ export class PlayerProfileService {
   // Calculate Analytics Helper
   private async calculateAnalytics(activePlayers: PlayerProfile[]): Promise<PlayerAnalytics> {
     const playersBySport: Record<string, number> = {};
-    const playersByExperience: Record<PlayerProfile['sports']['experience'], number> = {
+    const playersByExperience: Record<'beginner' | 'intermediate' | 'advanced' | 'professional', number> = {
       beginner: 0,
       intermediate: 0,
       advanced: 0,

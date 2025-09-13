@@ -1,12 +1,10 @@
 import {onCall, onRequest} from "firebase-functions/v2/https";
 // Removed unused import
-import {initializeApp} from "firebase-admin/app";
 import {getFirestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {AuthContext, isAuthContext, CallableContextV2} from "../types";
 
-// Initialize Firebase Admin
-initializeApp();
+// Get Firestore instance (Firebase Admin already initialized in main index.ts)
 const db = getFirestore();
 
 // Helper function to validate user authentication

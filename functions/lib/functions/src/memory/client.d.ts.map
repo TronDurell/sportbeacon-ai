@@ -1,0 +1,1 @@
+{"version":3,"file":"client.d.ts","sourceRoot":"","sources":["../../../../src/memory/client.ts"],"names":[],"mappings":"AAWA,eAAO,MAAM,EAAE,6BAAoB,CAAC;AAGpC,eAAO,MAAM,iBAAiB;oBAEJ,MAAM,SAAS,GAAG;kBAOpB,MAAM;kBAIN,MAAM;0CAGkB,MAAM,UAAU,GAAG,YAAY,MAAM;yCAStC,MAAM,SAAS,GAAG;yBAQlC,MAAM,QAAQ,GAAG;uBAOnB,MAAM,QAAQ,GAAG;CAS7C,CAAC"}

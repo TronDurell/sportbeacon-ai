@@ -94,8 +94,8 @@ export interface MediaMetadata {
   
   // User info
   uploadedBy: string;
-  uploadedAt: Timestamp;
-  updatedAt: Timestamp;
+  uploadedAt: string;
+  updatedAt: string;
   
   // Custom metadata
   customMetadata: Record<string, string>;
@@ -324,28 +324,4 @@ export interface MediaShare {
   createdAt: Timestamp;
 }
 
-// Export all types
-export type {
-  MediaType,
-  MediaCategory,
-  MediaStatus,
-  FileValidation,
-  UploadProgress,
-  MediaMetadata,
-  MediaUploadTask,
-  MediaCollection,
-  ImageProcessingOptions,
-  VideoProcessingOptions,
-  UploadConfig,
-  MediaServiceConfig,
-  UploadState,
-  MediaGallery,
-  MediaSearchFilters,
-  MediaAnalytics,
-  DropZoneProps,
-  FilePreview,
-  UploadError,
-  ProcessingQueueItem,
-  MediaAccessControl,
-  MediaShare
-}; 
+// All types are already exported inline above 

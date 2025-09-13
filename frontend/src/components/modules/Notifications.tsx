@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Bell, Check, X, AlertCircle } from 'lucide-react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React, { useState } from "react";
+import { Bell, Check, X, AlertCircle } from "lucide-react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'warning' | 'error' | 'success';
+  type: "info" | "warning" | "error" | "success";
   timestamp: Date;
   read: boolean;
 }
@@ -15,18 +15,18 @@ const Notifications: React.FC = () => {
   const { sendRequest } = useAgentOrchestration();
   const [notifications, setNotifications] = useState<Notification[]>([
     {
-      id: '1',
-      title: 'System Update',
-      message: 'New features have been deployed to the platform.',
-      type: 'info',
+      id: "1",
+      title: "System Update",
+      message: "New features have been deployed to the platform.",
+      type: "info",
       timestamp: new Date(),
       read: false
     },
     {
-      id: '2',
-      title: 'Schedule Conflict',
-      message: 'Multiple events scheduled for the same time slot.',
-      type: 'warning',
+      id: "2",
+      title: "Schedule Conflict",
+      message: "Multiple events scheduled for the same time slot.",
+      type: "warning",
       timestamp: new Date(Date.now() - 3600000),
       read: false
     }
@@ -38,7 +38,7 @@ const Notifications: React.FC = () => {
     );
     
     await sendRequest({
-      type: 'mark_notification_read',
+      type: "mark_notification_read",
       notificationId: id
     });
   };
@@ -47,26 +47,26 @@ const Notifications: React.FC = () => {
     setNotifications(prev => prev.filter(n => n.id !== id));
     
     await sendRequest({
-      type: 'delete_notification',
+      type: "delete_notification",
       notificationId: id
     });
   };
 
-  const getIcon = (type: Notification['type']) => {
+  const getIcon = (type: Notification["type"]) => {
     switch (type) {
-      case 'success': return <Check className="w-4 h-4 text-green-500" />;
-      case 'warning': return <AlertCircle className="w-4 h-4 text-yellow-500" />;
-      case 'error': return <X className="w-4 h-4 text-red-500" />;
+      case "success": return <Check className="w-4 h-4 text-green-500" />;
+      case "warning": return <AlertCircle className="w-4 h-4 text-yellow-500" />;
+      case "error": return <X className="w-4 h-4 text-red-500" />;
       default: return <Bell className="w-4 h-4 text-blue-500" />;
     }
   };
 
-  const getTypeColor = (type: Notification['type']) => {
+  const getTypeColor = (type: Notification["type"]) => {
     switch (type) {
-      case 'success': return 'border-l-green-500';
-      case 'warning': return 'border-l-yellow-500';
-      case 'error': return 'border-l-red-500';
-      default: return 'border-l-blue-500';
+      case "success": return "border-l-green-500";
+      case "warning": return "border-l-yellow-500";
+      case "error": return "border-l-red-500";
+      default: return "border-l-blue-500";
     }
   };
 
@@ -95,7 +95,7 @@ const Notifications: React.FC = () => {
                 bg-white border rounded-lg p-4 shadow-sm
                 ${getTypeColor(notification.type)}
                 border-l-4
-                ${notification.read ? 'opacity-75' : ''}
+                ${notification.read ? "opacity-75" : ""}
               `}
             >
               <div className="flex items-start justify-between">

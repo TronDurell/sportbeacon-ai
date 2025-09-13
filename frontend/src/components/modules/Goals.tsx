@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Plus, Check, Trash2 } from 'lucide-react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React, { useState } from "react";
+import { Plus, Check, Trash2 } from "lucide-react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface Goal {
   id: string;
   title: string;
   description: string;
-  category: 'fitness' | 'skill' | 'team' | 'personal';
+  category: "fitness" | "skill" | "team" | "personal";
   target: number;
   current: number;
   unit: string;
@@ -18,48 +18,48 @@ const Goals: React.FC = () => {
   const { sendRequest } = useAgentOrchestration();
   const [goals, setGoals] = useState<Goal[]>([
     {
-      id: '1',
-      title: 'Improve Shooting Accuracy',
-      description: 'Increase shooting accuracy from 60% to 80%',
-      category: 'skill',
+      id: "1",
+      title: "Improve Shooting Accuracy",
+      description: "Increase shooting accuracy from 60% to 80%",
+      category: "skill",
       target: 80,
       current: 65,
-      unit: '%',
-      deadline: new Date('2024-03-31'),
+      unit: "%",
+      deadline: new Date("2024-03-31"),
       completed: false
     },
     {
-      id: '2',
-      title: 'Run 5K',
-      description: 'Complete a 5K run in under 25 minutes',
-      category: 'fitness',
+      id: "2",
+      title: "Run 5K",
+      description: "Complete a 5K run in under 25 minutes",
+      category: "fitness",
       target: 25,
       current: 28,
-      unit: 'minutes',
-      deadline: new Date('2024-04-15'),
+      unit: "minutes",
+      deadline: new Date("2024-04-15"),
       completed: false
     },
     {
-      id: '3',
-      title: 'Team Leadership',
-      description: 'Lead 5 team practices as captain',
-      category: 'team',
+      id: "3",
+      title: "Team Leadership",
+      description: "Lead 5 team practices as captain",
+      category: "team",
       target: 5,
       current: 3,
-      unit: 'practices',
-      deadline: new Date('2024-05-01'),
+      unit: "practices",
+      deadline: new Date("2024-05-01"),
       completed: false
     }
   ]);
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [newGoal, setNewGoal] = useState({
-    title: '',
-    description: '',
-    category: 'skill' as Goal['category'],
+    title: "",
+    description: "",
+    category: "skill" as Goal["category"],
     target: 0,
-    unit: '',
-    deadline: ''
+    unit: "",
+    deadline: ""
   });
 
   const addGoal = async () => {
@@ -80,16 +80,16 @@ const Goals: React.FC = () => {
     setGoals(prev => [...prev, goal]);
     setShowAddForm(false);
     setNewGoal({
-      title: '',
-      description: '',
-      category: 'skill',
+      title: "",
+      description: "",
+      category: "skill",
       target: 0,
-      unit: '',
-      deadline: ''
+      unit: "",
+      deadline: ""
     });
 
     await sendRequest({
-      type: 'add_goal',
+      type: "add_goal",
       goal
     });
   };
@@ -108,7 +108,7 @@ const Goals: React.FC = () => {
     );
 
     await sendRequest({
-      type: 'update_goal_progress',
+      type: "update_goal_progress",
       goalId: id,
       progress: newProgress
     });
@@ -118,26 +118,26 @@ const Goals: React.FC = () => {
     setGoals(prev => prev.filter(goal => goal.id !== id));
     
     await sendRequest({
-      type: 'delete_goal',
+      type: "delete_goal",
       goalId: id
     });
   };
 
-  const getCategoryColor = (category: Goal['category']) => {
+  const getCategoryColor = (category: Goal["category"]) => {
     switch (category) {
-      case 'fitness': return 'bg-red-100 text-red-800';
-      case 'skill': return 'bg-blue-100 text-blue-800';
-      case 'team': return 'bg-green-100 text-green-800';
-      case 'personal': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "fitness": return "bg-red-100 text-red-800";
+      case "skill": return "bg-blue-100 text-blue-800";
+      case "team": return "bg-green-100 text-green-800";
+      case "personal": return "bg-purple-100 text-purple-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
   const getProgressColor = (progress: number) => {
-    if (progress >= 100) return 'bg-green-600';
-    if (progress >= 75) return 'bg-blue-600';
-    if (progress >= 50) return 'bg-yellow-600';
-    return 'bg-red-600';
+    if (progress >= 100) return "bg-green-600";
+    if (progress >= 75) return "bg-blue-600";
+    if (progress >= 50) return "bg-yellow-600";
+    return "bg-red-600";
   };
 
   return (
@@ -166,7 +166,7 @@ const Goals: React.FC = () => {
             />
             <select
               value={newGoal.category}
-              onChange={(e) => setNewGoal(prev => ({ ...prev, category: e.target.value as Goal['category'] }))}
+              onChange={(e) => setNewGoal(prev => ({ ...prev, category: e.target.value as Goal["category"] }))}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="fitness">Fitness</option>
@@ -227,7 +227,7 @@ const Goals: React.FC = () => {
             <div
               key={goal.id}
               className={`bg-white rounded-lg shadow p-6 border-2 ${
-                goal.completed ? 'border-green-200' : 'border-gray-200'
+                goal.completed ? "border-green-200" : "border-gray-200"
               }`}
             >
               <div className="flex items-center justify-between mb-4">

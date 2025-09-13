@@ -2,7 +2,7 @@ import React from 'react';
 import { List, ListItem, ListItemText } from '@mui/material';
 import { useNotifications } from '../hooks/useNotifications';
 
-export default function AlertList({ userId }) {
+export default function AlertList({ userId }: { userId: string }) {
   const { alerts } = useNotifications(userId);
 
   return (

@@ -1,13 +1,13 @@
-import React from 'react';
-import { Clock, Users } from 'lucide-react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React from "react";
+import { Clock, Users } from "lucide-react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface Drill {
   id: string;
   name: string;
-  category: 'passing' | 'shooting' | 'defense' | 'fitness' | 'tactics';
+  category: "passing" | "shooting" | "defense" | "fitness" | "tactics";
   duration: number;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
   participants: number;
   description: string;
   completed: boolean;
@@ -18,60 +18,60 @@ const Drills: React.FC = () => {
 
   const drills: Drill[] = [
     {
-      id: '1',
-      name: 'Triangle Passing',
-      category: 'passing',
+      id: "1",
+      name: "Triangle Passing",
+      category: "passing",
       duration: 15,
-      difficulty: 'intermediate',
+      difficulty: "intermediate",
       participants: 6,
-      description: 'Improve passing accuracy and team coordination',
+      description: "Improve passing accuracy and team coordination",
       completed: false
     },
     {
-      id: '2',
-      name: 'Shooting Practice',
-      category: 'shooting',
+      id: "2",
+      name: "Shooting Practice",
+      category: "shooting",
       duration: 20,
-      difficulty: 'beginner',
+      difficulty: "beginner",
       participants: 4,
-      description: 'Focus on shooting technique and accuracy',
+      description: "Focus on shooting technique and accuracy",
       completed: true
     },
     {
-      id: '3',
-      name: 'Defensive Positioning',
-      category: 'defense',
+      id: "3",
+      name: "Defensive Positioning",
+      category: "defense",
       duration: 25,
-      difficulty: 'advanced',
+      difficulty: "advanced",
       participants: 8,
-      description: 'Work on defensive formations and positioning',
+      description: "Work on defensive formations and positioning",
       completed: false
     }
   ];
 
-  const getCategoryColor = (category: Drill['category']) => {
+  const getCategoryColor = (category: Drill["category"]) => {
     switch (category) {
-      case 'passing': return 'bg-blue-100 text-blue-800';
-      case 'shooting': return 'bg-red-100 text-red-800';
-      case 'defense': return 'bg-green-100 text-green-800';
-      case 'fitness': return 'bg-yellow-100 text-yellow-800';
-      case 'tactics': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "passing": return "bg-blue-100 text-blue-800";
+      case "shooting": return "bg-red-100 text-red-800";
+      case "defense": return "bg-green-100 text-green-800";
+      case "fitness": return "bg-yellow-100 text-yellow-800";
+      case "tactics": return "bg-purple-100 text-purple-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getDifficultyColor = (difficulty: Drill['difficulty']) => {
+  const getDifficultyColor = (difficulty: Drill["difficulty"]) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-800';
-      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "beginner": return "bg-green-100 text-green-800";
+      case "intermediate": return "bg-yellow-100 text-yellow-800";
+      case "advanced": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
   const startDrill = async (drillId: string) => {
     await sendRequest({
-      type: 'start_drill',
+      type: "start_drill",
       drillId,
       timestamp: new Date()
     });
@@ -93,7 +93,7 @@ const Drills: React.FC = () => {
           <div
             key={drill.id}
             className={`bg-white rounded-lg shadow p-6 border-2 ${
-              drill.completed ? 'border-green-200' : 'border-gray-200'
+              drill.completed ? "border-green-200" : "border-gray-200"
             }`}
           >
             <div className="flex items-center justify-between mb-4">

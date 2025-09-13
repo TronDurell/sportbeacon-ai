@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Avatar, Typography } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+// import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 export default function SpotlightCard({ athlete }) {
   return (

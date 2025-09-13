@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../contexts/AdminAuthContext';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../contexts/AdminAuthContext";
 import { 
   Users, 
   Clock, 
@@ -28,7 +28,7 @@ import {
   TrendingUp,
   Shield,
   Lock
-} from 'lucide-react';
+} from "lucide-react";
 
 interface WaitlistEntry {
   id: string;
@@ -40,8 +40,8 @@ interface WaitlistEntry {
   ageGroup: string;
   registrationDate: Date;
   waitlistPosition: number;
-  priority: 'high' | 'medium' | 'low';
-  status: 'waiting' | 'promoted' | 'declined' | 'expired';
+  priority: "high" | "medium" | "low";
+  status: "waiting" | "promoted" | "declined" | "expired";
   notes?: string;
 }
 
@@ -56,7 +56,7 @@ interface SiblingPairing {
     league: string;
     team?: string;
   }>;
-  status: 'pending' | 'paired' | 'conflict' | 'manual_review';
+  status: "pending" | "paired" | "conflict" | "manual_review";
   requestedLeague?: string;
   notes?: string;
 }
@@ -71,7 +71,7 @@ interface AgeOverride {
   ageRequirement: number;
   reason: string;
   requestedBy: string;
-  status: 'pending' | 'approved' | 'denied';
+  status: "pending" | "approved" | "denied";
   directorNotes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -79,14 +79,14 @@ interface AgeOverride {
 
 interface DirectorApproval {
   id: string;
-  type: 'age_override' | 'sibling_pairing' | 'waitlist_promotion' | 'league_transfer';
+  type: "age_override" | "sibling_pairing" | "waitlist_promotion" | "league_transfer";
   title: string;
   description: string;
   requester: string;
   requesterEmail: string;
-  status: 'pending' | 'approved' | 'denied';
+  status: "pending" | "approved" | "denied";
   createdAt: Date;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
   attachments?: string[];
 }
 
@@ -108,15 +108,15 @@ interface RecAnalytics {
 
 const RecAdminHub: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'waitlists' | 'siblings' | 'overrides' | 'approvals' | 'analytics'>('waitlists');
+  const [activeTab, setActiveTab] = useState<"waitlists" | "siblings" | "overrides" | "approvals" | "analytics">("waitlists");
   const [waitlistData, setWaitlistData] = useState<WaitlistEntry[]>([]);
   const [siblingData, setSiblingData] = useState<SiblingPairing[]>([]);
   const [overrideData, setOverrideData] = useState<AgeOverride[]>([]);
   const [approvalData, setApprovalData] = useState<DirectorApproval[]>([]);
   const [analytics, setAnalytics] = useState<RecAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
 
   // Mock data for development
   useEffect(() => {
@@ -129,81 +129,81 @@ const RecAdminHub: React.FC = () => {
       // Mock waitlist data
       setWaitlistData([
         {
-          id: '1',
-          childName: 'Emma Johnson',
-          parentName: 'Sarah Johnson',
-          parentEmail: 'sarah.johnson@email.com',
-          parentPhone: '(919) 555-0123',
-          league: 'Youth Soccer',
-          ageGroup: 'U10',
-          registrationDate: new Date('2024-01-15'),
+          id: "1",
+          childName: "Emma Johnson",
+          parentName: "Sarah Johnson",
+          parentEmail: "sarah.johnson@email.com",
+          parentPhone: "(919) 555-0123",
+          league: "Youth Soccer",
+          ageGroup: "U10",
+          registrationDate: new Date("2024-01-15"),
           waitlistPosition: 1,
-          priority: 'high',
-          status: 'waiting',
-          notes: 'Previous participant, excellent attendance'
+          priority: "high",
+          status: "waiting",
+          notes: "Previous participant, excellent attendance"
         },
         {
-          id: '2',
-          childName: 'Michael Chen',
-          parentName: 'David Chen',
-          parentEmail: 'david.chen@email.com',
-          parentPhone: '(919) 555-0456',
-          league: 'Youth Basketball',
-          ageGroup: 'U12',
-          registrationDate: new Date('2024-01-20'),
+          id: "2",
+          childName: "Michael Chen",
+          parentName: "David Chen",
+          parentEmail: "david.chen@email.com",
+          parentPhone: "(919) 555-0456",
+          league: "Youth Basketball",
+          ageGroup: "U12",
+          registrationDate: new Date("2024-01-20"),
           waitlistPosition: 3,
-          priority: 'medium',
-          status: 'waiting'
+          priority: "medium",
+          status: "waiting"
         }
       ]);
 
       // Mock sibling pairing data
       setSiblingData([
         {
-          id: '1',
-          familyId: 'fam_001',
-          parentName: 'Jennifer Smith',
-          parentEmail: 'jennifer.smith@email.com',
+          id: "1",
+          familyId: "fam_001",
+          parentName: "Jennifer Smith",
+          parentEmail: "jennifer.smith@email.com",
           children: [
-            { name: 'Alex Smith', age: 10, league: 'Youth Soccer' },
-            { name: 'Jordan Smith', age: 8, league: 'Youth Soccer' }
+            { name: "Alex Smith", age: 10, league: "Youth Soccer" },
+            { name: "Jordan Smith", age: 8, league: "Youth Soccer" }
           ],
-          status: 'paired',
-          requestedLeague: 'Youth Soccer',
-          notes: 'Both children assigned to same team'
+          status: "paired",
+          requestedLeague: "Youth Soccer",
+          notes: "Both children assigned to same team"
         }
       ]);
 
       // Mock age override data
       setOverrideData([
         {
-          id: '1',
-          childName: 'Riley Thompson',
-          parentName: 'Mark Thompson',
-          parentEmail: 'mark.thompson@email.com',
+          id: "1",
+          childName: "Riley Thompson",
+          parentName: "Mark Thompson",
+          parentEmail: "mark.thompson@email.com",
           currentAge: 9,
-          requestedLeague: 'Youth Soccer U10',
+          requestedLeague: "Youth Soccer U10",
           ageRequirement: 10,
-          reason: 'Child is advanced for age, previous experience in older leagues',
-          requestedBy: 'mark.thompson@email.com',
-          status: 'pending',
-          createdAt: new Date('2024-01-25'),
-          updatedAt: new Date('2024-01-25')
+          reason: "Child is advanced for age, previous experience in older leagues",
+          requestedBy: "mark.thompson@email.com",
+          status: "pending",
+          createdAt: new Date("2024-01-25"),
+          updatedAt: new Date("2024-01-25")
         }
       ]);
 
       // Mock approval data
       setApprovalData([
         {
-          id: '1',
-          type: 'age_override',
-          title: 'Age Override Request - Riley Thompson',
-          description: 'Request to allow 9-year-old in U10 soccer league',
-          requester: 'Mark Thompson',
-          requesterEmail: 'mark.thompson@email.com',
-          status: 'pending',
-          createdAt: new Date('2024-01-25'),
-          priority: 'medium'
+          id: "1",
+          type: "age_override",
+          title: "Age Override Request - Riley Thompson",
+          description: "Request to allow 9-year-old in U10 soccer league",
+          requester: "Mark Thompson",
+          requesterEmail: "mark.thompson@email.com",
+          status: "pending",
+          createdAt: new Date("2024-01-25"),
+          priority: "medium"
         }
       ]);
 
@@ -215,26 +215,26 @@ const RecAdminHub: React.FC = () => {
         siblingPairings: 12,
         ageOverrides: 5,
         leagueCapacity: {
-          'Youth Soccer U8': 85,
-          'Youth Soccer U10': 92,
-          'Youth Soccer U12': 78,
-          'Youth Basketball U10': 88,
-          'Youth Basketball U12': 76
+          "Youth Soccer U8": 85,
+          "Youth Soccer U10": 92,
+          "Youth Soccer U12": 78,
+          "Youth Basketball U10": 88,
+          "Youth Basketball U12": 76
         },
         recentActivity: [
           {
-            id: '1',
-            type: 'waitlist_promotion',
-            description: 'Emma Johnson promoted from waitlist to Youth Soccer U10',
-            timestamp: new Date('2024-01-26T10:30:00'),
-            user: 'sarah.johnson@email.com'
+            id: "1",
+            type: "waitlist_promotion",
+            description: "Emma Johnson promoted from waitlist to Youth Soccer U10",
+            timestamp: new Date("2024-01-26T10:30:00"),
+            user: "sarah.johnson@email.com"
           },
           {
-            id: '2',
-            type: 'age_override_approved',
-            description: 'Age override approved for Riley Thompson',
-            timestamp: new Date('2024-01-26T09:15:00'),
-            user: 'rec.director@cary.gov'
+            id: "2",
+            type: "age_override_approved",
+            description: "Age override approved for Riley Thompson",
+            timestamp: new Date("2024-01-26T09:15:00"),
+            user: "rec.director@cary.gov"
           }
         ]
       });
@@ -246,11 +246,11 @@ const RecAdminHub: React.FC = () => {
   }, []);
 
   const tabs = [
-    { id: 'waitlists', label: 'Waitlists', icon: Clock, count: waitlistData.length },
-    { id: 'siblings', label: 'Sibling Pairing', icon: Users, count: siblingData.length },
-    { id: 'overrides', label: 'Age Overrides', icon: AlertTriangle, count: overrideData.length },
-    { id: 'approvals', label: 'Director Approvals', icon: Shield, count: approvalData.filter(a => a.status === 'pending').length },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, count: null }
+    { id: "waitlists", label: "Waitlists", icon: Clock, count: waitlistData.length },
+    { id: "siblings", label: "Sibling Pairing", icon: Users, count: siblingData.length },
+    { id: "overrides", label: "Age Overrides", icon: AlertTriangle, count: overrideData.length },
+    { id: "approvals", label: "Director Approvals", icon: Shield, count: approvalData.filter(a => a.status === "pending").length },
+    { id: "analytics", label: "Analytics", icon: BarChart3, count: null }
   ];
 
   const handlePromoteFromWaitlist = (entryId: string) => {
@@ -275,7 +275,7 @@ const RecAdminHub: React.FC = () => {
   );
 
   // Check if user has Town Staff role
-  if (!user || user.role !== 'TownStaff' as any) {
+  if (!user || user.role !== "TownStaff" as any) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -329,8 +329,8 @@ const RecAdminHub: React.FC = () => {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -389,7 +389,7 @@ const RecAdminHub: React.FC = () => {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.2 }}
         >
-          {activeTab === 'waitlists' && (
+          {activeTab === "waitlists" && (
             <div className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Waitlist Management</h2>
@@ -437,9 +437,9 @@ const RecAdminHub: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            entry.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' :
-                            entry.status === 'promoted' ? 'bg-green-100 text-green-800' :
-                            'bg-red-100 text-red-800'
+                            entry.status === "waiting" ? "bg-yellow-100 text-yellow-800" :
+                            entry.status === "promoted" ? "bg-green-100 text-green-800" :
+                            "bg-red-100 text-red-800"
                           }`}>
                             {entry.status.charAt(0).toUpperCase() + entry.status.slice(1)}
                           </span>
@@ -468,7 +468,7 @@ const RecAdminHub: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'siblings' && (
+          {activeTab === "siblings" && (
             <div className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Sibling Pairing Management</h2>
@@ -483,11 +483,11 @@ const RecAdminHub: React.FC = () => {
                         <p className="text-sm text-gray-500">{pairing.parentEmail}</p>
                       </div>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        pairing.status === 'paired' ? 'bg-green-100 text-green-800' :
-                        pairing.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                        pairing.status === "paired" ? "bg-green-100 text-green-800" :
+                        pairing.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                        "bg-red-100 text-red-800"
                       }`}>
-                        {pairing.status.replace('_', ' ').charAt(0).toUpperCase() + pairing.status.slice(1)}
+                        {pairing.status.replace("_", " ").charAt(0).toUpperCase() + pairing.status.slice(1)}
                       </span>
                     </div>
                     <div className="space-y-2">
@@ -507,7 +507,7 @@ const RecAdminHub: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'overrides' && (
+          {activeTab === "overrides" && (
             <div className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Age Override Management</h2>
@@ -522,9 +522,9 @@ const RecAdminHub: React.FC = () => {
                         <p className="text-sm text-gray-500">{override.parentName} • {override.parentEmail}</p>
                       </div>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        override.status === 'approved' ? 'bg-green-100 text-green-800' :
-                        override.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                        override.status === "approved" ? "bg-green-100 text-green-800" :
+                        override.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                        "bg-red-100 text-red-800"
                       }`}>
                         {override.status.charAt(0).toUpperCase() + override.status.slice(1)}
                       </span>
@@ -543,7 +543,7 @@ const RecAdminHub: React.FC = () => {
                       <span className="text-sm font-medium text-gray-700">Reason:</span>
                       <p className="text-sm text-gray-900 mt-1">{override.reason}</p>
                     </div>
-                    {override.status === 'pending' && (
+                    {override.status === "pending" && (
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleApproveOverride(override.id)}
@@ -562,7 +562,7 @@ const RecAdminHub: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'approvals' && (
+          {activeTab === "approvals" && (
             <div className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Director Approvals</h2>
@@ -577,9 +577,9 @@ const RecAdminHub: React.FC = () => {
                         <p className="text-sm text-gray-500">{approval.requester} • {approval.requesterEmail}</p>
                       </div>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        approval.status === 'approved' ? 'bg-green-100 text-green-800' :
-                        approval.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                        approval.status === "approved" ? "bg-green-100 text-green-800" :
+                        approval.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                        "bg-red-100 text-red-800"
                       }`}>
                         {approval.status.charAt(0).toUpperCase() + approval.status.slice(1)}
                       </span>
@@ -589,7 +589,7 @@ const RecAdminHub: React.FC = () => {
                       <span className="text-xs text-gray-500">
                         Requested: {approval.createdAt.toLocaleDateString()}
                       </span>
-                      {approval.status === 'pending' && (
+                      {approval.status === "pending" && (
                         <div className="flex gap-2">
                           <button className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
                             Approve
@@ -606,7 +606,7 @@ const RecAdminHub: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'analytics' && analytics && (
+          {activeTab === "analytics" && analytics && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Summary Cards */}
               <div className="bg-white rounded-lg shadow p-6">

@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { ErrorHandler, AppError } from '../utils/errorHandler';
+import { useState, useCallback, useEffect } from "react";
+import { ErrorHandler, AppError } from "../utils/errorHandler";
 
 // ============================================================================
 // ERROR BOUNDARY HOOK INTERFACES
@@ -38,7 +38,7 @@ export const useErrorBoundary = (options: UseErrorBoundaryOptions = {}): UseErro
     maxErrors = 3,
     errorWindow = 60000, // 1 minute
     onError,
-    context = 'useErrorBoundary',
+    context = "useErrorBoundary",
     autoRecover = false,
     recoveryDelay = 5000 // 5 seconds
   } = options;
@@ -61,7 +61,7 @@ export const useErrorBoundary = (options: UseErrorBoundaryOptions = {}): UseErro
     const newErrorCount = timeSinceLastError > errorWindow ? 1 : state.errorCount + 1;
 
     // Create app error
-    const appError = errorHandler.handleError(error, context, 'high');
+    const appError = errorHandler.handleError(error, context, "high");
 
     // Update state
     setState(prev => ({
@@ -112,10 +112,10 @@ export const useErrorBoundary = (options: UseErrorBoundaryOptions = {}): UseErro
     
     // Check if error is recoverable based on type
     const recoverableErrors = [
-      'NetworkError',
-      'TimeoutError',
-      'QuotaExceededError',
-      'PermissionDeniedError'
+      "NetworkError",
+      "TimeoutError",
+      "QuotaExceededError",
+      "PermissionDeniedError"
     ];
 
     return recoverableErrors.some(errorType => 
@@ -153,7 +153,7 @@ export const useApiErrorBoundary = (context?: string) => {
   return useErrorBoundary({
     maxErrors: 5,
     errorWindow: 30000, // 30 seconds
-    context: context || 'API',
+    context: context || "API",
     autoRecover: true,
     recoveryDelay: 3000 // 3 seconds
   });
@@ -164,7 +164,7 @@ export const useComponentErrorBoundary = (context?: string) => {
   return useErrorBoundary({
     maxErrors: 3,
     errorWindow: 60000, // 1 minute
-    context: context || 'Component',
+    context: context || "Component",
     autoRecover: false
   });
 };
@@ -174,7 +174,7 @@ export const useFormErrorBoundary = (context?: string) => {
   return useErrorBoundary({
     maxErrors: 10,
     errorWindow: 120000, // 2 minutes
-    context: context || 'Form',
+    context: context || "Form",
     autoRecover: true,
     recoveryDelay: 1000 // 1 second
   });
@@ -185,7 +185,7 @@ export const useNavigationErrorBoundary = (context?: string) => {
   return useErrorBoundary({
     maxErrors: 2,
     errorWindow: 30000, // 30 seconds
-    context: context || 'Navigation',
+    context: context || "Navigation",
     autoRecover: true,
     recoveryDelay: 2000 // 2 seconds
   });
@@ -202,39 +202,39 @@ export const createErrorRecoveryStrategy = (
 ): {
   shouldRetry: boolean;
   delay: number;
-  strategy: 'immediate' | 'exponential' | 'linear' | 'none';
+  strategy: "immediate" | "exponential" | "linear" | "none";
 } => {
   // Don't retry if we've exceeded max retries
   if (retryCount >= maxRetries) {
     return {
       shouldRetry: false,
       delay: 0,
-      strategy: 'none'
+      strategy: "none"
     };
   }
 
   // Determine retry strategy based on error type
-  if (error.name === 'NetworkError' || error.message.includes('network')) {
+  if (error.name === "NetworkError" || error.message.includes("network")) {
     return {
       shouldRetry: true,
       delay: Math.min(1000 * Math.pow(2, retryCount), 10000), // Exponential backoff, max 10s
-      strategy: 'exponential'
+      strategy: "exponential"
     };
   }
 
-  if (error.name === 'TimeoutError' || error.message.includes('timeout')) {
+  if (error.name === "TimeoutError" || error.message.includes("timeout")) {
     return {
       shouldRetry: true,
       delay: 2000 * (retryCount + 1), // Linear backoff
-      strategy: 'linear'
+      strategy: "linear"
     };
   }
 
-  if (error.name === 'QuotaExceededError' || error.message.includes('quota')) {
+  if (error.name === "QuotaExceededError" || error.message.includes("quota")) {
     return {
       shouldRetry: true,
       delay: 5000, // Fixed delay for quota errors
-      strategy: 'immediate'
+      strategy: "immediate"
     };
   }
 
@@ -242,7 +242,7 @@ export const createErrorRecoveryStrategy = (
   return {
     shouldRetry: false,
     delay: 0,
-    strategy: 'none'
+    strategy: "none"
   };
 };
 
@@ -251,62 +251,62 @@ export const createErrorRecoveryStrategy = (
 // ============================================================================
 
 export const classifyError = (error: Error): {
-  category: 'network' | 'auth' | 'validation' | 'server' | 'client' | 'unknown';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  category: "network" | "auth" | "validation" | "server" | "client" | "unknown";
+  severity: "low" | "medium" | "high" | "critical";
   recoverable: boolean;
 } => {
   const errorMessage = error.message.toLowerCase();
   const errorName = error.name.toLowerCase();
 
   // Network errors
-  if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorName.includes('network')) {
+  if (errorMessage.includes("network") || errorMessage.includes("fetch") || errorName.includes("network")) {
     return {
-      category: 'network',
-      severity: 'medium',
+      category: "network",
+      severity: "medium",
       recoverable: true
     };
   }
 
   // Authentication errors
-  if (errorMessage.includes('auth') || errorMessage.includes('unauthorized') || errorMessage.includes('forbidden')) {
+  if (errorMessage.includes("auth") || errorMessage.includes("unauthorized") || errorMessage.includes("forbidden")) {
     return {
-      category: 'auth',
-      severity: 'high',
+      category: "auth",
+      severity: "high",
       recoverable: false
     };
   }
 
   // Validation errors
-  if (errorMessage.includes('validation') || errorMessage.includes('invalid') || errorMessage.includes('required')) {
+  if (errorMessage.includes("validation") || errorMessage.includes("invalid") || errorMessage.includes("required")) {
     return {
-      category: 'validation',
-      severity: 'low',
+      category: "validation",
+      severity: "low",
       recoverable: true
     };
   }
 
   // Server errors
-  if (errorMessage.includes('server') || errorMessage.includes('500') || errorMessage.includes('internal')) {
+  if (errorMessage.includes("server") || errorMessage.includes("500") || errorMessage.includes("internal")) {
     return {
-      category: 'server',
-      severity: 'high',
+      category: "server",
+      severity: "high",
       recoverable: true
     };
   }
 
   // Client errors
-  if (errorMessage.includes('client') || errorMessage.includes('400') || errorMessage.includes('bad request')) {
+  if (errorMessage.includes("client") || errorMessage.includes("400") || errorMessage.includes("bad request")) {
     return {
-      category: 'client',
-      severity: 'medium',
+      category: "client",
+      severity: "medium",
       recoverable: true
     };
   }
 
   // Unknown errors
   return {
-    category: 'unknown',
-    severity: 'critical',
+    category: "unknown",
+    severity: "critical",
     recoverable: false
   };
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function usePublicMatches(date, location) {
+export default function usePublicMatches(date: string, location: string) {
   const [matches, setMatches] = useState([]);
   useEffect(() => {
     if (!date || !location) return;

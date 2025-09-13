@@ -5,8 +5,8 @@
 export declare const createPlayerProfile: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
     message: string;
     success: boolean;
-    error?: any;
     data?: any;
+    error?: any;
 } | {
     success: boolean;
     message: string;
@@ -23,8 +23,8 @@ export declare const createPlayerProfile: import("firebase-functions/v2/https").
 export declare const updatePlayerProfile: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
     message: string;
     success: boolean;
-    error?: any;
     data?: any;
+    error?: any;
 } | {
     success: boolean;
     message: string;

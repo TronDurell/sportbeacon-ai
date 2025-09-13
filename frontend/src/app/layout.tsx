@@ -1,10 +1,10 @@
-import React from 'react';
-import { Providers } from '../providers/RootProviders';
-import './globals.css';
+import React from "react";
+import { Providers } from "../providers/RootProviders";
+import "./globals.css";
 
 export const metadata = {
-  title: 'SportBeacon AI - Intelligent Sports Management',
-  description: 'AI-powered sports management platform for coaches, players, and organizations',
+  title: "SportBeacon AI - Intelligent Sports Management",
+  description: "AI-powered sports management platform for coaches, players, and organizations",
 };
 
 export default function RootLayout({

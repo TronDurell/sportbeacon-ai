@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
-import { Shield, Lock, Eye, EyeOff, Key } from 'lucide-react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React, { useState } from "react";
+import { Shield, Lock, Eye, EyeOff, Key } from "lucide-react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 const Security: React.FC = () => {
   const { sendRequest } = useAgentOrchestration();
   const [showPassword, setShowPassword] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const securityFeatures = [
     {
-      title: 'Two-Factor Authentication',
-      description: 'Add an extra layer of security to your account',
+      title: "Two-Factor Authentication",
+      description: "Add an extra layer of security to your account",
       enabled: true,
       icon: Shield
     },
     {
-      title: 'Login Notifications',
-      description: 'Get notified when someone logs into your account',
+      title: "Login Notifications",
+      description: "Get notified when someone logs into your account",
       enabled: true,
       icon: Lock
     },
     {
-      title: 'Session Management',
-      description: 'View and manage active sessions',
+      title: "Session Management",
+      description: "View and manage active sessions",
       enabled: false,
       icon: Key
     }
@@ -32,19 +32,19 @@ const Security: React.FC = () => {
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
-      alert('New passwords do not match');
+      alert("New passwords do not match");
       return;
     }
 
     await sendRequest({
-      type: 'change_password',
+      type: "change_password",
       currentPassword,
       newPassword
     });
 
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
   };
 
   return (
@@ -74,7 +74,7 @@ const Security: React.FC = () => {
                 </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -127,11 +127,11 @@ const Security: React.FC = () => {
                   <button
                     className={`px-3 py-1 rounded-full text-sm font-medium ${
                       feature.enabled
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
                     }`}
                   >
-                    {feature.enabled ? 'Enabled' : 'Disabled'}
+                    {feature.enabled ? "Enabled" : "Disabled"}
                   </button>
                 </div>
               ))}

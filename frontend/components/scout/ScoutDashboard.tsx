@@ -9,6 +9,7 @@ import {
     ListItem,
     ListItemText,
     ListItemAvatar,
+    ListItemIcon,
     Avatar,
     Typography,
     IconButton,
@@ -1719,7 +1720,7 @@ export const ReferralModal: React.FC<{
     );
 };
 
-export const CreatorAnalytics: React.FC<{ profileId: string }> = ({ profileId }) => {
+const CreatorAnalytics: React.FC<{ profileId: string }> = ({ profileId }) => {
     const { data: analyticsData, isLoading: isAnalyticsLoading } = useCreatorAnalytics(profileId);
 
     if (isAnalyticsLoading || !analyticsData) {
@@ -1773,7 +1774,9 @@ export const CreatorAnalytics: React.FC<{ profileId: string }> = ({ profileId })
             y: {
                 beginAtZero: true,
                 ticks: {
-                    callback: (value: number) => `$${value}`
+                    callback: function(this: any, value: string | number) {
+                        return `$${Number(value)}`;
+                    }
                 }
             }
         }

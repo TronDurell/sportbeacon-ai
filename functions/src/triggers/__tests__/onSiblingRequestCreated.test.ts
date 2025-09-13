@@ -60,7 +60,7 @@ describe("onSiblingRequestCreated", () => {
       parentNotes: "Please keep siblings on same team if possible",
     };
     const event = createMockDocumentCreatedEvent("towns/{townId}/siblingRequests/{requestId}", requestId,
-siblingRequestData);
+      siblingRequestData);
 
 
     // Act
@@ -105,7 +105,7 @@ siblingRequestData);
       automaticApproval: true,
     };
     const event = createMockDocumentCreatedEvent("towns/{townId}/siblingRequests/{requestId}", requestId,
-compatibleData);
+      compatibleData);
 
 
     // Act
@@ -165,7 +165,7 @@ compatibleData);
       conflictReason: "League mismatch - siblings in different sports",
     };
     const event = createMockDocumentCreatedEvent("towns/{townId}/siblingRequests/{requestId}", requestId,
-leagueMismatchData);
+      leagueMismatchData);
 
 
     // Act
@@ -241,7 +241,7 @@ leagueMismatchData);
 
     };
     const event = createMockDocumentCreatedEvent("towns/{townId}/siblingRequests/{requestId}", requestId,
-specialNeedsData);
+      specialNeedsData);
 
 
     // Act
@@ -273,7 +273,7 @@ specialNeedsData);
       parentPreferences: "Prefer same location for convenience",
     };
     const event = createMockDocumentCreatedEvent("towns/{townId}/siblingRequests/{requestId}", requestId,
-geographicData);
+      geographicData);
 
 
     // Act
@@ -355,7 +355,7 @@ geographicData);
     // Act
     const promises = requests.map((req) => {
       const event = createMockDocumentCreatedEvent("towns/{townId}/siblingRequests/{requestId}", req.requestId,
-req.data);
+        req.data);
 
       return onSiblingRequestCreated(event as any);
     });

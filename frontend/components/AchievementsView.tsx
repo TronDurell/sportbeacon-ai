@@ -57,10 +57,11 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({ playerId }) 
                     case 'oldest':
                         return (a.earnedDate ? new Date(a.earnedDate).getTime() : 0) -
                                (b.earnedDate ? new Date(b.earnedDate).getTime() : 0);
-                    case 'progress':
+                    case 'progress': {
                         const aProgress = a.progress / a.maxProgress;
                         const bProgress = b.progress / b.maxProgress;
                         return bProgress - aProgress;
+                    }
                     case 'alphabetical':
                         return a.name.localeCompare(b.name);
                     default:

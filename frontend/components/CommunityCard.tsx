@@ -3,45 +3,42 @@ import { Card, CardContent, Typography, Avatar, Box, IconButton } from '@mui/mat
 import { ThumbUp, Comment, Share } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 
-interface FeedItem {
-    id: string;
-    type: string;
-    content: string;
-    timestamp: Date;
-    author: {
-        id: string;
-        name: string;
-        avatar: string;
-    };
-    stats?: {
-        likes: number;
-        comments: number;
-        shares: number;
-    };
-}
+// Import consolidated FeedItem interface
+import type { FeedItem } from '../types';
 
 interface CommunityCardProps {
     item: FeedItem;
     onInteract: (type: 'like' | 'comment' | 'share') => void;
+    compact?: boolean;
 }
 
 export const CommunityCard: React.FC<CommunityCardProps> = ({ item, onInteract }) => {
+    // Handle author type safely
+    const author = typeof item.author === 'string' 
+        ? { id: '', name: item.author, avatar: '' }
+        : item.author;
+    
+    // Handle timestamp type safely
+    const timestamp = typeof item.timestamp === 'string' 
+        ? new Date(item.timestamp)
+        : item.timestamp;
+
     return (
         <Card variant="outlined" sx={{ mb: 2 }}>
             <CardContent>
                 <Box display="flex" alignItems="flex-start" gap={2}>
                     <Avatar
-                        src={item.author.avatar}
-                        alt={item.author.name}
+                        src={author.avatar}
+                        alt={author.name}
                         sx={{ width: 40, height: 40 }}
                     />
                     <Box flex={1}>
                         <Box display="flex" justifyContent="space-between" alignItems="center">
                             <Typography variant="subtitle2">
-                                {item.author.name}
+                                {author.name}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                                {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
+                                {formatDistanceToNow(timestamp, { addSuffix: true })}
                             </Typography>
                         </Box>
                         <Typography variant="body2" sx={{ mt: 1, mb: 2 }}>

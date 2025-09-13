@@ -6,14 +6,20 @@ export class PlayerAPI {
     return [
       {
         id: '1',
-        name: 'John Doe',
-        age: 16,
+        userId: 'user1',
+        firstName: 'John',
+        lastName: 'Doe',
+        displayName: 'John Doe',
+        email: 'john.doe@example.com',
+        phone: '+1234567890',
+        dateOfBirth: '1995-01-01',
         position: 'Forward',
-        team: { id: '1', name: 'Team A' },
-        skills: [{ name: 'Shooting', level: 8 }],
-        scoutRating: 85,
-        potential: 90,
-        avatar: '/avatar.jpg'
+        skillLevel: 'intermediate',
+        team: 'Team A',
+        isActive: true,
+        avatar: '/avatar.jpg',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
     ];
   }

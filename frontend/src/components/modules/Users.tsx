@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React, { useState } from "react";
+import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface User {
   id: string;
@@ -8,7 +8,7 @@ interface User {
   lastName: string;
   email: string;
   role: string;
-  status: 'active' | 'inactive' | 'pending';
+  status: "active" | "inactive" | "pending";
   createdAt: Date;
 }
 
@@ -16,36 +16,36 @@ const Users: React.FC = () => {
   const { sendRequest } = useAgentOrchestration();
   const [users, setUsers] = useState<User[]>([
     {
-      id: '1',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      role: 'player',
-      status: 'active',
-      createdAt: new Date('2024-01-15')
+      id: "1",
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      role: "player",
+      status: "active",
+      createdAt: new Date("2024-01-15")
     },
     {
-      id: '2',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      email: 'jane.smith@example.com',
-      role: 'coach',
-      status: 'active',
-      createdAt: new Date('2024-01-10')
+      id: "2",
+      firstName: "Jane",
+      lastName: "Smith",
+      email: "jane.smith@example.com",
+      role: "coach",
+      status: "active",
+      createdAt: new Date("2024-01-10")
     },
     {
-      id: '3',
-      firstName: 'Mike',
-      lastName: 'Johnson',
-      email: 'mike.johnson@example.com',
-      role: 'parent',
-      status: 'pending',
-      createdAt: new Date('2024-01-20')
+      id: "3",
+      firstName: "Mike",
+      lastName: "Johnson",
+      email: "mike.johnson@example.com",
+      role: "parent",
+      status: "pending",
+      createdAt: new Date("2024-01-20")
     }
   ]);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState<string>("all");
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
@@ -53,26 +53,26 @@ const Users: React.FC = () => {
       user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesRole = selectedRole === 'all' || user.role === selectedRole;
+    const matchesRole = selectedRole === "all" || user.role === selectedRole;
     
     return matchesSearch && matchesRole;
   });
 
-  const getStatusColor = (status: User['status']) => {
+  const getStatusColor = (status: User["status"]) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-red-100 text-red-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "active": return "bg-green-100 text-green-800";
+      case "inactive": return "bg-red-100 text-red-800";
+      case "pending": return "bg-yellow-100 text-yellow-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm("Are you sure you want to delete this user?")) {
       setUsers(prev => prev.filter(user => user.id !== userId));
       
       await sendRequest({
-        type: 'delete_user',
+        type: "delete_user",
         userId
       });
     }

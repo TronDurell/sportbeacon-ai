@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   DollarSign, 
   TrendingUp, 
@@ -34,7 +34,7 @@ import {
   Star as StarIcon,
   Crown as CrownIcon,
   Zap as ZapIcon
-} from 'lucide-react';
+} from "lucide-react";
 
 interface CreatorStats {
   totalEarnings: number;
@@ -52,7 +52,7 @@ interface CreatorStats {
 interface EarningsData {
   date: string;
   amount: number;
-  source: 'tips' | 'subscriptions' | 'sponsorships' | 'merchandise';
+  source: "tips" | "subscriptions" | "sponsorships" | "merchandise";
 }
 
 interface TipData {
@@ -67,8 +67,8 @@ interface TipData {
 interface PayoutData {
   id: string;
   amount: number;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  method: 'stripe' | 'paypal' | 'bank';
+  status: "pending" | "processing" | "completed" | "failed";
+  method: "stripe" | "paypal" | "bank";
   date: Date;
   reference: string;
 }
@@ -80,7 +80,7 @@ interface StripeAccount {
   balance: number;
   pendingBalance: number;
   currency: string;
-  payoutSchedule: 'manual' | 'daily' | 'weekly' | 'monthly';
+  payoutSchedule: "manual" | "daily" | "weekly" | "monthly";
   minimumPayout: number;
 }
 
@@ -104,7 +104,7 @@ interface LikeStreak {
 }
 
 const CreatorDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'earnings' | 'tips' | 'payout-setup'>('earnings');
+  const [activeTab, setActiveTab] = useState<"earnings" | "tips" | "payout-setup">("earnings");
   const [creatorStats, setCreatorStats] = useState<CreatorStats | null>(null);
   const [earningsData, setEarningsData] = useState<EarningsData[]>([]);
   const [tipsData, setTipsData] = useState<TipData[]>([]);
@@ -113,7 +113,7 @@ const CreatorDashboard: React.FC = () => {
   const [badgeLevel, setBadgeLevel] = useState<BadgeLevel | null>(null);
   const [likeStreak, setLikeStreak] = useState<LikeStreak | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d" | "1y">("30d");
 
   // Mock data for development
   useEffect(() => {
@@ -137,103 +137,103 @@ const CreatorDashboard: React.FC = () => {
       });
 
       setEarningsData([
-        { date: '2024-01-01', amount: 120.50, source: 'tips' },
-        { date: '2024-01-02', amount: 85.25, source: 'subscriptions' },
-        { date: '2024-01-03', amount: 200.00, source: 'sponsorships' },
-        { date: '2024-01-04', amount: 45.75, source: 'tips' },
-        { date: '2024-01-05', amount: 150.00, source: 'merchandise' },
-        { date: '2024-01-06', amount: 95.30, source: 'tips' },
-        { date: '2024-01-07', amount: 180.45, source: 'subscriptions' }
+        { date: "2024-01-01", amount: 120.50, source: "tips" },
+        { date: "2024-01-02", amount: 85.25, source: "subscriptions" },
+        { date: "2024-01-03", amount: 200.00, source: "sponsorships" },
+        { date: "2024-01-04", amount: 45.75, source: "tips" },
+        { date: "2024-01-05", amount: 150.00, source: "merchandise" },
+        { date: "2024-01-06", amount: 95.30, source: "tips" },
+        { date: "2024-01-07", amount: 180.45, source: "subscriptions" }
       ]);
 
       setTipsData([
         {
-          id: '1',
+          id: "1",
           amount: 25.00,
-          message: 'Amazing content! Keep it up!',
-          fromUser: 'soccer_fan_123',
-          timestamp: new Date('2024-01-15T10:30:00'),
+          message: "Amazing content! Keep it up!",
+          fromUser: "soccer_fan_123",
+          timestamp: new Date("2024-01-15T10:30:00"),
           isAnonymous: false
         },
         {
-          id: '2',
+          id: "2",
           amount: 50.00,
-          message: 'Your drills helped my team so much!',
-          fromUser: 'coach_mike',
-          timestamp: new Date('2024-01-14T15:45:00'),
+          message: "Your drills helped my team so much!",
+          fromUser: "coach_mike",
+          timestamp: new Date("2024-01-14T15:45:00"),
           isAnonymous: false
         },
         {
-          id: '3',
+          id: "3",
           amount: 15.00,
-          message: '',
-          fromUser: 'Anonymous',
-          timestamp: new Date('2024-01-13T09:20:00'),
+          message: "",
+          fromUser: "Anonymous",
+          timestamp: new Date("2024-01-13T09:20:00"),
           isAnonymous: true
         },
         {
-          id: '4',
+          id: "4",
           amount: 100.00,
-          message: 'Best coach on the platform!',
-          fromUser: 'parent_sarah',
-          timestamp: new Date('2024-01-12T18:15:00'),
+          message: "Best coach on the platform!",
+          fromUser: "parent_sarah",
+          timestamp: new Date("2024-01-12T18:15:00"),
           isAnonymous: false
         }
       ]);
 
       setPayoutData([
         {
-          id: 'payout-1',
+          id: "payout-1",
           amount: 2500.00,
-          status: 'completed',
-          method: 'stripe',
-          date: new Date('2024-01-10'),
-          reference: 'STRIPE_PAYOUT_001'
+          status: "completed",
+          method: "stripe",
+          date: new Date("2024-01-10"),
+          reference: "STRIPE_PAYOUT_001"
         },
         {
-          id: 'payout-2',
+          id: "payout-2",
           amount: 1800.50,
-          status: 'processing',
-          method: 'stripe',
-          date: new Date('2024-01-15'),
-          reference: 'STRIPE_PAYOUT_002'
+          status: "processing",
+          method: "stripe",
+          date: new Date("2024-01-15"),
+          reference: "STRIPE_PAYOUT_002"
         },
         {
-          id: 'payout-3',
+          id: "payout-3",
           amount: 3200.75,
-          status: 'pending',
-          method: 'stripe',
-          date: new Date('2024-01-20'),
-          reference: 'STRIPE_PAYOUT_003'
+          status: "pending",
+          method: "stripe",
+          date: new Date("2024-01-20"),
+          reference: "STRIPE_PAYOUT_003"
         }
       ]);
 
       setStripeAccount({
-        id: 'acct_stripe123',
+        id: "acct_stripe123",
         isConnected: true,
         isVerified: true,
         balance: 15420.50,
         pendingBalance: 3240.75,
-        currency: 'USD',
-        payoutSchedule: 'weekly',
+        currency: "USD",
+        payoutSchedule: "weekly",
         minimumPayout: 50.00
       });
 
       setBadgeLevel({
         level: 8,
-        name: 'Elite Coach',
-        description: 'Consistently delivering exceptional coaching content',
+        name: "Elite Coach",
+        description: "Consistently delivering exceptional coaching content",
         requirements: [
-          'Maintain 4.5+ rating for 3 months',
-          'Complete 100+ sessions',
-          'Earn $10,000+ in total',
-          'Have 10,000+ followers'
+          "Maintain 4.5+ rating for 3 months",
+          "Complete 100+ sessions",
+          "Earn $10,000+ in total",
+          "Have 10,000+ followers"
         ],
         benefits: [
-          'Priority support',
-          'Advanced analytics',
-          'Exclusive features',
-          'Higher payout rates'
+          "Priority support",
+          "Advanced analytics",
+          "Exclusive features",
+          "Higher payout rates"
         ],
         progress: 85,
         nextLevel: 9
@@ -242,14 +242,14 @@ const CreatorDashboard: React.FC = () => {
       setLikeStreak({
         currentStreak: 45,
         longestStreak: 67,
-        startDate: new Date('2023-12-01'),
-        lastActivity: new Date('2024-01-15'),
+        startDate: new Date("2023-12-01"),
+        lastActivity: new Date("2024-01-15"),
         milestones: [7, 30, 60, 90, 180, 365],
         rewards: [
-          'Badge boost',
-          'Featured placement',
-          'Bonus earnings',
-          'Exclusive content access'
+          "Badge boost",
+          "Featured placement",
+          "Bonus earnings",
+          "Exclusive content access"
         ]
       });
 
@@ -260,33 +260,33 @@ const CreatorDashboard: React.FC = () => {
   }, []);
 
   const tabs = [
-    { id: 'earnings', label: 'Earnings', icon: DollarSign },
-    { id: 'tips', label: 'Tips', icon: Gift },
-    { id: 'payout-setup', label: 'Payout Setup', icon: CreditCard }
+    { id: "earnings", label: "Earnings", icon: DollarSign },
+    { id: "tips", label: "Tips", icon: Gift },
+    { id: "payout-setup", label: "Payout Setup", icon: CreditCard }
   ];
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD"
     }).format(amount);
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
     }).format(date);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'text-green-600 bg-green-100';
-      case 'processing': return 'text-blue-600 bg-blue-100';
-      case 'pending': return 'text-yellow-600 bg-yellow-100';
-      case 'failed': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case "completed": return "text-green-600 bg-green-100";
+      case "processing": return "text-blue-600 bg-blue-100";
+      case "pending": return "text-yellow-600 bg-yellow-100";
+      case "failed": return "text-red-600 bg-red-100";
+      default: return "text-gray-600 bg-gray-100";
     }
   };
 
@@ -429,8 +429,8 @@ const CreatorDashboard: React.FC = () => {
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -451,20 +451,20 @@ const CreatorDashboard: React.FC = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {activeTab === 'earnings' && (
+              {activeTab === "earnings" && (
                 <div className="space-y-6">
                   {/* Time Range Selector */}
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-900">Earnings Overview</h2>
                     <div className="flex items-center gap-2">
-                      {['7d', '30d', '90d', '1y'].map((range) => (
+                      {["7d", "30d", "90d", "1y"].map((range) => (
                         <button
                           key={range}
                           onClick={() => setTimeRange(range as any)}
                           className={`px-3 py-1 rounded-lg text-sm font-medium ${
                             timeRange === range
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                           }`}
                         >
                           {range}
@@ -548,7 +548,7 @@ const CreatorDashboard: React.FC = () => {
                 </div>
               )}
 
-              {activeTab === 'tips' && (
+              {activeTab === "tips" && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-900">Recent Tips</h2>
@@ -578,7 +578,7 @@ const CreatorDashboard: React.FC = () => {
                               </div>
                             </div>
                             <p className="text-sm font-medium text-gray-900 mb-1">
-                              {tip.isAnonymous ? 'Anonymous' : tip.fromUser}
+                              {tip.isAnonymous ? "Anonymous" : tip.fromUser}
                             </p>
                             {tip.message && (
                               <p className="text-sm text-gray-600 italic">"{tip.message}"</p>
@@ -624,7 +624,7 @@ const CreatorDashboard: React.FC = () => {
                 </div>
               )}
 
-              {activeTab === 'payout-setup' && (
+              {activeTab === "payout-setup" && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-900">Payout Setup</h2>
@@ -686,7 +686,7 @@ const CreatorDashboard: React.FC = () => {
                             <div className="flex justify-between">
                               <span className="text-sm text-gray-600">Verification</span>
                               <span className="font-medium">
-                                {stripeAccount.isVerified ? 'Verified' : 'Pending'}
+                                {stripeAccount.isVerified ? "Verified" : "Pending"}
                               </span>
                             </div>
                           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { onSnapshot, query, where, orderBy, limit } from 'firebase/firestore';
+import { onSnapshot, query, where, orderBy, limit, collection, doc } from 'firebase/firestore';
 import { db } from '../firebase/init';
 import { useAuth } from './useAuth';
 import MonetizationService from '../services/monetizationService';
@@ -15,7 +15,7 @@ import type {
   EarningsExportOptions,
   EarningsExport,
   UseMonetizationReturn
-} from '../types/monetization';
+} from '../src/types/monetization';
 import type { TipTransactionDocument } from '../firebase/types';
 
 /**
@@ -41,7 +41,7 @@ export const useMonetization = (userId?: string): UseMonetizationReturn => {
 
     // Listen to tips in real-time
     const tipsQuery = query(
-      db.collection('tips'),
+      collection(db, 'tips'),
       where('toUserId', '==', targetUserId),
       where('status', '==', 'succeeded'),
       orderBy('createdAt', 'desc'),
@@ -58,7 +58,7 @@ export const useMonetization = (userId?: string): UseMonetizationReturn => {
 
     // Listen to payouts in real-time
     const payoutsQuery = query(
-      db.collection('payouts'),
+      collection(db, 'payouts'),
       where('userId', '==', targetUserId),
       orderBy('createdAt', 'desc'),
       limit(20)
@@ -73,7 +73,7 @@ export const useMonetization = (userId?: string): UseMonetizationReturn => {
     });
 
     // Listen to creator profile changes
-    const creatorDoc = db.collection('creatorProfiles').doc(targetUserId);
+    const creatorDoc = doc(db, 'creatorProfiles', targetUserId);
     const unsubscribeCreator = onSnapshot(creatorDoc, (doc) => {
       if (doc.exists()) {
         // Refresh earnings when creator profile updates
@@ -160,10 +160,8 @@ export const useMonetization = (userId?: string): UseMonetizationReturn => {
         userId: targetUserId,
         amount,
         currency: 'usd',
-        destination: settings?.destination || {
-          type: 'bank_account',
-          accountId: undefined
-        }
+        method: 'stripe',
+        notes: 'Payout request'
       };
 
       const response = await MonetizationService.requestPayout(request);
@@ -306,7 +304,7 @@ export const useMonetization = (userId?: string): UseMonetizationReturn => {
   const earningsGrowth = useMemo(() => {
     if (!earnings) return 0;
     // Calculate growth from previous period (simplified)
-    return calculateGrowth(earnings.monthlyEarnings, earnings.monthlyEarnings * 0.9); // Mock previous period
+    return calculateGrowth(earnings.monthlyEarnings || 0, (earnings.monthlyEarnings || 0) * 0.9); // Mock previous period
   }, [earnings, calculateGrowth]);
 
   return {
@@ -330,7 +328,18 @@ export const useMonetization = (userId?: string): UseMonetizationReturn => {
     // Utilities
     formatEarnings,
     calculateGrowth,
-    getEarningsPeriod,
+    getEarningsPeriod: (period: string) => {
+      // Mock implementation - replace with actual API call
+      return {
+        tipsTotal: 0,
+        adShareTotal: 0,
+        subsTotal: 0,
+        currency: 'usd',
+        period,
+        breakdown: [],
+        data: []
+      } as EarningsBreakdown;
+    },
     
     // Computed values
     pendingEarnings,

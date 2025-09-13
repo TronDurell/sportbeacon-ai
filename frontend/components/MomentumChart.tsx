@@ -1,15 +1,10 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+// import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
-export default function MomentumChart({ data }) {
+export default function MomentumChart({ data }: { data: any[] }) {
   return (
-    <LineChart width={500} height={300} data={data}>
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="interval" />
-      <YAxis />
-      <Tooltip />
-      <Legend />
-      <Line type="monotone" dataKey="momentum" stroke="#ff7300" />
-    </LineChart>
+    <div style={{ width: '500px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #ccc' }}>
+      <div>Chart placeholder - {data?.length || 0} data points</div>
+    </div>
   );
 } 

@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React, { useState, useCallback } from "react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface ShoppingRequest {
   id: string;
@@ -20,20 +20,20 @@ interface Product {
 
 const BeaconBuyBot: React.FC = () => {
   const { sendRequest } = useAgentOrchestration();
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('');
-  const [budget, setBudget] = useState('');
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [budget, setBudget] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Product[]>([]);
   const [searchHistory, setSearchHistory] = useState<ShoppingRequest[]>([]);
 
   const categories = [
-    'Equipment',
-    'Apparel',
-    'Footwear',
-    'Accessories',
-    'Training',
-    'Nutrition'
+    "Equipment",
+    "Apparel",
+    "Footwear",
+    "Accessories",
+    "Training",
+    "Nutrition"
   ];
 
   const handleSearch = useCallback(async () => {
@@ -54,27 +54,27 @@ const BeaconBuyBot: React.FC = () => {
 
       // Simulate AI-powered search
       await sendRequest({
-        type: 'shopping_search',
+        type: "shopping_search",
         data: request
       });
 
       // Mock results
       const mockResults: Product[] = [
         {
-          id: '1',
-          name: 'Professional Soccer Ball',
+          id: "1",
+          name: "Professional Soccer Ball",
           price: 29.99,
-          category: 'Equipment',
-          description: 'High-quality soccer ball for professional training',
-          imageUrl: '/images/soccer-ball.jpg'
+          category: "Equipment",
+          description: "High-quality soccer ball for professional training",
+          imageUrl: "/images/soccer-ball.jpg"
         },
         {
-          id: '2',
-          name: 'Moisture-Wicking Jersey',
+          id: "2",
+          name: "Moisture-Wicking Jersey",
           price: 24.99,
-          category: 'Apparel',
-          description: 'Comfortable sports jersey with moisture-wicking technology',
-          imageUrl: '/images/jersey.jpg'
+          category: "Apparel",
+          description: "Comfortable sports jersey with moisture-wicking technology",
+          imageUrl: "/images/jersey.jpg"
         }
       ];
 
@@ -86,7 +86,7 @@ const BeaconBuyBot: React.FC = () => {
   }, [query, category, budget, sendRequest]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
@@ -155,7 +155,7 @@ const BeaconBuyBot: React.FC = () => {
             disabled={loading || !query.trim()}
             className="w-full md:w-auto px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Searching...' : 'Search Products'}
+            {loading ? "Searching..." : "Search Products"}
           </button>
         </div>
       </div>
@@ -172,7 +172,7 @@ const BeaconBuyBot: React.FC = () => {
                 onClick={() => {
                   setQuery(search.query);
                   setCategory(search.category);
-                  setBudget(search.budget?.toString() || '');
+                  setBudget(search.budget?.toString() || "");
                 }}
               >
                 <div>

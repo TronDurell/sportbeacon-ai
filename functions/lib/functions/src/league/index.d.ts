@@ -5,8 +5,8 @@
 export declare const createLeague: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
     message: string;
     success: boolean;
-    error?: any;
     data?: any;
+    error?: any;
 } | {
     success: boolean;
     message: string;
@@ -113,8 +113,8 @@ export declare const generateLeagueSchedule: import("firebase-functions/v2/https
         gamesGenerated: number;
         schedule: {
             leagueId: any;
-            homeTeam: string;
-            awayTeam: string;
+            homeTeam: string | undefined;
+            awayTeam: string | undefined;
             date: Date;
             venue: any;
             status: string;

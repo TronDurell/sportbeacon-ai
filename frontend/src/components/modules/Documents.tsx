@@ -1,6 +1,6 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { FileText, Download, Upload, CheckCircle } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { FileText, Download, Upload, CheckCircle } from "lucide-react";
 
 const Documents: React.FC = () => {
   return (

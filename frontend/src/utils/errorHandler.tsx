@@ -16,7 +16,7 @@ export interface AppError {
   timestamp: Date;
   userId?: string;
   context?: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
 }
 
 export interface ErrorResponse {
@@ -40,36 +40,36 @@ export interface ValidationError {
 
 export const ERROR_CODES = {
   // Authentication Errors
-  AUTH_INVALID_CREDENTIALS: 'AUTH_INVALID_CREDENTIALS',
-  AUTH_TOKEN_EXPIRED: 'AUTH_TOKEN_EXPIRED',
-  AUTH_INSUFFICIENT_PERMISSIONS: 'AUTH_INSUFFICIENT_PERMISSIONS',
-  AUTH_USER_NOT_FOUND: 'AUTH_USER_NOT_FOUND',
-  AUTH_ACCOUNT_DISABLED: 'AUTH_ACCOUNT_DISABLED',
+  AUTH_INVALID_CREDENTIALS: "AUTH_INVALID_CREDENTIALS",
+  AUTH_TOKEN_EXPIRED: "AUTH_TOKEN_EXPIRED",
+  AUTH_INSUFFICIENT_PERMISSIONS: "AUTH_INSUFFICIENT_PERMISSIONS",
+  AUTH_USER_NOT_FOUND: "AUTH_USER_NOT_FOUND",
+  AUTH_ACCOUNT_DISABLED: "AUTH_ACCOUNT_DISABLED",
   
   // Validation Errors
-  VALIDATION_FAILED: 'VALIDATION_FAILED',
-  VALIDATION_INVALID_EMAIL: 'VALIDATION_INVALID_EMAIL',
-  VALIDATION_INVALID_PASSWORD: 'VALIDATION_INVALID_PASSWORD',
-  VALIDATION_INVALID_INPUT: 'VALIDATION_INVALID_INPUT',
+  VALIDATION_FAILED: "VALIDATION_FAILED",
+  VALIDATION_INVALID_EMAIL: "VALIDATION_INVALID_EMAIL",
+  VALIDATION_INVALID_PASSWORD: "VALIDATION_INVALID_PASSWORD",
+  VALIDATION_INVALID_INPUT: "VALIDATION_INVALID_INPUT",
   
   // Network Errors
-  NETWORK_TIMEOUT: 'NETWORK_TIMEOUT',
-  NETWORK_CONNECTION_FAILED: 'NETWORK_CONNECTION_FAILED',
-  NETWORK_SERVER_ERROR: 'NETWORK_SERVER_ERROR',
+  NETWORK_TIMEOUT: "NETWORK_TIMEOUT",
+  NETWORK_CONNECTION_FAILED: "NETWORK_CONNECTION_FAILED",
+  NETWORK_SERVER_ERROR: "NETWORK_SERVER_ERROR",
   
   // Firebase Errors
-  FIREBASE_PERMISSION_DENIED: 'FIREBASE_PERMISSION_DENIED',
-  FIREBASE_DOCUMENT_NOT_FOUND: 'FIREBASE_DOCUMENT_NOT_FOUND',
-  FIREBASE_QUOTA_EXCEEDED: 'FIREBASE_QUOTA_EXCEEDED',
+  FIREBASE_PERMISSION_DENIED: "FIREBASE_PERMISSION_DENIED",
+  FIREBASE_DOCUMENT_NOT_FOUND: "FIREBASE_DOCUMENT_NOT_FOUND",
+  FIREBASE_QUOTA_EXCEEDED: "FIREBASE_QUOTA_EXCEEDED",
   
   // Business Logic Errors
-  BUSINESS_INVALID_OPERATION: 'BUSINESS_INVALID_OPERATION',
-  BUSINESS_RESOURCE_NOT_FOUND: 'BUSINESS_RESOURCE_NOT_FOUND',
-  BUSINESS_CONFLICT: 'BUSINESS_CONFLICT',
+  BUSINESS_INVALID_OPERATION: "BUSINESS_INVALID_OPERATION",
+  BUSINESS_RESOURCE_NOT_FOUND: "BUSINESS_RESOURCE_NOT_FOUND",
+  BUSINESS_CONFLICT: "BUSINESS_CONFLICT",
   
   // System Errors
-  SYSTEM_UNKNOWN_ERROR: 'SYSTEM_UNKNOWN_ERROR',
-  SYSTEM_CONFIGURATION_ERROR: 'SYSTEM_CONFIGURATION_ERROR',
+  SYSTEM_UNKNOWN_ERROR: "SYSTEM_UNKNOWN_ERROR",
+  SYSTEM_CONFIGURATION_ERROR: "SYSTEM_CONFIGURATION_ERROR",
 } as const;
 
 // ============================================================================
@@ -94,7 +94,7 @@ export class ErrorHandler {
   handleError(
     error: unknown, 
     context?: string, 
-    severity: AppError['severity'] = 'medium'
+    severity: AppError["severity"] = "medium"
   ): AppError {
     const appError: AppError = {
       code: this.getErrorCode(error),
@@ -133,30 +133,30 @@ export class ErrorHandler {
   handleFirebaseError(error: unknown, context?: string): AppError {
     const firebaseError = error as { code?: string; message?: string };
     
-    let code = ERROR_CODES.FIREBASE_PERMISSION_DENIED;
-    let message = 'Firebase operation failed';
+    let code: string = ERROR_CODES.FIREBASE_PERMISSION_DENIED;
+    let message = "Firebase operation failed";
 
     if (firebaseError.code) {
       switch (firebaseError.code) {
-        case 'permission-denied':
+        case "permission-denied":
           code = ERROR_CODES.FIREBASE_PERMISSION_DENIED;
-          message = 'Access denied. You do not have permission to perform this operation.';
+          message = "Access denied. You do not have permission to perform this operation.";
           break;
-        case 'not-found':
+        case "not-found":
           code = ERROR_CODES.FIREBASE_DOCUMENT_NOT_FOUND;
-          message = 'The requested resource was not found.';
+          message = "The requested resource was not found.";
           break;
-        case 'quota-exceeded':
+        case "quota-exceeded":
           code = ERROR_CODES.FIREBASE_QUOTA_EXCEEDED;
-          message = 'Service quota exceeded. Please try again later.';
+          message = "Service quota exceeded. Please try again later.";
           break;
         default:
           code = ERROR_CODES.SYSTEM_UNKNOWN_ERROR;
-          message = firebaseError.message || 'An unexpected Firebase error occurred.';
+          message = firebaseError.message || "An unexpected Firebase error occurred.";
       }
     }
 
-    return this.handleError(error, context, 'high');
+    return this.handleError(error, context, "high");
   }
 
   /**
@@ -165,26 +165,26 @@ export class ErrorHandler {
   handleNetworkError(error: unknown, context?: string): AppError {
     const networkError = error as { status?: number; message?: string };
     
-    let code = ERROR_CODES.NETWORK_SERVER_ERROR;
-    let message = 'Network request failed';
+    let code: string = ERROR_CODES.NETWORK_SERVER_ERROR;
+    let message = "Network request failed";
 
     if (networkError.status) {
       switch (networkError.status) {
         case 408:
           code = ERROR_CODES.NETWORK_TIMEOUT;
-          message = 'Request timed out. Please try again.';
+          message = "Request timed out. Please try again.";
           break;
         case 500:
           code = ERROR_CODES.NETWORK_SERVER_ERROR;
-          message = 'Server error. Please try again later.';
+          message = "Server error. Please try again later.";
           break;
         default:
           code = ERROR_CODES.NETWORK_CONNECTION_FAILED;
-          message = networkError.message || 'Network connection failed.';
+          message = networkError.message || "Network connection failed.";
       }
     }
 
-    return this.handleError(error, context, 'medium');
+    return this.handleError(error, context, "medium");
   }
 
   /**
@@ -193,12 +193,12 @@ export class ErrorHandler {
   handleValidationError(errors: ValidationError[], context?: string): AppError {
     const error: AppError = {
       code: ERROR_CODES.VALIDATION_FAILED,
-      message: 'Validation failed',
+      message: "Validation failed",
       details: { errors },
       timestamp: new Date(),
       userId: this.getCurrentUserId(),
       context,
-      severity: 'low'
+      severity: "low"
     };
 
     this.logError(error);
@@ -209,7 +209,7 @@ export class ErrorHandler {
    * Extract error code from various error types
    */
   private getErrorCode(error: unknown): string {
-    if (typeof error === 'object' && error !== null) {
+    if (typeof error === "object" && error !== null) {
       const errorObj = error as { code?: string; name?: string };
       return errorObj.code || errorObj.name || ERROR_CODES.SYSTEM_UNKNOWN_ERROR;
     }
@@ -220,26 +220,26 @@ export class ErrorHandler {
    * Extract error message from various error types
    */
   private getErrorMessage(error: unknown): string {
-    if (typeof error === 'string') {
+    if (typeof error === "string") {
       return error;
     }
-    if (typeof error === 'object' && error !== null) {
+    if (typeof error === "object" && error !== null) {
       const errorObj = error as { message?: string; toString?: () => string };
-      return errorObj.message || errorObj.toString?.() || 'An unknown error occurred';
+      return errorObj.message || errorObj.toString?.() || "An unknown error occurred";
     }
-    return 'An unknown error occurred';
+    return "An unknown error occurred";
   }
 
   /**
    * Extract additional error details
    */
   private extractErrorDetails(error: unknown): Record<string, unknown> {
-    if (typeof error === 'object' && error !== null) {
+    if (typeof error === "object" && error !== null) {
       const errorObj = error as Record<string, unknown>;
       const details: Record<string, unknown> = {};
       
       // Extract common error properties
-      ['stack', 'cause', 'status', 'statusText', 'url'].forEach(key => {
+      ["stack", "cause", "status", "statusText", "url"].forEach(key => {
         if (errorObj[key] !== undefined) {
           details[key] = errorObj[key];
         }
@@ -263,7 +263,7 @@ export class ErrorHandler {
    */
   private logError(error: AppError): void {
     // Console logging
-    console.error('Application Error:', {
+    console.error("Application Error:", {
       code: error.code,
       message: error.message,
       context: error.context,
@@ -273,7 +273,7 @@ export class ErrorHandler {
     });
 
     // TODO: Send to external logging service (Sentry, LogRocket, etc.)
-    if (error.severity === 'critical' || error.severity === 'high') {
+    if (error.severity === "critical" || error.severity === "high") {
       this.sendToMonitoring(error);
     }
   }
@@ -284,7 +284,7 @@ export class ErrorHandler {
   private sendToMonitoring(error: AppError): void {
     // TODO: Implement monitoring service integration
     // Example: Sentry.captureException(error);
-    console.warn('Error monitoring not implemented:', error);
+    console.warn("Error monitoring not implemented:", error);
   }
 
   /**
@@ -358,7 +358,7 @@ export const handleValidationError = (errors: ValidationError[], context?: strin
 // REACT ERROR BOUNDARY
 // ============================================================================
 
-import React from 'react';
+import React from "react";
 
 export interface ErrorFallbackProps {
   error: AppError;
@@ -392,12 +392,12 @@ export const withErrorBoundary = <P extends object>(
     }
 
     static getDerivedStateFromError(error: unknown) {
-      const appError = handleError(error, 'ErrorBoundary');
+      const appError = handleError(error, "ErrorBoundary");
       return { hasError: true, error: appError };
     }
 
     componentDidCatch(error: unknown, errorInfo: unknown) {
-      handleError(error, 'ErrorBoundary');
+      handleError(error, "ErrorBoundary");
     }
 
     resetError = () => {

@@ -49,10 +49,10 @@ describe("weeklyDirectorDigest", () => {
     await seedTestData("ageOverrides", {
 
       "override-approved-1": {...mockData.ageOverride, status: "approved", approvedAt: new
-Date("2024-01-10T10:00:00Z")},
+      Date("2024-01-10T10:00:00Z")},
 
       "override-approved-2": {...mockData.ageOverride, status: "approved", approvedAt: new
-Date("2024-01-11T14:30:00Z")},
+      Date("2024-01-11T14:30:00Z")},
 
       "override-denied-1": {...mockData.ageOverride, status: "denied", deniedAt: new Date("2024-01-12T09:15:00Z")},
 
@@ -65,13 +65,13 @@ Date("2024-01-11T14:30:00Z")},
     await seedTestData("registrations", {
 
       "registration-1": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-10T10:00:00Z")},
+      Date("2024-01-10T10:00:00Z")},
 
       "registration-2": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-11T14:30:00Z")},
+      Date("2024-01-11T14:30:00Z")},
 
       "registration-3": {...mockData.registration, status: "cancelled", registrationDate: new
-Date("2024-01-12T09:15:00Z")},
+      Date("2024-01-12T09:15:00Z")},
 
     });
 
@@ -150,13 +150,13 @@ Date("2024-01-12T09:15:00Z")},
     await seedTestData("ageOverrides", {
 
       "override-approved-1": {...mockData.ageOverride, status: "approved", approvedAt: new
-Date("2024-01-10T10:00:00Z")},
+      Date("2024-01-10T10:00:00Z")},
 
       "override-approved-2": {...mockData.ageOverride, status: "approved", approvedAt: new
-Date("2024-01-11T14:30:00Z")},
+      Date("2024-01-11T14:30:00Z")},
 
       "override-approved-3": {...mockData.ageOverride, status: "approved", approvedAt: new
-Date("2024-01-12T09:15:00Z")},
+      Date("2024-01-12T09:15:00Z")},
 
     });
 
@@ -283,16 +283,16 @@ Date("2024-01-12T09:15:00Z")},
     await seedTestData("registrations", {
 
       "registration-active-1": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-10T10:00:00Z")},
+      Date("2024-01-10T10:00:00Z")},
 
       "registration-active-2": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-11T14:30:00Z")},
+      Date("2024-01-11T14:30:00Z")},
 
       "registration-cancelled-1": {...mockData.registration, status: "cancelled", registrationDate: new
-Date("2024-01-12T09:15:00Z")},
+      Date("2024-01-12T09:15:00Z")},
 
       "registration-pending-1": {...mockData.registration, status: "pending", registrationDate: new
-Date("2024-01-13T16:45:00Z")},
+      Date("2024-01-13T16:45:00Z")},
 
     });
 
@@ -333,7 +333,7 @@ Date("2024-01-13T16:45:00Z")},
     await seedTestData("siblingPairings", {
 
       "pairing-approved-1": {...mockData.siblingPairing, status: "approved", approvedAt: new
-Date("2024-01-10T10:00:00Z")},
+      Date("2024-01-10T10:00:00Z")},
 
       "pairing-denied-1": {...mockData.siblingPairing, status: "denied", deniedAt: new Date("2024-01-11T14:30:00Z")},
 

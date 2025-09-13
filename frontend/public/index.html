@@ -3,15 +3,28 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#111827" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SportBeacon" />
     <meta
       name="description"
-      content="SportBeaconAI - Advanced Sports Management Platform"
+      content="SportBeacon - Location-based sports community and threads"
     />
-    <link rel="apple-touch-icon" href="/logo192.png" />
-    <link rel="manifest" href="/manifest.json" />
-    <title>SportBeaconAI</title>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    
+    <!-- PWA Install Hints -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="SportBeacon" />
+    <meta name="msapplication-TileColor" content="#111827" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https: wss:;" />
+    
+    <title>SportBeacon</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

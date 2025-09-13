@@ -1,10 +1,10 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 
 // Lazy load commerce components
-const CommerceDashboard = React.lazy(() => import('../components/commerce/SocialCommerceFeed'));
-const BeaconBuyBot = React.lazy(() => import('../components/commerce/BeaconBuyBot'));
-const BulkProcurementPortal = React.lazy(() => import('../components/commerce/BulkProcurementPortal'));
+const CommerceDashboard = React.lazy(() => import("../components/commerce/SocialCommerceFeed"));
+const BeaconBuyBot = React.lazy(() => import("../components/commerce/BeaconBuyBot"));
+const BulkProcurementPortal = React.lazy(() => import("../components/commerce/BulkProcurementPortal"));
 
 const CommerceRoutes: React.FC = () => {
   return (

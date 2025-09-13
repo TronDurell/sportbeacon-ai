@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../firebase/init';
 
-export default function useTrainingLog(userId) {
-  const [logs, setLogs] = useState([]);
+export default function useTrainingLog(userId: string) {
+  const [logs, setLogs] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -15,7 +15,7 @@ export default function useTrainingLog(userId) {
     fetchLogs();
   }, [userId]);
 
-  const addLog = async (logData) => {
+  const addLog = async (logData: any) => {
     const ref = collection(db, 'trainingLogs');
     await addDoc(ref, { userId, ...logData });
   };

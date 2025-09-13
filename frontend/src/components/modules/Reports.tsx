@@ -1,15 +1,15 @@
-import React from 'react';
-import { FileText, BarChart3, Calendar } from 'lucide-react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import React from "react";
+import { FileText, BarChart3, Calendar } from "lucide-react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface Report {
   id: string;
   title: string;
-  type: 'performance' | 'attendance' | 'financial' | 'analytics';
+  type: "performance" | "attendance" | "financial" | "analytics";
   generatedDate: Date;
-  status: 'ready' | 'generating' | 'failed';
+  status: "ready" | "generating" | "failed";
   size: string;
-  format: 'pdf' | 'csv' | 'excel';
+  format: "pdf" | "csv" | "excel";
 }
 
 const Reports: React.FC = () => {
@@ -17,74 +17,74 @@ const Reports: React.FC = () => {
 
   const reports: Report[] = [
     {
-      id: '1',
-      title: 'Monthly Performance Report',
-      type: 'performance',
-      generatedDate: new Date('2024-01-20'),
-      status: 'ready',
-      size: '2.3 MB',
-      format: 'pdf'
+      id: "1",
+      title: "Monthly Performance Report",
+      type: "performance",
+      generatedDate: new Date("2024-01-20"),
+      status: "ready",
+      size: "2.3 MB",
+      format: "pdf"
     },
     {
-      id: '2',
-      title: 'Attendance Summary',
-      type: 'attendance',
-      generatedDate: new Date('2024-01-19'),
-      status: 'ready',
-      size: '1.1 MB',
-      format: 'csv'
+      id: "2",
+      title: "Attendance Summary",
+      type: "attendance",
+      generatedDate: new Date("2024-01-19"),
+      status: "ready",
+      size: "1.1 MB",
+      format: "csv"
     },
     {
-      id: '3',
-      title: 'Financial Overview',
-      type: 'financial',
-      generatedDate: new Date('2024-01-18'),
-      status: 'ready',
-      size: '3.7 MB',
-      format: 'excel'
+      id: "3",
+      title: "Financial Overview",
+      type: "financial",
+      generatedDate: new Date("2024-01-18"),
+      status: "ready",
+      size: "3.7 MB",
+      format: "excel"
     },
     {
-      id: '4',
-      title: 'Team Analytics',
-      type: 'analytics',
-      generatedDate: new Date('2024-01-17'),
-      status: 'generating',
-      size: '--',
-      format: 'pdf'
+      id: "4",
+      title: "Team Analytics",
+      type: "analytics",
+      generatedDate: new Date("2024-01-17"),
+      status: "generating",
+      size: "--",
+      format: "pdf"
     }
   ];
 
-  const getTypeColor = (type: Report['type']) => {
+  const getTypeColor = (type: Report["type"]) => {
     switch (type) {
-      case 'performance': return 'bg-blue-100 text-blue-800';
-      case 'attendance': return 'bg-green-100 text-green-800';
-      case 'financial': return 'bg-purple-100 text-purple-800';
-      case 'analytics': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "performance": return "bg-blue-100 text-blue-800";
+      case "attendance": return "bg-green-100 text-green-800";
+      case "financial": return "bg-purple-100 text-purple-800";
+      case "analytics": return "bg-orange-100 text-orange-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getStatusColor = (status: Report['status']) => {
+  const getStatusColor = (status: Report["status"]) => {
     switch (status) {
-      case 'ready': return 'text-green-600';
-      case 'generating': return 'text-yellow-600';
-      case 'failed': return 'text-red-600';
-      default: return 'text-gray-600';
+      case "ready": return "text-green-600";
+      case "generating": return "text-yellow-600";
+      case "failed": return "text-red-600";
+      default: return "text-gray-600";
     }
   };
 
-  const getFormatIcon = (format: Report['format']) => {
+  const getFormatIcon = (format: Report["format"]) => {
     switch (format) {
-      case 'pdf': return '📄';
-      case 'csv': return '📊';
-      case 'excel': return '📈';
-      default: return '📄';
+      case "pdf": return "📄";
+      case "csv": return "📊";
+      case "excel": return "📈";
+      default: return "📄";
     }
   };
 
-  const generateReport = async (type: Report['type']) => {
+  const generateReport = async (type: Report["type"]) => {
     await sendRequest({
-      type: 'generate_report',
+      type: "generate_report",
       reportType: type,
       timestamp: new Date()
     });
@@ -92,7 +92,7 @@ const Reports: React.FC = () => {
 
   const downloadReport = async (reportId: string) => {
     await sendRequest({
-      type: 'download_report',
+      type: "download_report",
       reportId
     });
   };
@@ -103,7 +103,7 @@ const Reports: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => generateReport('performance')}
+            onClick={() => generateReport("performance")}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2"
           >
             <FileText className="w-4 h-4" />
@@ -129,7 +129,7 @@ const Reports: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Ready</p>
               <p className="text-2xl font-bold text-green-600">
-                {reports.filter(r => r.status === 'ready').length}
+                {reports.filter(r => r.status === "ready").length}
               </p>
             </div>
             <BarChart3 className="w-8 h-8 text-green-500" />
@@ -141,7 +141,7 @@ const Reports: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Generating</p>
               <p className="text-2xl font-bold text-yellow-600">
-                {reports.filter(r => r.status === 'generating').length}
+                {reports.filter(r => r.status === "generating").length}
               </p>
             </div>
             <Calendar className="w-8 h-8 text-yellow-500" />
@@ -153,7 +153,7 @@ const Reports: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Failed</p>
               <p className="text-2xl font-bold text-red-600">
-                {reports.filter(r => r.status === 'failed').length}
+                {reports.filter(r => r.status === "failed").length}
               </p>
             </div>
             <FileText className="w-8 h-8 text-red-500" />
@@ -224,7 +224,7 @@ const Reports: React.FC = () => {
                     {report.size}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {report.status === 'ready' ? (
+                    {report.status === "ready" ? (
                       <button
                         onClick={() => downloadReport(report.id)}
                         className="text-blue-600 hover:text-blue-900"

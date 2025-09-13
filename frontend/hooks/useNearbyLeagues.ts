@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function useNearbyLeagues(geoPoint) {
+export default function useNearbyLeagues(geoPoint: any) {
   const [leagues, setLeagues] = useState([]);
   useEffect(() => {
     if (!geoPoint) return;

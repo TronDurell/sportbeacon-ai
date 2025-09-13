@@ -132,7 +132,7 @@ export const useMediaUpload = () => {
     }
 
     setIsProcessing(true);
-    const uploadTasks: MediaUploadTask[] = [];
+    const uploadTasksArray: MediaUploadTask[] = [];
 
     try {
       // Create previews first
@@ -142,11 +142,11 @@ export const useMediaUpload = () => {
       // Upload each file
       for (const file of files) {
         try {
-          const uploadTask = await mediaService.uploadFile(file, category, metadata);
+          const uploadTask = await mediaService.uploadFile(file, category, user.uid, metadata);
           
           // Store upload task
           uploadTasks.current.set(uploadTask.id, uploadTask);
-          uploadTasks.push(uploadTask);
+          uploadTasksArray.push(uploadTask);
 
           // Set up progress tracking
           const progressInterval = setInterval(() => {
@@ -202,12 +202,12 @@ export const useMediaUpload = () => {
           };
 
           uploadTasks.current.set(failedTask.id, failedTask);
-          uploadTasks.push(failedTask);
+          uploadTasksArray.push(failedTask);
         }
       }
 
       updateUploadState();
-      return uploadTasks;
+      return uploadTasksArray;
 
     } finally {
       setIsProcessing(false);
@@ -240,6 +240,7 @@ export const useMediaUpload = () => {
       const newTask = await mediaService.uploadFile(
         failedTask.file,
         failedTask.metadata.category as MediaCategory,
+        user?.uid || '',
         failedTask.metadata
       );
 
@@ -283,7 +284,7 @@ export const useMediaUpload = () => {
     mediaService.clearCompletedUploads();
     
     // Clear from local state
-    for (const [uploadId, task] of uploadTasks.current.entries()) {
+    for (const [uploadId, task] of Array.from(uploadTasks.current.entries())) {
       if (task.status === 'completed' || task.status === 'failed') {
         uploadTasks.current.delete(uploadId);
         

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../firebase/init';
 
-export default function useEvents(userId) {
-  const [events, setEvents] = useState([]);
+export default function useEvents(userId: string) {
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -15,7 +15,7 @@ export default function useEvents(userId) {
     fetchEvents();
   }, [userId]);
 
-  const rsvpEvent = async (eventId) => {
+  const rsvpEvent = async (eventId: string) => {
     const ref = collection(db, 'events', eventId, 'rsvps');
     await addDoc(ref, { userId });
   };

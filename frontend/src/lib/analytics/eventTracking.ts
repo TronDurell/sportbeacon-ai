@@ -17,7 +17,7 @@ export interface AnalyticsEvent {
   sessionId?: string;
   timestamp: Date;
   feature: string;
-  category: 'feature_usage' | 'user_interaction' | 'performance' | 'error' | 'conversion';
+  category: "feature_usage" | "user_interaction" | "performance" | "error" | "conversion";
   value?: number;
 }
 
@@ -25,7 +25,7 @@ export interface FeatureMetrics {
   featureStart: number;
   timeSpent: number;
   feedbackResponse: number;
-  sessionOutcome: 'completed' | 'abandoned' | 'error';
+  sessionOutcome: "completed" | "abandoned" | "error";
   userSatisfaction?: number;
   completionRate?: number;
   errorCount?: number;
@@ -40,7 +40,7 @@ export interface SessionData {
   duration?: number;
   interactions: number;
   events: AnalyticsEvent[];
-  outcome: 'completed' | 'abandoned' | 'error';
+  outcome: "completed" | "abandoned" | "error";
 }
 
 class AnalyticsTracker {
@@ -83,14 +83,14 @@ class AnalyticsTracker {
       startTime: new Date(),
       interactions: 0,
       events: [],
-      outcome: 'completed'
+      outcome: "completed"
     };
 
     this.currentSessions.set(sessionId, sessionData);
 
     // Track feature start event
     this.trackEvent({
-      eventName: 'feature_start',
+      eventName: "feature_start",
       eventParams: {
         feature,
         sessionId,
@@ -100,7 +100,7 @@ class AnalyticsTracker {
       sessionId,
       timestamp: new Date(),
       feature,
-      category: 'feature_usage'
+      category: "feature_usage"
     });
 
     return sessionId;
@@ -109,7 +109,7 @@ class AnalyticsTracker {
   /**
    * End a feature session
    */
-  endFeatureSession(sessionId: string, outcome: 'completed' | 'abandoned' | 'error', metadata?: Record<string, any>): void {
+  endFeatureSession(sessionId: string, outcome: "completed" | "abandoned" | "error", metadata?: Record<string, any>): void {
     const session = this.currentSessions.get(sessionId);
     if (!session) return;
 
@@ -119,7 +119,7 @@ class AnalyticsTracker {
 
     // Track session end event
     this.trackEvent({
-      eventName: 'feature_end',
+      eventName: "feature_end",
       eventParams: {
         feature: session.feature,
         sessionId,
@@ -132,7 +132,7 @@ class AnalyticsTracker {
       sessionId,
       timestamp: new Date(),
       feature: session.feature,
-      category: 'feature_usage',
+      category: "feature_usage",
       value: session.duration
     });
 
@@ -150,7 +150,7 @@ class AnalyticsTracker {
     session.interactions++;
 
     this.trackEvent({
-      eventName: 'user_interaction',
+      eventName: "user_interaction",
       eventParams: {
         feature: session.feature,
         sessionId,
@@ -162,7 +162,7 @@ class AnalyticsTracker {
       sessionId,
       timestamp: new Date(),
       feature: session.feature,
-      category: 'user_interaction'
+      category: "user_interaction"
     });
   }
 
@@ -174,7 +174,7 @@ class AnalyticsTracker {
     if (!session) return;
 
     this.trackEvent({
-      eventName: 'feedback_response',
+      eventName: "feedback_response",
       eventParams: {
         feature: session.feature,
         sessionId,
@@ -186,7 +186,7 @@ class AnalyticsTracker {
       sessionId,
       timestamp: new Date(),
       feature: session.feature,
-      category: 'user_interaction'
+      category: "user_interaction"
     });
   }
 
@@ -195,7 +195,7 @@ class AnalyticsTracker {
    */
   trackPerformance(feature: string, metric: string, value: number, metadata?: Record<string, any>): void {
     this.trackEvent({
-      eventName: 'performance_metric',
+      eventName: "performance_metric",
       eventParams: {
         feature,
         metric,
@@ -204,7 +204,7 @@ class AnalyticsTracker {
       },
       timestamp: new Date(),
       feature,
-      category: 'performance',
+      category: "performance",
       value
     });
   }
@@ -214,7 +214,7 @@ class AnalyticsTracker {
    */
   trackError(feature: string, errorType: string, errorMessage: string, metadata?: Record<string, any>): void {
     this.trackEvent({
-      eventName: 'error_occurred',
+      eventName: "error_occurred",
       eventParams: {
         feature,
         errorType,
@@ -223,7 +223,7 @@ class AnalyticsTracker {
       },
       timestamp: new Date(),
       feature,
-      category: 'error'
+      category: "error"
     });
   }
 
@@ -232,7 +232,7 @@ class AnalyticsTracker {
    */
   trackConversion(feature: string, conversionType: string, value?: number, metadata?: Record<string, any>): void {
     this.trackEvent({
-      eventName: 'conversion',
+      eventName: "conversion",
       eventParams: {
         feature,
         conversionType,
@@ -240,7 +240,7 @@ class AnalyticsTracker {
       },
       timestamp: new Date(),
       feature,
-      category: 'conversion',
+      category: "conversion",
       value
     });
   }
@@ -253,7 +253,7 @@ class AnalyticsTracker {
     if (!session) return;
 
     this.trackEvent({
-      eventName: 'time_spent',
+      eventName: "time_spent",
       eventParams: {
         feature: session.feature,
         sessionId,
@@ -264,7 +264,7 @@ class AnalyticsTracker {
       sessionId,
       timestamp: new Date(),
       feature: session.feature,
-      category: 'feature_usage',
+      category: "feature_usage",
       value: timeSpent
     });
   }
@@ -277,7 +277,7 @@ class AnalyticsTracker {
     if (!session) return;
 
     this.trackEvent({
-      eventName: 'user_satisfaction',
+      eventName: "user_satisfaction",
       eventParams: {
         feature: session.feature,
         sessionId,
@@ -289,7 +289,7 @@ class AnalyticsTracker {
       sessionId,
       timestamp: new Date(),
       feature: session.feature,
-      category: 'user_interaction',
+      category: "user_interaction",
       value: satisfaction
     });
   }
@@ -297,7 +297,7 @@ class AnalyticsTracker {
   /**
    * Core event tracking method
    */
-  private async trackEvent(event: AnalyticsEvent): Promise<void> {
+  public async trackEvent(event: AnalyticsEvent): Promise<void> {
     try {
       // Add to queue for batch processing
       this.eventQueue.push(event);
@@ -328,9 +328,9 @@ class AnalyticsTracker {
    */
   private storeEventLocally(event: AnalyticsEvent): void {
     try {
-      const storedEvents = JSON.parse(localStorage.getItem('analytics_events') || '[]');
+      const storedEvents = JSON.parse(localStorage.getItem("analytics_events") || "[]");
       storedEvents.push(event);
-      localStorage.setItem('analytics_events', JSON.stringify(storedEvents.slice(-1000))); // Keep last 1000 events
+      localStorage.setItem("analytics_events", JSON.stringify(storedEvents.slice(-1000))); // Keep last 1000 events
     } catch (error) {
       }
   }
@@ -346,10 +346,10 @@ class AnalyticsTracker {
 
     try {
       // Send events to backend for processing
-      await fetch('/api/analytics/events', {
-        method: 'POST',
+      await fetch("/api/analytics/events", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ events })
       });
@@ -372,7 +372,7 @@ class AnalyticsTracker {
         featureStart: 0,
         timeSpent: 0,
         feedbackResponse: 0,
-        sessionOutcome: 'completed'
+        sessionOutcome: "completed"
       };
     }
   }
@@ -396,19 +396,19 @@ class AnalyticsTracker {
    */
   async syncOfflineEvents(): Promise<void> {
     try {
-      const storedEvents = JSON.parse(localStorage.getItem('analytics_events') || '[]');
+      const storedEvents = JSON.parse(localStorage.getItem("analytics_events") || "[]");
       if (storedEvents.length === 0) return;
 
-      await fetch('/api/analytics/sync', {
-        method: 'POST',
+      await fetch("/api/analytics/sync", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ events: storedEvents })
       });
 
       // Clear stored events after successful sync
-      localStorage.removeItem('analytics_events');
+      localStorage.removeItem("analytics_events");
     } catch (error) {
       }
   }
@@ -435,16 +435,16 @@ export const analyticsTracker = AnalyticsTracker.getInstance();
 // Feature-specific tracking functions
 export const WorkoutPartnerTracking = {
   startSession: (userId: string, workoutType: string) => 
-    analyticsTracker.startFeatureSession('WorkoutPartner', userId, { workoutType }),
+    analyticsTracker.startFeatureSession("WorkoutPartner", userId, { workoutType }),
   
   trackWorkoutStart: (sessionId: string, workoutId: string) => 
-    analyticsTracker.trackInteraction(sessionId, 'workout_start', { workoutId }),
+    analyticsTracker.trackInteraction(sessionId, "workout_start", { workoutId }),
   
   trackExerciseComplete: (sessionId: string, exerciseId: string, duration: number) => 
-    analyticsTracker.trackInteraction(sessionId, 'exercise_complete', { exerciseId, duration }),
+    analyticsTracker.trackInteraction(sessionId, "exercise_complete", { exerciseId, duration }),
   
   trackWorkoutComplete: (sessionId: string, totalDuration: number, caloriesBurned: number) => 
-    analyticsTracker.endFeatureSession(sessionId, 'completed', { totalDuration, caloriesBurned }),
+    analyticsTracker.endFeatureSession(sessionId, "completed", { totalDuration, caloriesBurned }),
   
   trackFeedback: (sessionId: string, rating: number, feedback: string) => 
     analyticsTracker.trackSatisfaction(sessionId, rating, feedback)
@@ -452,19 +452,19 @@ export const WorkoutPartnerTracking = {
 
 export const CoachAssistantTracking = {
   startSession: (userId: string, teamId: string) => 
-    analyticsTracker.startFeatureSession('CoachAssistant', userId, { teamId }),
+    analyticsTracker.startFeatureSession("CoachAssistant", userId, { teamId }),
   
   trackDrillCreate: (sessionId: string, drillType: string) => 
-    analyticsTracker.trackInteraction(sessionId, 'drill_create', { drillType }),
+    analyticsTracker.trackInteraction(sessionId, "drill_create", { drillType }),
   
   trackPracticePlan: (sessionId: string, planId: string) => 
-    analyticsTracker.trackInteraction(sessionId, 'practice_plan', { planId }),
+    analyticsTracker.trackInteraction(sessionId, "practice_plan", { planId }),
   
   trackPlayerAnalysis: (sessionId: string, playerId: string) => 
-    analyticsTracker.trackInteraction(sessionId, 'player_analysis', { playerId }),
+    analyticsTracker.trackInteraction(sessionId, "player_analysis", { playerId }),
   
   trackSessionComplete: (sessionId: string, sessionType: string) => 
-    analyticsTracker.endFeatureSession(sessionId, 'completed', { sessionType }),
+    analyticsTracker.endFeatureSession(sessionId, "completed", { sessionType }),
   
   trackFeedback: (sessionId: string, feedbackType: string, response: any) => 
     analyticsTracker.trackFeedbackResponse(sessionId, feedbackType, response)
@@ -472,16 +472,16 @@ export const CoachAssistantTracking = {
 
 export const RefereeFeedbackTracking = {
   startSession: (userId: string, matchId: string) => 
-    analyticsTracker.startFeatureSession('RefereeFeedback', userId, { matchId }),
+    analyticsTracker.startFeatureSession("RefereeFeedback", userId, { matchId }),
   
   trackFeedbackSubmit: (sessionId: string, feedbackType: string) => 
-    analyticsTracker.trackInteraction(sessionId, 'feedback_submit', { feedbackType }),
+    analyticsTracker.trackInteraction(sessionId, "feedback_submit", { feedbackType }),
   
   trackIncidentReport: (sessionId: string, incidentType: string) => 
-    analyticsTracker.trackInteraction(sessionId, 'incident_report', { incidentType }),
+    analyticsTracker.trackInteraction(sessionId, "incident_report", { incidentType }),
   
   trackMatchComplete: (sessionId: string, matchDuration: number) => 
-    analyticsTracker.endFeatureSession(sessionId, 'completed', { matchDuration }),
+    analyticsTracker.endFeatureSession(sessionId, "completed", { matchDuration }),
   
   trackFeedback: (sessionId: string, rating: number, comments: string) => 
     analyticsTracker.trackSatisfaction(sessionId, rating, comments)
@@ -489,36 +489,36 @@ export const RefereeFeedbackTracking = {
 
 export const GunRangeCoachTracking = {
   startSession: (userId: string, rangeId: string) => 
-    analyticsTracker.startFeatureSession('GunRangeCoach', userId, { rangeId }),
+    analyticsTracker.startFeatureSession("GunRangeCoach", userId, { rangeId }),
   
   trackShotFired: (sessionId: string, targetDistance: number, accuracy: number) => 
-    analyticsTracker.trackInteraction(sessionId, 'shot_fired', { targetDistance, accuracy }),
+    analyticsTracker.trackInteraction(sessionId, "shot_fired", { targetDistance, accuracy }),
   
   trackTargetHit: (sessionId: string, targetId: string, score: number) => 
-    analyticsTracker.trackInteraction(sessionId, 'target_hit', { targetId, score }),
+    analyticsTracker.trackInteraction(sessionId, "target_hit", { targetId, score }),
   
   trackSessionComplete: (sessionId: string, totalShots: number, averageAccuracy: number) => 
-    analyticsTracker.endFeatureSession(sessionId, 'completed', { totalShots, averageAccuracy }),
+    analyticsTracker.endFeatureSession(sessionId, "completed", { totalShots, averageAccuracy }),
   
   trackFeedback: (sessionId: string, techniqueRating: number, safetyRating: number) => 
-    analyticsTracker.trackSatisfaction(sessionId, (techniqueRating + safetyRating) / 2, 'Range session feedback')
+    analyticsTracker.trackSatisfaction(sessionId, (techniqueRating + safetyRating) / 2, "Range session feedback")
 };
 
 export const ScoutEvalQueueTracking = {
   startSession: (userId: string, evaluationType: string) => 
-    analyticsTracker.startFeatureSession('ScoutEvalQueue', userId, { evaluationType }),
+    analyticsTracker.startFeatureSession("ScoutEvalQueue", userId, { evaluationType }),
   
   trackPlayerEval: (sessionId: string, playerId: string, evalType: string) => 
-    analyticsTracker.trackInteraction(sessionId, 'player_eval', { playerId, evalType }),
+    analyticsTracker.trackInteraction(sessionId, "player_eval", { playerId, evalType }),
   
   trackReportGenerate: (sessionId: string, reportType: string) => 
-    analyticsTracker.trackInteraction(sessionId, 'report_generate', { reportType }),
+    analyticsTracker.trackInteraction(sessionId, "report_generate", { reportType }),
   
   trackEvaluationComplete: (sessionId: string, totalEvaluations: number) => 
-    analyticsTracker.endFeatureSession(sessionId, 'completed', { totalEvaluations }),
+    analyticsTracker.endFeatureSession(sessionId, "completed", { totalEvaluations }),
   
   trackFeedback: (sessionId: string, evalQuality: number, recommendations: string[]) => 
-    analyticsTracker.trackSatisfaction(sessionId, evalQuality, recommendations.join(', '))
+    analyticsTracker.trackSatisfaction(sessionId, evalQuality, recommendations.join(", "))
 };
 
 // Initialize analytics on module load

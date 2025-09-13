@@ -49,13 +49,13 @@ describe("monthlyAnalyticsReport", () => {
     await seedTestData("registrations", {
 
       "registration-1": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-05T10:00:00Z")},
+      Date("2024-01-05T10:00:00Z")},
 
       "registration-2": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-10T14:30:00Z")},
+      Date("2024-01-10T14:30:00Z")},
 
       "registration-3": {...mockData.registration, status: "cancelled", registrationDate: new
-Date("2024-01-15T09:15:00Z")},
+      Date("2024-01-15T09:15:00Z")},
 
     });
 
@@ -164,16 +164,16 @@ Date("2024-01-15T09:15:00Z")},
     await seedTestData("registrations", {
 
       "registration-active-1": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-05T10:00:00Z")},
+      Date("2024-01-05T10:00:00Z")},
 
       "registration-active-2": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-10T14:30:00Z")},
+      Date("2024-01-10T14:30:00Z")},
 
       "registration-cancelled-1": {...mockData.registration, status: "cancelled", registrationDate: new
-Date("2024-01-15T09:15:00Z")},
+      Date("2024-01-15T09:15:00Z")},
 
       "registration-pending-1": {...mockData.registration, status: "pending", registrationDate: new
-Date("2024-01-20T16:45:00Z")},
+      Date("2024-01-20T16:45:00Z")},
 
     });
 
@@ -304,7 +304,7 @@ Date("2024-01-20T16:45:00Z")},
     await seedTestData("siblingPairings", {
 
       "pairing-approved-1": {...mockData.siblingPairing, status: "approved", createdAt: new
-Date("2024-01-05T10:00:00Z")},
+      Date("2024-01-05T10:00:00Z")},
 
       "pairing-denied-1": {...mockData.siblingPairing, status: "denied", createdAt: new Date("2024-01-10T14:30:00Z")},
 
@@ -349,13 +349,13 @@ Date("2024-01-05T10:00:00Z")},
     await seedTestData("registrations", {
 
       "registration-basketball-1": {...mockData.registration, status: "active", leagueId: "basketball",
-registrationDate: new Date("2024-01-05T10:00:00Z")},
+        registrationDate: new Date("2024-01-05T10:00:00Z")},
 
       "registration-basketball-2": {...mockData.registration, status: "active", leagueId: "basketball",
-registrationDate: new Date("2024-01-10T14:30:00Z")},
+        registrationDate: new Date("2024-01-10T14:30:00Z")},
 
       "registration-soccer-1": {...mockData.registration, status: "active", leagueId: "soccer", registrationDate: new
-Date("2024-01-15T09:15:00Z")},
+      Date("2024-01-15T09:15:00Z")},
 
       "registration-baseball-1": {...mockData.registration, status: "active", leagueId: "baseball", registrationDate:
 new Date("2024-01-20T16:45:00Z")},
@@ -607,7 +607,7 @@ new Date("2024-01-20T16:45:00Z")},
     await seedTestData("registrations", {
 
       "registration-timezone": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-05T10:00:00Z")},
+      Date("2024-01-05T10:00:00Z")},
 
     });
 
@@ -648,13 +648,13 @@ Date("2024-01-05T10:00:00Z")},
     await seedTestData("registrations", {
 
       "registration-trend-1": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-01T10:00:00Z")},
+      Date("2024-01-01T10:00:00Z")},
 
       "registration-trend-2": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-15T14:30:00Z")},
+      Date("2024-01-15T14:30:00Z")},
 
       "registration-trend-3": {...mockData.registration, status: "active", registrationDate: new
-Date("2024-01-31T09:15:00Z")},
+      Date("2024-01-31T09:15:00Z")},
 
     });
 

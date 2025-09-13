@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-01-08T07:25:00.000Z",
+  "phase": "baseline",
+  "summary": {
+    "total_errors": 420,
+    "frontend_errors": 420,
+    "functions_errors": 0,
+    "error_categories": {
+      "interface_conflict": 45,
+      "prop_mismatch": 89,
+      "service_signature": 67,
+      "date_timestamp": 34,
+      "enum_union": 23,
+      "missing_exports": 45,
+      "implicit_any": 78,
+      "other": 39
+    }
+  },
+  "top_error_files": [
+    "services/playerProfileService.ts: 29 errors",
+    "firebase/security.config.ts: 26 errors", 
+    "pages/TrainerView 2.tsx: 15 errors",
+    "pages/TrainerView(2).tsx: 15 errors",
+    "components/scout/ScoutDashboard.tsx: 61 errors",
+    "components/ScoutDashboard(2).tsx: 24 errors",
+    "components/ScoutDashboard.tsx: 13 errors",
+    "components/PlayerDashboard.tsx: 13 errors",
+    "components/PlayerDetailsModal.tsx: 11 errors",
+    "components/PlayerDetailsModal 2.tsx: 11 errors"
+  ],
+  "critical_issues": [
+    "PlayerProfile interface conflicts across multiple files",
+    "Message interface timestamp type conflicts", 
+    "Missing userId parameters in service methods",
+    "Export declaration conflicts in security.config.ts",
+    "Component prop type mismatches",
+    "Date/Timestamp standardization needed"
+  ]
+}

@@ -1,6 +1,7 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-import Stripe from 'stripe';
+import * as functions from "firebase-functions";
+import { onCall } from "firebase-functions/v2/https";
+import * as admin from "firebase-admin";
+import Stripe from "stripe";
 import {
   CreateCheckoutSessionRequest,
   CreateCheckoutSessionResponse,
@@ -9,13 +10,13 @@ import {
   TipTransaction,
   CreatorProfile,
   CallableRequestContext
-} from './types';
-import { ValidationMiddleware } from '../../../lib/middleware/validation';
-import { z } from 'zod';
+} from "./types";
+import { ValidationMiddleware } from "../utils/validation";
+import { z } from "zod";
 
 // Initialize Stripe with secret key
 const stripe = new Stripe(functions.config().stripe.secret_key, {
-  apiVersion: '2023-10-16',
+  apiVersion: "2023-10-16",
 });
 
 // Initialize Firestore
@@ -25,18 +26,18 @@ const db = admin.firestore();
  * Create a Stripe checkout session for tipping
  * This is a callable function that requires authentication
  */
-export const createStripeCheckoutSession = functions.https.onCall(
+export const createStripeCheckoutSession = onCall(
   async (
-    data: CreateCheckoutSessionRequest,
-    context: CallableRequestContext
+    data: any,
+    context: any
   ): Promise<StripeSuccessResponse<CreateCheckoutSessionResponse> | StripeErrorResponse> => {
     try {
       // Validate authentication
       if (!context.auth) {
         return {
           error: {
-            code: 'unauthenticated',
-            message: 'User must be authenticated to create checkout session'
+            code: "unauthenticated",
+            message: "User must be authenticated to create checkout session"
           }
         };
       }
@@ -45,41 +46,41 @@ export const createStripeCheckoutSession = functions.https.onCall(
       
       // Validate input using Zod schema
       const checkoutSessionSchema = z.object({
-        amount: z.number().min(50, 'Tip amount must be at least $0.50'),
-        currency: z.string().default('usd'),
-        toUserId: z.string().uuid('Invalid recipient user ID').refine(
+        amount: z.number().min(50, "Tip amount must be at least $0.50"),
+        currency: z.string().default("usd"),
+        toUserId: z.string().uuid("Invalid recipient user ID").refine(
           (val) => val !== fromUserId,
-          'Cannot tip yourself'
+          "Cannot tip yourself"
         ),
-        message: z.string().max(500, 'Message too long').optional(),
+        message: z.string().max(500, "Message too long").optional(),
         anonymous: z.boolean().default(false),
-        successUrl: z.string().url('Invalid success URL'),
-        cancelUrl: z.string().url('Invalid cancel URL')
+        successUrl: z.string().url("Invalid success URL"),
+        cancelUrl: z.string().url("Invalid cancel URL")
       });
       
       const validation = ValidationMiddleware.validateResponse(checkoutSessionSchema, data);
       if (!validation.success) {
         return {
           error: {
-            code: 'validation-error',
-            message: 'Invalid checkout session data',
+            code: "validation-error",
+            message: "Invalid checkout session data",
             details: validation.errors?.errors.map(err => ({
-              field: err.path.join('.'),
+              field: err.path.join("."),
               message: err.message
             }))
           }
         };
       }
 
-      const { amount, currency, toUserId, message, anonymous, successUrl, cancelUrl } = validation.data;
+      const { amount, currency, toUserId, message, anonymous, successUrl, cancelUrl } = (validation.data as any);
 
       // Check if recipient exists and is a creator
-      const creatorDoc = await db.collection('creatorProfiles').doc(toUserId).get();
+      const creatorDoc = await db.collection("creatorProfiles").doc(toUserId).get();
       if (!creatorDoc.exists) {
         return {
           error: {
-            code: 'creator-not-found',
-            message: 'Recipient is not a verified creator'
+            code: "creator-not-found",
+            message: "Recipient is not a verified creator"
           }
         };
       }
@@ -88,8 +89,8 @@ export const createStripeCheckoutSession = functions.https.onCall(
       if (!creatorProfile.verified) {
         return {
           error: {
-            code: 'creator-not-verified',
-            message: 'Recipient is not a verified creator'
+            code: "creator-not-verified",
+            message: "Recipient is not a verified creator"
           }
         };
       }
@@ -99,7 +100,7 @@ export const createStripeCheckoutSession = functions.https.onCall(
       if (!rateLimitResult.allowed) {
         return {
           error: {
-            code: 'rate-limit-exceeded',
+            code: "rate-limit-exceeded",
             message: rateLimitResult.message
           }
         };
@@ -110,66 +111,66 @@ export const createStripeCheckoutSession = functions.https.onCall(
 
       // Create Stripe checkout session
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
+        payment_method_types: ["card"],
         line_items: [
           {
             price_data: {
               currency: currency.toLowerCase(),
               product_data: {
-                name: `Tip to ${anonymous ? 'Anonymous Creator' : 'Creator'}`,
-                description: message || 'Thank you for your support!',
-                images: ['https://sportbeacon-ai.com/logo.png'], // Replace with actual logo
+                name: `Tip to ${anonymous ? "Anonymous Creator" : "Creator"}`,
+                description: message || "Thank you for your support!",
+                images: ["https://sportbeacon-ai.com/logo.png"], // Replace with actual logo
               },
               unit_amount: amount,
             },
             quantity: 1,
           },
         ],
-        mode: 'payment',
+        mode: "payment",
         success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}&tip_id=${tipId}`,
         cancel_url: cancelUrl,
         metadata: {
           tipId,
           fromUserId,
           toUserId,
-          message: message || '',
-          anonymous: anonymous ? 'true' : 'false',
-          type: 'tip'
+          message: message || "",
+          anonymous: anonymous ? "true" : "false",
+          type: "tip"
         },
         customer_email: context.auth.token.email,
         allow_promotion_codes: false,
-        billing_address_collection: 'auto',
+        billing_address_collection: "auto",
         shipping_address_collection: {
-          allowed_countries: ['US', 'CA'], // Limit to supported countries
+          allowed_countries: ["US", "CA"], // Limit to supported countries
         },
       });
 
       // Create tip transaction record in Firestore
-      const tipTransaction: Omit<TipTransaction, 'id'> = {
+      const tipTransaction: Omit<TipTransaction, "id"> = {
         amount,
         currency: currency.toLowerCase(),
         fromUserId,
         toUserId,
-        paymentIntentId: '', // Will be updated when payment is completed
+        paymentIntentId: "", // Will be updated when payment is completed
         checkoutSessionId: session.id,
-        status: 'pending',
+        status: "pending",
         createdAt: admin.firestore.Timestamp.now(),
         updatedAt: admin.firestore.Timestamp.now(),
         metadata: {
           message,
           anonymous,
-          category: 'tip'
+          category: "tip"
         }
       };
 
       // Save tip transaction to Firestore
-      await db.collection('tips').doc(tipId).set(tipTransaction);
+      await db.collection("tips").doc(tipId).set(tipTransaction);
 
       // Log audit entry
       await logAuditEntry({
         userId: fromUserId,
-        action: 'create_tip',
-        resource: 'tip',
+        action: "create_tip",
+        resource: "tip",
         resourceId: tipId,
         details: {
           amount,
@@ -194,25 +195,25 @@ export const createStripeCheckoutSession = functions.https.onCall(
       };
 
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error("Error creating checkout session:", error);
       
       // Log error for debugging
       await logAuditEntry({
-        userId: context.auth?.uid || 'unknown',
-        action: 'create_tip_error',
-        resource: 'tip',
-        resourceId: 'unknown',
+        userId: context.auth?.uid || "unknown",
+        action: "create_tip_error",
+        resource: "tip",
+        resourceId: "unknown",
         details: {
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
           data
         }
       });
 
       return {
         error: {
-          code: 'internal-error',
-          message: 'Failed to create checkout session',
-          details: error instanceof Error ? error.message : 'Unknown error'
+          code: "internal-error",
+          message: "Failed to create checkout session",
+          details: error instanceof Error ? error.message : "Unknown error"
         }
       };
     }
@@ -229,7 +230,7 @@ async function checkRateLimit(userId: string, amount: number): Promise<{ allowed
   const todayStart = admin.firestore.Timestamp.fromDate(today);
 
   // Get user's rate limit data
-  const rateLimitDoc = await db.collection('rateLimits').doc(userId).get();
+  const rateLimitDoc = await db.collection("rateLimits").doc(userId).get();
   
   if (!rateLimitDoc.exists) {
     // First time user, allow
@@ -256,19 +257,19 @@ async function checkRateLimit(userId: string, amount: number): Promise<{ allowed
 
   // Check limits
   if (rateLimit.requestsThisMinute >= 10) {
-    return { allowed: false, message: 'Too many requests per minute' };
+    return { allowed: false, message: "Too many requests per minute" };
   }
 
   if (rateLimit.requestsThisHour >= 100) {
-    return { allowed: false, message: 'Too many requests per hour' };
+    return { allowed: false, message: "Too many requests per hour" };
   }
 
   if (rateLimit.tipsToday >= 50) {
-    return { allowed: false, message: 'Daily tip limit exceeded' };
+    return { allowed: false, message: "Daily tip limit exceeded" };
   }
 
   if (rateLimit.tipAmountToday + amount > 10000) { // $100 daily limit
-    return { allowed: false, message: 'Daily tip amount limit exceeded' };
+    return { allowed: false, message: "Daily tip amount limit exceeded" };
   }
 
   return { allowed: true };
@@ -284,7 +285,7 @@ async function updateRateLimit(userId: string, amount: number): Promise<void> {
   tomorrow.setHours(0, 0, 0, 0);
   const resetAt = admin.firestore.Timestamp.fromDate(tomorrow);
 
-  await db.collection('rateLimits').doc(userId).set({
+  await db.collection("rateLimits").doc(userId).set({
     userId,
     requestsThisMinute: admin.firestore.FieldValue.increment(1),
     requestsThisHour: admin.firestore.FieldValue.increment(1),
@@ -311,20 +312,20 @@ async function logAuditEntry(entry: {
     timestamp: admin.firestore.Timestamp.now()
   };
 
-  await db.collection('auditLogs').doc(auditEntry.id).set(auditEntry);
+  await db.collection("auditLogs").doc(auditEntry.id).set(auditEntry);
 }
 
 /**
  * Get tip statistics for a creator
  */
-export const getCreatorTipStats = functions.https.onCall(
-  async (data: { creatorId: string }, context: CallableRequestContext) => {
+export const getCreatorTipStats = onCall(
+  async (data: any, context: any) => {
     try {
       if (!context.auth) {
         return {
           error: {
-            code: 'unauthenticated',
-            message: 'User must be authenticated'
+            code: "unauthenticated",
+            message: "User must be authenticated"
           }
         };
       }
@@ -336,17 +337,17 @@ export const getCreatorTipStats = functions.https.onCall(
       if (creatorId !== userId && !context.auth.token.admin) {
         return {
           error: {
-            code: 'permission-denied',
-            message: 'Can only view own tip statistics'
+            code: "permission-denied",
+            message: "Can only view own tip statistics"
           }
         };
       }
 
       // Get tip transactions for creator
-      const tipsSnapshot = await db.collection('tips')
-        .where('toUserId', '==', creatorId)
-        .where('status', '==', 'succeeded')
-        .orderBy('createdAt', 'desc')
+      const tipsSnapshot = await db.collection("tips")
+        .where("toUserId", "==", creatorId)
+        .where("status", "==", "succeeded")
+        .orderBy("createdAt", "desc")
         .limit(100)
         .get();
 
@@ -391,11 +392,11 @@ export const getCreatorTipStats = functions.https.onCall(
       };
 
     } catch (error) {
-      console.error('Error getting tip statistics:', error);
+      console.error("Error getting tip statistics:", error);
       return {
         error: {
-          code: 'internal-error',
-          message: 'Failed to get tip statistics'
+          code: "internal-error",
+          message: "Failed to get tip statistics"
         }
       };
     }

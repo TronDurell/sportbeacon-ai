@@ -3,9 +3,11 @@ import {getFirestore, FieldValue} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {AuthContext, CallableContextV2, isAuthContext} from "../types";
 import { ValidationMiddleware, Schemas } from "../utils/validation";
+import { adminMemoryClient } from "../memory/client";
 import { z } from "zod";
 
 const db = getFirestore();
+const memoryClient = adminMemoryClient();
 
 // Helper function to validate user authentication
 const validateAuth = async (context: CallableContextV2): Promise<AuthContext> => {
@@ -35,7 +37,7 @@ export const createPlayerProfile = onCall(async (data, context) => {
         message: "Invalid player data",
         data: null,
         errors: validation.errors?.errors.map(err => ({
-          field: err.path.join('.'),
+          field: err.path.join("."),
           message: err.message
         }))
       };
@@ -88,6 +90,24 @@ export const createPlayerProfile = onCall(async (data, context) => {
       data: {playerId: playerProfile.id},
     };
     
+    // Capture successful player profile creation
+    try {
+      await memoryClient.captureFunctionResult(
+        auth.uid,
+        'createPlayerProfile',
+        {
+          playerId: playerProfile.id,
+          playerName: (playerProfile.firstName || '') + ' ' + (playerProfile.lastName || ''),
+          dateOfBirth: playerProfile.dateOfBirth,
+          position: playerProfile.position
+        },
+        undefined,
+        'player-profile-creation'
+      );
+    } catch (memoryError) {
+      logger.warn('Failed to capture memory for player profile creation:', memoryError);
+    }
+    
     // Validate response before sending
     const responseValidation = ValidationMiddleware.validateResponse(
       Schemas.ApiResponse,
@@ -101,6 +121,21 @@ export const createPlayerProfile = onCall(async (data, context) => {
     };
   } catch (err) {
     logger.error("Player profile creation error", err);
+    
+    // Capture function error
+    try {
+      const authContext = context as any;
+      await memoryClient.captureFunctionError(
+        authContext.auth?.uid || 'unknown',
+        'createPlayerProfile',
+        err as Error,
+        { input: data },
+        'player-profile-creation-error'
+      );
+    } catch (memoryError) {
+      logger.warn('Failed to capture memory for player profile creation error:', memoryError);
+    }
+    
     return {success: false, message: "Player profile creation failed", error: err};
   }
 });
@@ -115,7 +150,7 @@ export const updatePlayerProfile = onCall(async (data, context) => {
     
     // Validate input using Zod schema
     const updatePlayerSchema = z.object({
-      playerId: z.string().uuid('Invalid player ID format'),
+      playerId: z.string().uuid("Invalid player ID format"),
       updates: Schemas.UpdatePlayer
     });
     
@@ -126,7 +161,7 @@ export const updatePlayerProfile = onCall(async (data, context) => {
         message: "Invalid player update data",
         data: null,
         errors: validation.errors?.errors.map(err => ({
-          field: err.path.join('.'),
+          field: err.path.join("."),
           message: err.message
         }))
       };

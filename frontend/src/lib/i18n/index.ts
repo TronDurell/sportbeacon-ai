@@ -21,7 +21,7 @@ const createI18n = (config: any): I18nInstance => {
         
         if (params) {
           Object.entries(params).forEach(([param, value]) => {
-            message = message.replace(new RegExp(`{${param}}`, 'g'), String(value));
+            message = message.replace(new RegExp(`{${param}}`, "g"), String(value));
           });
         }
         
@@ -37,58 +37,58 @@ const createI18n = (config: any): I18nInstance => {
 // Supported languages
 export const SUPPORTED_LANGUAGES = {
   en: {
-    name: 'English',
-    nativeName: 'English',
-    flag: '🇺🇸',
-    direction: 'ltr'
+    name: "English",
+    nativeName: "English",
+    flag: "🇺🇸",
+    direction: "ltr"
   },
   es: {
-    name: 'Spanish',
-    nativeName: 'Español',
-    flag: '🇪🇸',
-    direction: 'ltr'
+    name: "Spanish",
+    nativeName: "Español",
+    flag: "🇪🇸",
+    direction: "ltr"
   },
   fr: {
-    name: 'French',
-    nativeName: 'Français',
-    flag: '🇫🇷',
-    direction: 'ltr'
+    name: "French",
+    nativeName: "Français",
+    flag: "🇫🇷",
+    direction: "ltr"
   },
   pt: {
-    name: 'Portuguese',
-    nativeName: 'Português',
-    flag: '🇵🇹',
-    direction: 'ltr'
+    name: "Portuguese",
+    nativeName: "Português",
+    flag: "🇵🇹",
+    direction: "ltr"
   },
   sw: {
-    name: 'Swahili',
-    nativeName: 'Kiswahili',
-    flag: '🇹🇿',
-    direction: 'ltr'
+    name: "Swahili",
+    nativeName: "Kiswahili",
+    flag: "🇹🇿",
+    direction: "ltr"
   }
 };
 
-export const DEFAULT_LANGUAGE = 'en';
-export const FALLBACK_LANGUAGE = 'en';
+export const DEFAULT_LANGUAGE = "en";
+export const FALLBACK_LANGUAGE = "en";
 
 // Language detection utilities
 export class LanguageDetector {
   static detect(): string {
     // Check localStorage first
-    const savedLanguage = localStorage.getItem('preferred_language');
+    const savedLanguage = localStorage.getItem("preferred_language");
     if (savedLanguage && SUPPORTED_LANGUAGES[savedLanguage as keyof typeof SUPPORTED_LANGUAGES]) {
       return savedLanguage;
     }
 
     // Check browser language
-    const browserLanguage = navigator.language.split('-')[0];
+    const browserLanguage = navigator.language.split("-")[0];
     if (SUPPORTED_LANGUAGES[browserLanguage as keyof typeof SUPPORTED_LANGUAGES]) {
       return browserLanguage;
     }
 
     // Check navigator.languages
     for (const lang of navigator.languages) {
-      const languageCode = lang.split('-')[0];
+      const languageCode = lang.split("-")[0];
       if (SUPPORTED_LANGUAGES[languageCode as keyof typeof SUPPORTED_LANGUAGES]) {
         return languageCode;
       }
@@ -99,14 +99,14 @@ export class LanguageDetector {
 
   static setLanguage(language: string): void {
     if (SUPPORTED_LANGUAGES[language as keyof typeof SUPPORTED_LANGUAGES]) {
-      localStorage.setItem('preferred_language', language);
+      localStorage.setItem("preferred_language", language);
       document.documentElement.lang = language;
       document.documentElement.dir = SUPPORTED_LANGUAGES[language as keyof typeof SUPPORTED_LANGUAGES].direction;
     }
   }
 
   static getCurrentLanguage(): string {
-    return localStorage.getItem('preferred_language') || this.detect();
+    return localStorage.getItem("preferred_language") || this.detect();
   }
 }
 
@@ -227,10 +227,10 @@ class I18nManager {
   }
 
   // Utility methods for common translations
-  formatCurrency(amount: number, currency: string = 'USD'): string {
+  formatCurrency(amount: number, currency: string = "USD"): string {
     const locale = this.currentLanguage;
     return new Intl.NumberFormat(locale, {
-      style: 'currency',
+      style: "currency",
       currency
     }).format(amount);
   }
@@ -261,11 +261,11 @@ class I18nManager {
     for (const [unit, seconds] of Object.entries(intervals)) {
       const interval = Math.floor(diffInSeconds / seconds);
       if (interval >= 1) {
-        return this.t(`time.${unit}${interval === 1 ? '' : 's'}`, { count: interval });
+        return this.t(`time.${unit}${interval === 1 ? "" : "s"}`, { count: interval });
       }
     }
 
-    return this.t('time.justNow');
+    return this.t("time.justNow");
   }
 }
 

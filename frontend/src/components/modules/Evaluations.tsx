@@ -1,80 +1,80 @@
-import React from 'react';
-import { Star } from 'lucide-react';
+import React from "react";
+import { Star } from "lucide-react";
 
 interface Evaluation {
   id: string;
   title: string;
   evaluator: string;
   date: Date;
-  category: 'technical' | 'tactical' | 'physical' | 'mental';
+  category: "technical" | "tactical" | "physical" | "mental";
   score: number;
   maxScore: number;
   comments: string;
-  status: 'pending' | 'completed' | 'reviewed';
+  status: "pending" | "completed" | "reviewed";
 }
 
 const Evaluations: React.FC = () => {
   const evaluations: Evaluation[] = [
     {
-      id: '1',
-      title: 'Technical Skills Assessment',
-      evaluator: 'Coach Smith',
-      date: new Date('2024-01-20'),
-      category: 'technical',
+      id: "1",
+      title: "Technical Skills Assessment",
+      evaluator: "Coach Smith",
+      date: new Date("2024-01-20"),
+      category: "technical",
       score: 8,
       maxScore: 10,
-      comments: 'Excellent ball control and passing accuracy. Needs improvement in shooting technique.',
-      status: 'completed'
+      comments: "Excellent ball control and passing accuracy. Needs improvement in shooting technique.",
+      status: "completed"
     },
     {
-      id: '2',
-      title: 'Tactical Understanding',
-      evaluator: 'Coach Johnson',
-      date: new Date('2024-01-18'),
-      category: 'tactical',
+      id: "2",
+      title: "Tactical Understanding",
+      evaluator: "Coach Johnson",
+      date: new Date("2024-01-18"),
+      category: "tactical",
       score: 7,
       maxScore: 10,
-      comments: 'Good understanding of team formations. Could improve decision-making under pressure.',
-      status: 'reviewed'
+      comments: "Good understanding of team formations. Could improve decision-making under pressure.",
+      status: "reviewed"
     },
     {
-      id: '3',
-      title: 'Physical Fitness Test',
-      evaluator: 'Trainer Wilson',
-      date: new Date('2024-01-22'),
-      category: 'physical',
+      id: "3",
+      title: "Physical Fitness Test",
+      evaluator: "Trainer Wilson",
+      date: new Date("2024-01-22"),
+      category: "physical",
       score: 9,
       maxScore: 10,
-      comments: 'Outstanding endurance and speed. Maintains high performance throughout the game.',
-      status: 'pending'
+      comments: "Outstanding endurance and speed. Maintains high performance throughout the game.",
+      status: "pending"
     }
   ];
 
-  const getCategoryColor = (category: Evaluation['category']) => {
+  const getCategoryColor = (category: Evaluation["category"]) => {
     switch (category) {
-      case 'technical': return 'bg-blue-100 text-blue-800';
-      case 'tactical': return 'bg-green-100 text-green-800';
-      case 'physical': return 'bg-red-100 text-red-800';
-      case 'mental': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "technical": return "bg-blue-100 text-blue-800";
+      case "tactical": return "bg-green-100 text-green-800";
+      case "physical": return "bg-red-100 text-red-800";
+      case "mental": return "bg-purple-100 text-purple-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getStatusColor = (status: Evaluation['status']) => {
+  const getStatusColor = (status: Evaluation["status"]) => {
     switch (status) {
-      case 'completed': return 'text-green-600';
-      case 'reviewed': return 'text-blue-600';
-      case 'pending': return 'text-yellow-600';
-      default: return 'text-gray-600';
+      case "completed": return "text-green-600";
+      case "reviewed": return "text-blue-600";
+      case "pending": return "text-yellow-600";
+      default: return "text-gray-600";
     }
   };
 
   const getScoreColor = (score: number, maxScore: number) => {
     const percentage = (score / maxScore) * 100;
-    if (percentage >= 90) return 'text-green-600';
-    if (percentage >= 80) return 'text-blue-600';
-    if (percentage >= 70) return 'text-yellow-600';
-    return 'text-red-600';
+    if (percentage >= 90) return "text-green-600";
+    if (percentage >= 80) return "text-blue-600";
+    if (percentage >= 70) return "text-yellow-600";
+    return "text-red-600";
   };
 
   const renderStars = (score: number, maxScore: number) => {
@@ -89,10 +89,10 @@ const Evaluations: React.FC = () => {
             key={i}
             className={`w-4 h-4 ${
               i < fullStars
-                ? 'text-yellow-400 fill-current'
+                ? "text-yellow-400 fill-current"
                 : i === fullStars && hasHalfStar
-                ? 'text-yellow-400 fill-current opacity-50'
-                : 'text-gray-300'
+                ? "text-yellow-400 fill-current opacity-50"
+                : "text-gray-300"
             }`}
           />
         ))}

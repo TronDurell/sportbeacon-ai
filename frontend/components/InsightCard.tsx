@@ -7,25 +7,20 @@ import {
     LocalHospital as FatigueIcon,
     ArrowForward as ActionIcon
 } from '@mui/icons-material';
-
-interface Insight {
-    id: string;
-    type: 'fatigue' | 'performance_drop' | 'improvement';
-    severity: 'HIGH' | 'MEDIUM' | 'LOW';
-    metric: number;
-    message: string;
-    timestamp: string;
-}
+import type { Insight } from '../types';
 
 interface InsightCardProps {
     insight: Insight;
     onAction: () => void;
+    compact?: boolean;
 }
 
-const iconMap = {
+const iconMap: Record<string, React.ComponentType> = {
     fatigue: FatigueIcon,
     performance_drop: TrendingDownIcon,
-    improvement: TrendingUpIcon
+    improvement: TrendingUpIcon,
+    // Handle other types gracefully
+    default: WarningIcon
 };
 
 const colorMap = {
@@ -35,7 +30,7 @@ const colorMap = {
 } as const;
 
 export const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) => {
-    const Icon = iconMap[insight.type];
+    const Icon = iconMap[insight.type] || iconMap.default;
     const color = colorMap[insight.severity];
 
     return (
@@ -50,7 +45,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) =
             <CardContent>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                     <Box display="flex" gap={1} alignItems="center">
-                        <Icon color={color} />
+                        <Icon sx={{ color: color }} />
                         <Typography 
                             variant="subtitle1"
                             sx={{ textTransform: 'capitalize' }}

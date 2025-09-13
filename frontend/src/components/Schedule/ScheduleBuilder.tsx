@@ -1,45 +1,45 @@
-import React, { useState } from 'react';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
-import { Game, Team, Facility } from '../../types';
+import React, { useState } from "react";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
+import { Game, Team, Facility } from "../../types";
 
 interface ScheduleBuilderProps {
   className?: string;
 }
 
-const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => {
+const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = "" }) => {
   const { triggerScheduleOptimization } = useAgentOrchestration();
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
-  const [selectedFacility, setSelectedFacility] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [leagueId, setLeagueId] = useState('');
+  const [selectedFacility, setSelectedFacility] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [leagueId, setLeagueId] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Mock data
   const [teams] = useState<Team[]>([
-    { id: '1', name: 'Team Alpha', leagueId: '1', coachId: '1', players: [], createdAt: new Date(), updatedAt: new Date() },
-    { id: '2', name: 'Team Beta', leagueId: '1', coachId: '2', players: [], createdAt: new Date(), updatedAt: new Date() },
-    { id: '3', name: 'Team Gamma', leagueId: '1', coachId: '3', players: [], createdAt: new Date(), updatedAt: new Date() }
+    { id: "1", name: "Team Alpha", league: "League 1", leagueId: "1", coachId: "1", players: [], coaches: ["1"], createdAt: new Date(), updatedAt: new Date() },
+    { id: "2", name: "Team Beta", league: "League 1", leagueId: "1", coachId: "2", players: [], coaches: ["2"], createdAt: new Date(), updatedAt: new Date() },
+    { id: "3", name: "Team Gamma", league: "League 1", leagueId: "1", coachId: "3", players: [], coaches: ["3"], createdAt: new Date(), updatedAt: new Date() }
   ]);
 
   const [facilities] = useState<Facility[]>([
     {
-      id: '1',
-      name: 'Main Sports Complex',
-      address: '123 Sports Ave',
+      id: "1",
+      name: "Main Sports Complex",
+      address: "123 Sports Ave",
       fields: [
-        { id: '1', name: 'Field 1', facilityId: '1', type: 'soccer', capacity: 100, createdAt: new Date(), updatedAt: new Date() },
-        { id: '2', name: 'Field 2', facilityId: '1', type: 'basketball', capacity: 50, createdAt: new Date(), updatedAt: new Date() }
+        { id: "1", name: "Field 1", facilityId: "1", type: "soccer", capacity: 100, createdAt: new Date(), updatedAt: new Date() },
+        { id: "2", name: "Field 2", facilityId: "1", type: "basketball", capacity: 50, createdAt: new Date(), updatedAt: new Date() }
       ],
       createdAt: new Date(),
       updatedAt: new Date()
     },
     {
-      id: '2',
-      name: 'Community Center',
-      address: '456 Community St',
+      id: "2",
+      name: "Community Center",
+      address: "456 Community St",
       fields: [
-        { id: '3', name: 'Indoor Court', facilityId: '2', type: 'basketball', capacity: 75, createdAt: new Date(), updatedAt: new Date() }
+        { id: "3", name: "Indoor Court", facilityId: "2", type: "basketball", capacity: 75, createdAt: new Date(), updatedAt: new Date() }
       ],
       createdAt: new Date(),
       updatedAt: new Date()
@@ -58,7 +58,7 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => 
 
   const handleCreateGame = async () => {
     if (selectedTeams.length < 2 || !selectedFacility || !selectedDate || !selectedTime) {
-      alert('Please select at least 2 teams, a facility, date, and time.');
+      alert("Please select at least 2 teams, a facility, date, and time.");
       return;
     }
 
@@ -66,11 +66,13 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => 
     try {
       const newGame: Game = {
         id: Date.now().toString(),
+        homeTeam: getTeamName(selectedTeams[0]),
+        awayTeam: getTeamName(selectedTeams[1]),
         homeTeamId: selectedTeams[0],
         awayTeamId: selectedTeams[1],
-        date: new Date(`${selectedDate}T${selectedTime}`),
+        date: new Date(`${selectedDate}T${selectedTime}`).toISOString(),
         location: getFieldName(selectedFacility),
-        status: 'scheduled',
+        status: "scheduled",
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -79,9 +81,9 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => 
       
       // Reset form
       setSelectedTeams([]);
-      setSelectedFacility('');
-      setSelectedDate('');
-      setSelectedTime('');
+      setSelectedFacility("");
+      setSelectedDate("");
+      setSelectedTime("");
     } catch (error) {
       } finally {
       setLoading(false);
@@ -90,16 +92,16 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => 
 
   const handleOptimizeSchedule = async () => {
     if (selectedTeams.length < 2) {
-      alert('Please select at least 2 teams for optimization.');
+      alert("Please select at least 2 teams for optimization.");
       return;
     }
 
     setLoading(true);
     try {
       await triggerScheduleOptimization();
-      alert('Schedule optimization completed!');
+      alert("Schedule optimization completed!");
     } catch (error) {
-      alert('Failed to optimize schedule. Please try again.');
+      alert("Failed to optimize schedule. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -107,16 +109,21 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => 
 
   const getFieldName = (fieldId: string) => {
     const facility = facilities.find(f => f.fields.some(field => field.id === fieldId));
-    return facility?.fields.find(f => f.id === fieldId)?.name || 'Unknown Field';
+    return facility?.fields.find(f => f.id === fieldId)?.name || "Unknown Field";
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  const getTeamName = (teamId: string) => {
+    return teams.find(t => t.id === teamId)?.name || "Unknown Team";
+  };
+
+  const formatDate = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
     });
   };
 
@@ -139,8 +146,8 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => 
                 key={team.id}
                 className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                   selectedTeams.includes(team.id)
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
                 onClick={() => handleTeamToggle(team.id)}
               >
@@ -220,7 +227,7 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => 
             disabled={loading || selectedTeams.length < 2 || !selectedFacility || !selectedDate || !selectedTime}
             className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating...' : 'Create Game'}
+            {loading ? "Creating..." : "Create Game"}
           </button>
 
           <button
@@ -228,7 +235,7 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => 
             disabled={loading || selectedTeams.length < 2}
             className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Optimizing...' : 'Optimize Schedule'}
+            {loading ? "Optimizing..." : "Optimize Schedule"}
           </button>
         </div>
 
@@ -253,12 +260,12 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ className = '' }) => 
                         </p>
                       </div>
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        game.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                        game.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                        game.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
+                        game.status === "scheduled" ? "bg-blue-100 text-blue-800" :
+                        game.status === "in_progress" ? "bg-yellow-100 text-yellow-800" :
+                        game.status === "completed" ? "bg-green-100 text-green-800" :
+                        "bg-red-100 text-red-800"
                       }`}>
-                        {game.status.replace('_', ' ')}
+                        {game.status.replace("_", " ")}
                       </span>
                     </div>
                   </div>

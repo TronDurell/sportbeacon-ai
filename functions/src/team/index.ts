@@ -1,15 +1,15 @@
 import {onCall} from "firebase-functions/v2/https";
 // Removed unused import
-import {initializeApp} from "firebase-admin/app";
 import {getFirestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {AuthContext, isAuthContext, CallableContextV2} from "../types";
 import { ValidationMiddleware, Schemas } from "../utils/validation";
+import { adminMemoryClient } from "../memory/client";
 import { z } from "zod";
 
-// Initialize Firebase Admin
-initializeApp();
+// Get Firestore instance (Firebase Admin already initialized in main index.ts)
 const db = getFirestore();
+const memoryClient = adminMemoryClient();
 
 // Helper function to validate user authentication
 const validateAuth = async (context: CallableContextV2): Promise<AuthContext> => {
@@ -53,7 +53,7 @@ export const createTeam = onCall(async (data, context) => {
         message: "Invalid team data",
         data: null,
         errors: validation.errors?.errors.map(err => ({
-          field: err.path.join('.'),
+          field: err.path.join("."),
           message: err.message
         }))
       };
@@ -109,6 +109,23 @@ export const createTeam = onCall(async (data, context) => {
       data: {teamId: team.id},
     };
     
+    // Capture successful team creation
+    try {
+      await memoryClient.captureFunctionResult(
+        auth.uid,
+        'createTeam',
+        {
+          teamId: team.id,
+          teamName: team.name,
+          leagueId: teamData.leagueId || 'unknown'
+        },
+        undefined,
+        'team-creation'
+      );
+    } catch (memoryError) {
+      logger.warn('Failed to capture memory for team creation:', memoryError);
+    }
+    
     // Validate response before sending
     const responseValidation = ValidationMiddleware.validateResponse(
       Schemas.ApiResponse,
@@ -136,7 +153,7 @@ export const updateTeam = onCall(async (data, context) => {
     
     // Validate input using Zod schema
     const updateTeamSchema = z.object({
-      teamId: z.string().uuid('Invalid team ID format'),
+      teamId: z.string().uuid("Invalid team ID format"),
       updates: Schemas.UpdateTeam
     });
     
@@ -147,7 +164,7 @@ export const updateTeam = onCall(async (data, context) => {
         message: "Invalid team update data",
         data: null,
         errors: validation.errors?.errors.map(err => ({
-          field: err.path.join('.'),
+          field: err.path.join("."),
           message: err.message
         }))
       };

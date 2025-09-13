@@ -1,0 +1,29 @@
+{
+  "summary": {
+    "testSuites": {
+      "total": 48,
+      "passed": 1,
+      "failed": 47
+    },
+    "tests": {
+      "total": 228,
+      "passed": 22,
+      "failed": 206
+    },
+    "snapshots": {
+      "obsolete": 1
+    },
+    "time": "39.832s"
+  },
+  "coverage": "NOT_AVAILABLE",
+  "criticalIssues": [
+    "Firebase auth/invalid-api-key errors",
+    "Missing test utilities (clearFirestoreData)",
+    "Jest/Vitest configuration conflicts",
+    "Missing dependencies (@playwright/test, @testing-library/dom, @tensorflow/tfjs)",
+    "JSX syntax errors in test files",
+    "ESM/CommonJS module conflicts",
+    "Missing agent modules in functions"
+  ],
+  "timestamp": "2025-01-08T18:49:00Z"
+}

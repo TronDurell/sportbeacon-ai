@@ -1,29 +1,5 @@
-import { jest } from '@jest/globals';
-import { onCall } from 'firebase-functions/v2/https';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
-
-// Mock Firebase Admin
-jest.mock('firebase-admin/firestore');
-jest.mock('firebase-admin/auth');
-
-// Mock logger
-jest.mock('firebase-functions/logger', () => ({
-  logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn()
-  }
-}));
-
-// Mock validation utilities
-jest.mock('../functions/src/utils/validation', () => ({
-  validateAuth: jest.fn(),
-  validateUUID: jest.fn(),
-  checkRateLimit: jest.fn(),
-  checkPlayerAccess: jest.fn()
-}));
 
 // Type definitions for mocks
 type MockedFirestore = jest.Mocked<ReturnType<typeof getFirestore>>;

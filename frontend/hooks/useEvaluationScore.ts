@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import useEvaluationRubric from './useEvaluationRubric';
 
-export default function useEvaluationScore(evals) {
+export default function useEvaluationScore(evals: any) {
   const [score, setScore] = useState(0);
   const rubric = useEvaluationRubric();
 

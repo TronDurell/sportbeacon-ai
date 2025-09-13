@@ -1,12 +1,13 @@
 {
     "name": "SportBeacon",
     "short_name": "SportBeacon",
-    "description": "Your personal sports training companion",
-    "start_url": "/",
+    "description": "Location-based sports community and threads",
+    "start_url": "/?source=pwa",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#1976d2",
-    "orientation": "portrait-primary",
+    "background_color": "#111827",
+    "theme_color": "#111827",
+    "orientation": "portrait",
+    "scope": "/",
     "icons": [
         {
             "src": "/icons/icon-72x72.png",
@@ -59,18 +60,21 @@
     ],
     "shortcuts": [
         {
-            "name": "View Achievements",
-            "short_name": "Achievements",
-            "description": "View your earned badges and achievements",
-            "url": "/achievements",
-            "icons": [{ "src": "/icons/achievements.png", "sizes": "192x192" }]
+            "name": "Home Feed",
+            "short_name": "Home",
+            "description": "View your home feed",
+            "url": "/?source=pwa&shortcut=home",
+            "icons": [{ "src": "/icons/shortcut-home.png", "sizes": "96x96" }]
         },
         {
-            "name": "Start Training",
-            "short_name": "Train",
-            "description": "Begin your training session",
-            "url": "/training",
-            "icons": [{ "src": "/icons/training.png", "sizes": "192x192" }]
+            "name": "Create Post",
+            "short_name": "Post",
+            "description": "Create a new post",
+            "url": "/compose?source=pwa&shortcut=compose",
+            "icons": [{ "src": "/icons/shortcut-compose.png", "sizes": "96x96" }]
         }
-    ]
+    ],
+    "categories": ["sports", "social", "lifestyle"],
+    "lang": "en",
+    "dir": "ltr"
 } 

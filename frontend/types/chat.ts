@@ -240,18 +240,4 @@ export interface ChatServiceInterface {
   isConnected: () => boolean;
 }
 
-// Export all types
-export type {
-  ChatMessage,
-  ChatRoom,
-  UserPresence,
-  ChatNotification,
-  ChatSettings,
-  TypingIndicator,
-  ChatSearchResult,
-  ChatStats,
-  ChatExport,
-  WebSocketMessage,
-  UseChatReturn,
-  ChatServiceInterface
-}; 
+// All types are already exported inline above 

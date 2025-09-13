@@ -1,9 +1,15 @@
-import useSWR from 'swr'
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
+import { useState, useEffect } from 'react';
 
 export function useVenues() {
-  const { data, error } = useSWR('/api/venues', fetcher)
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/venues')
+      .then(res => res.json())
+      .then(setData)
+      .catch(setError);
+  }, []);
   return {
     venues: data,
     isLoading: !error && !data,
@@ -12,13 +18,23 @@ export function useVenues() {
 }
 
 export function useDrillSuggestions(playerId: string, venueType?: string) {
-  const { data, error } = useSWR(`/api/drills?playerId=${playerId}&venueType=${venueType}`, fetcher)
-  const filteredDrills = data?.filter(drill => {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch(`/api/drills?playerId=${playerId}&venueType=${venueType}`)
+      .then(res => res.json())
+      .then(setData)
+      .catch(setError);
+  }, [playerId, venueType]);
+
+  const filteredDrills = data ? (data as any[]).filter((drill: any) => {
     if (venueType === 'trail') {
       return !drill.tags.includes('water')
     }
     return true
-  })
+  }) : []
+  
   return {
     drills: filteredDrills,
     isLoading: !error && !data,

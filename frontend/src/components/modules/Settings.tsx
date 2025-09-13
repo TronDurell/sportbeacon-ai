@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
-import { User, Bell, Shield, Palette } from 'lucide-react';
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
+import { User, Bell, Shield, Palette } from "lucide-react";
 
 interface SettingsSection {
   id: string;
@@ -13,41 +13,41 @@ interface SettingsSection {
 const Settings: React.FC = () => {
   const { user, updateUser } = useAuth();
   const { sendRequest } = useAgentOrchestration();
-  const [activeSection, setActiveSection] = useState('profile');
+  const [activeSection, setActiveSection] = useState("profile");
 
   const settingsSections: SettingsSection[] = [
     {
-      id: 'profile',
-      title: 'Profile Settings',
+      id: "profile",
+      title: "Profile Settings",
       icon: User,
-      description: 'Manage your personal information and preferences'
+      description: "Manage your personal information and preferences"
     },
     {
-      id: 'notifications',
-      title: 'Notifications',
+      id: "notifications",
+      title: "Notifications",
       icon: Bell,
-      description: 'Configure how you receive notifications'
+      description: "Configure how you receive notifications"
     },
     {
-      id: 'security',
-      title: 'Security',
+      id: "security",
+      title: "Security",
       icon: Shield,
-      description: 'Manage your account security settings'
+      description: "Manage your account security settings"
     },
     {
-      id: 'appearance',
-      title: 'Appearance',
+      id: "appearance",
+      title: "Appearance",
       icon: Palette,
-      description: 'Customize the look and feel of the app'
+      description: "Customize the look and feel of the app"
     }
   ];
 
   const [profileData, setProfileData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phone: '',
-    bio: ''
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: "",
+    bio: ""
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -63,7 +63,7 @@ const Settings: React.FC = () => {
     try {
       await updateUser(profileData);
       await sendRequest({
-        type: 'update_profile',
+        type: "update_profile",
         data: profileData
       });
     } catch (error) {
@@ -78,14 +78,14 @@ const Settings: React.FC = () => {
     setNotificationSettings(newSettings);
     
     await sendRequest({
-      type: 'update_notifications',
+      type: "update_notifications",
       settings: newSettings
     });
   };
 
   const renderSectionContent = () => {
     switch (activeSection) {
-      case 'profile':
+      case "profile":
         return (
           <div className="space-y-6">
             <div>
@@ -157,7 +157,7 @@ const Settings: React.FC = () => {
           </div>
         );
 
-      case 'notifications':
+      case "notifications":
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Notification Preferences</h3>
@@ -166,21 +166,21 @@ const Settings: React.FC = () => {
                 <div key={key} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div>
                     <h4 className="font-medium text-gray-900 capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                      {key.replace(/([A-Z])/g, " $1").trim()}
                     </h4>
                     <p className="text-sm text-gray-600">
-                      Receive notifications for {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                      Receive notifications for {key.replace(/([A-Z])/g, " $1").toLowerCase()}
                     </p>
                   </div>
                   <button
                     onClick={() => handleNotificationToggle(key)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      value ? 'bg-blue-600' : 'bg-gray-200'
+                      value ? "bg-blue-600" : "bg-gray-200"
                     }`}
                   >
                     <span
                       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        value ? 'translate-x-6' : 'translate-x-1'
+                        value ? "translate-x-6" : "translate-x-1"
                       }`}
                     />
                   </button>
@@ -190,7 +190,7 @@ const Settings: React.FC = () => {
           </div>
         );
 
-      case 'security':
+      case "security":
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Security Settings</h3>
@@ -217,7 +217,7 @@ const Settings: React.FC = () => {
           </div>
         );
 
-      case 'appearance':
+      case "appearance":
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Appearance Settings</h3>
@@ -257,8 +257,8 @@ const Settings: React.FC = () => {
               onClick={() => setActiveSection(section.id)}
               className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors ${
                 activeSection === section.id
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? "bg-blue-50 text-blue-700 border border-blue-200"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <section.icon className="w-5 h-5" />

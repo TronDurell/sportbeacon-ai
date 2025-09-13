@@ -3,30 +3,36 @@
  * Creates a new player profile with basic information
  */
 export declare const createPlayerProfile: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
-    success: boolean;
-    message: string;
-    data: {
-        playerId: any;
-    };
-    error?: undefined;
+    success?: boolean;
+    message?: string;
+    error?: any;
+    data?: any;
 } | {
     success: boolean;
     message: string;
-    error: unknown;
-    data?: undefined;
+    data: any;
+    errors: {
+        field: string;
+        message: string;
+    }[];
 }>, unknown>;
 /**
  * Player Function: Update Player Profile
  * Updates an existing player profile with new information
  */
 export declare const updatePlayerProfile: import("firebase-functions/v2/https").CallableFunction<any, Promise<{
-    success: boolean;
-    message: string;
-    error?: undefined;
+    success?: boolean;
+    message?: string;
+    error?: any;
+    data?: any;
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    data: any;
+    errors: {
+        field: string;
+        message: string;
+    }[];
 }>, unknown>;
 /**
  * Player Function: Get Player Statistics
@@ -54,7 +60,7 @@ export declare const getPlayerStatistics: import("firebase-functions/v2/https").
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -73,7 +79,7 @@ export declare const getPlayerAchievements: import("firebase-functions/v2/https"
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -90,7 +96,7 @@ export declare const awardAchievement: import("firebase-functions/v2/https").Cal
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -109,7 +115,7 @@ export declare const getPlayerSchedule: import("firebase-functions/v2/https").Ca
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
     data?: undefined;
 }>, unknown>;
 /**
@@ -123,6 +129,6 @@ export declare const updatePlayerPerformance: import("firebase-functions/v2/http
 } | {
     success: boolean;
     message: string;
-    error: unknown;
+    error: any;
 }>, unknown>;
 //# sourceMappingURL=index.d.ts.map

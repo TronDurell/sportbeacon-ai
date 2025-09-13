@@ -1,0 +1,109 @@
+{
+  "timestamp": "2025-01-08T18:52:00Z",
+  "overallScore": 42,
+  "grade": "D",
+  "componentScores": {
+    "typeSafety": {
+      "score": 0,
+      "maxScore": 20,
+      "details": {
+        "frontendErrors": 375,
+        "functionsErrors": 7,
+        "mcpServerErrors": 0,
+        "memorySdkErrors": 1,
+        "totalErrors": 383
+      },
+      "calculation": "20 - log2(1+383)*4 = 0"
+    },
+    "lint": {
+      "score": 0,
+      "maxScore": 10,
+      "details": {
+        "errors": 126,
+        "warnings": 1975,
+        "totalProblems": 2101
+      },
+      "calculation": "10 - min(10, 126*0.5 + 1975/300) = 0"
+    },
+    "tests": {
+      "score": 4,
+      "maxScore": 15,
+      "details": {
+        "testSuites": {
+          "total": 48,
+          "passed": 1,
+          "failed": 47
+        },
+        "tests": {
+          "total": 228,
+          "passed": 22,
+          "failed": 206
+        },
+        "coverage": "NOT_AVAILABLE"
+      },
+      "calculation": "Coverage < 60% = 4"
+    },
+    "security": {
+      "score": 0,
+      "maxScore": 15,
+      "details": {
+        "critical": 0,
+        "high": 6,
+        "moderate": 12,
+        "low": 7,
+        "total": 25
+      },
+      "calculation": "15 - (6*3 + 12*1) = 0"
+    },
+    "webPerf": {
+      "score": 3,
+      "maxScore": 10,
+      "details": {
+        "lighthouseScore": 0,
+        "pwaScore": 0,
+        "accessibilityScore": 0,
+        "bestPracticesScore": 0
+      },
+      "calculation": "Lighthouse score < 70 = 3"
+    },
+    "functionsHealth": {
+      "score": 0,
+      "maxScore": 10,
+      "details": {
+        "buildStatus": "FAILED",
+        "typeErrors": 7,
+        "missingModules": ["memory/client", "db imports"]
+      },
+      "calculation": "Build failed = 0"
+    },
+    "rulesIndexes": {
+      "score": 8,
+      "maxScore": 10,
+      "details": {
+        "rulesCompile": true,
+        "warnings": 1,
+        "indexesValid": true
+      },
+      "calculation": "Compiles with minor warnings = 8"
+    },
+    "mcpAgents": {
+      "score": 7,
+      "maxScore": 10,
+      "details": {
+        "mcpServerTypecheck": "PASSED",
+        "mcpServerTests": "FAILED",
+        "agentModules": "PARTIAL",
+        "toolsAvailable": 8
+      },
+      "calculation": "Typecheck passes, tests fail = 7"
+    }
+  },
+  "recommendations": [
+    "Fix TypeScript compilation errors (383 total)",
+    "Resolve missing memory client modules",
+    "Fix test infrastructure and dependencies",
+    "Address security vulnerabilities (6 high, 12 moderate)",
+    "Implement PWA features for better Lighthouse scores",
+    "Fix Firebase Functions build issues"
+  ]
+}

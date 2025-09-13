@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '../../contexts/AdminAuthContext';
-import { useSmartLayer } from '../../contexts/SmartLayerContext';
-import { useAgentOrchestration } from '../../contexts/AgentOrchestrationContext';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useAuth } from "../../contexts/AdminAuthContext";
+import { useSmartLayer } from "../../contexts/SmartLayerContext";
+import { useAgentOrchestration } from "../../contexts/AgentOrchestrationContext";
 
 interface PlaymakerSession {
-  type: 'Training' | 'Learning' | 'Scouting' | 'Planning' | 'Social' | 'Review';
+  type: "Training" | "Learning" | "Scouting" | "Planning" | "Social" | "Review";
   maxPosts: number;
   role: string;
   startTime: number;
@@ -20,104 +20,104 @@ interface CoachNudge {
   actions: Array<{
     label: string;
     aiPrompt: string;
-    variant: 'primary' | 'secondary' | 'ghost';
+    variant: "primary" | "secondary" | "ghost";
   }>;
 }
 
 const ROLE_COACH_NUDGES: Record<string, CoachNudge[]> = {
   player: [
     {
-      id: 'player-train',
-      title: 'Time to Train?',
-      message: 'You\'ve been browsing for a while. Ready to put that knowledge into action?',
+      id: "player-train",
+      title: "Time to Train?",
+      message: "You've been browsing for a while. Ready to put that knowledge into action?",
       actions: [
-        { label: 'Start Workout', aiPrompt: 'Suggest a drill based on my current goals', variant: 'primary' },
-        { label: 'Log Progress', aiPrompt: 'Help me log my recent training progress', variant: 'secondary' },
-        { label: 'Find Local Game', aiPrompt: 'Find pickup games near me', variant: 'secondary' },
-        { label: 'Continue Browsing', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "Start Workout", aiPrompt: "Suggest a drill based on my current goals", variant: "primary" },
+        { label: "Log Progress", aiPrompt: "Help me log my recent training progress", variant: "secondary" },
+        { label: "Find Local Game", aiPrompt: "Find pickup games near me", variant: "secondary" },
+        { label: "Continue Browsing", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     },
     {
-      id: 'player-highlight',
-      title: 'Log a Highlight?',
-      message: 'Capture your recent achievements or insights.',
+      id: "player-highlight",
+      title: "Log a Highlight?",
+      message: "Capture your recent achievements or insights.",
       actions: [
-        { label: 'Share Highlight', aiPrompt: 'Help me create a highlight post', variant: 'primary' },
-        { label: 'Review Footage', aiPrompt: 'Analyze my recent game footage', variant: 'secondary' },
-        { label: 'Set Goal', aiPrompt: 'Help me set a new training goal', variant: 'secondary' },
-        { label: 'Not Now', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "Share Highlight", aiPrompt: "Help me create a highlight post", variant: "primary" },
+        { label: "Review Footage", aiPrompt: "Analyze my recent game footage", variant: "secondary" },
+        { label: "Set Goal", aiPrompt: "Help me set a new training goal", variant: "secondary" },
+        { label: "Not Now", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     }
   ],
   coach: [
     {
-      id: 'coach-plan',
-      title: 'Planning Session?',
-      message: 'Ready to plan your next training or review team performance?',
+      id: "coach-plan",
+      title: "Planning Session?",
+      message: "Ready to plan your next training or review team performance?",
       actions: [
-        { label: 'Plan Training', aiPrompt: 'Help me plan the next team training session', variant: 'primary' },
-        { label: 'Review Players', aiPrompt: 'Review recent player performance data', variant: 'secondary' },
-        { label: 'Team Meeting', aiPrompt: 'Schedule a team meeting or communication', variant: 'secondary' },
-        { label: 'Continue', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "Plan Training", aiPrompt: "Help me plan the next team training session", variant: "primary" },
+        { label: "Review Players", aiPrompt: "Review recent player performance data", variant: "secondary" },
+        { label: "Team Meeting", aiPrompt: "Schedule a team meeting or communication", variant: "secondary" },
+        { label: "Continue", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     },
     {
-      id: 'coach-scout',
-      title: 'Scouting Mode?',
-      message: 'Time to scout new talent or analyze opponents?',
+      id: "coach-scout",
+      title: "Scouting Mode?",
+      message: "Time to scout new talent or analyze opponents?",
       actions: [
-        { label: 'Scout Players', aiPrompt: 'Find potential recruits or transfer targets', variant: 'primary' },
-        { label: 'Opponent Analysis', aiPrompt: 'Analyze upcoming opponent strategies', variant: 'secondary' },
-        { label: 'Team Report', aiPrompt: 'Generate team performance report', variant: 'secondary' },
-        { label: 'Later', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "Scout Players", aiPrompt: "Find potential recruits or transfer targets", variant: "primary" },
+        { label: "Opponent Analysis", aiPrompt: "Analyze upcoming opponent strategies", variant: "secondary" },
+        { label: "Team Report", aiPrompt: "Generate team performance report", variant: "secondary" },
+        { label: "Later", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     }
   ],
   parent: [
     {
-      id: 'parent-engage',
-      title: 'Stay Engaged?',
-      message: 'Connect with your child\'s sports journey and community.',
+      id: "parent-engage",
+      title: "Stay Engaged?",
+      message: "Connect with your child's sports journey and community.",
       actions: [
-        { label: 'Check Schedule', aiPrompt: 'Show upcoming events and games', variant: 'primary' },
-        { label: 'Connect with Coach', aiPrompt: 'Help me communicate with the coach', variant: 'secondary' },
-        { label: 'Join Community', aiPrompt: 'Connect with other parents', variant: 'secondary' },
-        { label: 'Continue', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "Check Schedule", aiPrompt: "Show upcoming events and games", variant: "primary" },
+        { label: "Connect with Coach", aiPrompt: "Help me communicate with the coach", variant: "secondary" },
+        { label: "Join Community", aiPrompt: "Connect with other parents", variant: "secondary" },
+        { label: "Continue", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     },
     {
-      id: 'parent-support',
-      title: 'Support Mode?',
-      message: 'Ready to support your child\'s development?',
+      id: "parent-support",
+      title: "Support Mode?",
+      message: "Ready to support your child's development?",
       actions: [
-        { label: 'Review Progress', aiPrompt: 'Show my child\'s recent progress', variant: 'primary' },
-        { label: 'Safety Check', aiPrompt: 'Review safety guidelines and protocols', variant: 'secondary' },
-        { label: 'Equipment Check', aiPrompt: 'Check if equipment needs updating', variant: 'secondary' },
-        { label: 'Not Now', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "Review Progress", aiPrompt: "Show my child's recent progress", variant: "primary" },
+        { label: "Safety Check", aiPrompt: "Review safety guidelines and protocols", variant: "secondary" },
+        { label: "Equipment Check", aiPrompt: "Check if equipment needs updating", variant: "secondary" },
+        { label: "Not Now", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     }
   ],
   admin: [
     {
-      id: 'admin-manage',
-      title: 'Management Mode?',
-      message: 'Time to review league operations and metrics?',
+      id: "admin-manage",
+      title: "Management Mode?",
+      message: "Time to review league operations and metrics?",
       actions: [
-        { label: 'Review Metrics', aiPrompt: 'Show league performance metrics', variant: 'primary' },
-        { label: 'Handle Alerts', aiPrompt: 'Review system alerts and issues', variant: 'secondary' },
-        { label: 'User Management', aiPrompt: 'Review user accounts and permissions', variant: 'secondary' },
-        { label: 'Continue', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "Review Metrics", aiPrompt: "Show league performance metrics", variant: "primary" },
+        { label: "Handle Alerts", aiPrompt: "Review system alerts and issues", variant: "secondary" },
+        { label: "User Management", aiPrompt: "Review user accounts and permissions", variant: "secondary" },
+        { label: "Continue", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     },
     {
-      id: 'admin-optimize',
-      title: 'Optimization Time?',
-      message: 'Ready to optimize platform performance and user experience?',
+      id: "admin-optimize",
+      title: "Optimization Time?",
+      message: "Ready to optimize platform performance and user experience?",
       actions: [
-        { label: 'System Health', aiPrompt: 'Check system performance and health', variant: 'primary' },
-        { label: 'User Analytics', aiPrompt: 'Review user engagement analytics', variant: 'secondary' },
-        { label: 'Feature Planning', aiPrompt: 'Plan new features or improvements', variant: 'secondary' },
-        { label: 'Later', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+        { label: "System Health", aiPrompt: "Check system performance and health", variant: "primary" },
+        { label: "User Analytics", aiPrompt: "Review user engagement analytics", variant: "secondary" },
+        { label: "Feature Planning", aiPrompt: "Plan new features or improvements", variant: "secondary" },
+        { label: "Later", aiPrompt: "Dismiss this nudge", variant: "ghost" }
       ]
     }
   ]
@@ -169,7 +169,7 @@ export const usePlaymakerIntentEngine = () => {
     if (!user) return;
 
     const defaultSession: PlaymakerSession = {
-      type: 'Learning',
+      type: "Learning",
       maxPosts: 10,
       role: user.role,
       startTime: Date.now(),
@@ -205,13 +205,13 @@ export const usePlaymakerIntentEngine = () => {
       if (rapidScrolls >= PLAYMAKER_THRESHOLDS.MAX_RAPID_SCROLLS) {
         // Trigger rapid scroll intervention
         const rapidScrollNudge: CoachNudge = {
-          id: 'rapid-scroll',
-          title: 'Slow Down, Speed Up',
-          message: 'You\'re scrolling fast! Take a moment to absorb what you\'re seeing.',
+          id: "rapid-scroll",
+          title: "Slow Down, Speed Up",
+          message: "You're scrolling fast! Take a moment to absorb what you're seeing.",
           actions: [
-            { label: 'Take a Break', aiPrompt: 'Suggest a quick training break or activity', variant: 'primary' },
-            { label: 'Save for Later', aiPrompt: 'Help me save interesting content for later', variant: 'secondary' },
-            { label: 'Continue', aiPrompt: 'Dismiss this nudge', variant: 'ghost' }
+            { label: "Take a Break", aiPrompt: "Suggest a quick training break or activity", variant: "primary" },
+            { label: "Save for Later", aiPrompt: "Help me save interesting content for later", variant: "secondary" },
+            { label: "Continue", aiPrompt: "Dismiss this nudge", variant: "ghost" }
           ]
         };
         
@@ -268,20 +268,20 @@ export const usePlaymakerIntentEngine = () => {
       }
     }, 2000);
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('click', handleInteraction);
-    window.addEventListener('keydown', handleInteraction);
-    window.addEventListener('mousemove', handleInteraction);
-    window.addEventListener('touchstart', handleInteraction);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("click", handleInteraction);
+    window.addEventListener("keydown", handleInteraction);
+    window.addEventListener("mousemove", handleInteraction);
+    window.addEventListener("touchstart", handleInteraction);
 
     return () => {
       if (scrollTimerRef.current) clearInterval(scrollTimerRef.current);
       if (rapidScrollTimerRef.current) clearInterval(rapidScrollTimerRef.current);
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('keydown', handleInteraction);
-      window.removeEventListener('mousemove', handleInteraction);
-      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+      window.removeEventListener("mousemove", handleInteraction);
+      window.removeEventListener("touchstart", handleInteraction);
     };
   }, [autopilot, scrollCount, rapidScrolls, checkForCoachNudge, updatePlaymakerSession, detectRapidScrolling]);
 
@@ -298,8 +298,8 @@ export const usePlaymakerIntentEngine = () => {
 
     // Send session data to analytics
     sendRequest({
-      type: 'playmaker_session_end',
-      context: 'growth_session',
+      type: "playmaker_session_end",
+      context: "growth_session",
       data: sessionData
     });
 

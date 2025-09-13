@@ -1,5 +1,5 @@
-import React from 'react';
-import { Users, Plus, Calendar } from 'lucide-react';
+import React from "react";
+import { Users, Plus, Calendar } from "lucide-react";
 
 interface Team {
   id: string;
@@ -9,60 +9,60 @@ interface Team {
   coach: string;
   playerCount: number;
   maxPlayers: number;
-  status: 'active' | 'inactive' | 'full';
+  status: "active" | "inactive" | "full";
   nextGame?: Date;
 }
 
 const Teams: React.FC = () => {
   const teams: Team[] = [
     {
-      id: '1',
-      name: 'Thunder Hawks',
-      sport: 'Soccer',
-      ageGroup: 'U14',
-      coach: 'Coach Smith',
+      id: "1",
+      name: "Thunder Hawks",
+      sport: "Soccer",
+      ageGroup: "U14",
+      coach: "Coach Smith",
       playerCount: 12,
       maxPlayers: 15,
-      status: 'active',
-      nextGame: new Date('2024-01-27T14:00:00')
+      status: "active",
+      nextGame: new Date("2024-01-27T14:00:00")
     },
     {
-      id: '2',
-      name: 'Lightning Bolts',
-      sport: 'Basketball',
-      ageGroup: 'U16',
-      coach: 'Coach Johnson',
+      id: "2",
+      name: "Lightning Bolts",
+      sport: "Basketball",
+      ageGroup: "U16",
+      coach: "Coach Johnson",
       playerCount: 10,
       maxPlayers: 12,
-      status: 'active',
-      nextGame: new Date('2024-01-28T16:00:00')
+      status: "active",
+      nextGame: new Date("2024-01-28T16:00:00")
     },
     {
-      id: '3',
-      name: 'Storm Riders',
-      sport: 'Soccer',
-      ageGroup: 'U12',
-      coach: 'Coach Wilson',
+      id: "3",
+      name: "Storm Riders",
+      sport: "Soccer",
+      ageGroup: "U12",
+      coach: "Coach Wilson",
       playerCount: 15,
       maxPlayers: 15,
-      status: 'full'
+      status: "full"
     }
   ];
 
-  const getStatusColor = (status: Team['status']) => {
+  const getStatusColor = (status: Team["status"]) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-red-100 text-red-800';
-      case 'full': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "active": return "bg-green-100 text-green-800";
+      case "inactive": return "bg-red-100 text-red-800";
+      case "full": return "bg-yellow-100 text-yellow-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPlayerCountColor = (current: number, max: number) => {
     const percentage = (current / max) * 100;
-    if (percentage >= 90) return 'text-red-600';
-    if (percentage >= 75) return 'text-yellow-600';
-    return 'text-green-600';
+    if (percentage >= 90) return "text-red-600";
+    if (percentage >= 75) return "text-yellow-600";
+    return "text-green-600";
   };
 
   return (

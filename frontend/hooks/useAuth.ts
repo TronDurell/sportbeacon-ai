@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
+import type { User } from '../firebase/types';
+import { useMemory } from '../src/hooks/useMemory';
 
-interface User {
-    id: string;
+interface AuthUser extends User {
     role: 'trainer' | 'player' | 'admin';
     name: string;
-    email: string;
     avatar?: string;
 }
 
 interface AuthState {
-    user: User | null;
+    user: AuthUser | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
 }
 
 export const useAuth = () => {
+    const { captureAuthEvent } = useMemory({ enabled: true, autoCapture: false });
     const [authState, setAuthState] = useState<AuthState>({
         user: null,
         isAuthenticated: false,
@@ -38,6 +39,8 @@ export const useAuth = () => {
                     isLoading: false,
                     error: null
                 });
+                // Capture successful login
+                captureAuthEvent('login_success', { userId: data.user.id });
             } catch (error) {
                 setAuthState({
                     user: null,
@@ -45,6 +48,8 @@ export const useAuth = () => {
                     isLoading: false,
                     error: error instanceof Error ? error.message : 'Authentication failed'
                 });
+                // Capture login failure
+                captureAuthEvent('login_failure', { error: error instanceof Error ? error.message : 'Unknown error' });
             }
         };
 

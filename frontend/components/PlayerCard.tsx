@@ -1,28 +1,18 @@
 import React from 'react';
 import { Card, CardContent, Typography, Avatar, Box, Chip } from '@mui/material';
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
-
-interface Player {
-    id: string;
-    name: string;
-    avatar: string;
-    sport: string;
-    level: string;
-    weeklyProgress: {
-        drillsCompleted: number;
-        totalDrills: number;
-        performance: number;
-    };
-}
+import type { Player } from '../types';
 
 interface PlayerCardProps {
     player: Player;
     onViewDetails: () => void;
+    compact?: boolean;
 }
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({ player, onViewDetails }) => {
-    const performanceTrend = player.weeklyProgress.performance;
-    const completionRate = (player.weeklyProgress.drillsCompleted / player.weeklyProgress.totalDrills) * 100;
+    const performanceTrend = player.weeklyProgress?.performance || 0;
+    const completionRate = player.weeklyProgress ? (player.weeklyProgress.drillsCompleted / player.weeklyProgress.totalDrills) * 100 : 0;
+    const playerName = player.name || `${player.firstName} ${player.lastName}`;
 
     return (
         <Card 
@@ -36,11 +26,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, onViewDetails })
                 <Box display="flex" alignItems="center" gap={2} mb={2}>
                     <Avatar
                         src={player.avatar}
-                        alt={player.name}
+                        alt={playerName}
                         sx={{ width: 56, height: 56 }}
                     />
                     <Box>
-                        <Typography variant="h6">{player.name}</Typography>
+                        <Typography variant="h6">{playerName}</Typography>
                         <Box display="flex" alignItems="center" gap={1}>
                             <Chip 
                                 label={player.sport}

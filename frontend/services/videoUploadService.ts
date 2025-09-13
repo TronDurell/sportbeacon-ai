@@ -63,7 +63,7 @@ class VideoUploadService {
             // Upload file in chunks
             const chunks = Math.ceil(file.size / this.CHUNK_SIZE);
             let uploadedChunks = 0;
-            let startTime = Date.now();
+            const startTime = Date.now();
 
             for (let i = 0; i < chunks; i++) {
                 const start = i * this.CHUNK_SIZE;

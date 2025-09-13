@@ -73,7 +73,7 @@ export const waitlistAPI = {
         guardianName: entry.guardianName,
         guardianEmail: entry.guardianEmail,
         guardianPhone: entry.guardianPhone,
-        teamId,
+        teamId: teamId as `team-${number}`,
         leagueId: entry.leagueId,
         registrationDate: new Date().toISOString()
       });
@@ -122,7 +122,7 @@ export const siblingAPI = {
     const group = mockData.siblingGroups.find(g => g.id === groupId);
     if (group) {
       group.placement = {
-        teamId,
+        teamId: teamId as "team-1" | "team-2" | "team-3" | "team-4",
         reason: 'Manual placement',
         date: new Date().toISOString()
       };
@@ -134,7 +134,7 @@ export const siblingAPI = {
     await delay(800);
     mockData.siblingGroups.forEach(group => {
       group.aiSuggestions = Array.from({ length: 3 }, () => ({
-        teamName: ['Red Dragons', 'Blue Eagles', 'Green Lions', 'Yellow Tigers'][Math.floor(Math.random() * 4)],
+        teamName: (['Red Dragons', 'Blue Eagles', 'Green Lions', 'Yellow Tigers'][Math.floor(Math.random() * 4)]) as "Red Dragons" | "Blue Eagles" | "Green Lions" | "Yellow Tigers",
         confidence: Math.floor(Math.random() * 35) + 60
       }));
     });
@@ -263,9 +263,9 @@ export const refereeAPI = {
       id: `assign-${Date.now()}`,
       gameId,
       refereeId,
-      role,
+      role: role as "Center" | "Assistant",
       assignedDate: new Date().toISOString(),
-      status: 'assigned'
+      status: 'assigned' as "completed" | "assigned" | "confirmed"
     };
     mockData.refereeAssignments.push(assignment);
     return apiResponse({ success: true });
@@ -353,9 +353,9 @@ export const paymentAPI = {
       id: `refund-${Date.now()}`,
       paymentId,
       amount,
-      reason,
+      reason: reason as "Player injury - unable to participate" | "Schedule conflict" | "Family emergency" | "Dissatisfaction with program" | "Duplicate payment",
       date: new Date().toISOString(),
-      status: 'completed',
+      status: 'completed' as "pending" | "completed" | "failed",
       processedBy: 'Current Admin'
     };
     mockData.refunds.push(refund);

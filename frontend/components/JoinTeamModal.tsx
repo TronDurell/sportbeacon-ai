@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Box, Typography, Button, TextField } from '@mui/material';
 
-export default function JoinTeamModal({ open, onClose, onSubmit }) {
+export default function JoinTeamModal({ open, onClose, onSubmit }: { open: any, onClose: any, onSubmit: any }) {
   const [message, setMessage] = useState('');
 
   const handleSubmit = () => {

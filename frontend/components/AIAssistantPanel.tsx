@@ -16,12 +16,8 @@ import {
     Person as PersonIcon
 } from '@mui/icons-material';
 
-interface Message {
-    id: string;
-    role: 'ai' | 'trainer';
-    content: string;
-    timestamp: Date;
-}
+// Import consolidated Message interface
+import type { Message } from '../types';
 
 interface AIAssistantPanelProps {
     responses: Message[];
@@ -31,6 +27,7 @@ interface AIAssistantPanelProps {
     onStopRecording: () => void;
     isRecording: boolean;
     quickReplies?: string[];
+    compact?: boolean;
 }
 
 export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
@@ -85,7 +82,7 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
                         key={msg.id}
                         sx={{
                             display: 'flex',
-                            justifyContent: msg.role === 'trainer' ? 'flex-end' : 'flex-start',
+                            justifyContent: (msg.role === 'trainer' || msg.role === 'user') ? 'flex-end' : 'flex-start',
                             mb: 1
                         }}
                     >
@@ -93,8 +90,8 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
                             sx={{
                                 p: 2,
                                 maxWidth: '70%',
-                                bgcolor: msg.role === 'trainer' ? 'primary.main' : 'background.paper',
-                                color: msg.role === 'trainer' ? 'primary.contrastText' : 'text.primary',
+                                bgcolor: (msg.role === 'trainer' || msg.role === 'user') ? 'primary.main' : 'background.paper',
+                                color: (msg.role === 'trainer' || msg.role === 'user') ? 'primary.contrastText' : 'text.primary',
                                 borderRadius: 2
                             }}
                         >
@@ -108,7 +105,7 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
                                 {msg.content}
                             </Typography>
                             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                                {new Date(msg.timestamp).toLocaleTimeString()}
+                                {new Date(typeof msg.timestamp === 'string' ? msg.timestamp : msg.timestamp).toLocaleTimeString()}
                             </Typography>
                         </Paper>
                     </Box>
