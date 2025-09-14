@@ -4,9 +4,7 @@ import {onCall} from "firebase-functions/v2/https";
 import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
-// Import agent functions
-import { onStatSubmissionCreated } from '../agents/verificationAgent.js';
-import { generateWeeklyReports, generateTeamReport } from '../agents/reportingAgent.js';
+// Import agent functions - REMOVED: agents directory no longer exists
 
 // Initialize Firebase Admin
 initializeApp();
@@ -165,4 +163,4 @@ export const submitFeedback = onCall(async (request) => {
 });
 
 // Export agent functions
-export { onStatSubmissionCreated, generateWeeklyReports, generateTeamReport };
+// Removed agent exports - agents directory no longer exists

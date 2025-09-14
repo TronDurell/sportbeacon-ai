@@ -1,0 +1,51 @@
+name: Security Audit & Build Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run weekly security audit
+    - cron: '0 2 * * 1'
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: TypeScript type check
+      run: npm run typecheck
+      
+    - name: Build all workspaces
+      run: npm run build
+      
+    - name: Run tests
+      run: npm run test
+      
+    - name: Security audit (production only)
+      run: npm audit --omit=dev --audit-level=moderate
+      
+    - name: Security audit (all dependencies)
+      run: npm audit --audit-level=high
+      
+    - name: Check for high vulnerabilities
+      run: |
+        if npm audit --audit-level=high --json | jq -e '.metadata.vulnerabilities.high > 0'; then
+          echo "❌ High severity vulnerabilities found!"
+          exit 1
+        else
+          echo "✅ No high severity vulnerabilities found"
+        fi
