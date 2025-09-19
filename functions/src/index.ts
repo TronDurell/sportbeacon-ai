@@ -6,6 +6,11 @@ import * as logger from "firebase-functions/logger";
 
 // Import agent functions - REMOVED: agents directory no longer exists
 
+// Import secured handlers
+export { videoAnalyze } from './handlers/videoAnalyze';
+export { getPlayer } from './handlers/getPlayer';
+export { authLogin } from './handlers/authLogin';
+
 // Initialize Firebase Admin
 initializeApp();
 

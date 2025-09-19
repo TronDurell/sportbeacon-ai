@@ -1,0 +1,7 @@
+dist/
+coverage/
+.lhci/
+.firebase/
+node_modules/
+*.min.js
+*.min.css

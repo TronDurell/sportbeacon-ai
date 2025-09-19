@@ -463,4 +463,3 @@ export const validateAnalyticsEvent = (event: Partial<AnalyticsEvent>): string[]
 // ============================================================================
 
 export default analytics;
-export type { AnalyticsEvent, KPIEventData, DateString, AnalyticsEventType };

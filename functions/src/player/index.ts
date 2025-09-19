@@ -10,8 +10,8 @@ const db = getFirestore();
 const memoryClient = adminMemoryClient();
 
 // Helper function to validate user authentication
-const validateAuth = async (context: CallableContextV2): Promise<AuthContext> => {
-  if (!context || !isAuthContext(context)) {
+const validateAuth = async (context: any): Promise<AuthContext> => {
+  if (!context || !context.auth || !isAuthContext(context.auth)) {
     throw new Error("Unauthorized: User not authenticated");
   }
   return context.auth;
@@ -100,9 +100,7 @@ export const createPlayerProfile = onCall(async (data, context) => {
           playerName: (playerProfile.firstName || '') + ' ' + (playerProfile.lastName || ''),
           dateOfBirth: playerProfile.dateOfBirth,
           position: playerProfile.position
-        },
-        undefined,
-        'player-profile-creation'
+        }
       );
     } catch (memoryError) {
       logger.warn('Failed to capture memory for player profile creation:', memoryError);
@@ -128,9 +126,7 @@ export const createPlayerProfile = onCall(async (data, context) => {
       await memoryClient.captureFunctionError(
         authContext.auth?.uid || 'unknown',
         'createPlayerProfile',
-        err as Error,
-        { input: data },
-        'player-profile-creation-error'
+        err as Error
       );
     } catch (memoryError) {
       logger.warn('Failed to capture memory for player profile creation error:', memoryError);
@@ -168,6 +164,14 @@ export const updatePlayerProfile = onCall(async (data, context) => {
     }
 
     const {playerId, updates} = validation.data || {};
+
+    if (!playerId) {
+      return {
+        success: false,
+        message: "Player ID is required",
+        data: null,
+      };
+    }
 
     logger.info("Player profile update requested", {
       uid: auth.uid,

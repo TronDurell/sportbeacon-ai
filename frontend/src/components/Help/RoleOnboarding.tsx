@@ -103,8 +103,8 @@ const RoleOnboarding: React.FC<RoleOnboardingProps> = ({ onComplete }) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {currentStep === 1 && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">{steps[0].title}</h2>
-            <p className="text-gray-600 mb-6">{steps[0].description}</p>
+            <h2 className="text-xl font-semibold mb-4">{steps[0]?.title ?? "Welcome"}</h2>
+            <p className="text-gray-600 mb-6">{steps[0]?.description ?? "Get started with SportBeaconAI"}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {roles.map((role) => (
@@ -127,8 +127,8 @@ const RoleOnboarding: React.FC<RoleOnboardingProps> = ({ onComplete }) => {
 
         {currentStep === 2 && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">{steps[1].title}</h2>
-            <p className="text-gray-600 mb-6">{steps[1].description}</p>
+            <h2 className="text-xl font-semibold mb-4">{steps[1]?.title ?? "Complete Profile"}</h2>
+            <p className="text-gray-600 mb-6">{steps[1]?.description ?? "Tell us more about yourself"}</p>
             
             <div className="space-y-4">
               <div>
@@ -153,8 +153,8 @@ const RoleOnboarding: React.FC<RoleOnboardingProps> = ({ onComplete }) => {
 
         {currentStep === 3 && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">{steps[2].title}</h2>
-            <p className="text-gray-600 mb-6">{steps[2].description}</p>
+            <h2 className="text-xl font-semibold mb-4">{steps[2]?.title ?? "Preferences"}</h2>
+            <p className="text-gray-600 mb-6">{steps[2]?.description ?? "Customize your experience"}</p>
             
             <div className="space-y-4">
               <div>

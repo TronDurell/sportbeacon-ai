@@ -1,0 +1,32 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "preserve"
+  },
+  "include": [],
+  "references": [
+    {
+      "path": "./frontend"
+    },
+    {
+      "path": "./functions"
+    },
+    {
+      "path": "./packages/mcp-server"
+    },
+    {
+      "path": "./packages/memory-sdk"
+    }
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

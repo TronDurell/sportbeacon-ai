@@ -57,8 +57,8 @@ export const rateLimit = (operation: string, limit: number, window: "minute" | "
     const rateLimitData = rateLimitDoc.exists ? rateLimitDoc.data() : {};
     
     const key = `${operation}_${window}`;
-    const currentCount = rateLimitData[key] || 0;
-    const lastReset = rateLimitData[`${key}_reset`] || windowStart;
+    const currentCount = rateLimitData?.[key] || 0;
+    const lastReset = rateLimitData?.[`${key}_reset`] || windowStart;
     
     // Reset counter if window has passed
     if (lastReset < windowStart) {

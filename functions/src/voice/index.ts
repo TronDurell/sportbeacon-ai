@@ -8,8 +8,8 @@ import {AuthContext, isAuthContext, CallableContextV2} from "../types";
 const db = getFirestore();
 
 // Helper function to validate user authentication
-const validateAuth = async (context: CallableContextV2): Promise<AuthContext> => {
-  if (!context || !isAuthContext(context)) {
+const validateAuth = async (context: any): Promise<AuthContext> => {
+  if (!context || !context.auth || !isAuthContext(context.auth)) {
     throw new Error("Unauthorized: User not authenticated");
   }
   return context.auth;

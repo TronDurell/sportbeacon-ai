@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false,
     "skipLibCheck": true,
     "baseUrl": ".",
     "types": ["node"],
@@ -21,5 +22,11 @@
       "@mcp/*":         ["packages/mcp-server/src/*"],
       "@memory/*":      ["packages/memory-sdk/src/*"]
     }
-  }
+  },
+  "references": [
+    { "path": "packages/memory-sdk" },
+    { "path": "packages/mcp-server" },
+    { "path": "frontend" },
+    { "path": "functions" }
+  ]
 }

@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
 
 // Mock Firebase
-jest.mock("../../../lib/firebase/config", () => ({
+jest.mock("../../../lib/firebase", () => ({
   db: {},
   auth: {},
   storage: {}

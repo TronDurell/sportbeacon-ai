@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { jest, describe, it, expect, beforeEach  } from '@jest/globals';
 import SmartAlerts from "../components/SmartAlerts";
 import { AdminAuthProvider } from "../contexts/AdminAuthContext";
 import { SmartLayerProvider } from "../contexts/SmartLayerContext";
@@ -16,42 +16,42 @@ const mockUser = {
 
 const mockAuthContext = {
   user: mockUser,
-  login: vi.fn(),
-  logout: vi.fn(),
+  login: jest.fn(),
+  logout: jest.fn(),
   loading: false,
   error: null
 };
 
 const mockSmartLayerContext = {
   userIntent: "train",
-  setUserIntent: vi.fn(),
+  setUserIntent: jest.fn(),
   hasDeclaredIntent: true,
   autopilotMode: false,
-  setAutopilotMode: vi.fn()
+  setAutopilotMode: jest.fn()
 };
 
 const mockAgentOrchestrationContext = {
-  sendRequest: vi.fn(),
+  sendRequest: jest.fn(),
   agents: {},
   loading: false,
   error: null
 };
 
 // Mock the context providers
-vi.mock("../contexts/AdminAuthContext", () => ({
+jest.mock("../contexts/AdminAuthContext", () => ({
   useAuth: () => mockAuthContext
 }));
 
-vi.mock("../contexts/SmartLayerContext", () => ({
+jest.mock("../contexts/SmartLayerContext", () => ({
   useSmartLayer: () => mockSmartLayerContext
 }));
 
-vi.mock("../contexts/AgentOrchestrationContext", () => ({
+jest.mock("../contexts/AgentOrchestrationContext", () => ({
   useAgentOrchestration: () => mockAgentOrchestrationContext
 }));
 
 // Mock framer-motion
-vi.mock("framer-motion", () => ({
+jest.mock("framer-motion", () => ({
   motion: {
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>
   },
@@ -59,7 +59,7 @@ vi.mock("framer-motion", () => ({
 }));
 
 // Mock lucide-react icons
-vi.mock("lucide-react", () => ({
+jest.mock("lucide-react", () => ({
   AlertCircle: () => <div data-testid="alert-circle">AlertCircle</div>,
   CheckCircle: () => <div data-testid="check-circle">CheckCircle</div>,
   Target: () => <div data-testid="target">Target</div>,
@@ -90,9 +90,9 @@ const renderSmartAlerts = (props = {}) => {
 
 describe("SmartAlerts", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Mock Math.random to control achievement generation
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    jest.spyOn(Math, "random").mockReturnValue(0.5);
   });
 
   describe("Rendering", () => {
@@ -267,7 +267,7 @@ describe("SmartAlerts", () => {
     });
 
     it("auto-dismisses alerts after specified time", async () => {
-      vi.useFakeTimers();
+      jest.useFakeTimers();
       
       mockAuthContext.user.role = "player";
       
@@ -278,20 +278,20 @@ describe("SmartAlerts", () => {
       });
       
       // Fast-forward time
-      vi.advanceTimersByTime(11000); // 11 seconds (alert auto-dismisses at 10s)
+      jest.advanceTimersByTime(11000); // 11 seconds (alert auto-dismisses at 10s)
       
       await waitFor(() => {
         expect(screen.queryByText("Training Time!")).not.toBeInTheDocument();
       });
       
-      vi.useRealTimers();
+      jest.useRealTimers();
     });
   });
 
   describe("Alert Types and Styling", () => {
     it("renders success alerts with correct styling", async () => {
       // Mock achievement generation
-      vi.spyOn(Math, "random").mockReturnValue(0.3); // Low enough to trigger achievement
+      jest.spyOn(Math, "random").mockReturnValue(0.3); // Low enough to trigger achievement
       
       renderSmartAlerts();
       
@@ -317,7 +317,7 @@ describe("SmartAlerts", () => {
 
     it("renders motivation alerts with correct styling", async () => {
       // Mock motivation generation
-      vi.spyOn(Math, "random").mockReturnValue(0.1); // Low enough to trigger motivation
+      jest.spyOn(Math, "random").mockReturnValue(0.1); // Low enough to trigger motivation
       
       renderSmartAlerts();
       

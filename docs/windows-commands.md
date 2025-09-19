@@ -1,100 +1,317 @@
-# Windows PowerShell Commands Reference
+# Windows Commands Reference
 
-## Overview
-This document provides PowerShell equivalents for common Linux/macOS commands used in the SportBeaconAI project, ensuring cross-platform compatibility.
+This document provides Windows-specific commands and their POSIX equivalents for the SportBeaconAI project.
 
-## Command Translations
+## 🖥️ **Cross-Platform Command Equivalents**
 
-### Web Requests
+### **File Operations**
 
-| Linux/macOS | Windows PowerShell | Windows Git Bash |
-|-------------|-------------------|------------------|
-| `curl -s URL \| head -50` | `iwr URL -UseBasicParsing \| Select-Object -First 50` | `curl -s URL \| head -50` |
-| `curl -I URL` | `iwr URL -UseBasicParsing -Method Head` | `curl -I URL` |
-| `curl -X POST URL -d "data"` | `iwr URL -UseBasicParsing -Method Post -Body "data"` | `curl -X POST URL -d "data"` |
+| Task | POSIX | Windows PowerShell | Windows CMD |
+|------|-------|-------------------|-------------|
+| List files | `ls -la` | `Get-ChildItem` | `dir` |
+| Create directory | `mkdir -p dir` | `New-Item -ItemType Directory -Force dir` | `mkdir dir` |
+| Remove directory | `rm -rf dir` | `Remove-Item -Recurse -Force dir` | `rmdir /s dir` |
+| Copy files | `cp -r src dest` | `Copy-Item -Recurse src dest` | `xcopy src dest /e` |
+| Move files | `mv src dest` | `Move-Item src dest` | `move src dest` |
 
-### Text Processing
+### **Text Processing**
 
-| Linux/macOS | Windows PowerShell | Windows Git Bash |
-|-------------|-------------------|------------------|
-| `head -n 50` | `Select-Object -First 50` | `head -n 50` |
-| `tail -n 50` | `Select-Object -Last 50` | `tail -n 50` |
-| `grep pattern` | `Select-String pattern` | `grep pattern` |
-| `grep -r pattern .` | `Get-ChildItem -Recurse \| Select-String pattern` | `grep -r pattern .` |
-| `sed 's/old/new/'` | `(Get-Content file) -replace 'old', 'new'` | `sed 's/old/new/'` |
-| `awk '{print $1}'` | `ForEach-Object { $_.Split()[0] }` | `awk '{print $1}'` |
+| Task | POSIX | Windows PowerShell | Windows CMD |
+|------|-------|-------------------|-------------|
+| Search in files | `grep -r "pattern" .` | `Select-String -Pattern "pattern" -Recurse` | `findstr /s "pattern" *` |
+| Count lines | `wc -l file` | `(Get-Content file).Count` | `find /c /v "" file` |
+| View file | `cat file` | `Get-Content file` | `type file` |
+| Head of file | `head -n 50 file` | `Get-Content file -Head 50` | `more +1 file` |
 
-### File Operations
+### **Network Operations**
 
-| Linux/macOS | Windows PowerShell | Windows Git Bash |
-|-------------|-------------------|------------------|
-| `find . -name "*.ts"` | `Get-ChildItem -Recurse -Filter "*.ts"` | `find . -name "*.ts"` |
-| `wc -l file` | `(Get-Content file).Count` | `wc -l file` |
-| `sort file` | `Get-Content file \| Sort-Object` | `sort file` |
+| Task | POSIX | Windows PowerShell | Windows CMD |
+|------|-------|-------------------|-------------|
+| HTTP request | `curl -s url` | `Invoke-WebRequest -Uri url -UseBasicParsing` | `curl.exe -s url` |
+| Download file | `curl -O url` | `Invoke-WebRequest -Uri url -OutFile file` | `curl.exe -O url` |
+| Check connectivity | `ping host` | `Test-NetConnection host` | `ping host` |
 
-## Project-Specific Commands
+## 🔧 **Project-Specific Commands**
 
-### Testing & Development
-
-```powershell
-# Check if site is accessible
-try { 
-  $response = Invoke-WebRequest -Uri "https://sportbeacon-ai.web.app" -UseBasicParsing
-  Write-Host "Status: $($response.StatusCode)" 
-} catch { 
-  Write-Host "Error: $($_.Exception.Message)" 
-}
-
-# Get page content for debugging
-$content = Invoke-WebRequest -Uri "https://sportbeacon-ai.web.app" -UseBasicParsing
-$content.Content | Select-Object -First 20
-
-# Check Firebase deployment status
-iwr "https://sportbeacon-ai.web.app" -UseBasicParsing | Select-String "SportBeacon"
-```
-
-### Build & Deploy
+### **Node.js and npm**
 
 ```powershell
-# Run tests (cross-platform)
-npm test
+# Install dependencies
+npm ci
 
-# Check deployment (POSIX)
-npm run postdeploy:check:posix
+# Run tests
+npm run test
 
-# Check deployment (PowerShell)
-npm run postdeploy:check:powershell
+# Build frontend
+npm run build:frontend
+
+# Build functions
+npm run build:functions
 
 # Clear Jest cache
 npm run test:clear
 ```
 
-## Troubleshooting
-
-### Common Issues
-
-1. **Command not found**: Use `curl.exe` instead of `curl` when GNU semantics are required
-2. **Permission errors**: Run PowerShell as Administrator for file operations
-3. **Encoding issues**: Use `-Encoding UTF8` with PowerShell text operations
-
-### Environment Variables
+### **Git Operations**
 
 ```powershell
-# Set Node version (if using nvm-windows)
-nvm use 18.20.4
+# Check status
+git status
 
-# Check Node version
-node --version
+# Add files
+git add .
 
-# Check npm version
-npm --version
+# Commit changes
+git commit -m "message"
+
+# Push changes
+git push origin main
+
+# Pull changes
+git pull origin main
 ```
 
-## CI/CD Compatibility
+### **Firebase Operations**
 
-The project includes both POSIX and PowerShell versions of critical commands:
+```powershell
+# Deploy hosting
+firebase deploy --only hosting --project sportbeacon-ai
 
-- `postdeploy:check:posix` - Uses curl + head for Linux/macOS
-- `postdeploy:check:powershell` - Uses iwr for Windows
+# Deploy functions
+firebase deploy --only functions --project sportbeacon-ai
 
-This ensures the same functionality across all platforms in CI/CD pipelines.
+# Deploy all
+firebase deploy --project sportbeacon-ai
+```
+
+## 🌐 **Post-Deploy Verification**
+
+### **POSIX (Linux/macOS)**
+```bash
+# Check if site is accessible
+curl -s https://sportbeacon-ai.web.app | head -n 50
+
+# Check HTTP status
+curl -I https://sportbeacon-ai.web.app
+
+# Check specific endpoint
+curl -s https://sportbeacon-ai.web.app/api/health
+```
+
+### **Windows PowerShell**
+```powershell
+# Check if site is accessible
+iwr https://sportbeacon-ai.web.app -UseBasicParsing | Select-Object -First 50
+
+# Check HTTP status
+iwr https://sportbeacon-ai.web.app -UseBasicParsing | Select-Object StatusCode
+
+# Check specific endpoint
+iwr https://sportbeacon-ai.web.app/api/health -UseBasicParsing
+```
+
+### **Windows CMD**
+```cmd
+# Check if site is accessible
+curl.exe -s https://sportbeacon-ai.web.app | more
+
+# Check HTTP status
+curl.exe -I https://sportbeacon-ai.web.app
+
+# Check specific endpoint
+curl.exe -s https://sportbeacon-ai.web.app/api/health
+```
+
+## 🧪 **Testing Commands**
+
+### **Jest Testing**
+```powershell
+# Run all tests
+npm run test
+
+# Run specific test file
+npm run test -- __tests__/frontend-smoke.test.tsx
+
+# Run tests with coverage
+npm run test:ci
+
+# Clear Jest cache
+npm run test:clear
+
+# Update snapshots
+npm run test -- -u
+```
+
+### **Lighthouse CI**
+```powershell
+# Run Lighthouse CI locally
+npx @lhci/cli autorun
+
+# Run with specific config
+npx @lhci/cli autorun --config=lighthouserc.json
+```
+
+## 🔍 **Debugging Commands**
+
+### **Process Management**
+```powershell
+# List Node.js processes
+Get-Process node
+
+# Kill Node.js processes
+Stop-Process -Name node -Force
+
+# List processes by port
+netstat -ano | findstr :3000
+```
+
+### **Environment Variables**
+```powershell
+# List all environment variables
+Get-ChildItem Env:
+
+# Set environment variable
+$env:NODE_ENV = "test"
+
+# Check specific variable
+echo $env:NODE_ENV
+```
+
+### **File Permissions**
+```powershell
+# Check file permissions
+Get-Acl file.txt
+
+# Set file permissions
+icacls file.txt /grant Everyone:F
+```
+
+## 📦 **Package Management**
+
+### **npm Commands**
+```powershell
+# Install package
+npm install package-name
+
+# Install dev dependency
+npm install -D package-name
+
+# Install globally
+npm install -g package-name
+
+# List installed packages
+npm list
+
+# Check for outdated packages
+npm outdated
+
+# Update packages
+npm update
+```
+
+### **Node Version Management**
+```powershell
+# Check Node version
+node -v
+
+# Check npm version
+npm -v
+
+# Use nvm (if installed)
+nvm use 18.20.4
+nvm list
+nvm install 18.20.4
+```
+
+## 🚀 **CI/CD Commands**
+
+### **GitHub Actions (Local Simulation)**
+```powershell
+# Run linting
+npm run lint:ci
+
+# Run type checking
+npm run typecheck
+
+# Run tests with coverage
+npm run test:ci
+
+# Build all
+npm run build
+```
+
+### **Docker (if using)**
+```powershell
+# Build Docker image
+docker build -t sportbeacon-ai .
+
+# Run Docker container
+docker run -p 3000:3000 sportbeacon-ai
+
+# List Docker images
+docker images
+
+# Remove Docker images
+docker rmi sportbeacon-ai
+```
+
+## 🔧 **Troubleshooting**
+
+### **Common Issues**
+
+#### **Permission Errors**
+```powershell
+# Run PowerShell as Administrator
+Start-Process powershell -Verb RunAs
+
+# Fix npm permissions
+npm config set prefix %APPDATA%\npm
+```
+
+#### **Path Issues**
+```powershell
+# Check PATH
+echo $env:PATH
+
+# Add to PATH
+$env:PATH += ";C:\path\to\your\tool"
+```
+
+#### **Firewall Issues**
+```powershell
+# Check Windows Firewall status
+Get-NetFirewallProfile
+
+# Allow Node.js through firewall
+New-NetFirewallRule -DisplayName "Node.js" -Direction Inbound -Protocol TCP -LocalPort 3000 -Action Allow
+```
+
+### **Performance Monitoring**
+```powershell
+# Monitor CPU usage
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 10
+
+# Monitor memory usage
+Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First 10
+
+# Monitor disk usage
+Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name="Size(GB)";Expression={[math]::Round($_.Size/1GB,2)}}, @{Name="FreeSpace(GB)";Expression={[math]::Round($_.FreeSpace/1GB,2)}}
+```
+
+## 📚 **Additional Resources**
+
+- [PowerShell Documentation](https://docs.microsoft.com/en-us/powershell/)
+- [Windows Command Reference](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/)
+- [Node.js Windows Installation](https://nodejs.org/en/download/)
+- [Firebase CLI Windows Setup](https://firebase.google.com/docs/cli#windows)
+
+## 🎯 **Best Practices**
+
+1. **Use PowerShell over CMD** for better scripting capabilities
+2. **Use `iwr` (Invoke-WebRequest) over `curl.exe`** for better error handling
+3. **Use `Get-Content` over `type`** for better file processing
+4. **Use `Select-String` over `findstr`** for better regex support
+5. **Always use `-UseBasicParsing`** with `iwr` to avoid IE engine issues
+6. **Use `-Force` flag** with file operations to avoid confirmation prompts
+7. **Use `-Recurse` flag** for directory operations
+8. **Check `$LASTEXITCODE`** after running external commands to verify success

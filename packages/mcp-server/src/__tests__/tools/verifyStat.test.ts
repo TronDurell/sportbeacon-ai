@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest  } from '@jest/globals';
 import { verifyStat } from '../../tools/verifyStat';
 import { admin } from 'firebase-admin';
 
 // Mock Firebase Admin
-vi.mock('firebase-admin', () => ({
+jest.mock('firebase-admin', () => ({
   admin: {
-    firestore: vi.fn(),
+    firestore: jest.fn(),
   },
 }));
 
@@ -13,11 +13,11 @@ describe('verifyStat Tool', () => {
   let mockFirestore: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockFirestore = {
-      collection: vi.fn(),
+      collection: jest.fn(),
     };
-    vi.mocked(admin.firestore).mockReturnValue(mockFirestore);
+    jest.mocked(admin.firestore).mockReturnValue(mockFirestore);
   });
 
   it('should verify stat and update submission status', async () => {
@@ -31,12 +31,12 @@ describe('verifyStat Tool', () => {
     };
 
     const mockCollection = {
-      doc: vi.fn().mockReturnValue({
-        get: vi.fn().mockResolvedValue({
+      doc: jest.fn().mockReturnValue({
+        get: jest.fn().mockResolvedValue({
           exists: true,
           data: () => mockSubmission,
         }),
-        update: vi.fn().mockResolvedValue({}),
+        update: jest.fn().mockResolvedValue({}),
       }),
     };
 
@@ -68,12 +68,12 @@ describe('verifyStat Tool', () => {
     };
 
     const mockCollection = {
-      doc: vi.fn().mockReturnValue({
-        get: vi.fn().mockResolvedValue({
+      doc: jest.fn().mockReturnValue({
+        get: jest.fn().mockResolvedValue({
           exists: true,
           data: () => mockSubmission,
         }),
-        update: vi.fn().mockResolvedValue({}),
+        update: jest.fn().mockResolvedValue({}),
       }),
     };
 
@@ -98,8 +98,8 @@ describe('verifyStat Tool', () => {
     const mockSubmissionId = 'non-existent-123';
 
     const mockCollection = {
-      doc: vi.fn().mockReturnValue({
-        get: vi.fn().mockResolvedValue({
+      doc: jest.fn().mockReturnValue({
+        get: jest.fn().mockResolvedValue({
           exists: false,
         }),
       }),
@@ -121,8 +121,8 @@ describe('verifyStat Tool', () => {
     const mockSubmissionId = 'submission-123';
 
     const mockCollection = {
-      doc: vi.fn().mockReturnValue({
-        get: vi.fn().mockRejectedValue(new Error('Firestore error')),
+      doc: jest.fn().mockReturnValue({
+        get: jest.fn().mockRejectedValue(new Error('Firestore error')),
       }),
     };
 

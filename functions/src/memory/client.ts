@@ -34,21 +34,21 @@ export async function writeSnapshot(userId: string, data: any) {
   return ref.id;
 }
 
-export async function captureFunctionResult(data: any, context?: any, kind?: string) {
+export async function captureFunctionResult(userId: string, functionName: string, result: any, executionTime?: number, trace?: string) {
   return writeEvent({
-    tenantId: context?.tenantId || 'system',
-    userId: context?.userId || 'system',
-    kind: kind || 'function_result',
-    payload: data
+    tenantId: 'system',
+    userId: userId,
+    kind: 'function_result',
+    payload: { functionName, result, executionTime, trace }
   });
 }
 
-export async function captureFunctionError(error: Error, context?: any, kind?: string) {
+export async function captureFunctionError(userId: string, functionName: string, error: Error, executionTime?: number, trace?: string) {
   return writeEvent({
-    tenantId: context?.tenantId || 'system',
-    userId: context?.userId || 'system',
-    kind: kind || 'function_error',
-    payload: { error: error.message, stack: error.stack }
+    tenantId: 'system',
+    userId: userId,
+    kind: 'function_error',
+    payload: { functionName, error: error.message, stack: error.stack, executionTime, trace }
   });
 }
 

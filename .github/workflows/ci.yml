@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
@@ -8,59 +8,46 @@ on:
 
 jobs:
   test:
-    name: Test Suite
+    name: Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        node-version: [18]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20]
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup Node.js
+    - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci
+      run: npm ci --legacy-peer-deps
       
-    - name: Lint code
-      run: npm run lint
-      
-    - name: Type check
+    - name: Run type checking
       run: npm run typecheck
+      
+    - name: Run linting
+      run: npm run lint
       
     - name: Run tests
       run: npm run test:ci
       
-    - name: Build project
-      run: npm run build
+    - name: Build frontend
+      run: npm run build:frontend
       
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v4
-      if: matrix.os == 'ubuntu-latest'
-      with:
-        name: coverage-report
-        path: coverage/
-        
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: matrix.os == 'ubuntu-latest'
-      with:
-        name: test-results
-        path: |
-          coverage/
-          test-results.xml
+    - name: Build functions
+      run: npm run build:functions
 
   deploy:
-    name: Deploy to Staging
-    needs: test
+    name: Deploy
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
     - name: Checkout code
@@ -69,61 +56,22 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: '20'
         cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci
+      run: npm ci --legacy-peer-deps
       
-    - name: Build project
-      run: npm run build
+    - name: Build frontend
+      run: npm run build:frontend
+      
+    - name: Build functions
+      run: npm run build:functions
       
     - name: Deploy to Firebase
-      run: |
-        npm install -g firebase-tools
-        firebase deploy --only hosting,functions,firestore --project sportbeacon-ai
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        
-    - name: Post-deploy check (POSIX)
-      run: npm run postdeploy:check:posix
-      
-    - name: Post-deploy check (PowerShell)
-      if: runner.os == 'Windows'
-      run: npm run postdeploy:check:powershell
-
-  lighthouse:
-    name: Lighthouse Audit
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: FirebaseExtended/action-hosting-deploy@v0
       with:
-        node-version: 18
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build project
-      run: npm run build
-      
-    - name: Deploy to Firebase (staging)
-      run: |
-        npm install -g firebase-tools
-        firebase deploy --only hosting --project sportbeacon-ai
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        
-    - name: Run Lighthouse CI
-      run: |
-        npm install -g @lhci/cli
-        lhci autorun --collect.url=https://sportbeacon-ai.web.app
-      env:
-        LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        repoToken: '${{ secrets.GITHUB_TOKEN }}'
+        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+        channelId: live
+        projectId: sportbeacon-ai

@@ -1,4 +1,4 @@
-import { render, fireEvent, waitFor, screen } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
 import { TownRecIntegrityModule } from '../town-rec-integrity/TownRecIntegrityModule';

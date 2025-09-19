@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest  } from '@jest/globals';
 import { getPlayerStats } from '../../tools/getPlayerStats';
 import { admin } from 'firebase-admin';
 
 // Mock Firebase Admin
-vi.mock('firebase-admin', () => ({
+jest.mock('firebase-admin', () => ({
   admin: {
-    firestore: vi.fn(),
+    firestore: jest.fn(),
   },
 }));
 
@@ -13,11 +13,11 @@ describe('getPlayerStats Tool', () => {
   let mockFirestore: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockFirestore = {
-      collection: vi.fn(),
+      collection: jest.fn(),
     };
-    vi.mocked(admin.firestore).mockReturnValue(mockFirestore);
+    jest.mocked(admin.firestore).mockReturnValue(mockFirestore);
   });
 
   it('should return player stats for valid player ID', async () => {
@@ -28,11 +28,11 @@ describe('getPlayerStats Tool', () => {
     ];
 
     const mockCollection = {
-      doc: vi.fn().mockReturnValue({
-        collection: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              get: vi.fn().mockResolvedValue({
+      doc: jest.fn().mockReturnValue({
+        collection: jest.fn().mockReturnValue({
+          orderBy: jest.fn().mockReturnValue({
+            limit: jest.fn().mockReturnValue({
+              get: jest.fn().mockResolvedValue({
                 docs: mockStats.map(stat => ({
                   id: stat.id,
                   data: () => stat,
@@ -59,11 +59,11 @@ describe('getPlayerStats Tool', () => {
     const mockPlayerId = 'player-123';
 
     const mockCollection = {
-      doc: vi.fn().mockReturnValue({
-        collection: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              get: vi.fn().mockResolvedValue({
+      doc: jest.fn().mockReturnValue({
+        collection: jest.fn().mockReturnValue({
+          orderBy: jest.fn().mockReturnValue({
+            limit: jest.fn().mockReturnValue({
+              get: jest.fn().mockResolvedValue({
                 docs: [],
               }),
             }),
@@ -87,11 +87,11 @@ describe('getPlayerStats Tool', () => {
     const mockPlayerId = 'player-123';
 
     const mockCollection = {
-      doc: vi.fn().mockReturnValue({
-        collection: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              get: vi.fn().mockRejectedValue(new Error('Firestore error')),
+      doc: jest.fn().mockReturnValue({
+        collection: jest.fn().mockReturnValue({
+          orderBy: jest.fn().mockReturnValue({
+            limit: jest.fn().mockReturnValue({
+              get: jest.fn().mockRejectedValue(new Error('Firestore error')),
             }),
           }),
         }),

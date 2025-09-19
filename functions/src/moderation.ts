@@ -285,7 +285,7 @@ async function notifyModerators(
     // Create notifications for all moderators
     const batch = db.batch();
     
-    moderators.forEach(moderatorId => {
+    moderators.forEach((moderatorId: string) => {
       const notificationRef = db.collection("notifications").doc();
       
       batch.set(notificationRef, {

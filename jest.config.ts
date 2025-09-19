@@ -1,51 +1,28 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/__tests__', '<rootDir>/functions/src', '<rootDir>/frontend/src'],
-  testMatch: [
-    '**/__tests__/**/*.+(ts|tsx|js)',
-    '**/*.(test|spec).+(ts|tsx|js)'
-  ],
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/__tests__/setupTests.ts'],
+  moduleFileExtensions: ['ts','tsx','js','jsx','json'],
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: 'tsconfig.jest.json'
-    }]
+    '^.+\\.(ts|tsx)$': ['babel-jest', { rootMode: 'upward' }],
+    '^.+\\.(js|jsx)$': ['babel-jest', { rootMode: 'upward' }],
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!(@firebase|firebase|uuid)/)'
+    '/node_modules/(?!(@sportbeacon/memory-sdk)/)', // allow transpile of workspace pkg if needed
   ],
+  testMatch: ['**/__tests__/**/*.(spec|test).(ts|tsx|js)'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/(.*)$': '<rootDir>/frontend/src/$1',
+    '^@sportbeacon/memory-sdk$': '<rootDir>/packages/memory-sdk/src/index.ts',
     '^firebase-admin/(.*)$': '<rootDir>/__mocks__/firebase-admin-$1.ts',
     '^firebase-functions/logger$': '<rootDir>/__mocks__/firebase-functions.logger.ts'
   },
-  setupFilesAfterEnv: ['<rootDir>/__tests__/setupTests.ts'],
   collectCoverageFrom: [
-    '**/*.{ts,tsx}',
-    '!**/*.d.ts',
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/build/**',
-    '!**/coverage/**',
-    '!jest.config.ts',
-    '!tsconfig.jest.json'
+    'frontend/src/**/*.{ts,tsx,js,jsx}',
+    '!frontend/src/**/__mocks__/**',
   ],
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
-  coverageThreshold: {
-    global: {
-      lines: 60,
-      functions: 60,
-      branches: 40,
-      statements: 60
-    }
-  },
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  testTimeout: 10000,
-  verbose: true,
-  passWithNoTests: true
+  coverageThreshold: { global: { lines: 60, functions: 60, branches: 40, statements: 60 } },
 };
 
 export default config;

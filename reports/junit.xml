@@ -1,0 +1,2123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="189" failures="137" errors="0" time="0.2271914">
+    <testsuite name="packages/memory-sdk/src/smoke.test.ts" timestamp="2025-09-15T01:02:39.476Z" hostname="LowCountryBlues" tests="1" failures="0" errors="0" skipped="0" time="0.0029696">
+        <testcase classname="packages/memory-sdk/src/smoke.test.ts" name="memory-sdk smoke &gt; runs" time="0.0014745">
+        </testcase>
+    </testsuite>
+    <testsuite name="packages/mcp-server/src/smoke.test.ts" timestamp="2025-09-15T01:02:39.482Z" hostname="LowCountryBlues" tests="1" failures="0" errors="0" skipped="0" time="0.0027179">
+        <testcase classname="packages/mcp-server/src/smoke.test.ts" name="mcp-server smoke &gt; runs" time="0.0013105">
+        </testcase>
+    </testsuite>
+    <testsuite name="packages/mcp-server/src/__tests__/auth.test.ts" timestamp="2025-09-15T01:02:39.483Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="packages/mcp-server/src/__tests__/auth.test.ts" name="packages/mcp-server/src/__tests__/auth.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp node_modules/firebase-admin/lib/app/lifecycle.js:65:19
+ ❯ getApp node_modules/firebase-admin/lib/app/lifecycle.js:106:36
+ ❯ getFirestore node_modules/firebase-admin/lib/firestore/index.js:50:90
+ ❯ packages/mcp-server/src/auth.ts:12:12
+ ❯ packages/mcp-server/src/__tests__/auth.test.ts:2:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="packages/mcp-server/src/__tests__/index.test.ts" timestamp="2025-09-15T01:02:39.488Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="packages/mcp-server/src/__tests__/index.test.ts" name="packages/mcp-server/src/__tests__/index.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp node_modules/firebase-admin/lib/app/lifecycle.js:65:19
+ ❯ getApp node_modules/firebase-admin/lib/app/lifecycle.js:106:36
+ ❯ getFirestore node_modules/firebase-admin/lib/firestore/index.js:50:90
+ ❯ packages/mcp-server/src/auth.ts:12:12
+ ❯ packages/mcp-server/src/index.ts:11:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="packages/mcp-server/src/__tests__/tools/getPlayerStats.test.ts" timestamp="2025-09-15T01:02:39.490Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="packages/mcp-server/src/__tests__/tools/getPlayerStats.test.ts" name="packages/mcp-server/src/__tests__/tools/getPlayerStats.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp node_modules/firebase-admin/lib/app/lifecycle.js:65:19
+ ❯ getApp node_modules/firebase-admin/lib/app/lifecycle.js:106:36
+ ❯ getFirestore node_modules/firebase-admin/lib/firestore/index.js:50:90
+ ❯ packages/mcp-server/src/auth.ts:12:12
+ ❯ packages/mcp-server/src/tools/getPlayerStats.ts:9:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="packages/mcp-server/src/__tests__/tools/verifyStat.test.ts" timestamp="2025-09-15T01:02:39.493Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="packages/mcp-server/src/__tests__/tools/verifyStat.test.ts" name="packages/mcp-server/src/__tests__/tools/verifyStat.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp node_modules/firebase-admin/lib/app/lifecycle.js:65:19
+ ❯ getApp node_modules/firebase-admin/lib/app/lifecycle.js:106:36
+ ❯ getFirestore node_modules/firebase-admin/lib/firestore/index.js:50:90
+ ❯ packages/mcp-server/src/auth.ts:12:12
+ ❯ packages/mcp-server/src/tools/verifyStat.ts:9:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/smoke.test.ts" timestamp="2025-09-15T01:02:39.496Z" hostname="LowCountryBlues" tests="1" failures="0" errors="0" skipped="0" time="0.0030414">
+        <testcase classname="functions/src/smoke.test.ts" name="functions smoke &gt; runs" time="0.0014428">
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/__tests__/auth-functions.test.ts" timestamp="2025-09-15T01:02:39.496Z" hostname="LowCountryBlues" tests="17" failures="17" errors="0" skipped="0" time="0.028075">
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authLogin &gt; should handle valid login attempt" time="0.0153542">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:20:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authLogin &gt; should reject login with invalid email format" time="0.0013161">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:35:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authLogin &gt; should reject login with weak password" time="0.0004055">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:48:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authLogin &gt; should reject login with missing email" time="0.0005944">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:61:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authLogin &gt; should reject login with missing password" time="0.0004061">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:73:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authLogin &gt; should reject login with invalid data type" time="0.0004083">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:85:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authRegister &gt; should handle valid registration" time="0.0033515">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:97:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authRegister &gt; should reject registration with invalid email" time="0.0007027">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:115:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authRegister &gt; should reject registration with weak password" time="0.0006411">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:130:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authRegister &gt; should reject registration with invalid role" time="0.0004185">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:145:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authRegister &gt; should reject registration with invalid phone number" time="0.0002968">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:161:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authRegister &gt; should reject registration with invalid date of birth" time="0.0003354">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:177:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authLogout &gt; should handle logout for authenticated user" time="0.0002742">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:195:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authLogout &gt; should reject logout for unauthenticated user" time="0.0002581">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:205:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authSession &gt; should validate session for authenticated user" time="0.0003159">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:215:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authSession &gt; should reject session validation for unauthenticated user" time="0.0002536">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:226:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/auth-functions.test.ts" name="Authentication Functions &gt; authRefresh &gt; should handle token refresh" time="0.0002828">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/auth-functions.test.ts:236:28
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/__tests__/firestore.rules.test.ts" timestamp="2025-09-15T01:02:39.520Z" hostname="LowCountryBlues" tests="49" failures="1" errors="0" skipped="48" time="0.0134921">
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Locations Collection &gt; should allow public read access to locations" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Locations Collection &gt; should allow authenticated users to read locations" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Locations Collection &gt; should allow admin users to create locations" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Locations Collection &gt; should deny location creation by non-admin users" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Locations Collection &gt; should allow location moderators to update locations" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Locations Collection &gt; should deny location update by non-moderator users" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Locations Collection &gt; should allow admin users to delete locations" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Locations Collection &gt; should deny location deletion by non-admin users" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should allow public read access to thread posts" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should allow authenticated users to create posts" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should deny post creation without authentication" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should allow post author to update their own posts" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should deny post update by non-author" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should allow location moderators to update posts" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should deny team visibility posts" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should allow admin users to create team visibility posts" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should allow post author to delete their own posts" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should allow location moderators to delete posts" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should allow admin users to delete any post" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should deny post deletion by non-author, non-moderator, non-admin users" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should validate post data structure on creation" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should validate post type values" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Location Threads Subcollection &gt; should validate visibility values" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should allow users to create their own follow documents" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should deny follow creation by other users" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should allow users to read their own follow documents" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should deny read access to other users follow documents" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should allow users to update their own follow documents" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should deny follow update by other users" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should allow users to delete their own follow documents" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should deny follow deletion by other users" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should validate follow document data structure" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should validate notification preference values" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Follows Collection &gt; should allow admin users to read any follow document" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Home Location Feed &gt; should allow users to read their own home feed" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Home Location Feed &gt; should deny read access to other users home feed" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Home Location Feed &gt; should deny write access to home feed (system only)" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Home Location Feed &gt; should deny update access to home feed (system only)" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Home Location Feed &gt; should deny delete access to home feed (system only)" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Home Location Feed &gt; should allow system to create home feed items" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Home Location Feed &gt; should allow system to update home feed items" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Home Location Feed &gt; should allow system to delete home feed items" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Edge Cases and Security &gt; should handle malformed document IDs gracefully" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Edge Cases and Security &gt; should validate authorId matches authenticated user on post creation" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Edge Cases and Security &gt; should validate locationId matches document path on post creation" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Edge Cases and Security &gt; should handle concurrent access scenarios" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Edge Cases and Security &gt; should validate string length limits" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive) &gt; Edge Cases and Security &gt; should validate timestamp fields" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="functions/src/__tests__/firestore.rules.test.ts" name="Firestore Rules - Location Threads (Comprehensive)" time="0.0127366">
+            <failure message="The host and port of the firestore emulator must be specified. (You may wrap the test script with `firebase emulators:exec &apos;./your-test-script&apos;` to enable automatic discovery, or specify manually via initializeTestEnvironment({firestore: {host, port}})." type="Error">
+Error: The host and port of the firestore emulator must be specified. (You may wrap the test script with `firebase emulators:exec &apos;./your-test-script&apos;` to enable automatic discovery, or specify manually via initializeTestEnvironment({firestore: {host, port}}).
+ ❯ assertEmulatorRunning functions/node_modules/@firebase/rules-unit-testing/src/impl/test_environment.ts:257:13
+ ❯ initializeTestEnvironment functions/node_modules/@firebase/rules-unit-testing/src/initialize.ts:93:5
+ ❯ functions/src/__tests__/firestore.rules.test.ts:9:21
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;cleanup&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;cleanup&apos;)
+ ❯ functions/src/__tests__/firestore.rules.test.ts:18:19
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/__tests__/functions.test.ts" timestamp="2025-09-15T01:02:39.537Z" hostname="LowCountryBlues" tests="7" failures="7" errors="0" skipped="0" time="0.0494123">
+        <testcase classname="functions/src/__tests__/functions.test.ts" name="Firebase Cloud Functions Tests &gt; Authentication Functions &gt; should handle login attempt" time="0.0383691">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/functions.test.ts:20:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/functions.test.ts" name="Firebase Cloud Functions Tests &gt; Authentication Functions &gt; should handle logout for authenticated user" time="0.0005776">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/functions.test.ts:30:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/functions.test.ts" name="Firebase Cloud Functions Tests &gt; Authentication Functions &gt; should reject logout for unauthenticated user" time="0.0004135">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/functions.test.ts:40:28
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/functions.test.ts" name="Firebase Cloud Functions Tests &gt; Town Rec Functions &gt; should handle league submission for town staff" time="0.0043302">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/functions.test.ts:51:19
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/functions.test.ts:60:19
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/functions.test.ts" name="Firebase Cloud Functions Tests &gt; Town Rec Functions &gt; should reject league submission for non-staff user" time="0.0006116">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/functions.test.ts:51:19
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/functions.test.ts:60:19
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/functions.test.ts" name="Firebase Cloud Functions Tests &gt; Town Rec Functions &gt; should handle waitlist retrieval for town staff" time="0.0005898">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/functions.test.ts:51:19
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/functions.test.ts:60:19
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/functions.test.ts" name="Firebase Cloud Functions Tests &gt; Error Handling &gt; should handle function errors gracefully" time="0.0003333">
+            <failure message="Cannot read properties of undefined (reading &apos;length&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;length&apos;)
+ ❯ isV2CloudFunction node_modules/firebase-functions-test/lib/main.js:49:26
+ ❯ Object.wrap node_modules/firebase-functions-test/lib/main.js:32:9
+ ❯ functions/src/__tests__/functions.test.ts:104:28
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/__tests__/player-functions.test.ts" timestamp="2025-09-15T01:02:39.552Z" hostname="LowCountryBlues" tests="17" failures="17" errors="0" skipped="0" time="0.0261043">
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayer &gt; should retrieve player data with valid UUID" time="0.0106257">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayer &gt; should reject request with invalid UUID format" time="0.0008701">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayer &gt; should reject request with missing playerId" time="0.0005523">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayer &gt; should reject request with invalid data type" time="0.0015809">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerAiAnalysis &gt; should retrieve AI analysis with valid player ID" time="0.0007184">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerAiAnalysis &gt; should reject request with invalid UUID format" time="0.0006301">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerAiAnalysis &gt; should reject request with missing playerId" time="0.0004288">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerVideoClips &gt; should retrieve video clips with valid parameters" time="0.0006016">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerVideoClips &gt; should reject request with invalid UUID format" time="0.0007494">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerVideoClips &gt; should reject request with invalid limit" time="0.0004308">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerVideoClips &gt; should reject request with negative offset" time="0.0003885">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerVideoClips &gt; should reject request with invalid includeVideos type" time="0.000505">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerDrillHistory &gt; should retrieve drill history with valid parameters" time="0.0003975">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerDrillHistory &gt; should reject request with invalid UUID format" time="0.0004842">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerDrillHistory &gt; should reject request with invalid date format" time="0.0004265">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerDrillHistory &gt; should reject request with invalid limit" time="0.0004321">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/player-functions.test.ts" name="Player Functions &gt; getPlayerDrillHistory &gt; should reject request with negative offset" time="0.0003917">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/player-functions.test.ts:31:17
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/__tests__/video-functions.test.ts" timestamp="2025-09-15T01:02:39.591Z" hostname="LowCountryBlues" tests="17" failures="17" errors="0" skipped="0" time="0.027928">
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoInit &gt; should initialize video upload with valid parameters" time="0.0107254">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoInit &gt; should reject request with invalid file name" time="0.0007227">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoInit &gt; should reject request with file too large" time="0.0005137">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoInit &gt; should reject request with invalid file type" time="0.0015614">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoInit &gt; should reject request with invalid player ID format" time="0.0009384">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoInit &gt; should reject request with missing required fields" time="0.0004744">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoComplete &gt; should complete video processing with valid parameters" time="0.0004528">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoComplete &gt; should reject request with invalid UUID format" time="0.0013354">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoComplete &gt; should reject request with invalid status" time="0.0040245">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoComplete &gt; should reject request with invalid analysis score" time="0.0004684">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoComplete &gt; should reject request with invalid key points format" time="0.0003702">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoAnalyze &gt; should analyze video with valid parameters" time="0.0004529">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoAnalyze &gt; should reject request with invalid UUID format" time="0.0005661">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoAnalyze &gt; should reject request with invalid analysis type" time="0.0004025">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoAnalyze &gt; should reject request with invalid confidence value" time="0.0003468">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoAnalyze &gt; should reject request with invalid priority" time="0.0004794">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+        <testcase classname="functions/src/__tests__/video-functions.test.ts" name="Video Functions &gt; videoAnalyze &gt; should reject request with missing required fields" time="0.0003861">
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:20:17
+            </failure>
+            <failure message="Cannot read properties of undefined (reading &apos;firestore&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;firestore&apos;)
+ ❯ functions/src/__tests__/video-functions.test.ts:31:17
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/scheduled/__tests__/monthlyAnalyticsReport.test.ts" timestamp="2025-09-15T01:02:39.648Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/scheduled/__tests__/monthlyAnalyticsReport.test.ts" name="functions/src/scheduled/__tests__/monthlyAnalyticsReport.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/scheduled/index.ts:6:12
+ ❯ functions/src/scheduled/__tests__/monthlyAnalyticsReport.test.ts:1:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/scheduled/__tests__/parentFollowUpEmails.test.ts" timestamp="2025-09-15T01:02:39.650Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/scheduled/__tests__/parentFollowUpEmails.test.ts" name="functions/src/scheduled/__tests__/parentFollowUpEmails.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/scheduled/index.ts:6:12
+ ❯ functions/src/scheduled/__tests__/parentFollowUpEmails.test.ts:1:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/scheduled/__tests__/waitlistDailyScan.test.ts" timestamp="2025-09-15T01:02:39.652Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/scheduled/__tests__/waitlistDailyScan.test.ts" name="functions/src/scheduled/__tests__/waitlistDailyScan.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/scheduled/index.ts:6:12
+ ❯ functions/src/scheduled/__tests__/waitlistDailyScan.test.ts:1:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/scheduled/__tests__/weeklyDirectorDigest.test.ts" timestamp="2025-09-15T01:02:39.655Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/scheduled/__tests__/weeklyDirectorDigest.test.ts" name="functions/src/scheduled/__tests__/weeklyDirectorDigest.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/scheduled/index.ts:6:12
+ ❯ functions/src/scheduled/__tests__/weeklyDirectorDigest.test.ts:1:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/triggers/__tests__/onAgeOverrideCreated.test.ts" timestamp="2025-09-15T01:02:39.657Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/triggers/__tests__/onAgeOverrideCreated.test.ts" name="functions/src/triggers/__tests__/onAgeOverrideCreated.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/triggers/onSiblingRequestCreated.ts:6:12
+ ❯ functions/src/triggers/index.ts:235:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/triggers/__tests__/onAuditLogCreated.test.ts" timestamp="2025-09-15T01:02:39.662Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/triggers/__tests__/onAuditLogCreated.test.ts" name="functions/src/triggers/__tests__/onAuditLogCreated.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/triggers/onSiblingRequestCreated.ts:6:12
+ ❯ functions/src/triggers/index.ts:235:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/triggers/__tests__/onNotificationCreated.test.ts" timestamp="2025-09-15T01:02:39.664Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/triggers/__tests__/onNotificationCreated.test.ts" name="functions/src/triggers/__tests__/onNotificationCreated.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/triggers/onSiblingRequestCreated.ts:6:12
+ ❯ functions/src/triggers/index.ts:235:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/triggers/__tests__/onRegistrationUpdated.test.ts" timestamp="2025-09-15T01:02:39.666Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/triggers/__tests__/onRegistrationUpdated.test.ts" name="functions/src/triggers/__tests__/onRegistrationUpdated.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/triggers/onSiblingRequestCreated.ts:6:12
+ ❯ functions/src/triggers/index.ts:235:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/triggers/__tests__/onSiblingPairingCreated.test.ts" timestamp="2025-09-15T01:02:39.668Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/triggers/__tests__/onSiblingPairingCreated.test.ts" name="functions/src/triggers/__tests__/onSiblingPairingCreated.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/triggers/onSiblingRequestCreated.ts:6:12
+ ❯ functions/src/triggers/index.ts:235:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/triggers/__tests__/onSiblingRequestCreated.test.ts" timestamp="2025-09-15T01:02:39.670Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/triggers/__tests__/onSiblingRequestCreated.test.ts" name="functions/src/triggers/__tests__/onSiblingRequestCreated.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/triggers/onSiblingRequestCreated.ts:6:12
+ ❯ functions/src/triggers/__tests__/onSiblingRequestCreated.test.ts:1:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/triggers/__tests__/onTownStaffSessionCreated.test.ts" timestamp="2025-09-15T01:02:39.672Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/triggers/__tests__/onTownStaffSessionCreated.test.ts" name="functions/src/triggers/__tests__/onTownStaffSessionCreated.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/triggers/onSiblingRequestCreated.ts:6:12
+ ❯ functions/src/triggers/index.ts:235:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="functions/src/triggers/__tests__/onWaitlistEntryCreated.test.ts" timestamp="2025-09-15T01:02:39.674Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="functions/src/triggers/__tests__/onWaitlistEntryCreated.test.ts" name="functions/src/triggers/__tests__/onWaitlistEntryCreated.test.ts" time="0">
+            <failure message="The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services." type="Error">
+Error: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+ ❯ AppStore.getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:79:19
+ ❯ getApp functions/node_modules/firebase-admin/lib/app/lifecycle.js:222:36
+ ❯ getFirestore functions/node_modules/firebase-admin/lib/firestore/index.js:52:90
+ ❯ functions/src/triggers/onSiblingRequestCreated.ts:6:12
+ ❯ functions/src/triggers/index.ts:235:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;app/no-app&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/smoke.test.tsx" timestamp="2025-09-15T01:02:39.677Z" hostname="LowCountryBlues" tests="1" failures="0" errors="0" skipped="0" time="0.0025838">
+        <testcase classname="frontend/src/smoke.test.tsx" name="frontend smoke &gt; renders" time="0.0013715">
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/analytics/events.test.ts" timestamp="2025-09-15T01:02:39.678Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="frontend/src/analytics/events.test.ts" name="frontend/src/analytics/events.test.ts" time="0">
+            <failure message="Failed to resolve import &quot;@sportbeacon/memory-sdk&quot; from &quot;frontend/src/analytics/events.test.ts&quot;. Does the file exist?" type="Error">
+Error: Failed to resolve import &quot;@sportbeacon/memory-sdk&quot; from &quot;frontend/src/analytics/events.test.ts&quot;. Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/analytics/events.test.ts:212:44
+  164 |      });
+  165 |      it(&quot;should handle Memory SDK errors gracefully&quot;, async () =&gt; {
+  166 |        const { memoryClient } = await import(&quot;@sportbeacon/memory-sdk&quot;);
+      |                                              ^
+  167 |        const mockMemoryClient = memoryClient;
+  168 |        mockMemoryClient.mockReturnValue({
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31527:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31524:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:29996:18
+ ❯ node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:30054:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:30022:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31325:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:26407:26
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/__tests__/CivicAgent.test.tsx" timestamp="2025-09-15T01:02:39.680Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="frontend/src/__tests__/CivicAgent.test.tsx" name="frontend/src/__tests__/CivicAgent.test.tsx" time="0">
+            <failure message="jest is not defined" type="ReferenceError">
+ReferenceError: jest is not defined
+ ❯ frontend/src/__tests__/CivicAgent.test.tsx:7:1
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/__tests__/Feed.test.tsx" timestamp="2025-09-15T01:02:39.682Z" hostname="LowCountryBlues" tests="30" failures="30" errors="0" skipped="0" time="0.0433725">
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Initialization &gt; initializes session and generates feed posts on mount" time="0.0105088">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:153:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Initialization &gt; shows login message when user is not authenticated" time="0.0008814">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:165:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Initialization &gt; displays session progress bar" time="0.0006758">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:171:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Feed Posts &gt; displays feed posts with correct information" time="0.0008298">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:183:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Feed Posts &gt; displays post metadata correctly" time="0.000761">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:193:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Feed Posts &gt; displays AI insights for posts" time="0.000542">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:204:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Feed Posts &gt; handles post view events" time="0.0004678">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:214:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Role-based Content &gt; displays role insights" time="0.0004505">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:230:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Role-based Content &gt; displays intent recommendations" time="0.0006443">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:239:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Role-based Content &gt; displays scout recommendations" time="0.0005578">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:249:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Scroll Detection and Interventions &gt; detects scroll events and updates session" time="0.0005329">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:261:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Scroll Detection and Interventions &gt; triggers intervention for excessive scrolling" time="0.0004333">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:280:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Scroll Detection and Interventions &gt; shows intervention modal when triggered" time="0.000423">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:297:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Scroll Detection and Interventions &gt; handles intervention response" time="0.0011598">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:317:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Session Management &gt; tracks session progress correctly" time="0.0005846">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:338:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Session Management &gt; handles session actions" time="0.0004452">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:347:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Session Management &gt; logs session events" time="0.0004507">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:358:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; AI Integration &gt; sends requests to AI orchestration" time="0.0004149">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:368:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; AI Integration &gt; handles AI orchestration errors gracefully" time="0.0005425">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:385:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Content Curation &gt; curates content based on role and session type" time="0.0006877">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:396:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Content Curation &gt; filters posts by AI insights" time="0.0004347">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:404:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Content Curation &gt; sorts posts by relevance and actionability" time="0.0005271">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:414:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Performance and Optimization &gt; uses useCallback for event handlers" time="0.0004287">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:426:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Performance and Optimization &gt; debounces scroll events" time="0.0003943">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:438:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Error Boundaries &gt; handles missing user gracefully" time="0.0003869">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:456:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Error Boundaries &gt; handles missing session data gracefully" time="0.0003244">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:464:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Error Boundaries &gt; handles missing recommendations gracefully" time="0.0003075">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:473:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Accessibility &gt; has proper ARIA labels" time="0.0098711">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:482:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Accessibility &gt; supports keyboard navigation" time="0.0046566">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:491:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/Feed.test.tsx" name="Feed Component &gt; Accessibility &gt; has proper focus management" time="0.0008503">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderFeed frontend/src/__tests__/Feed.test.tsx:127:6
+ ❯ frontend/src/__tests__/Feed.test.tsx:502:7
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/__tests__/LocationThread.test.tsx" timestamp="2025-09-15T01:02:39.722Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="frontend/src/__tests__/LocationThread.test.tsx" name="frontend/src/__tests__/LocationThread.test.tsx" time="0">
+            <failure message="Transform failed with 1 error:
+C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/LocationThread.test.tsx:103:41: ERROR: &quot;await&quot; can only be used inside an &quot;async&quot; function" type="Error">
+Error: Transform failed with 1 error:
+C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/LocationThread.test.tsx:103:41: ERROR: &quot;await&quot; can only be used inside an &quot;async&quot; function
+  Plugin: vite:esbuild
+  File: C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/LocationThread.test.tsx:103:41
+  
+  &quot;await&quot; can only be used inside an &quot;async&quot; function
+  101 |    describe(&quot;FollowLocationButton&quot;, () =&gt; {
+  102 |      it(&quot;should render follow button when not following&quot;, () =&gt; {
+  103 |        const { useIsFollowingLocation } = await import(&quot;../hooks/useLocations&quot;);
+      |                                           ^
+  104 |        useIsFollowingLocation.mockReturnValue({
+  105 |          isFollowing: false,
+  
+ ❯ failureErrorWithLog node_modules/esbuild/lib/main.js:1467:15
+ ❯ node_modules/esbuild/lib/main.js:736:50
+ ❯ responseCallbacks.&lt;computed&gt; node_modules/esbuild/lib/main.js:603:9
+ ❯ handleIncomingPacket node_modules/esbuild/lib/main.js:658:12
+ ❯ Socket.readFromStdout node_modules/esbuild/lib/main.js:581:7
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/__tests__/RecAuditPanel.test.tsx" timestamp="2025-09-15T01:02:39.724Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="frontend/src/__tests__/RecAuditPanel.test.tsx" name="frontend/src/__tests__/RecAuditPanel.test.tsx" time="0">
+            <failure message="jest is not defined" type="ReferenceError">
+ReferenceError: jest is not defined
+ ❯ frontend/src/__tests__/RecAuditPanel.test.tsx:8:1
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/__tests__/SmartAlerts.test.tsx" timestamp="2025-09-15T01:02:39.727Z" hostname="LowCountryBlues" tests="24" failures="24" errors="0" skipped="0" time="0.0274945">
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Rendering &gt; renders without crashing" time="0.0096878">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:100:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Rendering &gt; renders with custom position" time="0.0011645">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:106:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Rendering &gt; renders with custom max alerts" time="0.0007246">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:112:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Role-based Alerts &gt; generates player-specific alerts" time="0.0011836">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:123:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Role-based Alerts &gt; generates coach-specific alerts" time="0.0007723">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:134:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Role-based Alerts &gt; generates parent-specific alerts" time="0.0005772">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:145:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Role-based Alerts &gt; generates admin-specific alerts" time="0.0005689">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:156:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Intent-based Alerts &gt; generates training intent alerts" time="0.0004704">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:169:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Intent-based Alerts &gt; generates learning intent alerts" time="0.0006434">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:180:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Intent-based Alerts &gt; generates connection intent alerts" time="0.0004935">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:191:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Actions &gt; handles primary action clicks" time="0.0005155">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:205:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Actions &gt; handles secondary action clicks" time="0.0004177">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:230:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Dismissal &gt; dismisses alerts when X button is clicked" time="0.0004091">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:256:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Dismissal &gt; auto-dismisses alerts after specified time" time="0.002098">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:274:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Types and Styling &gt; renders success alerts with correct styling" time="0.0006156">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:296:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Types and Styling &gt; renders warning alerts with correct styling" time="0.0004772">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:308:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Types and Styling &gt; renders motivation alerts with correct styling" time="0.0006837">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:322:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Filtering and Prioritization &gt; filters alerts by role" time="0.0004989">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:337:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Filtering and Prioritization &gt; filters alerts by intent" time="0.0004331">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:351:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Alert Filtering and Prioritization &gt; respects max alerts limit" time="0.0004133">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:366:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Error Handling &gt; handles agent orchestration errors gracefully" time="0.0004469">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:380:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Error Handling &gt; handles missing user gracefully" time="0.0003972">
+            <failure message="[vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+" type="Error">
+Error: [vitest] No &quot;AdminAuthProvider&quot; export is defined on the &quot;../contexts/AdminAuthContext&quot; mock. Did you forget to return it from &quot;vi.mock&quot;?
+If you need to partially mock a module, you can use &quot;importOriginal&quot; helper inside:
+
+vi.mock(import(&quot;../contexts/AdminAuthContext&quot;), async (importOriginal) =&gt; {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ renderSmartAlerts frontend/src/__tests__/SmartAlerts.test.tsx:81:6
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:397:7
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Accessibility &gt; has proper ARIA labels" time="0.0007314">
+            <failure message="Cannot set properties of undefined (setting &apos;role&apos;)" type="TypeError">
+TypeError: Cannot set properties of undefined (setting &apos;role&apos;)
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:406:28
+            </failure>
+        </testcase>
+        <testcase classname="frontend/src/__tests__/SmartAlerts.test.tsx" name="SmartAlerts &gt; Accessibility &gt; supports keyboard navigation" time="0.0004862">
+            <failure message="Cannot set properties of undefined (setting &apos;role&apos;)" type="TypeError">
+TypeError: Cannot set properties of undefined (setting &apos;role&apos;)
+ ❯ frontend/src/__tests__/SmartAlerts.test.tsx:417:28
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/__tests__/TownRecIntegration.test.tsx" timestamp="2025-09-15T01:02:39.760Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="frontend/src/__tests__/TownRecIntegration.test.tsx" name="frontend/src/__tests__/TownRecIntegration.test.tsx" time="0">
+            <failure message="Transform failed with 1 error:
+C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/TownRecIntegration.test.tsx:333:32: ERROR: &quot;await&quot; can only be used inside an &quot;async&quot; function" type="Error">
+Error: Transform failed with 1 error:
+C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/TownRecIntegration.test.tsx:333:32: ERROR: &quot;await&quot; can only be used inside an &quot;async&quot; function
+  Plugin: vite:esbuild
+  File: C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/TownRecIntegration.test.tsx:333:32
+  
+  &quot;await&quot; can only be used inside an &quot;async&quot; function
+  331 |  
+  332 |      test(&quot;role-based access control integration&quot;, () =&gt; {
+  333 |        const { townStaffRole } = await import(&quot;../../../lib/townRec/TownStaffRole&quot;);
+      |                                  ^
+  334 |        const mockRoleInstance = {
+  335 |          canAccessRecAdminHub: jest.fn().mockReturnValue(true),
+  
+ ❯ failureErrorWithLog node_modules/esbuild/lib/main.js:1467:15
+ ❯ node_modules/esbuild/lib/main.js:736:50
+ ❯ responseCallbacks.&lt;computed&gt; node_modules/esbuild/lib/main.js:603:9
+ ❯ handleIncomingPacket node_modules/esbuild/lib/main.js:658:12
+ ❯ Socket.readFromStdout node_modules/esbuild/lib/main.js:581:7
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/__tests__/TownRecSystem.test.tsx" timestamp="2025-09-15T01:02:39.762Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="frontend/src/__tests__/TownRecSystem.test.tsx" name="frontend/src/__tests__/TownRecSystem.test.tsx" time="0">
+            <failure message="Transform failed with 1 error:
+C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/TownRecSystem.test.tsx:465:30: ERROR: &quot;await&quot; can only be used inside an &quot;async&quot; function" type="Error">
+Error: Transform failed with 1 error:
+C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/TownRecSystem.test.tsx:465:30: ERROR: &quot;await&quot; can only be used inside an &quot;async&quot; function
+  Plugin: vite:esbuild
+  File: C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/TownRecSystem.test.tsx:465:30
+  
+  &quot;await&quot; can only be used inside an &quot;async&quot; function
+  463 |  
+  464 |    test(&quot;TownStaffRole integration&quot;, () =&gt; {
+  465 |      const { townStaffRole } = await import(&quot;../../../lib/townRec/TownStaffRole&quot;);
+      |                                ^
+  466 |      const mockInstance = townStaffRole.getInstance();
+  467 |      
+  
+ ❯ failureErrorWithLog node_modules/esbuild/lib/main.js:1467:15
+ ❯ node_modules/esbuild/lib/main.js:736:50
+ ❯ responseCallbacks.&lt;computed&gt; node_modules/esbuild/lib/main.js:603:9
+ ❯ handleIncomingPacket node_modules/esbuild/lib/main.js:658:12
+ ❯ Socket.readFromStdout node_modules/esbuild/lib/main.js:581:7
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/__tests__/townRecTriggers.test.ts" timestamp="2025-09-15T01:02:39.763Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="frontend/src/__tests__/townRecTriggers.test.ts" name="frontend/src/__tests__/townRecTriggers.test.ts" time="0">
+            <failure message="Failed to resolve import &quot;../../backend/functions/townRecTriggers&quot; from &quot;frontend/src/__tests__/townRecTriggers.test.ts&quot;. Does the file exist?" type="Error">
+Error: Failed to resolve import &quot;../../backend/functions/townRecTriggers&quot; from &quot;frontend/src/__tests__/townRecTriggers.test.ts&quot;. Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/townRecTriggers.test.ts:59:7
+  47 |    assignTeam,
+  48 |    logAuditTrail
+  49 |  } from &quot;../../backend/functions/townRecTriggers&quot;;
+     |          ^
+  50 |  describe(&quot;Town Rec Firestore Triggers&quot;, () =&gt; {
+  51 |    beforeEach(() =&gt; {
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31527:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31524:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:29996:18
+ ❯ node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:30054:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:30022:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31325:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:26407:26
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="frontend/src/__tests__/integration/admin.test.ts" timestamp="2025-09-15T01:02:39.764Z" hostname="LowCountryBlues" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="frontend/src/__tests__/integration/admin.test.ts" name="frontend/src/__tests__/integration/admin.test.ts" time="0">
+            <failure message="Failed to resolve import &quot;@firebase/rules-unit-testing&quot; from &quot;frontend/src/__tests__/integration/admin.test.ts&quot;. Does the file exist?" type="Error">
+Error: Failed to resolve import &quot;@firebase/rules-unit-testing&quot; from &quot;frontend/src/__tests__/integration/admin.test.ts&quot;. Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/cultu/iCloudDrive/CuratorSportsBeacon/sportbeacon-ai/frontend/src/__tests__/integration/admin.test.ts:6:64
+  1  |  import { describe, it, expect, beforeEach, afterEach } from &quot;vitest&quot;;
+  2  |  import { initializeTestEnvironment } from &quot;@firebase/rules-unit-testing&quot;;
+     |                                             ^
+  3  |  import {
+  4  |    collection,
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31527:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31524:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:29996:18
+ ❯ node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:30054:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:30022:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31325:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:26407:26
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -3,7 +3,13 @@
   "compilerOptions": {
     "moduleResolution": "bundler",
     "types": ["vite/client", "node"],
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@memory/*": ["../packages/memory-sdk/src/*"],
+      "@mcp/*": ["../packages/mcp-server/src/*"],
+      "@sportbeacon/memory-sdk": ["../packages/memory-sdk/src/index.ts"]
+    }
   },
-  "include": ["src", "vite.config.*", "env.d.ts"]
+  "include": ["src", "vite.config.*", "env.d.ts"],
+  "exclude": ["src/**/__tests__/**", "src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.spec.ts", "src/**/*.spec.tsx"]
 }

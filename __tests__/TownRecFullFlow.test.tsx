@@ -1,4 +1,4 @@
-import { render, fireEvent, waitFor, screen } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, onSnapshot } from 'firebase/firestore';
 import TownRecAIAgent from '../agents/townRecAIAgent';

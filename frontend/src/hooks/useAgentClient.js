@@ -1,0 +1,194 @@
+/**
+ * Agent Client Hook
+ * Provides MCP client functionality for React components
+ */
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { useAuth } from './useAuth';
+import { isFeatureEnabled } from '../featureFlags';
+export function useAgentClient() {
+    const { user } = useAuth();
+    const [state, setState] = useState({
+        isConnected: false,
+        isLoading: false,
+        error: null,
+        lastResponse: null
+    });
+    const abortControllerRef = useRef(null);
+    // Check if agent features are enabled
+    const agentsEnabled = isFeatureEnabled('ASSISTANT_ENABLED');
+    const mcpEnabled = isFeatureEnabled('MCP_ENABLED');
+    // MCP server configuration
+    const MCP_SERVER_URL = process.env.REACT_APP_MCP_SERVER_URL || 'http://localhost:8787';
+    /**
+     * Make a request to the MCP server
+     */
+    const callTool = useCallback(async (method, params) => {
+        if (!agentsEnabled || !mcpEnabled) {
+            throw new Error('Agent features are not enabled');
+        }
+        if (!user) {
+            throw new Error('User not authenticated');
+        }
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            // Cancel any existing request
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+            // Create new abort controller
+            abortControllerRef.current = new AbortController();
+            // Get Firebase ID token
+            const token = await user.getIdToken();
+            // Prepare MCP request
+            const request = {
+                jsonrpc: '2.0',
+                method,
+                params,
+                id: Date.now()
+            };
+            // Make request to MCP server
+            const response = await fetch(`${MCP_SERVER_URL}/mcp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(request),
+                signal: abortControllerRef.current.signal
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const mcpResponse = await response.json();
+            if (mcpResponse.error) {
+                throw new Error(mcpResponse.error.message);
+            }
+            setState(prev => ({
+                ...prev,
+                isLoading: false,
+                isConnected: true,
+                lastResponse: mcpResponse,
+                error: null
+            }));
+            return mcpResponse;
+        }
+        catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            setState(prev => ({
+                ...prev,
+                isLoading: false,
+                isConnected: false,
+                error: errorMessage
+            }));
+            throw error;
+        }
+    }, [user, agentsEnabled, mcpEnabled, MCP_SERVER_URL]);
+    /**
+     * Get player statistics
+     */
+    const getPlayerStats = useCallback(async (playerId, range) => {
+        const response = await callTool('getPlayerStats', { playerId, range });
+        return response.result;
+    }, [callTool]);
+    /**
+     * List pending submissions
+     */
+    const listPendingSubmissions = useCallback(async (teamId, range) => {
+        const response = await callTool('listPendingSubmissions', { teamId, range });
+        return response.result;
+    }, [callTool]);
+    /**
+     * Submit stat
+     */
+    const submitStat = useCallback(async (playerId, payload) => {
+        const response = await callTool('submitStat', { playerId, payload });
+        return response.result;
+    }, [callTool]);
+    /**
+     * Verify stat
+     */
+    const verifyStat = useCallback(async (submissionId) => {
+        const response = await callTool('verifyStat', { submissionId });
+        return response.result;
+    }, [callTool]);
+    /**
+     * Calculate KPI
+     */
+    const calculateKPI = useCallback(async (target, range) => {
+        const response = await callTool('calculateKPI', { target, range });
+        return response.result;
+    }, [callTool]);
+    /**
+     * Export dataset
+     */
+    const exportDataset = useCallback(async (filter, format) => {
+        const response = await callTool('exportDataset', { filter, format });
+        return response.result;
+    }, [callTool]);
+    /**
+     * Send notification
+     */
+    const sendNotification = useCallback(async (target, message) => {
+        const response = await callTool('sendNotification', { target, message });
+        return response.result;
+    }, [callTool]);
+    /**
+     * Update memory
+     */
+    const updateMemory = useCallback(async (context) => {
+        const response = await callTool('updateMemory', { context });
+        return response.result;
+    }, [callTool]);
+    /**
+     * Reset client state
+     */
+    const reset = useCallback(() => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        setState({
+            isConnected: false,
+            isLoading: false,
+            error: null,
+            lastResponse: null
+        });
+    }, []);
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
+    // Test connection on mount
+    useEffect(() => {
+        if (agentsEnabled && mcpEnabled && user) {
+            // Test connection with a simple health check
+            fetch(`${MCP_SERVER_URL}/health`)
+                .then(response => response.json())
+                .then(data => {
+                if (data.status === 'healthy') {
+                    setState(prev => ({ ...prev, isConnected: true }));
+                }
+            })
+                .catch(error => {
+                console.warn('MCP server health check failed:', error);
+                setState(prev => ({ ...prev, isConnected: false }));
+            });
+        }
+    }, [agentsEnabled, mcpEnabled, user, MCP_SERVER_URL]);
+    return {
+        ...state,
+        callTool,
+        getPlayerStats,
+        listPendingSubmissions,
+        submitStat,
+        verifyStat,
+        calculateKPI,
+        exportDataset,
+        sendNotification,
+        updateMemory,
+        reset
+    };
+}

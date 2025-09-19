@@ -10,8 +10,8 @@ import { z } from "zod";
 const db = getFirestore();
 
 // Helper function to validate user authentication
-const validateAuth = async (context: CallableContextV2): Promise<AuthContext> => {
-  if (!context || !isAuthContext(context)) {
+const validateAuth = async (context: any): Promise<AuthContext> => {
+  if (!context || !context.auth || !isAuthContext(context.auth)) {
     throw new Error("Unauthorized: User not authenticated");
   }
   return context.auth;
@@ -356,7 +356,7 @@ export const getLeagueSchedule = onCall(async (data, context) => {
       const gameData = game as any;
       const date = gameData.date?.toDate?.() ? gameData.date.toDate().toDateString() : new Date().toDateString();
       if (!acc[date]) acc[date] = [];
-      acc[date].push(game);
+      acc[date]!.push(game);
       return acc;
     }, {} as Record<string, any[]>);
 

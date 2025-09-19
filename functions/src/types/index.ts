@@ -1,206 +1,134 @@
-import {CallableContext} from "firebase-functions/v1/https";
-import {CallableResponse} from "firebase-functions/v2/https";
+// Shared types for Functions workspace
 
-// V2 CallableContext type that matches the actual v2 signature
-export type CallableContextV2 = CallableResponse<unknown> | undefined;
-
-// Firebase Functions Type Definitions
-// Import comprehensive types from the main interfaces
-
-// Temporarily disabled to fix deployment
-// export * from "../../../types/interfaces";
-
-// Additional types needed for functions
-export interface ApiContext {
-  auth?: {
-    uid: string;
-    token: Record<string, any>;
-  };
-  user?: {
-    uid: string;
-    email: string;
-    role: string;
-  };
-}
-
-export interface ApiRequest<T = any> {
-  data: T;
-}
-
-export interface Team {
+export interface StatSubmission {
   id: string;
-  name: string;
-  leagueId: string;
-  coachId: string;
-  players: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  playerId: string;
+  teamId: string;
+  statType: string;
+  value: number;
+  gameId?: string;
+  submittedBy: string;
+  submittedAt: Date;
+  verified?: boolean;
+  notes?: string;
+}
+
+export interface VerificationResult {
+  status: 'verified' | 'flagged';
+  notes?: string;
+  flaggedReason?: string;
+  confidence?: number;
+  verifiedBy?: string;
+  verifiedAt?: Date;
+}
+
+export interface WeeklyReport {
+  id: string;
+  teamId: string;
+  weekStart: Date;
+  weekEnd: Date;
+  stats: Record<string, number>;
+  insights: string[];
+  generatedAt: Date;
+  generatedBy: string;
+}
+
+export interface TeamReport {
+  id: string;
+  teamId: string;
+  period: {
+    start: Date;
+    end: Date;
+  };
+  summary: {
+    totalStats: number;
+    verifiedStats: number;
+    flaggedStats: number;
+  };
+  topPerformers: Array<{
+    playerId: string;
+    statType: string;
+    value: number;
+  }>;
+  generatedAt: Date;
+}
+
+export interface MemoryEvent {
+  tenantId: string;
+  userId: string;
+  kind: 'stat_verified' | 'stat_submitted' | 'feedback' | 'function_result' | 'function_error' | string;
+  payload: Record<string, unknown>;
+  createdAt?: Date;
+}
+
+export interface ApiRequest {
+  body?: Record<string, unknown>;
+  query?: Record<string, string>;
+  params?: Record<string, string>;
+  headers?: Record<string, string>;
 }
 
 export interface League {
   id: string;
   name: string;
   sport: string;
-  ageGroup: string;
   season: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Firebase-specific type extensions
-export interface FirebaseContext {
-  auth: {
-    uid: string;
-    token: Record<string, unknown>;
-  };
-  user?: {
-    uid: string;
-    email: string;
-    role: string;
-  };
+export interface User {
+  id: string;
+  email: string;
+  role: 'admin' | 'coach' | 'athlete' | 'director' | 'townStaff';
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-// Authentication types
+export interface Team {
+  id: string;
+  name: string;
+  leagueId: string;
+  sport: string;
+  season: string;
+  players?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface AuthContext {
   uid: string;
   token: {
-    admin?: boolean;
-    director?: boolean;
-    coach?: boolean;
-    parent?: boolean;
-    player?: boolean;
-    scout?: boolean;
-    referee?: boolean;
+    email?: string;
+    email_verified?: boolean;
     role?: string;
   };
 }
 
-export interface TownStaffData {
-  isActive: boolean;
-  role: string;
-  permissions: string[];
-  createdAt: FirebaseFirestore.Timestamp;
-}
-
-export interface ValidatedContext {
-  auth: AuthContext;
-  staffData?: TownStaffData;
-}
-
-// Request/Response types
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  message: string;
-  data?: T;
-  error?: unknown;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface AnalyticsEvent {
-  eventType: string;
-  userId: string;
-  metadata?: Record<string, unknown>;
-  timestamp: FirebaseFirestore.Timestamp;
-}
-
-export interface CoachFeedback {
-  coachId: string;
-  playerId: string;
-  feedback: string;
-  rating: number;
-  category: string;
-}
-
-export interface PlayerAnalysis {
-  playerId: string;
-  analysisType: "performance" | "skills" | "fitness";
-  data: Record<string, unknown>;
-}
-
-export interface StripeCheckoutRequest {
-  amount: number;
-  currency: string;
-  description: string;
-  successUrl: string;
-  cancelUrl: string;
-}
-
-// Firestore document types
-export interface User {
-  uid: string;
-  email: string;
-  role: string;
-  createdAt: FirebaseFirestore.Timestamp;
-  updatedAt: FirebaseFirestore.Timestamp;
-}
-
-export interface Registration {
-  playerId: string;
-  parentId: string;
-  leagueId: string;
-  status: "pending" | "approved" | "rejected" | "waitlisted";
-  createdAt: FirebaseFirestore.Timestamp;
-}
-
-export interface SiblingRequest {
-  parentId: string;
-  siblingIds: string[];
-  leagueId: string;
-  status: "pending" | "approved" | "rejected";
-  createdAt: FirebaseFirestore.Timestamp;
-}
-
-export interface AgeOverrideRequest {
-  playerId: string;
-  parentId: string;
-  leagueId: string;
-  reason: string;
-  status: "pending" | "approved" | "rejected";
-  createdAt: FirebaseFirestore.Timestamp;
-}
-
-export interface WaitlistEntry {
-  playerId: string;
-  leagueId: string;
-  position: number;
-  joinedAt: FirebaseFirestore.Timestamp;
-}
-
-export interface AuditLog {
-  userId: string;
-  action: string;
-  resource: string;
-  timestamp: FirebaseFirestore.Timestamp;
-  metadata?: Record<string, unknown>;
-}
-
-// Stripe-specific types
-export interface PayoutRequest {
-  userId: string;
-  amount: number;
-  currency: string;
-  destination: {
-    type: string;
-    [key: string]: any;
+export interface CallableContextV2 {
+  auth?: AuthContext;
+  request?: {
+    headers: Record<string, string>;
   };
-  reason?: string;
-  scheduledFor?: FirebaseFirestore.Timestamp;
+}
+
+export interface ApiContext {
+  auth?: AuthContext;
+  user?: User;
+  request: ApiRequest;
+}
+
+export interface PayoutRequest {
+  creatorId: string;
+  amount: number;
+  currency: string;
 }
 
 export interface PayoutResponse {
   success: boolean;
+  payoutId?: string;
   error?: string;
-  data?: {
-    status: any;
-    amount: any;
-    currency: any;
-    arrivalDate: any;
-    failureReason?: any;
-  };
 }
 
 export interface PayoutInfo {
@@ -208,64 +136,28 @@ export interface PayoutInfo {
   amount: number;
   currency: string;
   status: string;
-  arrivalDate?: number;
   failureReason?: string;
+  createdAt: Date;
 }
 
 export interface CreatorProfileDocument {
-  uid: string;
-  verified: boolean;
-  stripeAccountId?: string;
-  payoutSettings?: {
-    minimumPayout: number;
-    schedule: string;
-  };
+  id: string;
+  userId: string;
+  earnings: number;
+  payouts: PayoutInfo[];
+  verified?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CallableRequestContext {
-  auth?: {
-    uid: string;
-    token: Record<string, any>;
+  auth?: AuthContext;
+  request: {
+    headers: Record<string, string>;
   };
 }
 
-// Event types for Firestore triggers
-export interface FirestoreEvent<T = unknown> {
-  data: T;
-  context: {
-    eventId: string;
-    timestamp: string;
-    eventType: string;
-    resource: string;
-  };
-}
-
-// Type guards
-/**
- * Type guard to check if context has authentication data
- * @param context - The callable context to check
- * @returns True if context has valid auth data
- */
-export function isAuthContext(context: CallableContext | CallableContextV2): context is (CallableContext | CallableContextV2) & {auth: AuthContext} {
-  return context !== undefined &&
-         context !== null &&
-         typeof context === "object" &&
-         "auth" in context &&
-         context.auth !== undefined;
-}
-
-/**
- * Type guard to check if data is valid TownStaffData
- * @param data - The data to validate
- * @returns True if data matches TownStaffData interface
- */
-export function isTownStaffData(data: unknown): data is TownStaffData {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "isActive" in data &&
-    "role" in data &&
-    "permissions" in data &&
-    "createdAt" in data
-  );
+// Utility functions
+export function isAuthContext(context: any): context is AuthContext {
+  return context && typeof context.uid === 'string';
 }

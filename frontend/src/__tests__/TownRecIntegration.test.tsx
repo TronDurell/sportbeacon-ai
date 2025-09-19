@@ -9,7 +9,7 @@ jest.mock("../../../lib/townRec/WaitlistManager");
 jest.mock("../../../lib/townRec/SiblingPairingQueue");
 jest.mock("../../../lib/townRec/TownStaffRole");
 jest.mock("../../../lib/townRec/TownStaffRole");
-jest.mock("../../../lib/firebase/config");
+jest.mock("../../../lib/firebase");
 
 // Mock AdminAuthContext
 const mockAuthContext = {

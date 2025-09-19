@@ -108,7 +108,7 @@ function generateSummary(events: any[]): string | null {
 
   // Generate summary for each kind
   if (eventsByKind.feedback && eventsByKind.feedback.length > 0) {
-    const positiveFeedback = eventsByKind.feedback.filter(e => 
+    const positiveFeedback = eventsByKind.feedback.filter((e: any) => 
       e.data?.message?.toLowerCase().includes('helpful') ||
       e.data?.message?.toLowerCase().includes('good') ||
       e.data?.message?.toLowerCase().includes('great')
@@ -119,13 +119,13 @@ function generateSummary(events: any[]): string | null {
   }
 
   if (eventsByKind.result && eventsByKind.result.length > 0) {
-    const resultTypes = eventsByKind.result.map(e => e.data?.functionName || 'unknown');
+    const resultTypes = eventsByKind.result.map((e: any) => e.data?.functionName || 'unknown');
     const uniqueTypes = [...new Set(resultTypes)];
     summary.push(`Successfully completed ${eventsByKind.result.length} operations: ${uniqueTypes.join(', ')}`);
   }
 
   if (eventsByKind.observation && eventsByKind.observation.length > 0) {
-    const sessionEvents = eventsByKind.observation.filter(e => 
+    const sessionEvents = eventsByKind.observation.filter((e: any) => 
       e.tags?.includes('session:start')
     ).length;
     

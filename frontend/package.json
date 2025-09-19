@@ -11,6 +11,7 @@
     "@mui/material": "^5.13.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.12",
+    "@sportbeacon/memory-sdk": "file:../packages/memory-sdk",
     "@tanstack/react-query": "^4.29.5",
     "chart.js": "^4.3.0",
     "class-variance-authority": "^0.7.1",

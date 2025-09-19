@@ -1,11 +1,22 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "moduleResolution": "node",
     "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "outDir": "lib",
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "baseUrl": ".",
+    "paths": {
+      "@lib/*": ["src/lib/*"],
+      "@memory/*": ["../packages/memory-sdk/src/*"],
+      "@types/*": ["src/types/*"]
+    },
+    "strictNullChecks": true
   },
   "include": ["src"],
-  "exclude": ["src/**/__tests__/**", "src/**/*.test.ts", "src/**/*.spec.ts"]
+  "exclude": ["src/**/__tests__/**", "src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.spec.ts", "src/**/*.spec.tsx"]
 }

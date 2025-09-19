@@ -2,7 +2,7 @@
    Integration tests for admin verification and dispute resolution
 */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach  } from '@jest/globals';
 import { initializeTestEnvironment, RulesTestEnvironment } from '@firebase/rules-unit-testing';
 import { 
   collection, 

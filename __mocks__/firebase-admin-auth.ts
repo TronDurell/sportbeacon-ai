@@ -1,6 +1,8 @@
-export type DecodedIdToken = { uid: string; email?: string } & Record<string, any>;
+// Mock Auth instance using unified factory
+import { createAuthMock } from './factories/firebase';
+import type { DecodedIdToken, UserRecord } from './factories/types';
 
-export const getAuth = jest.fn(() => ({
-  verifyIdToken: jest.fn(async (_t: string) => ({ uid: 'test' } as DecodedIdToken)),
-  createCustomToken: jest.fn(async (_: string) => 'token')
-}));
+// Re-export types for backward compatibility
+export type { DecodedIdToken, UserRecord };
+
+export const getAuth = jest.fn(() => createAuthMock());

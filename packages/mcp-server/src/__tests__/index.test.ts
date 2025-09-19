@@ -1,18 +1,18 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest  } from '@jest/globals';
 import request from 'supertest';
 import { app } from '../index';
 
 // Mock Firebase Admin
-vi.mock('firebase-admin', () => ({
+jest.mock('firebase-admin', () => ({
   admin: {
-    auth: vi.fn(),
-    firestore: vi.fn(),
+    auth: jest.fn(),
+    firestore: jest.fn(),
   },
 }));
 
 describe('MCP Server', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('GET /mcp/schema', () => {

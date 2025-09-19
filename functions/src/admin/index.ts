@@ -42,6 +42,10 @@ export const adminGetLeagueStats = onCall(async (data, context) => {
 
     const {leagueId} = validation.data || {};
 
+    if (!leagueId) {
+      return {success: false, message: "League ID is required"};
+    }
+
     const leagueRef = db.collection("leagues").doc(leagueId);
     const leagueDoc = await leagueRef.get();
 
@@ -110,6 +114,10 @@ export const adminUpdateStaffRole = onCall(async (data, context) => {
 
     const {staffId, newRole, permissions} = validation.data || {};
 
+    if (!staffId) {
+      return {success: false, message: "Staff ID is required"};
+    }
+
     const staffRef = db.collection("townStaff").doc(staffId);
     await staffRef.update({
       role: newRole,
@@ -168,6 +176,10 @@ export const adminGenerateReport = onCall(async (data, context) => {
     }
 
     const {reportType, dateRange} = validation.data || {};
+
+    if (!dateRange?.start || !dateRange?.end) {
+      return {success: false, message: "Date range is required"};
+    }
 
     // TODO: Implement report generation logic
     const report = {
@@ -229,7 +241,7 @@ export const adminBulkOperation = onCall(async (data, context) => {
 
     switch (operation) {
     case "approve":
-      registrationIds.forEach(id => {
+      registrationIds.forEach((id: string) => {
         const ref = db.collection("registrations").doc(id);
         batch.update(ref, {
           status: "approved",
@@ -241,7 +253,7 @@ export const adminBulkOperation = onCall(async (data, context) => {
       break;
 
     case "reject":
-      registrationIds.forEach(id => {
+      registrationIds.forEach((id: string) => {
         const ref = db.collection("registrations").doc(id);
         batch.update(ref, {
           status: "rejected",
@@ -253,7 +265,7 @@ export const adminBulkOperation = onCall(async (data, context) => {
       break;
 
     case "waitlist":
-      registrationIds.forEach(id => {
+      registrationIds.forEach((id: string) => {
         const ref = db.collection("registrations").doc(id);
         batch.update(ref, {
           status: "waitlisted",

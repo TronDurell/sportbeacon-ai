@@ -2,7 +2,7 @@
    Unit tests for analytics event system
 */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { analytics, ANALYTICS_EVENTS, createDateString, parseDateString, isValidDateString, validateAnalyticsEvent } from './events';
 
 // ============================================================================
@@ -10,9 +10,9 @@ import { analytics, ANALYTICS_EVENTS, createDateString, parseDateString, isValid
 // ============================================================================
 
 // Mock Memory SDK
-vi.mock('@sportbeacon/memory-sdk', () => ({
-  memoryClient: vi.fn(() => ({
-    writeEvent: vi.fn().mockResolvedValue('event_id')
+jest.mock('@sportbeacon/memory-sdk', () => ({
+  memoryClient: jest.fn(() => ({
+    writeEvent: jest.fn().mockResolvedValue('event_id')
   }))
 }));
 
@@ -30,7 +30,7 @@ Object.defineProperty(window, 'dataLayer', {
 describe('Analytics Events System', () => {
   beforeEach(() => {
     // Clear mocks and dataLayer
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockDataLayer.length = 0;
     analytics.setUserId('test_user_123');
     analytics.setTenantId('test_tenant');
@@ -212,7 +212,7 @@ describe('Analytics Events System', () => {
       const { memoryClient } = await import('@sportbeacon/memory-sdk');
       const mockMemoryClient = memoryClient as any;
       mockMemoryClient.mockReturnValue({
-        writeEvent: vi.fn().mockRejectedValue(new Error('Memory SDK error'))
+        writeEvent: jest.fn().mockRejectedValue(new Error('Memory SDK error'))
       });
 
       await analytics.emitAthleteClaimed({
@@ -394,7 +394,7 @@ describe('Analytics Events System', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
       
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
       await analytics.emitAthleteClaimed({
         athleteId: 'athlete_123',
@@ -415,7 +415,7 @@ describe('Analytics Events System', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
       
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
       await analytics.emitAthleteClaimed({
         athleteId: 'athlete_123',

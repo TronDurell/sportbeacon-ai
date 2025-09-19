@@ -1,222 +1,171 @@
-# SportBeacon AI Deployment Guide
+# SportBeaconAI Deployment Guide
 
-This guide covers deployment options for the SportBeacon AI application, including both frontend and backend components.
+## Prerequisites
 
-## Architecture Overview
+1. **Firebase CLI**: Install globally
+   ```bash
+   npm install -g firebase-tools
+   ```
 
-- **Frontend**: React SPA with Vite build system
-- **Backend**: FastAPI Python application
-- **Database**: No persistent database required (in-memory for demo)
-- **Containerization**: Docker with docker-compose orchestration
+2. **Firebase Login**: Authenticate with Firebase
+   ```bash
+   firebase login
+   ```
 
-## Deployment Options
+3. **Project Setup**: Ensure you're using the correct project
+   ```bash
+   firebase use sportbeacon-ai
+   ```
 
-### 1. Serverless Frontend + Containerized Backend
+## Quick Deployment
 
-#### Frontend (Vercel/Netlify)
-
-**Vercel Deployment:**
+### Option 1: Using npm scripts (Recommended)
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Deploy everything (hosting + functions)
+npm run deploy
 
-# Deploy from frontend directory
-cd frontend
-vercel --prod
+# Deploy only hosting
+npm run deploy:hosting
+
+# Deploy only functions
+npm run deploy:functions
 ```
 
-**Netlify Deployment:**
+### Option 2: Using deployment scripts
 ```bash
-# Build the frontend
-cd frontend
-npm run build
+# Linux/macOS
+./deploy.sh
 
-# Deploy to Netlify (drag and drop dist folder)
-# Or use Netlify CLI
-netlify deploy --prod --dir=dist
+# Windows
+deploy.bat
 ```
 
-#### Backend (Render/Railway/Fly.io)
-
-**Render Deployment:**
-1. Connect GitHub repository
-2. Select backend directory as root
-3. Set build command: `pip install -r requirements.txt`
-4. Set start command: `uvicorn backend.api:app --host 0.0.0.0 --port $PORT`
-5. Add environment variables:
-   - `FRONTEND_ORIGIN`: Your frontend URL
-   - `UVICORN_HOST`: 0.0.0.0
-   - `UVICORN_PORT`: $PORT
-
-**Railway Deployment:**
-1. Connect GitHub repository
-2. Select backend directory
-3. Railway auto-detects Python and installs requirements
-4. Set start command: `uvicorn backend.api:app --host 0.0.0.0 --port $PORT`
-5. Add environment variables in Railway dashboard
-
-**Fly.io Deployment:**
+### Option 3: Manual deployment
 ```bash
-# Install flyctl
-curl -L https://fly.io/install.sh | sh
+# Build frontend
+npm run build:frontend
 
-# Create fly.toml
-fly launch
+# Build functions
+npm run build:functions
 
-# Deploy
-fly deploy
+# Deploy to Firebase
+firebase deploy --only hosting,functions
 ```
 
-### 2. Full Container Deployment
+## Pre-deployment Checklist
 
-#### Docker Compose (Local/Server)
+- [ ] All tests pass: `npm run test:ci`
+- [ ] Type checking passes: `npm run typecheck`
+- [ ] Linting passes: `npm run lint`
+- [ ] Frontend builds successfully: `npm run build:frontend`
+- [ ] Functions build successfully: `npm run build:functions`
+- [ ] Firebase emulator works: `firebase emulators:start`
 
+## Post-deployment Verification
+
+### Option 1: Using npm scripts
 ```bash
-# Build and run locally
-docker-compose up --build
+# Linux/macOS
+npm run postdeploy:posix
 
-# Access applications
-# Frontend: http://localhost:3002
-# Backend: http://localhost:8000
-# Metrics: http://localhost:8000/metrics
+# Windows
+npm run postdeploy:powershell
 ```
 
-#### Kubernetes Deployment
-
-Create Kubernetes manifests:
-
-```yaml
-# backend-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: sportbeacon-backend
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: sportbeacon-backend
-  template:
-    metadata:
-      labels:
-        app: sportbeacon-backend
-    spec:
-      containers:
-      - name: backend
-        image: your-registry/sportbeacon-backend:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: FRONTEND_ORIGIN
-          value: "https://your-frontend-domain.com"
-```
-
-### 3. Cloud Platform Deployment
-
-#### Google Cloud Run
-
+### Option 2: Manual verification
 ```bash
-# Deploy backend
-gcloud run deploy sportbeacon-backend \
-  --source backend \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated
+# Check if the site is accessible
+curl -I https://sportbeacon-ai.web.app
 
-# Deploy frontend
-gcloud run deploy sportbeacon-frontend \
-  --source frontend \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated
+# Or visit in browser
+open https://sportbeacon-ai.web.app
 ```
 
-#### AWS ECS
+## Environment Configuration
 
-1. Create ECS cluster
-2. Create task definitions for frontend and backend
-3. Create services with load balancers
-4. Configure environment variables
+### Required Environment Variables
+- `FIREBASE_PROJECT_ID`: sportbeacon-ai
+- `FIREBASE_API_KEY`: (set in Firebase console)
+- `FIREBASE_AUTH_DOMAIN`: sportbeacon-ai.firebaseapp.com
+- `FIREBASE_STORAGE_BUCKET`: sportbeacon-ai.appspot.com
 
-## Environment Variables
-
-### Backend (.env)
-```bash
-FRONTEND_ORIGIN=http://localhost:3002
-UVICORN_HOST=0.0.0.0
-UVICORN_PORT=8000
-SENTRY_DSN=your-sentry-dsn
-OPENAI_API_KEY=your-openai-key
-```
-
-### Frontend (.env.production)
-```bash
-VITE_API_URL=https://your-backend-domain.com
-VITE_APP_VERSION=1.0.0
-```
-
-## Health Checks
-
-- **Backend**: `GET /health`
-- **Frontend**: `GET /health`
-- **Metrics**: `GET /metrics` (Prometheus format)
-
-## Monitoring
-
-### Prometheus Metrics
-The backend exposes Prometheus metrics at `/metrics` endpoint:
-- Request counts and durations
-- Error rates
-- Custom business metrics
-
-### Logging
-- Backend: Structured JSON logging
-- Frontend: Console logging with error reporting
-
-## Security Considerations
-
-1. **CORS**: Configure `FRONTEND_ORIGIN` for production
-2. **HTTPS**: Always use HTTPS in production
-3. **API Keys**: Store sensitive keys in environment variables
-4. **Rate Limiting**: Consider adding rate limiting for API endpoints
-5. **Input Validation**: All inputs are validated with Pydantic
+### Firebase Configuration
+- **Project ID**: sportbeacon-ai
+- **Hosting URL**: https://sportbeacon-ai.web.app
+- **Functions URL**: https://us-central1-sportbeacon-ai.cloudfunctions.net
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **CORS Errors**: Check `FRONTEND_ORIGIN` environment variable
-2. **Port Conflicts**: Ensure ports 8000 and 3002 are available
-3. **Build Failures**: Check Node.js and Python versions
-4. **Docker Issues**: Ensure Docker and docker-compose are installed
+1. **Build Failures**
+   ```bash
+   # Clear cache and rebuild
+   npm run test:clear
+   npm run build:frontend
+   ```
 
-### Debug Commands
+2. **Firebase Authentication Issues**
+   ```bash
+   # Re-authenticate
+   firebase logout
+   firebase login
+   ```
 
+3. **Deployment Timeouts**
+   ```bash
+   # Deploy with increased timeout
+   firebase deploy --only hosting,functions --timeout 600
+   ```
+
+4. **Function Build Issues**
+   ```bash
+   # Clean and rebuild functions
+   cd functions
+   rm -rf lib
+   npm run build
+   ```
+
+### Logs and Debugging
 ```bash
-# Check backend health
-curl http://localhost:8000/health
+# View Firebase logs
+firebase functions:log
 
-# Check frontend
-curl http://localhost:3002/
+# View hosting logs
+firebase hosting:channel:list
 
-# View logs
-docker-compose logs backend
-docker-compose logs frontend
-
-# Check metrics
-curl http://localhost:8000/metrics
+# Debug emulator
+firebase emulators:start --debug
 ```
+
+## CI/CD Integration
+
+The project includes GitHub Actions workflow (`.github/workflows/ci.yml`) that:
+- Runs tests on multiple platforms (Ubuntu, Windows, macOS)
+- Tests multiple Node.js versions (18, 20)
+- Automatically deploys on push to main branch
+- Requires `FIREBASE_SERVICE_ACCOUNT` secret in GitHub
+
+## Security Considerations
+
+- Never commit Firebase service account keys
+- Use environment variables for sensitive data
+- Enable Firebase Security Rules
+- Regularly update dependencies
+- Monitor Firebase usage and costs
 
 ## Performance Optimization
 
-1. **Frontend**: Enable gzip compression in nginx
-2. **Backend**: Use multiple workers with uvicorn
-3. **Caching**: Implement Redis for session storage
-4. **CDN**: Use CDN for static assets
+- Enable Firebase Hosting caching
+- Use Firebase CDN for static assets
+- Optimize bundle sizes with Vite
+- Implement proper error boundaries
+- Monitor Core Web Vitals
 
-## Backup and Recovery
+## Support
 
-1. **Configuration**: Version control all configuration files
-2. **Environment Variables**: Document all required variables
-3. **Docker Images**: Tag and store images in registry
-4. **Monitoring**: Set up alerts for critical metrics
+For deployment issues:
+1. Check Firebase console for errors
+2. Review GitHub Actions logs
+3. Test locally with emulators
+4. Contact the development team

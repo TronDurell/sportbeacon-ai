@@ -12,8 +12,8 @@ const db = getFirestore();
 const memoryClient = adminMemoryClient();
 
 // Helper function to validate user authentication
-const validateAuth = async (context: CallableContextV2): Promise<AuthContext> => {
-  if (!context || !isAuthContext(context)) {
+const validateAuth = async (context: any): Promise<AuthContext> => {
+  if (!context || !context.auth || !isAuthContext(context.auth)) {
     throw new Error("Unauthorized: User not authenticated");
   }
   return context.auth;
@@ -60,6 +60,14 @@ export const createTeam = onCall(async (data, context) => {
     }
 
     const {teamData} = validation.data || {};
+
+    if (!teamData) {
+      return {
+        success: false,
+        message: "Team data is required",
+        data: null,
+      };
+    }
 
     logger.info("Team creation requested", {
       requestedBy: auth.uid,
@@ -118,9 +126,7 @@ export const createTeam = onCall(async (data, context) => {
           teamId: team.id,
           teamName: team.name,
           leagueId: teamData.leagueId || 'unknown'
-        },
-        undefined,
-        'team-creation'
+        }
       );
     } catch (memoryError) {
       logger.warn('Failed to capture memory for team creation:', memoryError);
@@ -171,6 +177,14 @@ export const updateTeam = onCall(async (data, context) => {
     }
 
     const {teamId, updates} = validation.data || {};
+
+    if (!teamId) {
+      return {
+        success: false,
+        message: "Team ID is required",
+        data: null,
+      };
+    }
 
     logger.info("Team update requested", {
       requestedBy: auth.uid,

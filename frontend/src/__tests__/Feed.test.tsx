@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { jest, describe, it, expect, beforeEach  } from '@jest/globals';
 import Feed from "../components/Feed";
 import { AdminAuthProvider } from "../contexts/AdminAuthContext";
 import { SmartLayerProvider } from "../contexts/SmartLayerContext";
@@ -16,42 +16,42 @@ const mockDrillScrollSessionManager = {
     }
   },
   postsViewed: 3,
-  incrementPostView: vi.fn(),
-  takeDrillAction: vi.fn(),
-  getDrillSessionProgress: vi.fn().mockReturnValue({ progress: 30 }),
-  getDrillSessionCTA: vi.fn().mockReturnValue({ message: "Keep going! You're doing great!" }),
-  startDrillSession: vi.fn(),
-  endDrillSession: vi.fn()
+  incrementPostView: jest.fn(),
+  takeDrillAction: jest.fn(),
+  getDrillSessionProgress: jest.fn().mockReturnValue({ progress: 30 }),
+  getDrillSessionCTA: jest.fn().mockReturnValue({ message: "Keep going! You're doing great!" }),
+  startDrillSession: jest.fn(),
+  endDrillSession: jest.fn()
 };
 
 const mockPlaymakerIntentEngine = {
   scrollCount: 25,
   rapidScrolls: 2,
   scrollIntent: "focused",
-  detectScrollIntent: vi.fn(),
-  triggerIntervention: vi.fn(),
-  getIntentRecommendations: vi.fn().mockReturnValue([
+  detectScrollIntent: jest.fn(),
+  triggerIntervention: jest.fn(),
+  getIntentRecommendations: jest.fn().mockReturnValue([
     { id: "1", title: "Recommended Drill", description: "Try this agility drill" }
   ])
 };
 
 const mockScoutRoleCurationHub = {
-  getScoutRecommendations: vi.fn().mockReturnValue([
+  getScoutRecommendations: jest.fn().mockReturnValue([
     { id: "1", title: "Scout Recommendation", description: "Based on your performance" }
   ]),
-  curateContentForRole: vi.fn(),
-  getRoleInsights: vi.fn().mockReturnValue({ message: "You're making great progress!" })
+  curateContentForRole: jest.fn(),
+  getRoleInsights: jest.fn().mockReturnValue({ message: "You're making great progress!" })
 };
 
 const mockSessionLiberationAnalytics = {
-  startAnalyticsSession: vi.fn().mockReturnValue("analytics-session-1"),
-  endAnalyticsSession: vi.fn(),
-  logIntervention: vi.fn(),
-  logSessionEvent: vi.fn(),
-  getSessionMetrics: vi.fn()
+  startAnalyticsSession: jest.fn().mockReturnValue("analytics-session-1"),
+  endAnalyticsSession: jest.fn(),
+  logIntervention: jest.fn(),
+  logSessionEvent: jest.fn(),
+  getSessionMetrics: jest.fn()
 };
 
-vi.mock("../modules/GrowthSessions", () => ({
+jest.mock("../modules/GrowthSessions", () => ({
   useDrillScrollSessionManager: () => mockDrillScrollSessionManager,
   usePlaymakerIntentEngine: () => mockPlaymakerIntentEngine,
   useScoutRoleCurationHub: () => mockScoutRoleCurationHub,
@@ -68,42 +68,42 @@ const mockUser = {
 
 const mockAuthContext = {
   user: mockUser,
-  login: vi.fn(),
-  logout: vi.fn(),
+  login: jest.fn(),
+  logout: jest.fn(),
   loading: false,
   error: null
 };
 
 const mockSmartLayerContext = {
   userIntent: "train",
-  setUserIntent: vi.fn(),
+  setUserIntent: jest.fn(),
   hasDeclaredIntent: true,
   autopilotMode: false,
-  setAutopilotMode: vi.fn()
+  setAutopilotMode: jest.fn()
 };
 
 const mockAgentOrchestrationContext = {
-  sendRequest: vi.fn(),
+  sendRequest: jest.fn(),
   agents: {},
   loading: false,
   error: null
 };
 
 // Mock the context providers
-vi.mock("../contexts/AdminAuthContext", () => ({
+jest.mock("../contexts/AdminAuthContext", () => ({
   useAuth: () => mockAuthContext
 }));
 
-vi.mock("../contexts/SmartLayerContext", () => ({
+jest.mock("../contexts/SmartLayerContext", () => ({
   useSmartLayer: () => mockSmartLayerContext
 }));
 
-vi.mock("../contexts/AgentOrchestrationContext", () => ({
+jest.mock("../contexts/AgentOrchestrationContext", () => ({
   useAgentOrchestration: () => mockAgentOrchestrationContext
 }));
 
 // Mock framer-motion
-vi.mock("framer-motion", () => ({
+jest.mock("framer-motion", () => ({
   motion: {
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>
   },
@@ -111,7 +111,7 @@ vi.mock("framer-motion", () => ({
 }));
 
 // Mock lucide-react icons
-vi.mock("lucide-react", () => ({
+jest.mock("lucide-react", () => ({
   Target: () => <div data-testid="target">Target</div>,
   CheckCircle: () => <div data-testid="check-circle">CheckCircle</div>,
   AlertCircle: () => <div data-testid="alert-circle">AlertCircle</div>,
@@ -136,7 +136,7 @@ const renderFeed = () => {
 
 describe("Feed Component", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Mock window.scrollY and window.innerHeight
     Object.defineProperty(window, "scrollY", {
       value: 0,

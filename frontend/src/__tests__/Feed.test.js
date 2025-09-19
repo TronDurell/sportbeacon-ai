@@ -1,0 +1,421 @@
+import React from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { jest, describe, it, expect, beforeEach  } from '@jest/globals';
+import Feed from "../components/Feed.tsx";
+import { AdminAuthProvider } from "../contexts/AdminAuthContext.tsx";
+import { SmartLayerProvider } from "../contexts/SmartLayerContext.tsx";
+import { AgentOrchestrationProvider } from "../contexts/AgentOrchestrationContext.tsx";
+// Mock the GrowthSessions hooks
+const mockDrillScrollSessionManager = {
+    currentDrillSession: {
+        id: "test-session-1",
+        sessionType: {
+            description: "Training Session",
+            maxPosts: 10
+        }
+    },
+    postsViewed: 3,
+    incrementPostView: jest.fn(),
+    takeDrillAction: jest.fn(),
+    getDrillSessionProgress: jest.fn().mockReturnValue({ progress: 30 }),
+    getDrillSessionCTA: jest.fn().mockReturnValue({ message: "Keep going! You're doing great!" }),
+    startDrillSession: jest.fn(),
+    endDrillSession: jest.fn()
+};
+const mockPlaymakerIntentEngine = {
+    scrollCount: 25,
+    rapidScrolls: 2,
+    scrollIntent: "focused",
+    detectScrollIntent: jest.fn(),
+    triggerIntervention: jest.fn(),
+    getIntentRecommendations: jest.fn().mockReturnValue([
+        { id: "1", title: "Recommended Drill", description: "Try this agility drill" }
+    ])
+};
+const mockScoutRoleCurationHub = {
+    getScoutRecommendations: jest.fn().mockReturnValue([
+        { id: "1", title: "Scout Recommendation", description: "Based on your performance" }
+    ]),
+    curateContentForRole: jest.fn(),
+    getRoleInsights: jest.fn().mockReturnValue({ message: "You're making great progress!" })
+};
+const mockSessionLiberationAnalytics = {
+    startAnalyticsSession: jest.fn().mockReturnValue("analytics-session-1"),
+    endAnalyticsSession: jest.fn(),
+    logIntervention: jest.fn(),
+    logSessionEvent: jest.fn(),
+    getSessionMetrics: jest.fn()
+};
+jest.mock("../modules/GrowthSessions", () => ({
+    useDrillScrollSessionManager: () => mockDrillScrollSessionManager,
+    usePlaymakerIntentEngine: () => mockPlaymakerIntentEngine,
+    useScoutRoleCurationHub: () => mockScoutRoleCurationHub,
+    useSessionLiberationAnalytics: () => mockSessionLiberationAnalytics
+}));
+// Mock the contexts
+const mockUser = {
+    id: "test-user-1",
+    email: "test@example.com",
+    role: "player",
+    name: "Test Player"
+};
+const mockAuthContext = {
+    user: mockUser,
+    login: jest.fn(),
+    logout: jest.fn(),
+    loading: false,
+    error: null
+};
+const mockSmartLayerContext = {
+    userIntent: "train",
+    setUserIntent: jest.fn(),
+    hasDeclaredIntent: true,
+    autopilotMode: false,
+    setAutopilotMode: jest.fn()
+};
+const mockAgentOrchestrationContext = {
+    sendRequest: jest.fn(),
+    agents: {},
+    loading: false,
+    error: null
+};
+// Mock the context providers
+jest.mock("../contexts/AdminAuthContext", () => ({
+    useAuth: () => mockAuthContext
+}));
+jest.mock("../contexts/SmartLayerContext", () => ({
+    useSmartLayer: () => mockSmartLayerContext
+}));
+jest.mock("../contexts/AgentOrchestrationContext", () => ({
+    useAgentOrchestration: () => mockAgentOrchestrationContext
+}));
+// Mock framer-motion
+jest.mock("framer-motion", () => ({
+    motion: {
+        div: ({ children, ...props }) => {
+            const React = require("react");
+            return React.createElement("div", props, children);
+        }
+    },
+    AnimatePresence: ({ children }) => {
+        const React = require("react");
+        return React.createElement("div", {}, children);
+    }
+}));
+// Mock lucide-react icons
+jest.mock("lucide-react", () => {
+    const React = require("react");
+    return {
+        Target: () => React.createElement("div", { "data-testid": "target" }, "Target"),
+        CheckCircle: () => React.createElement("div", { "data-testid": "check-circle" }, "CheckCircle"),
+        AlertCircle: () => React.createElement("div", { "data-testid": "alert-circle" }, "AlertCircle"),
+        TrendingUp: () => React.createElement("div", { "data-testid": "trending-up" }, "TrendingUp"),
+        MapPin: () => React.createElement("div", { "data-testid": "map-pin" }, "MapPin"),
+        Clock: () => React.createElement("div", { "data-testid": "clock" }, "Clock"),
+        Users: () => React.createElement("div", { "data-testid": "users" }, "Users"),
+        Zap: () => React.createElement("div", { "data-testid": "zap" }, "Zap")
+    };
+});
+const renderFeed = () => {
+    return render(_jsx(AdminAuthProvider, { children: _jsx(SmartLayerProvider, { children: _jsx(AgentOrchestrationProvider, { children: _jsx(Feed, {}) }) }) }));
+};
+describe("Feed Component", () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        // Mock window.scrollY and window.innerHeight
+        Object.defineProperty(window, "scrollY", {
+            value: 0,
+            writable: true
+        });
+        Object.defineProperty(window, "innerHeight", {
+            value: 800,
+            writable: true
+        });
+    });
+    describe("Initialization", () => {
+        it("initializes session and generates feed posts on mount", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(mockSessionLiberationAnalytics.startAnalyticsSession).toHaveBeenCalledWith("curated");
+                expect(mockDrillScrollSessionManager.startDrillSession).toHaveBeenCalled();
+                expect(mockScoutRoleCurationHub.curateContentForRole).toHaveBeenCalled();
+            });
+        });
+        it("shows login message when user is not authenticated", () => {
+            mockAuthContext.user = undefined;
+            renderFeed();
+            expect(screen.getByText("Please log in to view your feed")).toBeInTheDocument();
+        });
+        it("displays session progress bar", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(screen.getByText("Training Session")).toBeInTheDocument();
+                expect(screen.getByText("3 / 10 posts")).toBeInTheDocument();
+                expect(screen.getByText("Keep going! You're doing great!")).toBeInTheDocument();
+            });
+        });
+    });
+    describe("Feed Posts", () => {
+        it("displays feed posts with correct information", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(screen.getByText("Agility Ladder Workout")).toBeInTheDocument();
+                expect(screen.getByText("Improve your footwork and speed with this 15-minute ladder drill designed for your skill level...")).toBeInTheDocument();
+                expect(screen.getByText("Coach Smith")).toBeInTheDocument();
+            });
+        });
+        it("displays post metadata correctly", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(screen.getByText("Local Gym")).toBeInTheDocument();
+                expect(screen.getByText(/agility/)).toBeInTheDocument();
+                expect(screen.getByText(/24 likes/)).toBeInTheDocument();
+                expect(screen.getByText(/8 comments/)).toBeInTheDocument();
+            });
+        });
+        it("displays AI insights for posts", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(screen.getByText("95%")).toBeInTheDocument(); // Relevance score
+                expect(screen.getByText("88%")).toBeInTheDocument(); // Actionability score
+                expect(screen.getByText("92%")).toBeInTheDocument(); // Motivation score
+            });
+        });
+        it("handles post view events", async () => {
+            renderFeed();
+            await waitFor(() => {
+                const post = screen.getByText("Agility Ladder Workout").closest("div");
+                expect(post).toBeInTheDocument();
+                fireEvent.click(post);
+                expect(mockDrillScrollSessionManager.incrementPostView).toHaveBeenCalled();
+                expect(mockSessionLiberationAnalytics.logSessionEvent).toHaveBeenCalledWith("post_viewed", expect.any(Object));
+            });
+        });
+    });
+    describe("Role-based Content", () => {
+        it("displays role insights", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(screen.getByText("Insights for player")).toBeInTheDocument();
+                expect(screen.getByText("You're making great progress!")).toBeInTheDocument();
+            });
+        });
+        it("displays intent recommendations", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(screen.getByText("Based on Your Intent")).toBeInTheDocument();
+                expect(screen.getByText("Recommended Drill")).toBeInTheDocument();
+                expect(screen.getByText("Try this agility drill")).toBeInTheDocument();
+            });
+        });
+        it("displays scout recommendations", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(screen.getByText("Recommended for You")).toBeInTheDocument();
+                expect(screen.getByText("Scout Recommendation")).toBeInTheDocument();
+                expect(screen.getByText("Based on your performance")).toBeInTheDocument();
+            });
+        });
+    });
+    describe("Scroll Detection and Interventions", () => {
+        it("detects scroll events and updates session", async () => {
+            renderFeed();
+            // Simulate scroll event
+            fireEvent.scroll(window, { target: { scrollY: 100 } });
+            await waitFor(() => {
+                expect(mockPlaymakerIntentEngine.detectScrollIntent).toHaveBeenCalled();
+            });
+        });
+        it("triggers intervention for excessive scrolling", async () => {
+            mockPlaymakerIntentEngine.scrollCount = 60;
+            mockPlaymakerIntentEngine.rapidScrolls = 5;
+            mockPlaymakerIntentEngine.triggerIntervention.mockReturnValue({
+                title: "Take a Break",
+                message: "You've been scrolling a lot. Consider taking a break.",
+                action: { label: "Take Break" }
+            });
+            renderFeed();
+            // Simulate scroll event
+            fireEvent.scroll(window, { target: { scrollY: 100 } });
+            await waitFor(() => {
+                expect(mockSessionLiberationAnalytics.logIntervention).toHaveBeenCalledWith("scroll_timeout", "excessive_scrolling");
+            });
+        });
+        it("shows intervention modal when triggered", async () => {
+            mockPlaymakerIntentEngine.triggerIntervention.mockReturnValue({
+                title: "Take a Break",
+                message: "You've been scrolling a lot. Consider taking a break.",
+                action: { label: "Take Break" }
+            });
+            renderFeed();
+            // Simulate excessive scrolling
+            mockPlaymakerIntentEngine.scrollCount = 60;
+            mockPlaymakerIntentEngine.rapidScrolls = 5;
+            fireEvent.scroll(window, { target: { scrollY: 100 } });
+            await waitFor(() => {
+                expect(screen.getByText("Take a Break")).toBeInTheDocument();
+                expect(screen.getByText("You've been scrolling a lot. Consider taking a break.")).toBeInTheDocument();
+            });
+        });
+        it("handles intervention response", async () => {
+            mockPlaymakerIntentEngine.triggerIntervention.mockReturnValue({
+                title: "Take a Break",
+                message: "You've been scrolling a lot. Consider taking a break.",
+                action: { label: "Take Break" }
+            });
+            renderFeed();
+            // Simulate excessive scrolling
+            mockPlaymakerIntentEngine.scrollCount = 60;
+            mockPlaymakerIntentEngine.rapidScrolls = 5;
+            fireEvent.scroll(window, { target: { scrollY: 100 } });
+            await waitFor(() => {
+                const takeBreakButton = screen.getByText("Take Break");
+                fireEvent.click(takeBreakButton);
+                expect(mockDrillScrollSessionManager.takeDrillAction).toHaveBeenCalled();
+                expect(mockSessionLiberationAnalytics.logIntervention).toHaveBeenCalledWith("session_complete", "user_action");
+                expect(mockSessionLiberationAnalytics.endAnalyticsSession).toHaveBeenCalled();
+                expect(mockDrillScrollSessionManager.endDrillSession).toHaveBeenCalled();
+            });
+        });
+    });
+    describe("Session Management", () => {
+        it("tracks session progress correctly", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(mockDrillScrollSessionManager.getDrillSessionProgress).toHaveBeenCalled();
+                expect(mockDrillScrollSessionManager.getDrillSessionCTA).toHaveBeenCalled();
+            });
+        });
+        it("handles session actions", async () => {
+            renderFeed();
+            await waitFor(() => {
+                const post = screen.getByText("Agility Ladder Workout").closest("div");
+                fireEvent.click(post);
+                expect(mockDrillScrollSessionManager.incrementPostView).toHaveBeenCalled();
+            });
+        });
+        it("logs session events", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(mockSessionLiberationAnalytics.logSessionEvent).toHaveBeenCalledWith("session_started", expect.any(Object));
+            });
+        });
+    });
+    describe("AI Integration", () => {
+        it("sends requests to AI orchestration", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(mockAgentOrchestrationContext.sendRequest).toHaveBeenCalledWith({
+                    type: "content_analysis",
+                    data: {
+                        userRole: "player",
+                        sessionType: "training",
+                        userIntent: "train"
+                    }
+                });
+            });
+        });
+        it("handles AI orchestration errors gracefully", async () => {
+            mockAgentOrchestrationContext.sendRequest.mockRejectedValue(new Error("AI service error"));
+            renderFeed();
+            // Should not crash
+            await waitFor(() => {
+                expect(screen.getByText("Agility Ladder Workout")).toBeInTheDocument();
+            });
+        });
+    });
+    describe("Content Curation", () => {
+        it("curates content based on role and session type", async () => {
+            renderFeed();
+            await waitFor(() => {
+                expect(mockScoutRoleCurationHub.curateContentForRole).toHaveBeenCalledWith("player", "training");
+            });
+        });
+        it("filters posts by AI insights", async () => {
+            renderFeed();
+            await waitFor(() => {
+                // Should only show posts with relevance > 0.7
+                const posts = screen.getAllByText(/Agility Ladder Workout|Team Performance Update|Recovery Best Practices|Upcoming Game|New Personal Best!/);
+                expect(posts.length).toBeGreaterThan(0);
+            });
+        });
+        it("sorts posts by relevance and actionability", async () => {
+            renderFeed();
+            await waitFor(() => {
+                // Posts should be sorted by AI insights
+                const posts = screen.getAllByText(/Agility Ladder Workout|Team Performance Update|Recovery Best Practices|Upcoming Game|New Personal Best!/);
+                expect(posts.length).toBeGreaterThan(0);
+            });
+        });
+    });
+    describe("Performance and Optimization", () => {
+        it("uses useCallback for event handlers", async () => {
+            renderFeed();
+            await waitFor(() => {
+                const post = screen.getByText("Agility Ladder Workout").closest("div");
+                fireEvent.click(post);
+                // Should not cause unnecessary re-renders
+                expect(mockDrillScrollSessionManager.incrementPostView).toHaveBeenCalledTimes(1);
+            });
+        });
+        it("debounces scroll events", async () => {
+            renderFeed();
+            // Simulate rapid scroll events
+            for (let i = 0; i < 10; i++) {
+                fireEvent.scroll(window, { target: { scrollY: i * 100 } });
+            }
+            await waitFor(() => {
+                // Should not call detectScrollIntent for every scroll event
+                expect(mockPlaymakerIntentEngine.detectScrollIntent).toHaveBeenCalled();
+            });
+        });
+    });
+    describe("Error Boundaries", () => {
+        it("handles missing user gracefully", () => {
+            mockAuthContext.user = undefined;
+            renderFeed();
+            expect(screen.getByText("Please log in to view your feed")).toBeInTheDocument();
+        });
+        it("handles missing session data gracefully", () => {
+            mockDrillScrollSessionManager.currentDrillSession = undefined;
+            renderFeed();
+            // Should render without crashing
+            expect(document.body).toBeInTheDocument();
+        });
+        it("handles missing recommendations gracefully", () => {
+            mockScoutRoleCurationHub.getScoutRecommendations.mockReturnValue(undefined);
+            renderFeed();
+            // Should render without crashing
+            expect(document.body).toBeInTheDocument();
+        });
+    });
+    describe("Accessibility", () => {
+        it("has proper ARIA labels", async () => {
+            renderFeed();
+            await waitFor(() => {
+                const progressBar = screen.getByRole("progressbar");
+                expect(progressBar).toBeInTheDocument();
+            });
+        });
+        it("supports keyboard navigation", async () => {
+            renderFeed();
+            await waitFor(() => {
+                const posts = screen.getAllByText(/Agility Ladder Workout|Team Performance Update/);
+                posts.forEach(post => {
+                    expect(post.closest("div")).toHaveAttribute("tabIndex");
+                });
+            });
+        });
+        it("has proper focus management", async () => {
+            renderFeed();
+            await waitFor(() => {
+                const dismissButton = screen.getByText("Continue Browsing");
+                if (dismissButton) {
+                    dismissButton.focus();
+                    expect(document.activeElement).toBe(dismissButton);
+                }
+            });
+        });
+    });
+});

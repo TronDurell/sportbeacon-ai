@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { jest, describe, it, expect, beforeEach, afterEach  } from '@jest/globals';
 import { FollowLocationButton } from "../components/FollowLocationButton";
 import { LocationComposer } from "../components/LocationComposer";
 import { LocationPostCard } from "../components/LocationPostCard";
@@ -10,29 +10,29 @@ import { PlaceHeader } from "../components/PlaceHeader";
 import { Location, LocationPost } from "../types";
 
 // Mock the useLocations hook
-const mockUseLocations = vi.fn();
-vi.mock("../hooks/useLocations", () => ({
-  useIsFollowingLocation: vi.fn(),
-  followLocation: vi.fn(),
-  unfollowLocation: vi.fn(),
-  createLocationPost: vi.fn(),
-  useHomeLocationFeed: vi.fn()
+const mockUseLocations = jest.fn();
+jest.mock("../hooks/useLocations", () => ({
+  useIsFollowingLocation: jest.fn(),
+  followLocation: jest.fn(),
+  unfollowLocation: jest.fn(),
+  createLocationPost: jest.fn(),
+  useHomeLocationFeed: jest.fn()
 }));
 
 // Mock Firebase
-vi.mock("firebase/firestore", () => ({
-  collection: vi.fn(),
-  doc: vi.fn(),
-  getDocs: vi.fn(),
-  addDoc: vi.fn(),
-  updateDoc: vi.fn(),
-  deleteDoc: vi.fn(),
-  onSnapshot: vi.fn(),
-  query: vi.fn(),
-  where: vi.fn(),
-  orderBy: vi.fn(),
-  limit: vi.fn(),
-  startAfter: vi.fn()
+jest.mock("firebase/firestore", () => ({
+  collection: jest.fn(),
+  doc: jest.fn(),
+  getDocs: jest.fn(),
+  addDoc: jest.fn(),
+  updateDoc: jest.fn(),
+  deleteDoc: jest.fn(),
+  onSnapshot: jest.fn(),
+  query: jest.fn(),
+  where: jest.fn(),
+  orderBy: jest.fn(),
+  limit: jest.fn(),
+  startAfter: jest.fn()
 }));
 
 const mockLocation: Location = {
@@ -91,15 +91,15 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe("Location Thread Components", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    jest.resetAllMocks();
   });
 
   describe("FollowLocationButton", () => {
-    it("should render follow button when not following", () => {
+    it("should render follow button when not following", async () => {
       const { useIsFollowingLocation } = await import("../hooks/useLocations");
       useIsFollowingLocation.mockReturnValue({
         isFollowing: false,
@@ -111,7 +111,7 @@ describe("Location Thread Components", () => {
           <FollowLocationButton
             locationId="test-location"
             userId="user1"
-            onFollowChange={vi.fn()}
+            onFollowChange={jest.fn()}
           />
         </TestWrapper>
       );
@@ -119,7 +119,7 @@ describe("Location Thread Components", () => {
       expect(screen.getByText("Follow")).toBeInTheDocument();
     });
 
-    it("should render following button when following", () => {
+    it("should render following button when following", async () => {
       const { useIsFollowingLocation } = await import("../hooks/useLocations");
       useIsFollowingLocation.mockReturnValue({
         isFollowing: true,
@@ -131,7 +131,7 @@ describe("Location Thread Components", () => {
           <FollowLocationButton
             locationId="test-location"
             userId="user1"
-            onFollowChange={vi.fn()}
+            onFollowChange={jest.fn()}
           />
         </TestWrapper>
       );
@@ -151,7 +151,7 @@ describe("Location Thread Components", () => {
           <FollowLocationButton
             locationId="test-location"
             userId="user1"
-            onFollowChange={vi.fn()}
+            onFollowChange={jest.fn()}
           />
         </TestWrapper>
       );
@@ -174,7 +174,7 @@ describe("Location Thread Components", () => {
       });
       followLocation.mockResolvedValue({ success: true });
 
-      const onFollowChange = vi.fn();
+      const onFollowChange = jest.fn();
 
       render(
         <TestWrapper>
@@ -207,7 +207,7 @@ describe("Location Thread Components", () => {
         <TestWrapper>
           <LocationComposer
             locationId="test-location"
-            onPostCreated={vi.fn()}
+            onPostCreated={jest.fn()}
           />
         </TestWrapper>
       );
@@ -224,7 +224,7 @@ describe("Location Thread Components", () => {
         <TestWrapper>
           <LocationComposer
             locationId="test-location"
-            onPostCreated={vi.fn()}
+            onPostCreated={jest.fn()}
           />
         </TestWrapper>
       );
@@ -242,7 +242,7 @@ describe("Location Thread Components", () => {
         <TestWrapper>
           <LocationComposer
             locationId="test-location"
-            onPostCreated={vi.fn()}
+            onPostCreated={jest.fn()}
           />
         </TestWrapper>
       );
@@ -260,7 +260,7 @@ describe("Location Thread Components", () => {
       const { createLocationPost } = await import("../hooks/useLocations");
       createLocationPost.mockResolvedValue({ success: true, post: mockPost });
 
-      const onPostCreated = vi.fn();
+      const onPostCreated = jest.fn();
 
       render(
         <TestWrapper>
@@ -298,8 +298,8 @@ describe("Location Thread Components", () => {
           <LocationPostCard
             post={mockPost}
             location={mockLocation}
-            onLike={vi.fn()}
-            onReport={vi.fn()}
+            onLike={jest.fn()}
+            onReport={jest.fn()}
           />
         </TestWrapper>
       );
@@ -318,8 +318,8 @@ describe("Location Thread Components", () => {
           <LocationPostCard
             post={pinnedPost}
             location={mockLocation}
-            onLike={vi.fn()}
-            onReport={vi.fn()}
+            onLike={jest.fn()}
+            onReport={jest.fn()}
           />
         </TestWrapper>
       );
@@ -343,8 +343,8 @@ describe("Location Thread Components", () => {
           <LocationPostCard
             post={pollPost}
             location={mockLocation}
-            onLike={vi.fn()}
-            onReport={vi.fn()}
+            onLike={jest.fn()}
+            onReport={jest.fn()}
           />
         </TestWrapper>
       );
@@ -371,8 +371,8 @@ describe("Location Thread Components", () => {
           <LocationPostCard
             post={runPost}
             location={mockLocation}
-            onLike={vi.fn()}
-            onReport={vi.fn()}
+            onLike={jest.fn()}
+            onReport={jest.fn()}
           />
         </TestWrapper>
       );
@@ -382,7 +382,7 @@ describe("Location Thread Components", () => {
     });
 
     it("should call onLike when like button is clicked", () => {
-      const onLike = vi.fn();
+      const onLike = jest.fn();
 
       render(
         <TestWrapper>
@@ -390,7 +390,7 @@ describe("Location Thread Components", () => {
             post={mockPost}
             location={mockLocation}
             onLike={onLike}
-            onReport={vi.fn()}
+            onReport={jest.fn()}
           />
         </TestWrapper>
       );
@@ -407,8 +407,8 @@ describe("Location Thread Components", () => {
           <LocationPostCard
             post={mockPost}
             location={mockLocation}
-            onLike={vi.fn()}
-            onReport={vi.fn()}
+            onLike={jest.fn()}
+            onReport={jest.fn()}
           />
         </TestWrapper>
       );
@@ -424,13 +424,13 @@ describe("Location Thread Components", () => {
   });
 
   describe("PlacesFeedSection", () => {
-    it("should render feed items correctly", () => {
+    it("should render feed items correctly", async () => {
       const { useHomeLocationFeed } = await import("../hooks/useLocations");
       useHomeLocationFeed.mockReturnValue({
         feedItems: [mockFeedItem],
         loading: false,
         hasMore: false,
-        loadMore: vi.fn()
+        loadMore: jest.fn()
       });
 
       render(
@@ -448,13 +448,13 @@ describe("Location Thread Components", () => {
       expect(screen.getByText("Location Update")).toBeInTheDocument();
     });
 
-    it("should show empty state when no feed items", () => {
+    it("should show empty state when no feed items", async () => {
       const { useHomeLocationFeed } = await import("../hooks/useLocations");
       useHomeLocationFeed.mockReturnValue({
         feedItems: [],
         loading: false,
         hasMore: false,
-        loadMore: vi.fn()
+        loadMore: jest.fn()
       });
 
       render(
@@ -471,13 +471,13 @@ describe("Location Thread Components", () => {
       expect(screen.getByText("Follow some places to see their updates here!")).toBeInTheDocument();
     });
 
-    it("should show loading state", () => {
+    it("should show loading state", async () => {
       const { useHomeLocationFeed } = await import("../hooks/useLocations");
       useHomeLocationFeed.mockReturnValue({
         feedItems: [],
         loading: true,
         hasMore: false,
-        loadMore: vi.fn()
+        loadMore: jest.fn()
       });
 
       render(
@@ -493,7 +493,7 @@ describe("Location Thread Components", () => {
       expect(screen.getByRole("status")).toBeInTheDocument(); // Loading spinner
     });
 
-    it("should show expand/collapse for items exceeding maxItems", () => {
+    it("should show expand/collapse for items exceeding maxItems", async () => {
       const { useHomeLocationFeed } = await import("../hooks/useLocations");
       const manyFeedItems = Array.from({ length: 15 }, (_, i) => ({
         ...mockFeedItem,
@@ -504,7 +504,7 @@ describe("Location Thread Components", () => {
         feedItems: manyFeedItems,
         loading: false,
         hasMore: false,
-        loadMore: vi.fn()
+        loadMore: jest.fn()
       });
 
       render(
@@ -522,7 +522,7 @@ describe("Location Thread Components", () => {
 
     it("should call loadMore when load more button is clicked", async () => {
       const { useHomeLocationFeed } = await import("../hooks/useLocations");
-      const loadMore = vi.fn();
+      const loadMore = jest.fn();
 
       useHomeLocationFeed.mockReturnValue({
         feedItems: [mockFeedItem],

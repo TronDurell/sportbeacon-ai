@@ -38,14 +38,12 @@ export const UserRegistrationSchema = z.object({
     .regex(/^[a-zA-Z\s\-']+$/, "Last name contains invalid characters")
     .transform((name: string) => name.trim()),
   
-  role: z.enum(["admin", "director", "coach", "townStaff", "athlete"], {
-    errorMap: () => ({ message: "Invalid role selected" })
-  }),
+  role: z.enum(["admin", "director", "coach", "townStaff", "athlete"]),
   
   organization: z.string()
     .max(100, "Organization name too long")
     .optional()
-    .transform((org: string) => org?.trim() || undefined),
+    .transform((org: string | undefined) => org?.trim() || undefined),
 });
 
 /**
@@ -60,9 +58,7 @@ export const UserLoginSchema = z.object({
   password: z.string()
     .min(1, "Password is required"),
   
-  role: z.enum(["admin", "director", "coach", "townStaff", "athlete"], {
-    errorMap: () => ({ message: "Invalid role selected" })
-  }),
+  role: z.enum(["admin", "director", "coach", "townStaff", "athlete"]),
 });
 
 /**
@@ -86,7 +82,7 @@ export const UserProfileUpdateSchema = z.object({
   organization: z.string()
     .max(100, "Organization name too long")
     .optional()
-    .transform((org: string) => org?.trim() || undefined),
+    .transform((org: string | undefined) => org?.trim() || undefined),
 });
 
 /**
@@ -99,13 +95,9 @@ export const LeagueSchema = z.object({
     .regex(/^[a-zA-Z0-9\s\-']+$/, "League name contains invalid characters")
     .transform((name: string) => name.trim()),
   
-  sport: z.enum(["soccer", "basketball", "baseball", "football", "hockey", "tennis", "volleyball", "lacrosse"], {
-    errorMap: () => ({ message: "Invalid sport selected" })
-  }),
+  sport: z.enum(["soccer", "basketball", "baseball", "football", "hockey", "tennis", "volleyball", "lacrosse"]),
   
-  ageGroup: z.enum(["u6", "u8", "u10", "u12", "u14", "u16", "u18", "adult"], {
-    errorMap: () => ({ message: "Invalid age group selected" })
-  }),
+  ageGroup: z.enum(["u6", "u8", "u10", "u12", "u14", "u16", "u18", "adult"]),
   
   maxTeams: z.number()
     .int("Max teams must be a whole number")
@@ -162,7 +154,7 @@ export const PlayerSchema = z.object({
   
   dateOfBirth: z.string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
-    .refine((date: Date) => {
+    .refine((date: string) => {
       const birthDate = new Date(date);
       const today = new Date();
       const age = today.getFullYear() - birthDate.getFullYear();

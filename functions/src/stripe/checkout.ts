@@ -101,7 +101,7 @@ export const createStripeCheckoutSession = onCall(
         return {
           error: {
             code: "rate-limit-exceeded",
-            message: rateLimitResult.message
+            message: rateLimitResult.message || "Rate limit exceeded"
           }
         };
       }

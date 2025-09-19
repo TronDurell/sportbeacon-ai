@@ -276,9 +276,7 @@ export const resolveDispute = onCall(
             targetType: disputeData?.targetType,
             targetId: disputeData?.targetId,
             timestamp: timestamp.toISOString()
-          },
-          undefined,
-          'dispute-resolution'
+          }
         );
 
         // Update athlete memory with dispute pattern
@@ -291,9 +289,7 @@ export const resolveDispute = onCall(
             resolvedBy: 'admin',
             disputeResolutionTime,
             resolution: action === 'resolve' ? 'resolved' : action === 'reject' ? 'rejected' : 'escalated'
-          },
-          undefined,
-          'analytics-dispute-resolved'
+          }
         );
 
       } catch (memoryError) {

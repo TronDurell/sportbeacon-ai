@@ -1,17 +1,17 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest  } from '@jest/globals';
 import { validateFirebaseIdToken, validateServiceKey } from '../auth';
 import { admin } from 'firebase-admin';
 
 // Mock Firebase Admin
-vi.mock('firebase-admin', () => ({
+jest.mock('firebase-admin', () => ({
   admin: {
-    auth: vi.fn(),
+    auth: jest.fn(),
   },
 }));
 
 describe('MCP Authentication', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('validateFirebaseIdToken', () => {
@@ -23,8 +23,8 @@ describe('MCP Authentication', () => {
         teamId: 'team-456',
       };
 
-      vi.mocked(admin.auth).mockReturnValue({
-        verifyIdToken: vi.fn().mockResolvedValue(mockDecodedToken),
+      jest.mocked(admin.auth).mockReturnValue({
+        verifyIdToken: jest.fn().mockResolvedValue(mockDecodedToken),
       } as any);
 
       const result = await validateFirebaseIdToken(mockToken);
@@ -43,8 +43,8 @@ describe('MCP Authentication', () => {
         role: 'admin',
       };
 
-      vi.mocked(admin.auth).mockReturnValue({
-        verifyIdToken: vi.fn().mockResolvedValue(mockDecodedToken),
+      jest.mocked(admin.auth).mockReturnValue({
+        verifyIdToken: jest.fn().mockResolvedValue(mockDecodedToken),
       } as any);
 
       const result = await validateFirebaseIdToken(mockToken);
@@ -56,8 +56,8 @@ describe('MCP Authentication', () => {
     });
 
     it('should throw error for invalid token', async () => {
-      vi.mocked(admin.auth).mockReturnValue({
-        verifyIdToken: vi.fn().mockRejectedValue(new Error('Invalid token')),
+      jest.mocked(admin.auth).mockReturnValue({
+        verifyIdToken: jest.fn().mockRejectedValue(new Error('Invalid token')),
       } as any);
 
       await expect(validateFirebaseIdToken('invalid-token')).rejects.toThrow('Invalid token');
@@ -72,8 +72,8 @@ describe('MCP Authentication', () => {
         role: 'agent-service',
       };
 
-      vi.mocked(admin.auth).mockReturnValue({
-        verifyIdToken: vi.fn().mockResolvedValue(mockDecodedToken),
+      jest.mocked(admin.auth).mockReturnValue({
+        verifyIdToken: jest.fn().mockResolvedValue(mockDecodedToken),
       } as any);
 
       const result = await validateServiceKey(mockServiceKey);
@@ -85,8 +85,8 @@ describe('MCP Authentication', () => {
     });
 
     it('should throw error for invalid service key', async () => {
-      vi.mocked(admin.auth).mockReturnValue({
-        verifyIdToken: vi.fn().mockRejectedValue(new Error('Invalid service key')),
+      jest.mocked(admin.auth).mockReturnValue({
+        verifyIdToken: jest.fn().mockRejectedValue(new Error('Invalid service key')),
       } as any);
 
       await expect(validateServiceKey('invalid-service-key')).rejects.toThrow('Invalid service key');
