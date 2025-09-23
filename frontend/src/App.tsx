@@ -4,6 +4,7 @@ import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import ErrorBoundaryWithMonitoring from "./components/ErrorBoundaryWithMonitoring";
 import webVitalsReporter from "./lib/webVitals";
 import { useMemory } from "./hooks/useMemory";
+import { performanceOptimizer } from "./utils/performanceOptimizer";
 import "./App.css";
 
 // Lazy load pages for code splitting
@@ -28,6 +29,16 @@ function App() {
   useEffect(() => {
     // Initialize Web Vitals monitoring
     webVitalsReporter.initialize();
+    
+    // Initialize performance monitoring
+    performanceOptimizer.measure('App.initialize', () => {
+      console.log('App initialized with performance monitoring');
+    });
+
+    // Cleanup function for memory leak prevention
+    return () => {
+      console.log('App cleanup completed');
+    };
   }, []);
 
   return (

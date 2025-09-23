@@ -3,7 +3,7 @@
 import { auth } from "../lib/firebase";
 // Mock API service for development
 class RealApiService {
-    baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5001/sportbeacon-ai/us-central1";
     async request(endpoint, options = {}) {
         const token = await auth.currentUser?.getIdToken();
         const response = await fetch(`${this.baseUrl}${endpoint}`, {

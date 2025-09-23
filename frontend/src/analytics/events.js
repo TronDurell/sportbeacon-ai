@@ -21,7 +21,7 @@ export const ANALYTICS_EVENTS = {
 // ANALYTICS SERVICE CLASS
 // ============================================================================
 class AnalyticsService {
-    memoryClient = memoryClient();
+    memoryClient = memoryClient;
     tenantId;
     userId = null;
     constructor(tenantId = 'sportbeacon') {
@@ -75,10 +75,6 @@ class AnalyticsService {
     async emitAthleteClaimed(data) {
         await this.emitEvent(ANALYTICS_EVENTS.ATHLETE_CLAIMED, {
             athleteId: data.athleteId,
-            meta: {
-                claimerType: data.claimerType,
-                claimMethod: data.claimMethod
-            }
         });
     }
     async emitHighlightAdded(data) {
@@ -87,10 +83,6 @@ class AnalyticsService {
             highlightType: data.highlightType,
             source: data.source,
             sport: data.sport,
-            meta: {
-                highlightId: data.highlightId,
-                isPublic: data.isPublic
-            }
         });
     }
     async emitCsvImported(data) {
@@ -98,11 +90,6 @@ class AnalyticsService {
             athleteId: data.athleteId,
             sport: data.sport,
             method: data.method,
-            meta: {
-                rowCount: data.rowCount,
-                successCount: data.successCount,
-                errorCount: data.errorCount
-            }
         });
     }
     async emitStatSubmitted(data) {
@@ -111,10 +98,6 @@ class AnalyticsService {
             sport: data.sport,
             statType: data.statType,
             method: data.method,
-            meta: {
-                statId: data.statId,
-                submittedBy: data.submittedBy
-            }
         });
     }
     async emitStatVerified(data) {
@@ -123,24 +106,12 @@ class AnalyticsService {
             sport: data.sport,
             statType: data.statType,
             verificationTime: data.verificationTime,
-            meta: {
-                statId: data.statId,
-                verifiedBy: data.verifiedBy,
-                resolution: data.resolution
-            }
         });
     }
     async emitDisputeSubmitted(data) {
         await this.emitEvent(ANALYTICS_EVENTS.DISPUTE_SUBMITTED, {
             athleteId: data.athleteId,
             disputeType: data.disputeType,
-            meta: {
-                disputeId: data.disputeId,
-                targetType: data.targetType,
-                targetId: data.targetId,
-                submittedBy: data.submittedBy,
-                priority: data.priority
-            }
         });
     }
     async emitDisputeResolved(data) {
@@ -148,45 +119,22 @@ class AnalyticsService {
             athleteId: data.athleteId,
             disputeType: data.disputeType,
             disputeResolutionTime: data.disputeResolutionTime,
-            meta: {
-                disputeId: data.disputeId,
-                resolvedBy: data.resolvedBy,
-                resolution: data.resolution,
-                resolutionReason: data.resolutionReason
-            }
         });
     }
     async emitAthleteProfileViewed(data) {
         await this.emitEvent(ANALYTICS_EVENTS.ATHLETE_PROFILE_VIEWED, {
             athleteId: data.athleteId,
-            meta: {
-                viewerType: data.viewerType,
-                viewedTabs: data.viewedTabs,
-                sessionDuration: data.sessionDuration
-            }
         });
     }
     async emitAdminActionPerformed(data) {
         await this.emitEvent(ANALYTICS_EVENTS.ADMIN_ACTION_PERFORMED, {
             success: data.success,
             error: data.error,
-            meta: {
-                action: data.action,
-                targetId: data.targetId,
-                targetType: data.targetType,
-                adminId: data.adminId
-            }
         });
     }
     async emitMemoryUpdated(data) {
         await this.emitEvent(ANALYTICS_EVENTS.MEMORY_UPDATED, {
             athleteId: data.athleteId,
-            meta: {
-                memoryField: data.memoryField,
-                updateType: data.updateType,
-                updateSource: data.updateSource,
-                confidence: data.confidence
-            }
         });
     }
     // ============================================================================

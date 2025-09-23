@@ -58,7 +58,7 @@ export type AnalyticsEventType = typeof ANALYTICS_EVENTS[keyof typeof ANALYTICS_
 // ============================================================================
 
 class AnalyticsService {
-  private memoryClient = memoryClient();
+  private memoryClient = memoryClient;
   private tenantId: string;
   private userId: string | null = null;
 
@@ -73,7 +73,7 @@ class AnalyticsService {
   private async emitEvent(
     eventType: AnalyticsEventType,
     data: KPIEventData,
-    memoryKind: MemoryEventKind = 'observation'
+    memoryKind: MemoryEventKind = 'observation' as MemoryEventKind
   ): Promise<void> {
     try {
       const timestamp = new Date().toISOString() as DateString;
@@ -129,10 +129,6 @@ class AnalyticsService {
   }): Promise<void> {
     await this.emitEvent(ANALYTICS_EVENTS.ATHLETE_CLAIMED, {
       athleteId: data.athleteId,
-      meta: {
-        claimerType: data.claimerType,
-        claimMethod: data.claimMethod
-      }
     });
   }
 
@@ -149,10 +145,6 @@ class AnalyticsService {
       highlightType: data.highlightType,
       source: data.source,
       sport: data.sport,
-      meta: {
-        highlightId: data.highlightId,
-        isPublic: data.isPublic
-      }
     });
   }
 
@@ -168,11 +160,6 @@ class AnalyticsService {
       athleteId: data.athleteId,
       sport: data.sport,
       method: data.method,
-      meta: {
-        rowCount: data.rowCount,
-        successCount: data.successCount,
-        errorCount: data.errorCount
-      }
     });
   }
 
@@ -189,10 +176,6 @@ class AnalyticsService {
       sport: data.sport,
       statType: data.statType,
       method: data.method,
-      meta: {
-        statId: data.statId,
-        submittedBy: data.submittedBy
-      }
     });
   }
 
@@ -210,11 +193,6 @@ class AnalyticsService {
       sport: data.sport,
       statType: data.statType,
       verificationTime: data.verificationTime,
-      meta: {
-        statId: data.statId,
-        verifiedBy: data.verifiedBy,
-        resolution: data.resolution
-      }
     });
   }
 
@@ -230,13 +208,6 @@ class AnalyticsService {
     await this.emitEvent(ANALYTICS_EVENTS.DISPUTE_SUBMITTED, {
       athleteId: data.athleteId,
       disputeType: data.disputeType,
-      meta: {
-        disputeId: data.disputeId,
-        targetType: data.targetType,
-        targetId: data.targetId,
-        submittedBy: data.submittedBy,
-        priority: data.priority
-      }
     });
   }
 
@@ -253,12 +224,6 @@ class AnalyticsService {
       athleteId: data.athleteId,
       disputeType: data.disputeType,
       disputeResolutionTime: data.disputeResolutionTime,
-      meta: {
-        disputeId: data.disputeId,
-        resolvedBy: data.resolvedBy,
-        resolution: data.resolution,
-        resolutionReason: data.resolutionReason
-      }
     });
   }
 
@@ -270,11 +235,6 @@ class AnalyticsService {
   }): Promise<void> {
     await this.emitEvent(ANALYTICS_EVENTS.ATHLETE_PROFILE_VIEWED, {
       athleteId: data.athleteId,
-      meta: {
-        viewerType: data.viewerType,
-        viewedTabs: data.viewedTabs,
-        sessionDuration: data.sessionDuration
-      }
     });
   }
 
@@ -289,12 +249,6 @@ class AnalyticsService {
     await this.emitEvent(ANALYTICS_EVENTS.ADMIN_ACTION_PERFORMED, {
       success: data.success,
       error: data.error,
-      meta: {
-        action: data.action,
-        targetId: data.targetId,
-        targetType: data.targetType,
-        adminId: data.adminId
-      }
     });
   }
 
@@ -307,12 +261,6 @@ class AnalyticsService {
   }): Promise<void> {
     await this.emitEvent(ANALYTICS_EVENTS.MEMORY_UPDATED, {
       athleteId: data.athleteId,
-      meta: {
-        memoryField: data.memoryField,
-        updateType: data.updateType,
-        updateSource: data.updateSource,
-        confidence: data.confidence
-      }
     });
   }
 

@@ -1,9 +1,12 @@
-const logger = { 
-  info: jest.fn(), 
-  warn: jest.fn(), 
-  error: jest.fn(), 
-  log: jest.fn() 
-};
+// Mock for firebase-functions/logger
+export const info = jest.fn();
+export const warn = jest.fn();
+export const error = jest.fn();
+export const debug = jest.fn();
 
-export { logger }; 
-export default logger;
+export default {
+  info,
+  warn,
+  error,
+  debug,
+};

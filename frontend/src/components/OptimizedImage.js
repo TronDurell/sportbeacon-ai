@@ -11,7 +11,7 @@ const OptimizedImage = ({ src, alt, className = "", width, height, placeholder =
             return;
         }
         const observer = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting) {
+            if (entry?.isIntersecting) {
                 setIsInView(true);
                 observer.disconnect();
             }

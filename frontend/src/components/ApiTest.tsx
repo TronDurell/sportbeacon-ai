@@ -9,7 +9,7 @@ const ApiTest: React.FC = () => {
     const testApiConnection = async () => {
       try {
         // Test health endpoint
-        const healthResponse = await fetch("http://127.0.0.1:8000/health");
+        const healthResponse = await fetch("http://localhost:5001/sportbeacon-ai/us-central1/health");
         if (healthResponse.ok) {
           const healthData = await healthResponse.json();
           setHealthStatus(`✅ Health: ${healthData.status} - ${healthData.service}`);
@@ -18,7 +18,7 @@ const ApiTest: React.FC = () => {
         }
 
         // Test API endpoint
-        const testResponse = await fetch("http://127.0.0.1:8000/api/test");
+        const testResponse = await fetch("http://localhost:5001/sportbeacon-ai/us-central1/api/test");
         if (testResponse.ok) {
           const testData = await testResponse.json();
           setTestStatus(`✅ API Test: ${testData.message}`);
@@ -46,7 +46,7 @@ const ApiTest: React.FC = () => {
       <div style={{ marginTop: "20px", padding: "15px", backgroundColor: "#f5f5f5", borderRadius: "5px" }}>
         <h4>Integration Summary:</h4>
         <ul>
-          <li>✅ Backend server running on http://127.0.0.1:8000</li>
+          <li>✅ Backend server running on http://localhost:5001/sportbeacon-ai/us-central1</li>
           <li>✅ Frontend server running on http://localhost:3001</li>
           <li>✅ Production build completed successfully</li>
           <li>✅ API endpoints configured and accessible</li>

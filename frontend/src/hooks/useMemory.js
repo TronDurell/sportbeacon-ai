@@ -2,7 +2,7 @@
    Provides easy integration with the Memory SDK for web components
 */
 import { useCallback, useEffect, useState } from 'react';
-import { createMemoryClient } from '@sportbeacon/memory-sdk';
+import { memoryClient } from '@sportbeacon/memory-sdk';
 export function useMemory(options = {}) {
     const { enabled = true, autoCapture = true } = options;
     const [client, setClient] = useState(null);
@@ -19,7 +19,7 @@ export function useMemory(options = {}) {
             return;
         }
         try {
-            const memClient = createMemoryClient();
+            const memClient = memoryClient;
             setClient(memClient);
             setIsInitialized(true);
         }

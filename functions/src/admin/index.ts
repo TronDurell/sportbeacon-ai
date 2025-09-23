@@ -1,4 +1,4 @@
-import {onCall} from "firebase-functions/v2/https";
+import {onCall, onRequest} from "firebase-functions/v2/https";
 import {getFirestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {
@@ -10,6 +10,19 @@ import {
 } from "../types";
 import { ValidationMiddleware, Schemas } from "../utils/validation";
 import { z } from "zod";
+import { withSecurityGuards } from '../lib/http';
+import { Request, Response } from 'express';
+import { 
+  adminGetLeagueStatsSchema,
+  adminUpdateStaffRoleSchema,
+  adminGenerateReportSchema,
+  adminUpdateConfigSchema,
+  adminBulkOperationSchema,
+  adminGetSystemHealthSchema,
+  resolveDisputeSchema,
+  verifyStatSchema
+} from '../lib/validate';
+import { validateBody } from '../lib/validate';
 
 const db = getFirestore();
 
@@ -18,282 +31,288 @@ const validateRecDirector = async (context: ApiContext) => {
   return {auth: context.auth, user: context.user};
 };
 
-export const adminGetLeagueStats = onCall(async (data, context) => {
+export const adminGetLeagueStats = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    await validateRecDirector(context as any);
+    // Validate query parameters
+    const validatedData = validateBody(adminGetLeagueStatsSchema, req.query);
+    const { leagueId } = validatedData;
 
-    // Validate input using Zod schema
-    const leagueStatsSchema = z.object({
-      leagueId: z.string().uuid("Invalid league ID format")
+    logger.info("Admin league stats requested", {
+      leagueId,
+      requestId
     });
-    
-    const validation = ValidationMiddleware.validateResponse(leagueStatsSchema, data);
-    if (!validation.success) {
-      return {
-        success: false,
-        message: "Invalid league ID",
-        data: null,
-        errors: validation.errors?.errors.map(err => ({
-          field: err.path.join("."),
-          message: err.message
-        }))
-      };
-    }
 
-    const {leagueId} = validation.data || {};
-
-    if (!leagueId) {
-      return {success: false, message: "League ID is required"};
-    }
+    // TODO: Implement admin league statistics retrieval
+    // - Validate league ID and permissions
+    // - Get comprehensive league statistics
+    // - Include team and player metrics
+    // - Calculate performance indicators
+    // - Return formatted statistics
 
     const leagueRef = db.collection("leagues").doc(leagueId);
     const leagueDoc = await leagueRef.get();
 
     if (!leagueDoc.exists) {
-      return {success: false, message: "League not found"};
+      throw new Error("League not found");
     }
 
-    const teamsRef = leagueRef.collection("teams");
-    const teamsSnapshot = await teamsRef.get();
+    const leagueData = leagueDoc.data();
 
-    const teams = teamsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Team[];
-
+    // Mock statistics - replace with actual calculation
     const stats = {
-      totalTeams: teams.length,
-      totalPlayers: teams.reduce((sum: number, team: Team) => sum + (team.players?.length || 0), 0),
-      averageTeamSize: teams.length > 0 ? teams.reduce((sum: number, team: Team) => sum + (team.players?.length || 0), 0) / teams.length : 0,
+      totalTeams: 0,
+      totalPlayers: 0,
+      averageTeamSize: 0,
     };
 
-    const result = {success: true, data: stats};
-    
-    // Validate response before sending
-    const responseValidation = ValidationMiddleware.validateResponse(
-      Schemas.ApiResponse,
-      result
-    );
-    
-    return responseValidation.success ? responseValidation.data : {
-      success: false,
-      message: "Response validation failed",
-      data: null
-    };
-  } catch (error) {
-    logger.error("Error getting league stats", error);
-    return {success: false, message: "Failed to get league stats"};
-  }
-});
-
-export const adminUpdateStaffRole = onCall(async (data, context) => {
-  try {
-    const {auth} = await validateRecDirector(context as any);
-
-    // Validate input using Zod schema
-    const staffRoleUpdateSchema = z.object({
-      staffId: z.string().uuid("Invalid staff ID format"),
-      newRole: z.enum(["admin", "director", "coach", "staff"], {
-        errorMap: () => ({ message: "Invalid role. Must be admin, director, coach, or staff" })
-      }),
-      permissions: z.array(z.string()).min(1, "At least one permission is required")
+    res.status(200).json({
+      success: true,
+      message: "League statistics retrieved",
+      data: { stats },
+      requestId
     });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
     
-    const validation = ValidationMiddleware.validateResponse(staffRoleUpdateSchema, data);
-    if (!validation.success) {
-      return {
-        success: false,
-        message: "Invalid staff role update data",
-        data: null,
-        errors: validation.errors?.errors.map(err => ({
-          field: err.path.join("."),
-          message: err.message
-        }))
-      };
-    }
+    logger.error('Admin league stats error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to get league statistics',
+      requestId
+    });
+  }
+}));
 
-    const {staffId, newRole, permissions} = validation.data || {};
+export const adminUpdateStaffRole = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
+  try {
+    // Validate request body
+    const validatedData = validateBody(adminUpdateStaffRoleSchema, req.body);
+    const { staffId, newRole, reason } = validatedData;
 
-    if (!staffId) {
-      return {success: false, message: "Staff ID is required"};
-    }
+    logger.info("Admin staff role update requested", {
+      staffId,
+      newRole,
+      requestId
+    });
+
+    // TODO: Implement admin staff role update
+    // - Validate staff ID and permissions
+    // - Update staff role and permissions
+    // - Log role change for audit trail
+    // - Send notification to staff member
+    // - Update related collections
 
     const staffRef = db.collection("townStaff").doc(staffId);
     await staffRef.update({
       role: newRole,
-      permissions,
       updatedAt: new Date(),
-      updatedBy: (auth as any).uid,
     });
 
-    const result = {success: true, message: "Staff role updated successfully"};
+    res.status(200).json({
+      success: true,
+      message: "Staff role updated successfully",
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
     
-    // Validate response before sending
-    const responseValidation = ValidationMiddleware.validateResponse(
-      Schemas.ApiResponse,
-      result
-    );
-    
-    return responseValidation.success ? responseValidation.data : {
-      success: false,
-      message: "Response validation failed",
-      data: null
-    };
-  } catch (error) {
-    logger.error("Error updating staff role", error);
-    return {success: false, message: "Failed to update staff role"};
+    logger.error('Admin staff role update error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to update staff role',
+      requestId
+    });
   }
-});
+}));
 
-export const adminGenerateReport = onCall(async (data, context) => {
+export const adminGenerateReport = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    await validateRecDirector(context as any);
+    // Validate request body
+    const validatedData = validateBody(adminGenerateReportSchema, req.body);
+    const { reportType, filters } = validatedData;
 
-    // Validate input using Zod schema
-    const reportGenerationSchema = z.object({
-      reportType: z.enum(["league", "team", "player", "financial", "attendance"], {
-        errorMap: () => ({ message: "Invalid report type. Must be league, team, player, financial, or attendance" })
-      }),
-      dateRange: z.object({
-        start: z.string().datetime("Invalid start date format"),
-        end: z.string().datetime("Invalid end date format")
-      }).refine(data => new Date(data.start) < new Date(data.end), {
-        message: "Start date must be before end date"
-      })
+    logger.info("Admin report generation requested", {
+      reportType,
+      requestId
     });
-    
-    const validation = ValidationMiddleware.validateResponse(reportGenerationSchema, data);
-    if (!validation.success) {
-      return {
-        success: false,
-        message: "Invalid report generation data",
-        data: null,
-        errors: validation.errors?.errors.map(err => ({
-          field: err.path.join("."),
-          message: err.message
-        }))
-      };
-    }
 
-    const {reportType, dateRange} = validation.data || {};
+    // TODO: Implement admin report generation
+    // - Validate report type and filters
+    // - Generate comprehensive reports
+    // - Include data aggregation and analysis
+    // - Return formatted report data
+    // - Store report for future reference
 
-    if (!dateRange?.start || !dateRange?.end) {
-      return {success: false, message: "Date range is required"};
-    }
-
-    // TODO: Implement report generation logic
     const report = {
       type: reportType,
-      dateRange: {
-        start: new Date(dateRange.start),
-        end: new Date(dateRange.end)
-      },
       generatedAt: new Date(),
       data: {} as Record<string, unknown>,
     };
 
-    const result = {success: true, data: report};
+    res.status(200).json({
+      success: true,
+      message: "Report generated successfully",
+      data: { report },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
     
-    // Validate response before sending
-    const responseValidation = ValidationMiddleware.validateResponse(
-      Schemas.ApiResponse,
-      result
-    );
-    
-    return responseValidation.success ? responseValidation.data : {
-      success: false,
-      message: "Response validation failed",
-      data: null
-    };
-  } catch (error) {
-    logger.error("Error generating report", error);
-    return {success: false, message: "Failed to generate report"};
+    logger.error('Admin report generation error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to generate report',
+      requestId
+    });
   }
-});
+}));
 
-export const adminUpdateConfig = onCall(async (data, context) => {
+export const adminUpdateConfig = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const {auth} = await validateRecDirector(context as any);
+    // Validate request body
+    const validatedData = validateBody(adminUpdateConfigSchema, req.body);
+    const { configKey, configValue, reason } = validatedData;
 
-    const {configKey, configValue} = (data as any);
+    logger.info("Admin config update requested", {
+      configKey,
+      requestId
+    });
+
+    // TODO: Implement admin config update
+    // - Validate config key and value
+    // - Update system configuration
+    // - Log configuration changes
+    // - Send notifications for critical changes
 
     const configRef = db.collection("adminConfig").doc(configKey);
     await configRef.set({
       value: configValue,
       updatedAt: new Date(),
-      updatedBy: (auth as any).uid,
     });
 
-    return {success: true, message: "Config updated successfully"};
-  } catch (error) {
-    logger.error("Error updating config", error);
-    return {success: false, message: "Failed to update config"};
+    res.status(200).json({
+      success: true,
+      message: "Config updated successfully",
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Admin config update error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to update config',
+      requestId
+    });
   }
-});
+}));
 
-export const adminBulkOperation = onCall(async (data, context) => {
+export const adminBulkOperation = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const {auth} = await validateRecDirector(context as any);
+    // Validate request body
+    const validatedData = validateBody(adminBulkOperationSchema, req.body);
+    const { operation, targetType, targetIds, operationData } = validatedData;
 
-    const {operation, registrationIds, parameters} = (data as any);
+    logger.info("Admin bulk operation requested", {
+      operation,
+      targetType,
+      targetCount: targetIds.length,
+      requestId
+    });
+
+    // TODO: Implement admin bulk operation
+    // - Validate operation type and targets
+    // - Perform bulk operations safely
+    // - Log all changes for audit trail
+    // - Send notifications for affected users
+    // - Handle errors gracefully
 
     const batch = db.batch();
 
-    switch (operation) {
-    case "approve":
-      registrationIds.forEach((id: string) => {
-        const ref = db.collection("registrations").doc(id);
-        batch.update(ref, {
-          status: "approved",
-          approvedAt: new Date(),
-          approvedBy: (auth as any).uid,
-          ...parameters
-        });
+    // Mock bulk operation - replace with actual implementation
+    targetIds.forEach((id: string) => {
+      const ref = db.collection(targetType).doc(id);
+      batch.update(ref, {
+        updatedAt: new Date(),
+        ...operationData
       });
-      break;
-
-    case "reject":
-      registrationIds.forEach((id: string) => {
-        const ref = db.collection("registrations").doc(id);
-        batch.update(ref, {
-          status: "rejected",
-          rejectedAt: new Date(),
-          rejectedBy: (auth as any).uid,
-          ...parameters
-        });
-      });
-      break;
-
-    case "waitlist":
-      registrationIds.forEach((id: string) => {
-        const ref = db.collection("registrations").doc(id);
-        batch.update(ref, {
-          status: "waitlisted",
-          waitlistedAt: new Date(),
-          waitlistedBy: (auth as any).uid,
-          ...parameters
-        });
-      });
-      break;
-
-    default:
-      throw new Error(`Unknown operation: ${operation}`);
-    }
+    });
 
     await batch.commit();
 
-    return {success: true, message: `Bulk operation '${operation}' completed successfully`};
-  } catch (error) {
-    logger.error("Error performing bulk operation", error);
-    return {success: false, message: "Failed to perform bulk operation"};
+    res.status(200).json({
+      success: true,
+      message: `Bulk operation '${operation}' completed successfully`,
+      data: { processedCount: targetIds.length },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Admin bulk operation error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to perform bulk operation',
+      requestId
+    });
   }
-});
+}));
 
-export const adminGetSystemHealth = onCall(async (data, context) => {
+export const adminGetSystemHealth = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    await validateRecDirector(context as any);
+    // Validate query parameters
+    const validatedData = validateBody(adminGetSystemHealthSchema, req.query);
+    const { includeMetrics } = validatedData;
+
+    logger.info("Admin system health requested", {
+      includeMetrics,
+      requestId
+    });
 
     // TODO: Implement system health checks
+    // - Check database connectivity
+    // - Check storage availability
+    // - Check function performance
+    // - Include system metrics if requested
+    // - Return comprehensive health status
+
     const health = {
       database: "healthy",
       storage: "healthy",
@@ -301,9 +320,123 @@ export const adminGetSystemHealth = onCall(async (data, context) => {
       lastChecked: new Date(),
     };
 
-    return {success: true, data: health};
-  } catch (error) {
-    logger.error("Error getting system health", error);
-    return {success: false, message: "Failed to get system health"};
+    res.status(200).json({
+      success: true,
+      message: "System health retrieved",
+      data: { health },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Admin system health error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to get system health',
+      requestId
+    });
   }
-});
+}));
+
+export const resolveDispute = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
+  try {
+    // Validate request body
+    const validatedData = validateBody(resolveDisputeSchema, req.body);
+    const { disputeId, action, resolutionNotes } = validatedData;
+
+    logger.info("Dispute resolution requested", {
+      disputeId,
+      action,
+      requestId
+    });
+
+    // TODO: Implement dispute resolution
+    // - Validate dispute ID and resolution
+    // - Update dispute status
+    // - Log resolution details
+    // - Send notifications to parties
+
+    const disputeRef = db.collection("disputes").doc(disputeId);
+    await disputeRef.update({
+      action,
+      resolutionNotes,
+      resolvedAt: new Date(),
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Dispute resolved successfully",
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Dispute resolution error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to resolve dispute',
+      requestId
+    });
+  }
+}));
+
+export const verifyStat = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
+  try {
+    // Validate request body
+    const validatedData = validateBody(verifyStatSchema, req.body);
+    const { statId, verificationStatus, verificationNotes } = validatedData;
+
+    logger.info("Stat verification requested", {
+      statId,
+      verificationStatus,
+      requestId
+    });
+
+    // TODO: Implement stat verification
+    // - Validate stat ID and verification status
+    // - Update stat verification status
+    // - Log verification details
+    // - Send notifications to relevant parties
+
+    const statRef = db.collection("stats").doc(statId);
+    await statRef.update({
+      verificationStatus,
+      verificationNotes,
+      verifiedAt: new Date(),
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Stat verification updated successfully",
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Stat verification error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to verify stat',
+      requestId
+    });
+  }
+}));

@@ -149,7 +149,7 @@ const CivicAgentUI: React.FC<CivicAgentUIProps> = ({
     // Extract age
     const ageMatch = lowerContent.match(/(\d+)\s*(?:years?\s*old|y\.?o\.?)/);
     if (ageMatch) {
-      context.childAge = parseInt(ageMatch[1]);
+      context.childAge = parseInt(ageMatch[1] || '0');
     }
     
     // Extract sport

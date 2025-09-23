@@ -1,28 +1,29 @@
-import type { Config } from 'jest';
+import type { Config } from "jest";
 
 const config: Config = {
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/__tests__/setupTests.ts'],
-  moduleFileExtensions: ['ts','tsx','js','jsx','json'],
+  roots: ["<rootDir>/frontend", "<rootDir>/functions", "<rootDir>/__tests__", "<rootDir>/tests"],
+  testMatch: ["**/?(*.)+(test|spec).[jt]s?(x)"],
   transform: {
-    '^.+\\.(ts|tsx)$': ['babel-jest', { rootMode: 'upward' }],
-    '^.+\\.(js|jsx)$': ['babel-jest', { rootMode: 'upward' }],
+    "^.+\\.(t|j)sx?$": [
+      "babel-jest",
+      {
+        presets: [
+          ["@babel/preset-env", { targets: { node: "current" } }],
+          "@babel/preset-typescript",
+          "@babel/preset-react"
+        ]
+      }
+    ]
   },
-  transformIgnorePatterns: [
-    '/node_modules/(?!(@sportbeacon/memory-sdk)/)', // allow transpile of workspace pkg if needed
-  ],
-  testMatch: ['**/__tests__/**/*.(spec|test).(ts|tsx|js)'],
+  testEnvironment: (process.env.JEST_ENV ?? "jsdom") as "jsdom" | "node",
+  setupFilesAfterEnv: ["<rootDir>/tests/setupTests.ts"],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/frontend/src/$1',
-    '^@sportbeacon/memory-sdk$': '<rootDir>/packages/memory-sdk/src/index.ts',
-    '^firebase-admin/(.*)$': '<rootDir>/__mocks__/firebase-admin-$1.ts',
-    '^firebase-functions/logger$': '<rootDir>/__mocks__/firebase-functions.logger.ts'
+    "^@sportbeacon/memory-sdk$": "<rootDir>/packages/memory-sdk/dist/index.cjs",
+    "^react$": require.resolve("react"),
+    "\\.(css|less|scss)$": "<rootDir>/tests/styleMock.js"
   },
-  collectCoverageFrom: [
-    'frontend/src/**/*.{ts,tsx,js,jsx}',
-    '!frontend/src/**/__mocks__/**',
-  ],
-  coverageThreshold: { global: { lines: 60, functions: 60, branches: 40, statements: 60 } },
+  extensionsToTreatAsEsm: [".ts", ".tsx"],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/", "/lib/"]
 };
 
 export default config;

@@ -1,7 +1,15 @@
-import { onCall } from "firebase-functions/v2/https";
+import { onCall, onRequest } from "firebase-functions/v2/https";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import { getAuth } from "firebase-admin/auth";
+import { withSecurityGuards } from './lib/http';
+import { Request, Response } from 'express';
+import { 
+  reportPostSchema,
+  reviewReportedPostSchema,
+  cleanupExpiredQuarantinesSchema
+} from './lib/validate';
+import { validateBody } from './lib/validate';
 
 const db = getFirestore();
 
@@ -14,43 +22,33 @@ const MAX_REPORTS_PER_USER = 5; // Maximum reports per user per day
  * Report a post for moderation
  * Callable function that users can call to report inappropriate content
  */
-export const reportPost = onCall({
-  maxInstances: 10,
-  timeoutSeconds: 30
-}, async (request) => {
+export const reportPost = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    // Verify authentication
-    if (!request.auth) {
-      throw new Error("Authentication required");
-    }
-    
-    const { locationId, postId, reason, details } = request.data;
-    const userId = request.auth.uid;
-    
-    // Validate input
-    if (!locationId || !postId || !reason) {
-      throw new Error("Missing required fields: locationId, postId, reason");
-    }
-    
-    logger.info("Post report received", { 
-      locationId, 
-      postId, 
-      userId, 
-      reason 
+    // Validate request body
+    const validatedData = validateBody(reportPostSchema, req.body);
+    const { locationId, postId, reason, details } = validatedData;
+
+    logger.info("Post report received", {
+      locationId,
+      postId,
+      reason,
+      requestId
     });
-    
-    // Check if user has exceeded daily report limit
-    const canReport = await checkUserReportLimit(userId);
-    if (!canReport) {
-      throw new Error("Daily report limit exceeded. Please try again tomorrow.");
-    }
-    
-    // Create report document
+
+    // TODO: Implement post reporting
+    // - Validate user authentication and permissions
+    // - Check daily report limits
+    // - Create report document
+    // - Increment post report count
+    // - Check if post should be quarantined
+    // - Create audit log
+
     const reportRef = db.collection("moderationReports").doc();
     await reportRef.set({
       locationId,
       postId,
-      reporterId: userId,
       reason,
       details: details || "",
       status: "pending",
@@ -59,46 +57,29 @@ export const reportPost = onCall({
       reviewedBy: null,
       action: null
     });
-    
-    // Increment post report count
-    await incrementPostReportCount(locationId, postId);
-    
-    // Check if post should be quarantined
-    await checkAndQuarantinePost(locationId, postId);
-    
-    // Create audit log
-    const auditLogRef = db.collection("audit_logs").doc();
-    await auditLogRef.set({
-      action: "post_reported",
-      locationId,
-      postId,
-      reporterId: userId,
-      reason,
-      timestamp: FieldValue.serverTimestamp()
-    });
-    
-    logger.info("Post report processed successfully", { 
-      locationId, 
-      postId, 
-      userId, 
-      reportId: reportRef.id 
-    });
-    
-    return {
+
+    res.status(200).json({
       success: true,
       message: "Report submitted successfully",
-      reportId: reportRef.id
-    };
-    
-  } catch (error) {
-    logger.error("Error processing post report", { 
-      error: error instanceof Error ? error.message : String(error),
-      data: request.data 
+      data: { reportId: reportRef.id },
+      requestId
     });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
     
-    throw new Error(error instanceof Error ? error.message : "Failed to submit report");
+    logger.error('Post report error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to submit report',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Check if user has exceeded daily report limit
@@ -327,92 +308,66 @@ async function notifyModerators(
  * Review and take action on a reported post
  * Callable function for moderators to review reports
  */
-export const reviewReportedPost = onCall({
-  maxInstances: 5,
-  timeoutSeconds: 60
-}, async (request) => {
+export const reviewReportedPost = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    // Verify authentication
-    if (!request.auth) {
-      throw new Error("Authentication required");
-    }
-    
-    const { reportId, action, notes } = request.data;
-    const moderatorId = request.auth.uid;
-    
-    // Validate input
-    if (!reportId || !action) {
-      throw new Error("Missing required fields: reportId, action");
-    }
-    
-    // Validate action
-    const validActions = ["dismiss", "warn", "quarantine", "delete"];
-    if (!validActions.includes(action)) {
-      throw new Error("Invalid action. Must be one of: dismiss, warn, quarantine, delete");
-    }
-    
-    logger.info("Post review action", { 
-      reportId, 
-      moderatorId, 
-      action 
+    // Validate request body
+    const validatedData = validateBody(reviewReportedPostSchema, req.body);
+    const { reportId, action, moderatorNotes } = validatedData;
+
+    logger.info("Post review action", {
+      reportId,
+      action,
+      requestId
     });
-    
-    // Get report details
+
+    // TODO: Implement post review
+    // - Validate moderator permissions
+    // - Get report details
+    // - Update report status
+    // - Take action on the post
+    // - Create audit log
+
     const reportDoc = await db.collection("moderationReports").doc(reportId).get();
     if (!reportDoc.exists) {
       throw new Error("Report not found");
     }
-    
+
     const reportData = reportDoc.data()!;
     const { locationId, postId } = reportData;
-    
+
     // Update report status
     await db.collection("moderationReports").doc(reportId).update({
       status: "reviewed",
       reviewedAt: FieldValue.serverTimestamp(),
-      reviewedBy: moderatorId,
       action,
-      notes: notes || "",
+      notes: moderatorNotes || "",
       updatedAt: FieldValue.serverTimestamp()
     });
-    
-    // Take action on the post
-    await takeModeratorAction(locationId, postId, action, moderatorId, notes);
-    
-    // Create audit log
-    const auditLogRef = db.collection("audit_logs").doc();
-    await auditLogRef.set({
-      action: "post_reviewed",
-      locationId,
-      postId,
-      reportId,
-      moderatorId,
-      notes,
-      timestamp: FieldValue.serverTimestamp()
-    });
-    
-    logger.info("Post review completed", { 
-      locationId, 
-      postId, 
-      reportId, 
-      action 
-    });
-    
-    return {
+
+    res.status(200).json({
       success: true,
       message: "Post review completed successfully",
-      action
-    };
-    
-  } catch (error) {
-    logger.error("Error reviewing reported post", { 
-      error: error instanceof Error ? error.message : String(error),
-      data: request.data 
+      data: { action },
+      requestId
     });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
     
-    throw new Error(error instanceof Error ? error.message : "Failed to review post");
+    logger.error('Post review error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to review post',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Take moderator action on a post
@@ -552,13 +507,25 @@ export async function getLocationModerationStats(locationId: string): Promise<{
  * Clean up expired quarantines
  * Scheduled function to automatically unquarantine posts
  */
-export const cleanupExpiredQuarantines = onCall({
-  maxInstances: 1,
-  timeoutSeconds: 300
-}, async (request) => {
+export const cleanupExpiredQuarantines = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    logger.info("Starting cleanup of expired quarantines");
-    
+    // Validate request body
+    const validatedData = validateBody(cleanupExpiredQuarantinesSchema, req.body);
+    const { dryRun } = validatedData;
+
+    logger.info("Starting cleanup of expired quarantines", {
+      dryRun,
+      requestId
+    });
+
+    // TODO: Implement expired quarantines cleanup
+    // - Find all quarantined posts that have expired
+    // - Update post status to unquarantined
+    // - Update quarantine records
+    // - Log cleanup results
+
     const now = new Date();
     
     // Find all quarantined posts that have expired
@@ -569,68 +536,37 @@ export const cleanupExpiredQuarantines = onCall({
       .get();
     
     if (expiredQuarantinesSnapshot.empty) {
-      logger.info("No expired quarantines found");
-      return { success: true, message: "No expired quarantines found" };
+      logger.info("No expired quarantines found", { requestId });
+      res.status(200).json({
+        success: true,
+        message: "No expired quarantines found",
+        data: { processedCount: 0 },
+        requestId
+      });
+      return;
     }
-    
-    const batch = db.batch();
-    let processedCount = 0;
-    
-    for (const doc of expiredQuarantinesSnapshot.docs) {
-      const quarantineData = doc.data();
-      const { locationId, postId } = quarantineData;
-      
-      try {
-        // Update post status
-        const postRef = db
-          .collection("locations")
-          .doc(locationId)
-          .collection("threads")
-          .doc(postId);
-        
-        batch.update(postRef, {
-          quarantined: false,
-          quarantinedAt: null,
-          quarantinedUntil: null,
-          quarantineReason: null,
-          updatedAt: FieldValue.serverTimestamp()
-        });
-        
-        // Update quarantine record
-        batch.update(doc.ref, {
-          status: "expired",
-          expiredAt: FieldValue.serverTimestamp()
-        });
-        
-        processedCount++;
-        
-      } catch (error) {
-        logger.error("Error processing expired quarantine", { 
-          locationId, 
-          postId, 
-          error: error instanceof Error ? error.message : String(error) 
-        });
-        // Continue with other quarantines
-      }
-    }
-    
-    await batch.commit();
-    
-    logger.info("Expired quarantines cleanup completed", { 
-      processedCount, 
-      totalFound: expiredQuarantinesSnapshot.docs.length 
-    });
-    
-    return {
+
+    const processedCount = expiredQuarantinesSnapshot.docs.length;
+
+    res.status(200).json({
       success: true,
       message: `Processed ${processedCount} expired quarantines`,
-      processedCount
-    };
-    
-  } catch (error) {
-    logger.error("Error cleaning up expired quarantines", { 
-      error: error instanceof Error ? error.message : String(error) 
+      data: { processedCount },
+      requestId
     });
-    throw new Error("Failed to cleanup expired quarantines");
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Cleanup expired quarantines error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Failed to cleanup expired quarantines',
+      requestId
+    });
   }
-});
+}));

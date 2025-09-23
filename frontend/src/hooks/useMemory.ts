@@ -34,7 +34,7 @@ export function useMemory(options: UseMemoryOptions = {}) {
     }
 
     try {
-      const memClient = memoryClient();
+      const memClient = memoryClient;
       setClient(memClient);
       setIsInitialized(true);
     } catch (error) {

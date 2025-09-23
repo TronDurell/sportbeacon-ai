@@ -12,6 +12,8 @@ import {
   CheckoutSessionData,
   PayoutData
 } from "./types";
+import { withSecurityGuards } from '../lib/http';
+import { Request, Response } from 'express';
 
 // Initialize Stripe with secret key
 const stripe = new Stripe(functions.config().stripe.secret_key, {
@@ -25,11 +27,11 @@ const db = admin.firestore();
  * Handle Stripe webhook events
  * This function processes webhook events from Stripe with signature verification
  */
-export const stripeWebhook = functions.https.onRequest(async (req, res) => {
+export const stripeWebhook = functions.https.onRequest(withSecurityGuards(async (req: Request, res: Response) => {
   try {
     const sig = req.headers["stripe-signature"] as string;
     const webhookSecret = functions.config().stripe.webhook_secret;
-    const payload = req.rawBody;
+    const payload = req.body;
 
     if (!sig || !payload) {
       console.error("Missing signature or payload");
@@ -74,7 +76,7 @@ export const stripeWebhook = functions.https.onRequest(async (req, res) => {
     console.error("Webhook processing error:", error);
     res.status(500).send("Webhook processing error");
   }
-});
+}));
 
 /**
  * Verify webhook signature

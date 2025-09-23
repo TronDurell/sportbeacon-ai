@@ -53,10 +53,10 @@ const ScheduleBuilder = ({ className = "" }) => {
         try {
             const newGame = {
                 id: Date.now().toString(),
-                homeTeam: getTeamName(selectedTeams[0]),
-                awayTeam: getTeamName(selectedTeams[1]),
-                homeTeamId: selectedTeams[0],
-                awayTeamId: selectedTeams[1],
+                homeTeam: getTeamName(selectedTeams[0] || ''),
+                awayTeam: getTeamName(selectedTeams[1] || ''),
+                homeTeamId: selectedTeams[0] || '',
+                awayTeamId: selectedTeams[1] || '',
                 date: new Date(`${selectedDate}T${selectedTime}`).toISOString(),
                 location: getFieldName(selectedFacility),
                 status: "scheduled",

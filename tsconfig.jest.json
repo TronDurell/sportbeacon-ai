@@ -1,14 +1,7 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "module": "commonjs",
-    "types": ["jest", "node"],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["frontend/src/*"],
-      "@sportbeacon/memory-sdk": ["packages/memory-sdk/src/index.ts"]
-    }
+    "types": ["jest", "node", "whatwg-fetch"]
   },
-  "include": ["frontend/src", "frontend/__tests_", "__tests_", "types"]
+  "include": ["frontend/src", "functions/src", "__tests__", "tests", "types"]
 }

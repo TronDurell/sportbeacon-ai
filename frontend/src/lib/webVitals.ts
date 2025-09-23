@@ -1,4 +1,4 @@
-import { onCLS, onFID, onFCP, onLCP, onTTFB, Metric } from "web-vitals";
+import { onCLS, onINP, onFCP, onLCP, onTTFB, Metric } from "web-vitals";
 
 interface WebVitalsConfig {
   enabled: boolean;
@@ -107,7 +107,7 @@ class WebVitalsReporter {
   } {
     const coreWebVitals = {
       CLS: this.metrics.find(m => m.name === "CLS")?.value || null,
-      FID: this.metrics.find(m => m.name === "FID")?.value || null,
+      INP: this.metrics.find(m => m.name === "INP")?.value || null,
       LCP: this.metrics.find(m => m.name === "LCP")?.value || null,
     };
 

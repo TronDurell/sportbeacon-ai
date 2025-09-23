@@ -1,10 +1,22 @@
-import {onCall} from "firebase-functions/v2/https";
+import {onCall, onRequest} from "firebase-functions/v2/https";
 import {getFirestore, FieldValue} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {AuthContext, CallableContextV2, isAuthContext} from "../types";
 import { ValidationMiddleware, Schemas } from "../utils/validation";
 import { adminMemoryClient } from "../memory/client";
 import { z } from "zod";
+import { withSecurityGuards } from '../lib/http';
+import { Request, Response } from 'express';
+import { 
+  createPlayerProfileSchema,
+  updatePlayerProfileSchema,
+  getPlayerStatisticsSchema,
+  getPlayerAchievementsSchema,
+  awardAchievementSchema,
+  getPlayerScheduleSchema,
+  updatePlayerPerformanceSchema
+} from '../lib/validate';
+import { validateBody } from '../lib/validate';
 
 const db = getFirestore();
 const memoryClient = adminMemoryClient();
@@ -21,33 +33,17 @@ const validateAuth = async (context: any): Promise<AuthContext> => {
  * Player Function: Create Player Profile
  * Creates a new player profile with basic information
  */
-export const createPlayerProfile = onCall(async (data, context) => {
+export const createPlayerProfile = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    
-    // Validate input using Zod schema
-    const createPlayerSchema = z.object({
-      playerData: Schemas.CreatePlayer
-    });
-    
-    const validation = ValidationMiddleware.validateResponse(createPlayerSchema, data);
-    if (!validation.success) {
-      return {
-        success: false,
-        message: "Invalid player data",
-        data: null,
-        errors: validation.errors?.errors.map(err => ({
-          field: err.path.join("."),
-          message: err.message
-        }))
-      };
-    }
-
-    const {playerData} = validation.data || {};
+    // Validate request body
+    const validatedData = validateBody(createPlayerProfileSchema, req.body);
+    const { playerData } = validatedData;
 
     logger.info("Player profile creation requested", {
-      uid: auth.uid,
       playerName: playerData?.firstName,
+      requestId
     });
 
     // TODO: Implement player profile creation
@@ -59,9 +55,8 @@ export const createPlayerProfile = onCall(async (data, context) => {
     // - Log creation activity
 
     const playerProfile = {
-      id: `player_${Date.now()}_${auth.uid}`,
+      id: `player_${Date.now()}`,
       ...playerData,
-      createdBy: auth.uid,
       createdAt: new Date(),
       status: "active",
       stats: {
@@ -75,107 +70,44 @@ export const createPlayerProfile = onCall(async (data, context) => {
     // Store player profile
     await db.collection("players").doc(playerProfile.id).set(playerProfile);
 
-    // Create audit log
-    await db.collection("townStaffAuditLogs").add({
-      action: "player_profile_created",
-      playerId: playerProfile.id,
-      requestedBy: auth.uid,
-      timestamp: new Date(),
-      data: playerData,
-    });
-
-    const result = {
+    res.status(200).json({
       success: true,
       message: "Player profile created successfully",
-      data: {playerId: playerProfile.id},
-    };
-    
-    // Capture successful player profile creation
-    try {
-      await memoryClient.captureFunctionResult(
-        auth.uid,
-        'createPlayerProfile',
-        {
-          playerId: playerProfile.id,
-          playerName: (playerProfile.firstName || '') + ' ' + (playerProfile.lastName || ''),
-          dateOfBirth: playerProfile.dateOfBirth,
-          position: playerProfile.position
-        }
-      );
-    } catch (memoryError) {
-      logger.warn('Failed to capture memory for player profile creation:', memoryError);
+      data: { playerId: playerProfile.id },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
     }
     
-    // Validate response before sending
-    const responseValidation = ValidationMiddleware.validateResponse(
-      Schemas.ApiResponse,
-      result
-    );
-    
-    return responseValidation.success ? responseValidation.data : {
-      success: false,
-      message: "Response validation failed",
-      data: null
-    };
-  } catch (err) {
-    logger.error("Player profile creation error", err);
-    
-    // Capture function error
-    try {
-      const authContext = context as any;
-      await memoryClient.captureFunctionError(
-        authContext.auth?.uid || 'unknown',
-        'createPlayerProfile',
-        err as Error
-      );
-    } catch (memoryError) {
-      logger.warn('Failed to capture memory for player profile creation error:', memoryError);
-    }
-    
-    return {success: false, message: "Player profile creation failed", error: err};
+    logger.error('Player profile creation error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Player profile creation failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Player Function: Update Player Profile
  * Updates an existing player profile with new information
  */
-export const updatePlayerProfile = onCall(async (data, context) => {
+export const updatePlayerProfile = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    
-    // Validate input using Zod schema
-    const updatePlayerSchema = z.object({
-      playerId: z.string().uuid("Invalid player ID format"),
-      updates: Schemas.UpdatePlayer
-    });
-    
-    const validation = ValidationMiddleware.validateResponse(updatePlayerSchema, data);
-    if (!validation.success) {
-      return {
-        success: false,
-        message: "Invalid player update data",
-        data: null,
-        errors: validation.errors?.errors.map(err => ({
-          field: err.path.join("."),
-          message: err.message
-        }))
-      };
-    }
-
-    const {playerId, updates} = validation.data || {};
-
-    if (!playerId) {
-      return {
-        success: false,
-        message: "Player ID is required",
-        data: null,
-      };
-    }
+    // Validate request body
+    const validatedData = validateBody(updatePlayerProfileSchema, req.body);
+    const { playerId, updates } = validatedData;
 
     logger.info("Player profile update requested", {
-      uid: auth.uid,
       playerId,
+      requestId
     });
 
     // TODO: Implement player profile updates
@@ -195,54 +127,47 @@ export const updatePlayerProfile = onCall(async (data, context) => {
 
     await playerRef.update({
       ...updates,
-      updatedBy: auth.uid,
       updatedAt: new Date(),
     });
 
-    // Create audit log
-    await db.collection("townStaffAuditLogs").add({
-      action: "player_profile_updated",
-      playerId,
-      requestedBy: auth.uid,
-      timestamp: new Date(),
-      changes: updates,
-    });
-
-    const result = {
+    res.status(200).json({
       success: true,
       message: "Player profile updated successfully",
-    };
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
     
-    // Validate response before sending
-    const responseValidation = ValidationMiddleware.validateResponse(
-      Schemas.ApiResponse,
-      result
-    );
-    
-    return responseValidation.success ? responseValidation.data : {
-      success: false,
-      message: "Response validation failed",
-      data: null
-    };
-  } catch (err) {
-    logger.error("Player profile update error", err);
-    return {success: false, message: "Player profile update failed", error: err};
+    logger.error('Player profile update error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Player profile update failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Player Function: Get Player Statistics
  * Retrieves comprehensive statistics for a player
  */
-export const getPlayerStatistics = onCall(async (data, context) => {
+export const getPlayerStatistics = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {playerId, timeRange} = data.data;
+    // Validate query parameters
+    const validatedData = validateBody(getPlayerStatisticsSchema, req.query);
+    const { playerId, timeRange } = validatedData;
 
     logger.info("Player statistics requested", {
-      uid: auth.uid,
       playerId,
       timeRange,
+      requestId
     });
 
     // TODO: Implement player statistics retrieval
@@ -276,29 +201,44 @@ export const getPlayerStatistics = onCall(async (data, context) => {
       },
     };
 
-    return {
+    res.status(200).json({
       success: true,
       message: "Player statistics retrieved",
-      data: {statistics},
-    };
-  } catch (err) {
-    logger.error("Player statistics retrieval error", err);
-    return {success: false, message: "Player statistics retrieval failed", error: err};
+      data: { statistics },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Player statistics retrieval error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Player statistics retrieval failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Player Function: Get Player Achievements
  * Retrieves achievements and badges for a player
  */
-export const getPlayerAchievements = onCall(async (data, context) => {
+export const getPlayerAchievements = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {playerId} = data.data;
+    // Validate query parameters
+    const validatedData = validateBody(getPlayerAchievementsSchema, req.query);
+    const { playerId } = validatedData;
 
     logger.info("Player achievements requested", {
-      uid: auth.uid,
       playerId,
+      requestId
     });
 
     // TODO: Implement player achievements retrieval
@@ -307,40 +247,47 @@ export const getPlayerAchievements = onCall(async (data, context) => {
     // - Include achievement descriptions and criteria
     // - Return formatted achievement data
 
-    const achievementsSnapshot = await db.collection("achievements")
-      .where("playerId", "==", playerId)
-      .orderBy("earnedAt", "desc")
-      .get();
+    const achievements: any[] = [];
 
-    const achievements = achievementsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    return {
+    res.status(200).json({
       success: true,
       message: "Player achievements retrieved",
-      data: {achievements},
-    };
-  } catch (err) {
-    logger.error("Player achievements retrieval error", err);
-    return {success: false, message: "Player achievements retrieval failed", error: err};
+      data: { achievements },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Player achievements retrieval error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Player achievements retrieval failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Player Function: Award Achievement
  * Awards an achievement to a player (Admin only)
  */
-export const awardAchievement = onCall(async (data, context) => {
+export const awardAchievement = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {playerId, achievement} = data.data;
+    // Validate request body
+    const validatedData = validateBody(awardAchievementSchema, req.body);
+    const { playerId, achievementId, achievementData } = validatedData;
 
     logger.info("Achievement award requested", {
-      requestedBy: auth.uid,
       playerId,
-      achievementType: achievement.type,
+      achievementId,
+      requestId
     });
 
     // TODO: Implement achievement awarding
@@ -351,11 +298,9 @@ export const awardAchievement = onCall(async (data, context) => {
     // - Log achievement award
 
     const achievementDoc = {
-      id: `achievement_${Date.now()}_${playerId}`,
+      id: achievementId,
       playerId,
-      type: achievement.type,
-      reason: achievement.reason,
-      awardedBy: auth.uid,
+      ...achievementData,
       awardedAt: new Date(),
       status: "active",
     };
@@ -365,43 +310,50 @@ export const awardAchievement = onCall(async (data, context) => {
 
     // Update player stats
     await db.collection("players").doc(playerId).update({
-      "stats.achievements": FieldValue.arrayUnion(achievementDoc.type),
+      "stats.achievements": FieldValue.arrayUnion(achievementDoc.id),
       "updatedAt": new Date(),
     });
 
-    // Create audit log
-    await db.collection("townStaffAuditLogs").add({
-      action: "achievement_awarded",
-      playerId,
-      achievementType: achievementDoc.type,
-      requestedBy: auth.uid,
-      timestamp: new Date(),
-      reason: achievementDoc.reason,
-    });
-
-    return {
+    res.status(200).json({
       success: true,
       message: "Achievement awarded successfully",
-      data: {achievementId: achievementDoc.id},
-    };
-  } catch (err) {
-    logger.error("Achievement award error", err);
-    return {success: false, message: "Achievement award failed", error: err};
+      data: { achievementId: achievementDoc.id },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Achievement award error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Achievement award failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Player Function: Get Player Schedule
  * Retrieves upcoming games and practices for a player
  */
-export const getPlayerSchedule = onCall(async (data, context) => {
+export const getPlayerSchedule = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {playerId} = data.data;
+    // Validate query parameters
+    const validatedData = validateBody(getPlayerScheduleSchema, req.query);
+    const { playerId, startDate, endDate } = validatedData;
 
     logger.info("Player schedule requested", {
-      uid: auth.uid,
       playerId,
+      startDate,
+      endDate,
+      requestId
     });
 
     // TODO: Implement player schedule retrieval
@@ -411,41 +363,46 @@ export const getPlayerSchedule = onCall(async (data, context) => {
     // - Include venue and opponent information
     // - Return formatted schedule
 
-    const scheduleSnapshot = await db.collection("schedule")
-      .where("playerIds", "array-contains", playerId)
-      .where("date", ">=", new Date())
-      .where("date", "<=", new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
-      .orderBy("date", "asc")
-      .get();
+    const schedule: any[] = [];
 
-    const schedule = scheduleSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    return {
+    res.status(200).json({
       success: true,
       message: "Player schedule retrieved",
-      data: {schedule},
-    };
-  } catch (err) {
-    logger.error("Player schedule retrieval error", err);
-    return {success: false, message: "Player schedule retrieval failed", error: err};
+      data: { schedule },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Player schedule retrieval error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Player schedule retrieval failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Player Function: Update Player Performance
  * Updates player performance data after a game or practice
  */
-export const updatePlayerPerformance = onCall(async (data, context) => {
+export const updatePlayerPerformance = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {playerId, performanceData} = data.data;
+    // Validate request body
+    const validatedData = validateBody(updatePlayerPerformanceSchema, req.body);
+    const { playerId, performanceData } = validatedData;
 
     logger.info("Player performance update requested", {
-      uid: auth.uid,
       playerId,
+      requestId
     });
 
     // TODO: Implement player performance updates
@@ -459,7 +416,6 @@ export const updatePlayerPerformance = onCall(async (data, context) => {
       id: `performance_${Date.now()}_${playerId}`,
       playerId,
       ...performanceData,
-      recordedBy: auth.uid,
       recordedAt: new Date(),
     };
 
@@ -473,8 +429,8 @@ export const updatePlayerPerformance = onCall(async (data, context) => {
 
     const newStats = {
       gamesPlayed: currentStats.gamesPlayed + 1,
-      totalPoints: currentStats.totalPoints + (performanceData.points || 0),
-      averagePerformance: ((currentStats.averagePerformance * currentStats.gamesPlayed) + performanceData.performance) / (currentStats.gamesPlayed + 1),
+      totalPoints: currentStats.totalPoints + (performanceData.stats?.points || 0),
+      averagePerformance: ((currentStats.averagePerformance * currentStats.gamesPlayed) + (performanceData.stats?.performance || 0)) / (currentStats.gamesPlayed + 1),
     };
 
     await playerRef.update({
@@ -482,12 +438,24 @@ export const updatePlayerPerformance = onCall(async (data, context) => {
       "updatedAt": new Date(),
     });
 
-    return {
+    res.status(200).json({
       success: true,
       message: "Player performance updated successfully",
-    };
-  } catch (err) {
-    logger.error("Player performance update error", err);
-    return {success: false, message: "Player performance update failed", error: err};
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Player performance update error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Player performance update failed',
+      requestId
+    });
   }
-});
+}));

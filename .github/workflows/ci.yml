@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [18, 20]
+        node-version: [18]
     
     steps:
     - name: Checkout code
@@ -34,14 +34,21 @@ jobs:
     - name: Run linting
       run: npm run lint
       
-    - name: Run tests
+    - name: Run tests with coverage
       run: npm run test:ci
+      
+    - name: Build SDK
+      run: npm run build:sdk
       
     - name: Build frontend
       run: npm run build:frontend
       
     - name: Build functions
       run: npm run build:functions
+      
+    - name: Run Lighthouse CI
+      run: npm run lhci:autorun
+      if: matrix.os == 'ubuntu-latest'
 
   deploy:
     name: Deploy
@@ -56,22 +63,41 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '18'
         cache: 'npm'
         
     - name: Install dependencies
       run: npm ci --legacy-peer-deps
       
-    - name: Build frontend
-      run: npm run build:frontend
+    - name: Build all components
+      run: |
+        npm run build:sdk
+        npm run build:frontend
+        npm run build:functions
       
-    - name: Build functions
-      run: npm run build:functions
+    - name: Run Lighthouse CI
+      run: npm run lhci:autorun
       
-    - name: Deploy to Firebase
+    - name: Deploy to Firebase Hosting
       uses: FirebaseExtended/action-hosting-deploy@v0
       with:
         repoToken: '${{ secrets.GITHUB_TOKEN }}'
         firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
         channelId: live
         projectId: sportbeacon-ai
+        
+    - name: Deploy Firebase Functions
+      run: firebase deploy --only functions --project sportbeacon-ai
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
+    - name: Deploy Firestore Rules
+      run: firebase deploy --only firestore:rules,firestore:indexes --project sportbeacon-ai
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
+    - name: Post-deployment verification
+      run: |
+        curl -I https://sportbeacon-ai.web.app/
+        curl -I https://sportbeacon-ai.web.app/manifest.json
+        curl -I https://sportbeacon-ai.web.app/sw.js

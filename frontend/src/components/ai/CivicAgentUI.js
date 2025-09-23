@@ -105,7 +105,7 @@ const CivicAgentUI = ({ municipalityName = "Cary", leaguePolicies = [], adminRol
         // Extract age
         const ageMatch = lowerContent.match(/(\d+)\s*(?:years?\s*old|y\.?o\.?)/);
         if (ageMatch) {
-            context.childAge = parseInt(ageMatch[1]);
+            context.childAge = parseInt(ageMatch[1] || '0');
         }
         // Extract sport
         const sports = ["soccer", "basketball", "baseball", "football", "volleyball", "tennis", "swimming"];

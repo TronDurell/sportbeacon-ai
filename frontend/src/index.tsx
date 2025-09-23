@@ -3,6 +3,9 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
+// Initialize Web Vitals monitoring
+import { webVitalsReporter } from "./performance/vitals";
+
 // Register service worker in production
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {

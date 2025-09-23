@@ -164,7 +164,7 @@ export default function AthleteProfilePage() {
   const handleAddHighlight = async (highlightData: any) => {
     try {
       // TODO: Implement highlight creation
-      console.log('Adding highlight:', highlightData);
+      // console.log('Adding highlight:', highlightData);
       
       // Capture highlight addition event
       await captureEvent('result', {
@@ -183,7 +183,7 @@ export default function AthleteProfilePage() {
   const handleCsvImport = async (csvData: any) => {
     try {
       // TODO: Implement CSV import
-      console.log('Importing CSV:', csvData);
+      // console.log('Importing CSV:', csvData);
       
       // Capture CSV import event
       await captureEvent('result', {
@@ -202,7 +202,7 @@ export default function AthleteProfilePage() {
   const handleManualStatSubmit = async (statData: any) => {
     try {
       // TODO: Implement manual stat submission
-      console.log('Submitting manual stat:', statData);
+      // console.log('Submitting manual stat:', statData);
       
       // Capture manual stat submission event
       await captureEvent('result', {

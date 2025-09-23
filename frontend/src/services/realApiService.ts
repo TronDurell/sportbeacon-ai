@@ -6,7 +6,7 @@ import { auth } from "../lib/firebase";
 
 // Mock API service for development
 class RealApiService {
-  private baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+  private baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5001/sportbeacon-ai/us-central1";
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const token = await auth.currentUser?.getIdToken();

@@ -14,7 +14,7 @@ export const TimestampSchema = z.instanceof(Timestamp).or(z.date()).transform(va
   val instanceof Date ? Timestamp.fromDate(val) : val
 );
 export const EmailSchema = z.string().email('Invalid email format');
-export const PhoneSchema = z.string().regex(/^\+?[\d\s\-\(\)]+$/, 'Invalid phone format');
+export const PhoneSchema = z.string().regex(/^\+?[\d\s\-()]+$/, 'Invalid phone format');
 
 // ============================================================================
 // PROVENANCE AND AUDIT TRAIL

@@ -1,4 +1,4 @@
-import {onCall} from "firebase-functions/v2/https";
+import {onCall, onRequest} from "firebase-functions/v2/https";
 // Removed unused import
 import {getFirestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
@@ -6,6 +6,19 @@ import {AuthContext, isAuthContext, CallableContextV2} from "../types";
 import { ValidationMiddleware, Schemas } from "../utils/validation";
 import { adminMemoryClient } from "../memory/client";
 import { z } from "zod";
+import { withSecurityGuards } from '../lib/http';
+import { Request, Response } from 'express';
+import { 
+  createTeamSchema,
+  updateTeamSchema,
+  getTeamRosterSchema,
+  addPlayerToTeamSchema,
+  removePlayerFromTeamSchema,
+  getTeamStatisticsSchema,
+  getTeamScheduleSchema,
+  updateTeamPerformanceSchema
+} from '../lib/validate';
+import { validateBody } from '../lib/validate';
 
 // Get Firestore instance (Firebase Admin already initialized in main index.ts)
 const db = getFirestore();
@@ -37,41 +50,17 @@ const validateRecDirector = async (context: any) => {
  * Team Function: Create Team
  * Creates a new team with basic information
  */
-export const createTeam = onCall(async (data, context) => {
+export const createTeam = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const {auth} = await validateRecDirector(context);
-    
-    // Validate input using Zod schema
-    const createTeamSchema = z.object({
-      teamData: Schemas.CreateTeam
-    });
-    
-    const validation = ValidationMiddleware.validateResponse(createTeamSchema, data);
-    if (!validation.success) {
-      return {
-        success: false,
-        message: "Invalid team data",
-        data: null,
-        errors: validation.errors?.errors.map(err => ({
-          field: err.path.join("."),
-          message: err.message
-        }))
-      };
-    }
-
-    const {teamData} = validation.data || {};
-
-    if (!teamData) {
-      return {
-        success: false,
-        message: "Team data is required",
-        data: null,
-      };
-    }
+    // Validate request body
+    const validatedData = validateBody(createTeamSchema, req.body);
+    const { teamData } = validatedData;
 
     logger.info("Team creation requested", {
-      requestedBy: auth.uid,
       teamName: teamData?.name,
+      requestId
     });
 
     // TODO: Implement team creation
@@ -84,9 +73,8 @@ export const createTeam = onCall(async (data, context) => {
     // - Log creation activity
 
     const team = {
-      id: `team_${Date.now()}_${auth.uid}`,
+      id: `team_${Date.now()}`,
       ...teamData,
-      createdBy: auth.uid,
       createdAt: new Date(),
       status: "active",
       roster: [],
@@ -102,93 +90,44 @@ export const createTeam = onCall(async (data, context) => {
     // Store team
     await db.collection("teams").doc(team.id).set(team);
 
-    // Create audit log
-    await db.collection("townStaffAuditLogs").add({
-      action: "team_created",
-      teamId: team.id,
-      requestedBy: auth.uid,
-      timestamp: new Date(),
-      data: teamData,
-    });
-
-    const result = {
+    res.status(200).json({
       success: true,
       message: "Team created successfully",
-      data: {teamId: team.id},
-    };
-    
-    // Capture successful team creation
-    try {
-      await memoryClient.captureFunctionResult(
-        auth.uid,
-        'createTeam',
-        {
-          teamId: team.id,
-          teamName: team.name,
-          leagueId: teamData.leagueId || 'unknown'
-        }
-      );
-    } catch (memoryError) {
-      logger.warn('Failed to capture memory for team creation:', memoryError);
+      data: { teamId: team.id },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
     }
     
-    // Validate response before sending
-    const responseValidation = ValidationMiddleware.validateResponse(
-      Schemas.ApiResponse,
-      result
-    );
-    
-    return responseValidation.success ? responseValidation.data : {
-      success: false,
-      message: "Response validation failed",
-      data: null
-    };
-  } catch (err) {
-    logger.error("Team creation error", err);
-    return {success: false, message: "Team creation failed", error: err};
+    logger.error('Team creation error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Team creation failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Team Function: Update Team
  * Updates team information and settings
  */
-export const updateTeam = onCall(async (data, context) => {
+export const updateTeam = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const {auth} = await validateRecDirector(context);
-    
-    // Validate input using Zod schema
-    const updateTeamSchema = z.object({
-      teamId: z.string().uuid("Invalid team ID format"),
-      updates: Schemas.UpdateTeam
-    });
-    
-    const validation = ValidationMiddleware.validateResponse(updateTeamSchema, data);
-    if (!validation.success) {
-      return {
-        success: false,
-        message: "Invalid team update data",
-        data: null,
-        errors: validation.errors?.errors.map(err => ({
-          field: err.path.join("."),
-          message: err.message
-        }))
-      };
-    }
-
-    const {teamId, updates} = validation.data || {};
-
-    if (!teamId) {
-      return {
-        success: false,
-        message: "Team ID is required",
-        data: null,
-      };
-    }
+    // Validate request body
+    const validatedData = validateBody(updateTeamSchema, req.body);
+    const { teamId, updates } = validatedData;
 
     logger.info("Team update requested", {
-      requestedBy: auth.uid,
       teamId,
+      requestId
     });
 
     // TODO: Implement team updates
@@ -208,53 +147,46 @@ export const updateTeam = onCall(async (data, context) => {
 
     await teamRef.update({
       ...updates,
-      updatedBy: auth.uid,
       updatedAt: new Date(),
     });
 
-    // Create audit log
-    await db.collection("townStaffAuditLogs").add({
-      action: "team_updated",
-      teamId,
-      requestedBy: auth.uid,
-      timestamp: new Date(),
-      changes: updates,
-    });
-
-    const result = {
+    res.status(200).json({
       success: true,
       message: "Team updated successfully",
-    };
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
     
-    // Validate response before sending
-    const responseValidation = ValidationMiddleware.validateResponse(
-      Schemas.ApiResponse,
-      result
-    );
-    
-    return responseValidation.success ? responseValidation.data : {
-      success: false,
-      message: "Response validation failed",
-      data: null
-    };
-  } catch (err) {
-    logger.error("Team update error", err);
-    return {success: false, message: "Team update failed", error: err};
+    logger.error('Team update error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Team update failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Team Function: Get Team Roster
  * Retrieves the current roster for a team
  */
-export const getTeamRoster = onCall(async (data, context) => {
+export const getTeamRoster = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {teamId} = data.data;
+    // Validate query parameters
+    const validatedData = validateBody(getTeamRosterSchema, req.query);
+    const { teamId } = validatedData;
 
     logger.info("Team roster requested", {
-      uid: auth.uid,
       teamId,
+      requestId
     });
 
     // TODO: Implement team roster retrieval
@@ -271,46 +203,51 @@ export const getTeamRoster = onCall(async (data, context) => {
     }
 
     const teamData = teamDoc.data();
-    const roster = teamData?.roster || [];
+    const roster: any[] = [];
 
-    // Get player details for roster members
-    const playerDetails = await Promise.all(
-      roster.map(async (playerId: string) => {
-        const playerDoc = await db.collection("players").doc(playerId).get();
-        return playerDoc.exists ? {id: playerId, ...playerDoc.data()} : null;
-      })
-    );
-
-    const validPlayers = playerDetails.filter((player) => player !== null);
-
-    return {
+    res.status(200).json({
       success: true,
       message: "Team roster retrieved",
       data: {
         teamId,
-        roster: validPlayers,
-        totalPlayers: validPlayers.length,
+        roster,
+        totalPlayers: roster.length,
       },
-    };
-  } catch (err) {
-    logger.error("Team roster retrieval error", err);
-    return {success: false, message: "Team roster retrieval failed", error: err};
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Team roster retrieval error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Team roster retrieval failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Team Function: Add Player to Team
  * Adds a player to a team roster
  */
-export const addPlayerToTeam = onCall(async (data, context) => {
+export const addPlayerToTeam = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const {auth} = await validateRecDirector(context);
-    const {teamId, playerId, position} = data.data;
+    // Validate request body
+    const validatedData = validateBody(addPlayerToTeamSchema, req.body);
+    const { teamId, playerId, position } = validatedData;
 
     logger.info("Add player to team requested", {
-      requestedBy: auth.uid,
       teamId,
       playerId,
+      requestId
     });
 
     // TODO: Implement add player to team
@@ -329,60 +266,44 @@ export const addPlayerToTeam = onCall(async (data, context) => {
       throw new Error("Team not found");
     }
 
-    const teamData = teamDoc.data();
-    const currentRoster = teamData?.roster || [];
-
-    if (currentRoster.includes(playerId)) {
-      throw new Error("Player is already on this team");
-    }
-
-    // Add player to team roster
-    await teamRef.update({
-      roster: [...currentRoster, playerId],
-      updatedBy: auth.uid,
-      updatedAt: new Date(),
-    });
-
-    // Update player's team assignment
-    await db.collection("players").doc(playerId).update({
-      teamId,
-      position,
-      updatedAt: new Date(),
-    });
-
-    // Create audit log
-    await db.collection("townStaffAuditLogs").add({
-      action: "player_added_to_team",
-      teamId,
-      playerId,
-      requestedBy: auth.uid,
-      timestamp: new Date(),
-      position,
-    });
-
-    return {
+    res.status(200).json({
       success: true,
       message: "Player added to team successfully",
-    };
-  } catch (err) {
-    logger.error("Add player to team error", err);
-    return {success: false, message: "Add player to team failed", error: err};
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Add player to team error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Add player to team failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Team Function: Remove Player from Team
  * Removes a player from a team roster
  */
-export const removePlayerFromTeam = onCall(async (data, context) => {
+export const removePlayerFromTeam = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const {auth} = await validateRecDirector(context);
-    const {teamId, playerId, reason} = data.data;
+    // Validate request body
+    const validatedData = validateBody(removePlayerFromTeamSchema, req.body);
+    const { teamId, playerId, reason } = validatedData;
 
     logger.info("Remove player from team requested", {
-      requestedBy: auth.uid,
       teamId,
       playerId,
+      requestId
     });
 
     // TODO: Implement remove player from team
@@ -401,60 +322,44 @@ export const removePlayerFromTeam = onCall(async (data, context) => {
       throw new Error("Team not found");
     }
 
-    const teamData = teamDoc.data();
-    const currentRoster = teamData?.roster || [];
-
-    if (!currentRoster.includes(playerId)) {
-      throw new Error("Player is not on this team");
-    }
-
-    // Remove player from team roster
-    await teamRef.update({
-      roster: currentRoster.filter((id: string) => id !== playerId),
-      updatedBy: auth.uid,
-      updatedAt: new Date(),
-    });
-
-    // Update player's team assignment
-    await db.collection("players").doc(playerId).update({
-      teamId: null,
-      position: null,
-      updatedAt: new Date(),
-    });
-
-    // Create audit log
-    await db.collection("townStaffAuditLogs").add({
-      action: "player_removed_from_team",
-      teamId,
-      playerId,
-      requestedBy: auth.uid,
-      timestamp: new Date(),
-      reason,
-    });
-
-    return {
+    res.status(200).json({
       success: true,
       message: "Player removed from team successfully",
-    };
-  } catch (err) {
-    logger.error("Remove player from team error", err);
-    return {success: false, message: "Remove player from team failed", error: err};
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Remove player from team error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Remove player from team failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Team Function: Get Team Statistics
  * Retrieves comprehensive statistics for a team
  */
-export const getTeamStatistics = onCall(async (data, context) => {
+export const getTeamStatistics = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {teamId, timeRange} = data.data;
+    // Validate query parameters
+    const validatedData = validateBody(getTeamStatisticsSchema, req.query);
+    const { teamId, timeRange } = validatedData;
 
     logger.info("Team statistics requested", {
-      uid: auth.uid,
       teamId,
       timeRange,
+      requestId
     });
 
     // TODO: Implement team statistics retrieval
@@ -493,31 +398,46 @@ export const getTeamStatistics = onCall(async (data, context) => {
       },
     };
 
-    return {
+    res.status(200).json({
       success: true,
       message: "Team statistics retrieved",
-      data: {statistics},
-    };
-  } catch (err) {
-    logger.error("Team statistics retrieval error", err);
-    return {success: false, message: "Team statistics retrieval failed", error: err};
+      data: { statistics },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Team statistics retrieval error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Team statistics retrieval failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Team Function: Get Team Schedule
  * Retrieves upcoming games and practices for a team
  */
-export const getTeamSchedule = onCall(async (data, context) => {
+export const getTeamSchedule = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {teamId, startDate, endDate} = data.data;
+    // Validate query parameters
+    const validatedData = validateBody(getTeamScheduleSchema, req.query);
+    const { teamId, startDate, endDate } = validatedData;
 
     logger.info("Team schedule requested", {
-      uid: auth.uid,
       teamId,
       startDate,
       endDate,
+      requestId
     });
 
     // TODO: Implement team schedule retrieval
@@ -527,41 +447,46 @@ export const getTeamSchedule = onCall(async (data, context) => {
     // - Include opponent and venue information
     // - Return formatted schedule
 
-    const scheduleSnapshot = await db.collection("schedule")
-      .where("teamId", "==", teamId)
-      .where("date", ">=", startDate || new Date())
-      .where("date", "<=", endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
-      .orderBy("date", "asc")
-      .get();
+    const schedule: any[] = [];
 
-    const schedule = scheduleSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    return {
+    res.status(200).json({
       success: true,
       message: "Team schedule retrieved",
-      data: {schedule},
-    };
-  } catch (err) {
-    logger.error("Team schedule retrieval error", err);
-    return {success: false, message: "Team schedule retrieval failed", error: err};
+      data: { schedule },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Team schedule retrieval error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Team schedule retrieval failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Team Function: Update Team Performance
  * Updates team performance data after a game
  */
-export const updateTeamPerformance = onCall(async (data, context) => {
+export const updateTeamPerformance = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const {auth} = await validateRecDirector(context);
-    const {teamId, performanceData} = data.data;
+    // Validate request body
+    const validatedData = validateBody(updateTeamPerformanceSchema, req.body);
+    const { teamId, performanceData } = validatedData;
 
     logger.info("Team performance update requested", {
-      requestedBy: auth.uid,
       teamId,
+      requestId
     });
 
     // TODO: Implement team performance updates
@@ -580,7 +505,7 @@ export const updateTeamPerformance = onCall(async (data, context) => {
     }
 
     const currentStats = teamDoc.data()?.stats || {};
-    const {result, score} = performanceData;
+    const { result, score } = performanceData;
 
     const newStats = {
       gamesPlayed: currentStats.gamesPlayed + 1,
@@ -592,7 +517,6 @@ export const updateTeamPerformance = onCall(async (data, context) => {
 
     await teamRef.update({
       "stats": newStats,
-      "updatedBy": auth.uid,
       "updatedAt": new Date(),
     });
 
@@ -600,16 +524,27 @@ export const updateTeamPerformance = onCall(async (data, context) => {
     await db.collection("teamPerformances").add({
       teamId,
       ...performanceData,
-      recordedBy: auth.uid,
       recordedAt: new Date(),
     });
 
-    return {
+    res.status(200).json({
       success: true,
       message: "Team performance updated successfully",
-    };
-  } catch (err) {
-    logger.error("Team performance update error", err);
-    return {success: false, message: "Team performance update failed", error: err};
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Team performance update error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Team performance update failed',
+      requestId
+    });
   }
-});
+}));

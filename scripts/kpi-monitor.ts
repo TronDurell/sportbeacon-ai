@@ -372,12 +372,13 @@ if (require.main === module) {
         console.log('Collected metrics:', metrics);
       });
       break;
-    case 'baseline':
+    case 'baseline': {
       const version = process.argv[3] || 'current';
       monitor.collectMetrics().then(() => {
         monitor.saveBaseline(version);
       });
       break;
+    }
     case 'canary':
       monitor.runCanaryValidation().then(success => {
         process.exit(success ? 0 : 1);

@@ -30,6 +30,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
+      "@sportbeacon/memory-sdk": resolve(__dirname, "../packages/memory-sdk/dist/index.js"),
     },
   },
   server: {

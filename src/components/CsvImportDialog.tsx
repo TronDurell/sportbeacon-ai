@@ -3,7 +3,7 @@
 */
 
 import React, { useState, useRef } from 'react';
-import { Sport, StatLine } from '../domain/types';
+import { Sport } from '../domain/types';
 
 // ============================================================================
 // INTERFACES
@@ -13,7 +13,6 @@ interface CsvImportDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (importData: CsvImportData) => Promise<void>;
-  athleteId: string;
   athleteName: string;
   defaultSport?: Sport;
 }
@@ -97,7 +96,6 @@ export const CsvImportDialog: React.FC<CsvImportDialogProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  athleteId,
   athleteName,
   defaultSport = 'basketball'
 }) => {
@@ -160,6 +158,30 @@ export const CsvImportDialog: React.FC<CsvImportDialogProps> = ({
     });
   };
 
+  const autoMapColumns = (headers: string[], selectedSport: Sport): ColumnMapping => {
+    const fieldMappings = SPORT_FIELD_MAPPINGS[selectedSport];
+    const mapping: ColumnMapping = {};
+    
+    headers.forEach(header => {
+      // Try exact match first
+      if (fieldMappings[header]) {
+        mapping[header] = fieldMappings[header];
+        return;
+      }
+      
+      // Try case-insensitive match
+      const lowerHeader = header.toLowerCase();
+      for (const [fieldName, fieldKey] of Object.entries(fieldMappings)) {
+        if (fieldName.toLowerCase() === lowerHeader) {
+          mapping[header] = fieldKey;
+          break;
+        }
+      }
+    });
+    
+    return mapping;
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -192,29 +214,6 @@ export const CsvImportDialog: React.FC<CsvImportDialogProps> = ({
     }
   };
 
-  const autoMapColumns = (headers: string[], selectedSport: Sport): ColumnMapping {
-    const fieldMappings = SPORT_FIELD_MAPPINGS[selectedSport];
-    const mapping: ColumnMapping = {};
-    
-    headers.forEach(header => {
-      // Try exact match first
-      if (fieldMappings[header]) {
-        mapping[header] = fieldMappings[header];
-        return;
-      }
-      
-      // Try case-insensitive match
-      const lowerHeader = header.toLowerCase();
-      for (const [fieldName, fieldKey] of Object.entries(fieldMappings)) {
-        if (fieldName.toLowerCase() === lowerHeader) {
-          mapping[header] = fieldKey;
-          break;
-        }
-      }
-    });
-    
-    return mapping;
-  };
 
   // ============================================================================
   // VALIDATION

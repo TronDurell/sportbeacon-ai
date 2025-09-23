@@ -1,32 +1,40 @@
-import express from 'express';
-import * as functions from 'firebase-functions';
-import { z } from 'zod';
-import { withGuards } from '../lib/http';
-import { validateBody } from '../lib/validate';
+import { Request, Response } from 'express';
+import { onRequest } from 'firebase-functions/v2/https';
+import { withSecurityGuards } from '../lib/http';
+import { validateBody, authLoginSchema } from '../lib/validate';
+import * as logger from 'firebase-functions/logger';
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  rememberMe: z.boolean().optional().default(false)
-});
-
-const app = express();
-withGuards(app);
-
-app.post('/', async (req, res) => {
+export const authLogin = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const { email, password, rememberMe } = validateBody(schema, req.body);
-    // TODO: business logic - authenticate user
+    // Validate request body
+    const validatedData = validateBody(authLoginSchema, req.body);
+    const { email, password } = validatedData;
+    
+    // TODO: Implement actual authentication logic
+    // For now, return a demo response
+    logger.info(`Auth login attempt for: ${email}`, { requestId });
+    
     res.status(200).json({ 
-      ok: true, 
+      success: true,
       user: { email, id: 'demo-user-id' },
-      token: 'demo-token'
+      token: 'demo-token',
+      requestId
     });
-  } catch (e: any) {
-    const status = e?.status ?? 500;
-    functions.logger.error('authLogin error', { msg: e?.message });
-    res.status(status).json({ ok: false, error: e?.message ?? 'Internal error' });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Auth login error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Authentication failed',
+      requestId
+    });
   }
-});
-
-export const authLogin = functions.https.onRequest(app);
+}));

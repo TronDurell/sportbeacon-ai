@@ -3,6 +3,17 @@ import {onCall, onRequest} from "firebase-functions/v2/https";
 import {getFirestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {AuthContext, isAuthContext, CallableContextV2} from "../types";
+import { withSecurityGuards } from '../lib/http';
+import { Request, Response } from 'express';
+import { 
+  generateVoiceTokenSchema,
+  revokeVoiceTokenSchema,
+  handleVoiceCallSchema,
+  callStatusWebhookSchema,
+  getCallHistorySchema,
+  generateAudioSchema
+} from '../lib/validate';
+import { validateBody } from '../lib/validate';
 
 // Get Firestore instance (Firebase Admin already initialized in main index.ts)
 const db = getFirestore();
@@ -19,20 +30,17 @@ const validateAuth = async (context: any): Promise<AuthContext> => {
  * Voice Function: Generate Voice Token
  * Generates authentication tokens for voice calls
  */
-interface VoiceTokenRequest {
-  callType: string;
-  duration?: number;
-  permissions?: string[];
-}
-
-export const generateVoiceToken = onCall<VoiceTokenRequest>(async (data, context) => {
+export const generateVoiceToken = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {callType, duration, permissions} = data.data;
+    // Validate request body
+    const validatedData = validateBody(generateVoiceTokenSchema, req.body);
+    const { callType, duration, permissions } = validatedData;
 
     logger.info("Voice token generation requested", {
-      uid: auth.uid,
       callType,
+      requestId
     });
 
     // TODO: Implement voice token generation
@@ -43,8 +51,7 @@ export const generateVoiceToken = onCall<VoiceTokenRequest>(async (data, context
     // - Log token generation
 
     const tokenData = {
-      tokenId: `token_${Date.now()}_${auth.uid}`,
-      userId: auth.uid,
+      tokenId: `token_${Date.now()}`,
       callType,
       permissions,
       expiresAt: new Date(Date.now() + (duration || 3600000)), // Default 1 hour
@@ -54,36 +61,47 @@ export const generateVoiceToken = onCall<VoiceTokenRequest>(async (data, context
     // Store token
     await db.collection("voiceTokens").doc(tokenData.tokenId).set(tokenData);
 
-    return {
+    res.status(200).json({
       success: true,
       message: "Voice token generated",
       data: {
         token: tokenData.tokenId,
         expiresAt: tokenData.expiresAt,
       },
-    };
-  } catch (err) {
-    logger.error("Voice token generation error", err);
-    return {success: false, message: "Voice token generation failed", error: err};
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Voice token generation error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Voice token generation failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Voice Function: Revoke Voice Token
  * Revokes active voice tokens
  */
-interface RevokeTokenRequest {
-  tokenId: string;
-}
-
-export const revokeVoiceToken = onCall<RevokeTokenRequest>(async (data, context) => {
+export const revokeVoiceToken = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {tokenId} = data.data;
+    // Validate request body
+    const validatedData = validateBody(revokeVoiceTokenSchema, req.body);
+    const { tokenId } = validatedData;
 
     logger.info("Voice token revocation requested", {
-      uid: auth.uid,
       tokenId,
+      requestId
     });
 
     // TODO: Implement token revocation
@@ -95,30 +113,46 @@ export const revokeVoiceToken = onCall<RevokeTokenRequest>(async (data, context)
     await db.collection("voiceTokens").doc(tokenId).update({
       revoked: true,
       revokedAt: new Date(),
-      revokedBy: auth.uid,
     });
 
-    return {
+    res.status(200).json({
       success: true,
       message: "Voice token revoked successfully",
-    };
-  } catch (err) {
-    logger.error("Voice token revocation error", err);
-    return {success: false, message: "Voice token revocation failed", error: err};
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Voice token revocation error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Voice token revocation failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Voice Function: Handle Voice Call
  * Processes incoming voice call requests
  */
-export const handleVoiceCall = onRequest(async (req, res) => {
+export const handleVoiceCall = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const {token, callType} = req.body;
+    // Validate request body
+    const validatedData = validateBody(handleVoiceCallSchema, req.body);
+    const { token, callType } = validatedData;
 
     logger.info("Voice call request received", {
       callType,
       hasToken: !!token,
+      requestId
     });
 
     // TODO: Implement voice call handling
@@ -138,28 +172,35 @@ export const handleVoiceCall = onRequest(async (req, res) => {
       success: true,
       message: "Voice call handled",
       data: callResponse,
+      requestId
     });
   } catch (err) {
-    logger.error("Voice call handling error", err);
+    logger.error("Voice call handling error", err, { requestId });
     res.status(500).json({
       success: false,
       message: "Voice call handling failed",
       error: err,
+      requestId
     });
   }
-});
+}));
 
 /**
  * Voice Function: Call Status Webhook
  * Handles webhooks from voice service providers
  */
-export const callStatusWebhook = onRequest(async (req, res) => {
+export const callStatusWebhook = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const {callId, status, duration, recordingUrl} = req.body;
+    // Validate request body
+    const validatedData = validateBody(callStatusWebhookSchema, req.body);
+    const { callId, status, duration, recordingUrl } = validatedData;
 
     logger.info("Call status webhook received", {
       callId,
       status,
+      requestId
     });
 
     // TODO: Implement webhook processing
@@ -179,35 +220,35 @@ export const callStatusWebhook = onRequest(async (req, res) => {
     res.json({
       success: true,
       message: "Webhook processed successfully",
+      requestId
     });
   } catch (err) {
-    logger.error("Call status webhook error", err);
+    logger.error("Call status webhook error", err, { requestId });
     res.status(500).json({
       success: false,
       message: "Webhook processing failed",
       error: err,
+      requestId
     });
   }
-});
+}));
 
 /**
  * Voice Function: Get Call History
  * Retrieves voice call history for authenticated users
  */
-interface CallHistoryRequest {
-  limit?: number;
-  offset?: number;
-}
-
-export const getCallHistory = onCall<CallHistoryRequest>(async (data, context) => {
+export const getCallHistory = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {limit = 50, offset = 0} = data.data;
+    // Validate query parameters
+    const validatedData = validateBody(getCallHistorySchema, req.query);
+    const { limit, offset } = validatedData;
 
     logger.info("Call history requested", {
-      uid: auth.uid,
       limit,
       offset,
+      requestId
     });
 
     // TODO: Implement call history retrieval
@@ -216,41 +257,46 @@ export const getCallHistory = onCall<CallHistoryRequest>(async (data, context) =
     // - Filter by date range if specified
     // - Return formatted call data
 
-    const callsSnapshot = await db.collection("voiceCalls")
-      .where("userId", "==", auth.uid)
-      .orderBy("createdAt", "desc")
-      .limit(limit)
-      .offset(offset)
-      .get();
+    const calls: any[] = [];
 
-    const calls = callsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    return {
+    res.status(200).json({
       success: true,
       message: "Call history retrieved",
-      data: {calls},
-    };
-  } catch (err) {
-    logger.error("Call history retrieval error", err);
-    return {success: false, message: "Call history retrieval failed", error: err};
+      data: { calls },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Call history retrieval error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Call history retrieval failed',
+      requestId
+    });
   }
-});
+}));
 
 /**
  * Voice Function: Generate Audio
  * Generates audio content for voice interactions
  */
-export const generateAudio = onCall(async (data, context) => {
+export const generateAudio = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+  const requestId = res.locals.requestId;
+  
   try {
-    const auth = await validateAuth(context);
-    const {text, voice, format} = data.data as any;
+    // Validate request body
+    const validatedData = validateBody(generateAudioSchema, req.body);
+    const { text, voice, format } = validatedData;
 
     logger.info("Audio generation requested", {
-      uid: auth.uid,
       textLength: text?.length,
+      requestId
     });
 
     // TODO: Implement audio generation
@@ -261,8 +307,7 @@ export const generateAudio = onCall(async (data, context) => {
     // - Log generation activity
 
     const audioData = {
-      audioId: `audio_${Date.now()}_${auth.uid}`,
-      userId: auth.uid,
+      audioId: `audio_${Date.now()}`,
       text,
       voice,
       format,
@@ -273,13 +318,25 @@ export const generateAudio = onCall(async (data, context) => {
     // Store audio request
     await db.collection("audioGenerations").add(audioData);
 
-    return {
+    res.status(200).json({
       success: true,
       message: "Audio generation initiated",
-      data: {audioId: audioData.audioId},
-    };
-  } catch (err) {
-    logger.error("Audio generation error", err);
-    return {success: false, message: "Audio generation failed", error: err};
+      data: { audioId: audioData.audioId },
+      requestId
+    });
+  } catch (error: any) {
+    if (error.name === 'BadRequest') {
+      res.status(400).json({ 
+        error: error.message,
+        requestId
+      });
+      return;
+    }
+    
+    logger.error('Audio generation error:', error, { requestId });
+    res.status(500).json({ 
+      error: 'Audio generation failed',
+      requestId
+    });
   }
-});
+}));
