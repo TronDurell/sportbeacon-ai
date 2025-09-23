@@ -257,7 +257,7 @@ class ObservabilityDashboard {
       const recentMetrics = await metricsCollector.getAgentMetrics(agentId, new Date(Date.now() - 24 * 60 * 60 * 1000));
       
       const lastActivity = recentMetrics.length > 0 
-        ? recentMetrics[0].timestamp 
+        ? recentMetrics[0]?.timestamp || new Date(0)
         : new Date(0);
 
       utilization.push({

@@ -127,7 +127,7 @@ export function TriageAssistant({ tenantId, onTriageDecision, onFeedback }) {
         const relevantPatterns = patterns.filter(p => p.text.toLowerCase().includes(content.category) ||
             p.text.toLowerCase().includes(content.severity));
         if (relevantPatterns.length > 0) {
-            reasoning += `\n\nPattern Analysis: ${relevantPatterns[0].text}`;
+            reasoning += `\n\nPattern Analysis: ${relevantPatterns[0]?.text || 'No pattern data available'}`;
         }
         // Add similar case insights
         if (similarCases.length > 0) {

@@ -8,6 +8,7 @@ import { useAuth } from './useAuth';
 import { isFeatureEnabled } from '../featureFlags';
 
 export interface MCPRequest {
+  jsonrpc: '2.0';
   method: string;
   params: any;
   id?: string | number;
@@ -86,7 +87,7 @@ export function useAgentClient(): AgentClientState & AgentClientActions {
       abortControllerRef.current = new AbortController();
 
       // Get Firebase ID token
-      const token = await user.getIdToken();
+      const token = await user?.getIdToken?.();
 
       // Prepare MCP request
       const request: MCPRequest = {

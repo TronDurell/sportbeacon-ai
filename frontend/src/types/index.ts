@@ -161,7 +161,7 @@ export interface User {
   updatedAt?: string;
 }
 
-export type UserRole = 'admin' | 'coach' | 'player' | 'parent' | 'scout' | 'trainer';
+export type UserRole = 'admin' | 'coach' | 'player' | 'parent' | 'scout' | 'trainer' | 'athlete' | 'director' | 'townStaff';
 
 // Game and Team types
 export interface Game {

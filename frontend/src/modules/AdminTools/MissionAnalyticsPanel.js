@@ -46,7 +46,7 @@ const MissionAnalyticsPanel = () => {
                     { role: "admin", totalUsers: 45, activeUsers: 42, engagementRate: 93, averageSessionTime: 30 }
                 ],
                 timeSeriesData: Array.from({ length: 30 }, (_, i) => ({
-                    date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split("T")[0],
+                    date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split("T")[0] || '',
                     interventions: Math.floor(Math.random() * 50) + 20,
                     actions: Math.floor(Math.random() * 30) + 10,
                     engagement: Math.floor(Math.random() * 30) + 60

@@ -38,7 +38,7 @@ export function useAgentClient() {
             // Create new abort controller
             abortControllerRef.current = new AbortController();
             // Get Firebase ID token
-            const token = await user.getIdToken();
+            const token = await user?.getIdToken?.();
             // Prepare MCP request
             const request = {
                 jsonrpc: '2.0',

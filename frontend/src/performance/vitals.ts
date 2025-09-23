@@ -143,11 +143,6 @@ if (typeof window !== 'undefined') {
 
 // Export individual metric functions for manual use
 export {
-  getCLS,
-  getINP,
-  getFCP,
-  getLCP,
-  getTTFB,
   onCLS,
   onINP,
   onFCP,

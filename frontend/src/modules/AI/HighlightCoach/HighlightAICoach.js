@@ -167,7 +167,7 @@ const HighlightAICoach = () => {
         ];
         setUploadedVideos(mockVideos);
         if (mockVideos.length > 0) {
-            setCurrentVideo(mockVideos[0]);
+            setCurrentVideo(mockVideos[0] || null);
         }
     }, []);
     // Cleanup intervals on unmount

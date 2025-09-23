@@ -180,7 +180,7 @@ export function TriageAssistant({
     );
 
     if (relevantPatterns.length > 0) {
-      reasoning += `\n\nPattern Analysis: ${relevantPatterns[0].text}`;
+      reasoning += `\n\nPattern Analysis: ${relevantPatterns[0]?.text || 'No pattern data available'}`;
     }
 
     // Add similar case insights

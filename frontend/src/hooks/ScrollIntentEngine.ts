@@ -122,7 +122,13 @@ export const useScrollIntentEngine = () => {
       }
     ];
 
-    return interventions[Math.floor(Math.random() * interventions.length)];
+    const randomIndex = Math.floor(Math.random() * interventions.length);
+    return interventions[randomIndex] || interventions[0] || {
+      id: 'default',
+      title: 'Stay Focused',
+      message: 'Take a moment to reflect on your goals.',
+      actions: []
+    };
   }, []);
 
   const showInterventionModal = useCallback(() => {

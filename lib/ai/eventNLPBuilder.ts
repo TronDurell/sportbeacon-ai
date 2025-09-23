@@ -24,6 +24,11 @@ export class EventNLPBuilder {
       throw new Error('Invalid command');
     }
     
+    // Check for mock provider failure
+    if (process.env.MOCK_PROVIDER_FAIL === "1") {
+      throw new Error('Mock provider failure');
+    }
+    
     const text = command.text.toLowerCase();
     
     if (text.includes('basketball') && text.includes('tomorrow')) {

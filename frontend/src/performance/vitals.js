@@ -104,4 +104,4 @@ if (typeof window !== 'undefined') {
     webVitalsReporter.initialize();
 }
 // Export individual metric functions for manual use
-export { getCLS, getINP, getFCP, getLCP, getTTFB, onCLS, onINP, onFCP, onLCP, onTTFB };
+export { onCLS, onINP, onFCP, onLCP, onTTFB };

@@ -4,7 +4,7 @@ import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
-  { ignores: ["**/dist/**", "**/lib/**", "**/coverage/**", "**/*.d.ts"] },
+  { ignores: ["**/dist/**", "**/lib/**", "**/coverage/**", "**/*.d.ts", "**/scripts/**", "**/tools/**", "**/*.stories.tsx"] },
   js.configs.recommended,
   ...ts.configs.recommended,
   {

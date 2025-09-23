@@ -130,11 +130,11 @@ export const useScoutRoleCurationHub = () => {
             role: user.role,
             intent: userIntent || "explore",
             filters: {
-                contentTypes: rolePrefs.contentTypes || ["drill", "highlight", "article"],
-                difficulty: rolePrefs.difficulty || ["beginner", "intermediate"],
-                maxDuration: rolePrefs.maxDuration || 20,
-                tags: rolePrefs.tags || [],
-                engagement: rolePrefs.engagement || 70
+                contentTypes: rolePrefs?.contentTypes || ["drill", "highlight", "article"],
+                difficulty: rolePrefs?.difficulty || ["beginner", "intermediate"],
+                maxDuration: rolePrefs?.maxDuration || 20,
+                tags: rolePrefs?.tags || [],
+                engagement: rolePrefs?.engagement || 70
             },
             contentQueue: [],
             viewedContent: [],

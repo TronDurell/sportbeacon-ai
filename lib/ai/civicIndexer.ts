@@ -24,6 +24,11 @@ export class CivicIndexer {
       throw new Error('Town ID is required');
     }
     
+    // Check for mock provider failure
+    if (process.env.MOCK_PROVIDER_FAIL === "1") {
+      throw new Error('Mock provider failure');
+    }
+    
     return {
       overallScore: 78,
       categories: {

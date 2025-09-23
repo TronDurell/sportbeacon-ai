@@ -150,28 +150,34 @@ export const useDrillScrollSessionManager = () => {
     if (!user) return;
 
     const roleSessions = DRILL_SESSION_TYPES[user.role] || DRILL_SESSION_TYPES.player;
-    let selectedSession: DrillSession;
+    let selectedSession: DrillSession | null;
 
     // Select session type based on user intent
     if (userIntent) {
       switch (userIntent) {
         case "train":
-          selectedSession = roleSessions?.find(s => s.type === "Training") || roleSessions?.[0];
+          selectedSession = roleSessions?.find(s => s.type === "Training") || roleSessions?.[0] || null;
           break;
         case "learn":
-          selectedSession = roleSessions?.find(s => s.type === "Learning") || roleSessions?.[0];
+          selectedSession = roleSessions?.find(s => s.type === "Learning") || roleSessions?.[0] || null;
           break;
         case "create":
-          selectedSession = roleSessions?.find(s => s.type === "Planning") || roleSessions?.[0];
+          selectedSession = roleSessions?.find(s => s.type === "Planning") || roleSessions?.[0] || null;
           break;
         case "explore":
-          selectedSession = roleSessions?.find(s => s.type === "Social") || roleSessions?.[0];
+          selectedSession = roleSessions?.find(s => s.type === "Social") || roleSessions?.[0] || null;
           break;
         default:
-          selectedSession = roleSessions?.[0];
+          selectedSession = roleSessions?.[0] || null;
       }
     } else {
-      selectedSession = roleSessions?.[0];
+      selectedSession = roleSessions?.[0] || null;
+    }
+
+    // Guard against null selectedSession
+    if (!selectedSession) {
+      console.warn('No drill session available for user intent:', userIntent);
+      return;
     }
 
     const newDrillSession: DrillSessionData = {

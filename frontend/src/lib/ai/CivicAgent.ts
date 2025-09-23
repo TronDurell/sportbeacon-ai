@@ -180,6 +180,19 @@ class CivicAgent {
    * Main query handler for civic questions
    */
   async handleQuery(query: CivicQuery): Promise<CivicResponse> {
+    console.log('CivicAgent handleQuery called with:', query);
+    
+    // Check for mock provider failure
+    if (process.env.MOCK_PROVIDER_FAIL === "1") {
+      throw new Error('Mock provider failure');
+    }
+    
+    // Validate input
+    if (!query || !query.type || !query.question) {
+      console.log('CivicAgent validation failed:', { query, hasType: !!query?.type, hasQuestion: !!query?.question });
+      throw new Error('Invalid query: missing required fields');
+    }
+    
     // Track query
     analyticsTracker.trackEvent({
       eventName: "civic_query",
@@ -260,7 +273,7 @@ class CivicAgent {
 
       if (recommendedPolicies.length > 0) {
         const policy = recommendedPolicies[0];
-        answer = `Registration for ${sport} (age ${childAge}): Cost $${policy.cost}, Registration deadline: ${policy.registrationDeadlines[0]?.toLocaleDateString()}`;
+        answer = `Registration for ${sport} (age ${childAge}): Cost $${policy?.cost || 'TBD'}, Registration deadline: ${policy?.registrationDeadlines?.[0]?.toLocaleDateString() || 'TBD'}`;
       } else {
         answer = `No ${sport} leagues available for age ${childAge}. Please check our website for other options.`;
       }
@@ -327,7 +340,7 @@ class CivicAgent {
     }
 
     const answer = recommendations.length > 0
-      ? `Recommended leagues: ${recommendations.map(p => `${p.sport} (${p.ageGroups[0].name})`).join(", ")}`
+      ? `Recommended leagues: ${recommendations.map(p => `${p.sport} (${p.ageGroups?.[0]?.name || 'Unknown'})`).join(", ")}`
       : "No leagues match your criteria. Please contact our office for assistance.";
 
     return {

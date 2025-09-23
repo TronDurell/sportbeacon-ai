@@ -327,7 +327,7 @@ const HighlightAICoach: React.FC = () => {
 
     setUploadedVideos(mockVideos);
     if (mockVideos.length > 0) {
-      setCurrentVideo(mockVideos[0]);
+      setCurrentVideo(mockVideos[0] || null);
     }
   }, []);
 

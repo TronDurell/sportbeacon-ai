@@ -1,0 +1,5 @@
+[
+  { "uid": "admin_1", "role": "admin", "email": "admin@sportbeacon.ai" },
+  { "uid": "coach_1", "role": "coach", "email": "coach@sportbeacon.ai" },
+  { "uid": "parent_1", "role": "parent", "email": "parent@sportbeacon.ai" }
+]

@@ -235,9 +235,11 @@ export const usePlaymakerIntentEngine = () => {
         timeSinceLastInteraction > PLAYMAKER_THRESHOLDS.INACTIVE_TIMEOUT) {
       
       const roleNudges = ROLE_COACH_NUDGES[user.role] || ROLE_COACH_NUDGES.player;
-      const randomNudge = roleNudges[Math.floor(Math.random() * roleNudges.length)];
+      const randomNudge = roleNudges?.[Math.floor(Math.random() * (roleNudges?.length || 0))];
       
-      triggerScrollIntervention(randomNudge, timeSinceLastInteraction);
+      if (randomNudge) {
+        triggerScrollIntervention(randomNudge, timeSinceLastInteraction);
+      }
       setLastNudgeTime(now);
     }
   }, [autopilot, user, playmakerSession, lastNudgeTime, lastInteractionTime, triggerScrollIntervention]);

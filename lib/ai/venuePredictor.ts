@@ -16,12 +16,17 @@ export class VenuePredictor {
     this.initialized = true;
   }
 
-  getVenuePrediction(venueId: string): any | null {
+  async getVenuePrediction(venueId: string): Promise<any> {
     if (!this.initialized) {
-      return null;
+      throw new Error('VenuePredictor not initialized');
     }
     if (!venueId) {
-      return null;
+      throw new Error('Venue ID is required');
+    }
+    
+    // Check for mock provider failure
+    if (process.env.MOCK_PROVIDER_FAIL === "1") {
+      throw new Error('Mock provider failure');
     }
     
     return {

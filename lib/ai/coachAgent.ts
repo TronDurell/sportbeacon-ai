@@ -24,6 +24,11 @@ export class CoachAgent {
       throw new Error('User ID is required');
     }
     
+    // Check for mock provider failure
+    if (process.env.MOCK_PROVIDER_FAIL === "1") {
+      throw new Error('Mock provider failure');
+    }
+    
     return [
       {
         type: 'workout',

@@ -83,14 +83,14 @@ export class LanguageDetector {
     // Check browser language
     const browserLanguage = navigator.language.split("-")[0];
     if (SUPPORTED_LANGUAGES[browserLanguage as keyof typeof SUPPORTED_LANGUAGES]) {
-      return browserLanguage;
+      return browserLanguage || 'en';
     }
 
     // Check navigator.languages
     for (const lang of navigator.languages) {
       const languageCode = lang.split("-")[0];
       if (SUPPORTED_LANGUAGES[languageCode as keyof typeof SUPPORTED_LANGUAGES]) {
-        return languageCode;
+        return languageCode || 'en';
       }
     }
 

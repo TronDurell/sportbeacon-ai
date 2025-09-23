@@ -172,7 +172,7 @@ const LiberationStatsDashboard = () => {
                     }
                 ],
                 timeSeriesData: Array.from({ length: 30 }, (_, i) => ({
-                    date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split("T")[0],
+                    date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split("T")[0] || '',
                     interventions: Math.floor(Math.random() * 100) + 50,
                     recoveries: Math.floor(Math.random() * 60) + 30,
                     engagement: Math.floor(Math.random() * 20) + 70,
