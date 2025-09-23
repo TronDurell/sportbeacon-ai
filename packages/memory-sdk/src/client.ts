@@ -1,7 +1,16 @@
 import type { MemoryEvent, MemorySnapshot, KPI } from "./types";
 
 export function createMemoryClient() {
-  return { writeEvent, writeSnapshot, calculateKPI };
+  return { 
+    writeEvent, 
+    writeSnapshot, 
+    calculateKPI,
+    feedback: async (userId: string, message: string, tags: string[], trace?: string) => ({ ok: true }),
+    recall: async (query: any) => [],
+    remember: async (data: any) => ({ ok: true }),
+    learn: async (id: string, type: string, ownerId: string, data: any) => ({ ok: true }),
+    purgeLowValue: async (type: string, ownerId: string, threshold: number) => 0
+  };
 }
 
 export async function writeEvent(evt: MemoryEvent): Promise<{ ok: true }> {

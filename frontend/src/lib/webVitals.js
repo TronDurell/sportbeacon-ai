@@ -49,7 +49,7 @@ class WebVitalsReporter {
             return;
         // Core Web Vitals
         onCLS(this.sendMetric.bind(this));
-        onFID(this.sendMetric.bind(this));
+        // onFID(this.sendMetric.bind(this)); // FID deprecated in favor of INP
         onLCP(this.sendMetric.bind(this));
         // Additional metrics
         onFCP(this.sendMetric.bind(this));

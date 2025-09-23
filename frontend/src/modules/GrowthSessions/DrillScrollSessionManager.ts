@@ -156,22 +156,22 @@ export const useDrillScrollSessionManager = () => {
     if (userIntent) {
       switch (userIntent) {
         case "train":
-          selectedSession = roleSessions.find(s => s.type === "Training") || roleSessions[0];
+          selectedSession = roleSessions?.find(s => s.type === "Training") || roleSessions?.[0];
           break;
         case "learn":
-          selectedSession = roleSessions.find(s => s.type === "Learning") || roleSessions[0];
+          selectedSession = roleSessions?.find(s => s.type === "Learning") || roleSessions?.[0];
           break;
         case "create":
-          selectedSession = roleSessions.find(s => s.type === "Planning") || roleSessions[0];
+          selectedSession = roleSessions?.find(s => s.type === "Planning") || roleSessions?.[0];
           break;
         case "explore":
-          selectedSession = roleSessions.find(s => s.type === "Social") || roleSessions[0];
+          selectedSession = roleSessions?.find(s => s.type === "Social") || roleSessions?.[0];
           break;
         default:
-          selectedSession = roleSessions[0];
+          selectedSession = roleSessions?.[0];
       }
     } else {
-      selectedSession = roleSessions[0];
+      selectedSession = roleSessions?.[0];
     }
 
     const newDrillSession: DrillSessionData = {

@@ -247,7 +247,7 @@ const SmartAlerts = ({ className = "", position = "top-right", maxAlerts = 3, ro
         if (Math.random() > 0.7) {
             const achievement = achievements[Math.floor(Math.random() * achievements.length)];
             if (!achievement)
-                return;
+                return [];
             alerts.push({
                 id: achievement.id,
                 type: achievement.type,
@@ -289,7 +289,7 @@ const SmartAlerts = ({ className = "", position = "top-right", maxAlerts = 3, ro
         if (Math.random() > 0.8) {
             const motivation = motivations[Math.floor(Math.random() * motivations.length)];
             if (!motivation)
-                return;
+                return [];
             alerts.push({
                 id: motivation.id,
                 type: "motivation",
