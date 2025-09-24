@@ -31,9 +31,18 @@ export type Memory = {
 
 export type MemoryClient = {
   writeEvent: (userId: string, event: { kind: MemoryEventKind; scope: string; trace?: string; tags?: string[]; data: any }) => Promise<{ ok: boolean }>;
-  feedback: (userId: string, message: string, tags: string[], trace: string) => Promise<{ ok: boolean }>;
+  feedback: (userId: string, message: string, tags: string[], trace?: string) => Promise<{ ok: boolean }>;
   recall: (query: { ownerId: string; kind?: MemoryEventKind; limit?: number }) => Promise<Memory[]>;
   remember: (data: { ownerId: string; kind: MemoryEventKind; scope: string; trace?: string; tags?: string[]; data: any }) => Promise<{ id: string }>;
   learn: (memoryId: string, ownerId: string, feedback: { score: number; note?: string }) => Promise<{ ok: boolean }>;
   purgeLowValue: (ownerId: string, threshold: number) => Promise<{ purged: number }>;
+};
+
+export type MemorySDK = {
+  recall: (query: { ownerId: string; kind?: MemoryEventKind; limit?: number }) => Promise<Memory[]>;
+  remember: (data: { ownerId: string; kind: MemoryEventKind; scope: string; trace?: string; tags?: string[]; data: any }) => Promise<{ id: string }>;
+  learn: (memoryId: string, ownerId: string, feedback: { score: number; note?: string }) => Promise<{ ok: boolean }>;
+  purgeLowValue: (ownerId: string, threshold: number) => Promise<{ purged: number }>;
+  current?: MemorySDK;
+  uid?: string;
 };

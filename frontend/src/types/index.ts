@@ -265,6 +265,7 @@ export interface Message {
   createdAt: DateString;
   updatedAt: DateString;
   readAt?: DateString;
+  timestamp?: string;
 }
 
 export interface MessageMetadata {

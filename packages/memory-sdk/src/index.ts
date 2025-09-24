@@ -1,2 +1,2 @@
-export type { MemoryEvent, MemorySnapshot, KPI, MemoryEventKind, MemoryResult, MemoryClient } from "./types";
+export type { MemoryEvent, MemorySnapshot, KPI, MemoryEventKind, MemoryResult, MemoryClient, MemorySDK } from "./types";
 export { createMemoryClient, memoryClient, writeEvent, writeSnapshot, calculateKPI } from "./client";

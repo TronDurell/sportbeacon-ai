@@ -3,7 +3,7 @@ import type { MemoryEvent, MemorySnapshot, KPI, MemoryClient, MemoryResult, Memo
 export function createMemoryClient(): MemoryClient {
   return { 
     writeEvent: async (userId: string, event: { kind: MemoryEventKind; scope: string; trace?: string; tags?: string[]; data: any }) => ({ ok: true }),
-    feedback: async (userId: string, message: string, tags: string[], trace: string) => ({ ok: true }),
+    feedback: async (userId: string, message: string, tags: string[], trace?: string) => ({ ok: true }),
     recall: async (query: { ownerId: string; kind?: MemoryEventKind; limit?: number }) => [],
     remember: async (data: { ownerId: string; kind: MemoryEventKind; scope: string; trace?: string; tags?: string[]; data: any }) => ({ id: "mock" }),
     learn: async (memoryId: string, ownerId: string, feedback: { score: number; note?: string }) => ({ ok: true }),
