@@ -196,7 +196,7 @@ export function AgentAssistant() {
       // Simple keyword-based responses for now
       // In a real implementation, this would use an LLM
       let response = '';
-      let responseData: any = null;
+      const responseData: any = null;
       let responseActions: Message['actions'] = undefined;
 
       if (userMessage.toLowerCase().includes('stats') || userMessage.toLowerCase().includes('performance')) {

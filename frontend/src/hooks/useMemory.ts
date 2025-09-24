@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { memoryClient, type MemoryClient } from '@sportbeacon/memory-sdk';
+import type { MemorySDKCompat } from '../types/memory';
 
 export interface UseMemoryOptions {
   enabled?: boolean;
@@ -34,7 +35,7 @@ export function useMemory(options: UseMemoryOptions = {}) {
     }
 
     try {
-      const memClient = memoryClient;
+      const memClient = memoryClient as MemoryClient & MemorySDKCompat;
       setClient(memClient);
       setIsInitialized(true);
     } catch (error) {
@@ -48,7 +49,7 @@ export function useMemory(options: UseMemoryOptions = {}) {
     if (!client || !userId || !autoCapture) return;
 
     try {
-      await client.writeEvent(userId, {
+      await (client as any).writeEvent?.(userId, {
         kind: 'observation',
         scope: 'web',
         tags: ['session:start'],
@@ -70,7 +71,7 @@ export function useMemory(options: UseMemoryOptions = {}) {
     if (!client || !userId) return;
 
     try {
-      await client.writeEvent(userId, {
+      await (client as any).writeEvent?.(userId, {
         kind: 'observation',
         scope: 'web',
         tags: [`auth:${event}`],
@@ -92,7 +93,7 @@ export function useMemory(options: UseMemoryOptions = {}) {
     if (!client || !userId) return;
 
     try {
-      await client.feedback(userId, message, tags, trace);
+      await (client as any).feedback?.(userId, message, tags, trace);
       setStats(prev => ({ ...prev, eventsWritten: prev.eventsWritten + 1, lastEventTime: new Date() }));
     } catch (error) {
       console.warn('Failed to capture feedback:', error);
@@ -111,7 +112,7 @@ export function useMemory(options: UseMemoryOptions = {}) {
     if (!client || !userId) return;
 
     try {
-      await client.writeEvent(userId, {
+      await (client as any).writeEvent?.(userId, {
         kind,
         scope: 'web',
         tags,

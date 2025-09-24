@@ -13,8 +13,10 @@ export default [
       "**/*.d.ts",
       "**/scripts/**",
       "**/tools/**",
-      "**/*.stories.*",
       "**/.storybook/**",
+      "**/*.stories.*",
+      "**/reports/**",
+      "**/artifacts/**",
       "**/node_modules/**",
       "**/build/**",
       "**/out/**",
@@ -23,7 +25,7 @@ export default [
       "**/functions/__tests__/**",
       "**/packages/*/test/**",
       "**/packages/*/__tests__/**",
-      "**/src/**", // Legacy src directory
+      "**/legacy-src/**", // Legacy src directory
       "**/town-rec-integrity/**",
       "**/townRec/**",
       "**/testenv/**",
@@ -55,24 +57,46 @@ export default [
   },
   js.configs.recommended,
   ...ts.configs.recommended,
+  // Core app - relaxed for stabilization
   {
     files: ["frontend/src/**/*.{ts,tsx,js,jsx}", "functions/src/**/*.{ts,tsx,js,jsx}", "packages/*/src/**/*.{ts,tsx,js,jsx}"],
     plugins: { react, "react-hooks": reactHooks },
     rules: {
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "@typescript-eslint/no-explicit-any": "warn",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      "@typescript-eslint/no-explicit-any": "warn"
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }]
     },
     settings: { react: { version: "detect" } }
   },
+  // Tests - relaxed rules
   {
-    files: ["**/*.test.*", "**/__tests__/**"],
-    rules: { 
-      "no-console": "off",
+    files: ["**/__tests__/**", "tests/**", "**/*.test.ts?(x)"],
+    languageOptions: { 
+      globals: { 
+        jest: true,
+        node: true 
+      } 
+    },
+    rules: {
       "@typescript-eslint/no-explicit-any": "off",
+      "no-console": "off",
       "@typescript-eslint/no-unused-vars": "off"
+    }
+  },
+  // Scripts/tools/configs - relaxed rules
+  {
+    files: ["scripts/**", "tools/**", "**/*.config.*", "**/*.rc.*"],
+    languageOptions: { 
+      globals: { 
+        node: true 
+      } 
+    },
+    rules: {
+      "@typescript-eslint/no-var-requires": "off",
+      "no-console": "off"
     }
   }
 ];

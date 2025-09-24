@@ -327,7 +327,7 @@ function setupRoutes() {
         case 'updateMemory':
           result = await updateMemory(request.params, auth);
           break;
-        default:
+        default: {
           const error: JsonRpcError = {
             code: -32601,
             message: 'Method not found'
@@ -337,6 +337,7 @@ function setupRoutes() {
             error,
             id: request.id
           });
+        }
       }
 
       // Log audit event

@@ -3,6 +3,7 @@
 */
 
 import { memoryClient, type MemoryEventKind } from '@sportbeacon/memory-sdk';
+import type { MemorySDKCompat } from '../types/memory';
 import { Timestamp } from 'firebase/firestore';
 
 // ============================================================================
@@ -58,7 +59,7 @@ export type AnalyticsEventType = typeof ANALYTICS_EVENTS[keyof typeof ANALYTICS_
 // ============================================================================
 
 class AnalyticsService {
-  private memoryClient = memoryClient;
+  private memoryClient = memoryClient as typeof memoryClient & MemorySDKCompat;
   private tenantId: string;
   private userId: string | null = null;
 
@@ -73,7 +74,7 @@ class AnalyticsService {
   private async emitEvent(
     eventType: AnalyticsEventType,
     data: KPIEventData,
-    memoryKind: MemoryEventKind = 'observation'
+    memoryKind: MemoryEventKind = 'observation' as MemoryEventKind
   ): Promise<void> {
     try {
       const timestamp = new Date().toISOString() as DateString;
@@ -88,7 +89,7 @@ class AnalyticsService {
 
       // Write to Memory SDK
       if (this.userId) {
-        await this.memoryClient.writeEvent(this.userId, {
+        await this.memoryClient.writeEvent?.(this.userId, {
           kind: memoryKind,
           scope: 'web',
           trace: eventType,

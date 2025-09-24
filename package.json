@@ -22,8 +22,8 @@
   "scripts": {
     "preinstall": "node -e \"const v=process.versions.node.split('.')[0]; if(+v<18) { console.error('Node >=18.20.x required'); process.exit(1); }\"",
     "typecheck": "tsc -b",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint frontend/src functions/src packages/memory-sdk/src packages/mcp-server/src --max-warnings=0",
+    "lint:fix": "eslint --fix frontend/src functions/src packages/memory-sdk/src packages/mcp-server/src",
     "build": "npm run build:sdk && npm run build:frontend && npm -w functions run build",
     "build:sdk": "npm -w packages/memory-sdk run build",
     "build:frontend": "npm -w frontend run build",

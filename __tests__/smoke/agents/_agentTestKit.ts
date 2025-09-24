@@ -27,7 +27,7 @@ export async function runAgentCase(agentFactory: any, caseType: Case) {
     } else if (agent.processQuery) {
       return expect(agent.processQuery({})).rejects.toThrow();
     } else if (agent.handleQuery) {
-      return expect(agent.handleQuery({} as any)).rejects.toThrow();
+      return expect(agent.handleQuery({ type: "invalid" } as any)).rejects.toThrow();
     }
   }
   
@@ -47,7 +47,11 @@ export async function runAgentCase(agentFactory: any, caseType: Case) {
     } else if (agent.processQuery) {
       return expect(agent.processQuery({ query: "test" })).rejects.toThrow();
     } else if (agent.handleQuery) {
-      return expect(agent.handleQuery({ query: "test" } as any)).rejects.toThrow();
+      return expect(agent.handleQuery({ 
+        type: "general", 
+        question: "test query", 
+        context: {} 
+      } as any)).rejects.toThrow();
     }
   }
   
@@ -66,7 +70,11 @@ export async function runAgentCase(agentFactory: any, caseType: Case) {
   } else if (agent.processQuery) {
     out = await agent.processQuery({ query: "test query" });
   } else if (agent.handleQuery) {
-    out = await agent.handleQuery({ query: "test query", context: {} });
+    out = await agent.handleQuery({ 
+      type: "general", 
+      question: "test query", 
+      context: {} 
+    });
   }
   
   expect(out).toBeTruthy();
