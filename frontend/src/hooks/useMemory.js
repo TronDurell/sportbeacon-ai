@@ -33,7 +33,7 @@ export function useMemory(options = {}) {
         if (!client || !userId || !autoCapture)
             return;
         try {
-            await client.writeEvent(userId, {
+            await client.writeEvent?.(userId, {
                 kind: 'observation',
                 scope: 'web',
                 tags: ['session:start'],
@@ -55,7 +55,7 @@ export function useMemory(options = {}) {
         if (!client || !userId)
             return;
         try {
-            await client.writeEvent(userId, {
+            await client.writeEvent?.(userId, {
                 kind: 'observation',
                 scope: 'web',
                 tags: [`auth:${event}`],
@@ -77,7 +77,7 @@ export function useMemory(options = {}) {
         if (!client || !userId)
             return;
         try {
-            await client.feedback(userId, message, tags, trace);
+            await client.feedback?.(userId, message, tags, trace);
             setStats(prev => ({ ...prev, eventsWritten: prev.eventsWritten + 1, lastEventTime: new Date() }));
         }
         catch (error) {
@@ -90,7 +90,7 @@ export function useMemory(options = {}) {
         if (!client || !userId)
             return;
         try {
-            await client.writeEvent(userId, {
+            await client.writeEvent?.(userId, {
                 kind,
                 scope: 'web',
                 tags,

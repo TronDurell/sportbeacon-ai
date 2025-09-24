@@ -42,7 +42,7 @@ class AnalyticsService {
             };
             // Write to Memory SDK
             if (this.userId) {
-                await this.memoryClient.writeEvent(this.userId, {
+                await this.memoryClient.writeEvent?.(this.userId, {
                     kind: memoryKind,
                     scope: 'web',
                     trace: eventType,

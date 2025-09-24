@@ -30,7 +30,7 @@ export function TriageAssistant({ tenantId, onTriageDecision, onFeedback }) {
         setError(null);
         try {
             // Get moderation patterns from memory
-            const patterns = await memorySDK.recall({
+            const patterns = await memorySDK.current?.recall({
                 scope: 'agent',
                 ownerId: 'moderation-agent',
                 kind: 'fact',
@@ -38,7 +38,7 @@ export function TriageAssistant({ tenantId, onTriageDecision, onFeedback }) {
                 limit: 50
             });
             // Get historical triage decisions
-            const decisions = await memorySDK.recall({
+            const decisions = await memorySDK.current?.recall({
                 scope: 'agent',
                 ownerId: 'moderation-agent',
                 kind: 'feedback',
@@ -117,7 +117,17 @@ export function TriageAssistant({ tenantId, onTriageDecision, onFeedback }) {
             action: decision.text.includes('approve') ? 'approve' : 'reject',
             outcome: decision.score && decision.score > 0 ? 'correct' : 'incorrect',
             moderatorId: 'moderator-1',
-            timestamp: decision.createdAt?.toDate?.()?.toISOString() || new Date().toISOString()
+            timestamp: (() => {
+                if (!decision.createdAt)
+                    return new Date().toISOString();
+                if (decision.createdAt instanceof Date)
+                    return decision.createdAt.toISOString();
+                if (typeof decision.createdAt === 'string')
+                    return new Date(decision.createdAt).toISOString();
+                if (typeof decision.createdAt === 'number')
+                    return new Date(decision.createdAt).toISOString();
+                return new Date().toISOString();
+            })()
         }));
     };
     // Enhance reasoning with AI insights
@@ -142,7 +152,7 @@ export function TriageAssistant({ tenantId, onTriageDecision, onFeedback }) {
             return;
         try {
             // Store decision in memory for learning
-            await memorySDK.remember({
+            await memorySDK.current?.remember({
                 tenantId,
                 scope: 'agent',
                 ownerId: 'moderation-agent',
@@ -168,7 +178,7 @@ export function TriageAssistant({ tenantId, onTriageDecision, onFeedback }) {
         try {
             // Learn from feedback
             const delta = feedback === 'correct' ? 0.3 : -0.2;
-            await memorySDK.learn(item.id, 'agent', 'moderation-agent', {
+            await memorySDK.current?.learn(item.id, 'agent', 'moderation-agent', {
                 delta,
                 reason: `Triage decision feedback: ${feedback} for ${item.suggestedAction}`,
                 tags: ['triage-feedback', feedback, item.category]

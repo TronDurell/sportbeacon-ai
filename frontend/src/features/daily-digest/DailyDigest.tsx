@@ -57,7 +57,7 @@ export function DailyDigest({
 
     try {
       // Get user preferences from memory
-      const preferences = await memorySDK.recall({
+      const preferences = await memorySDK.current?.recall({
         scope: 'user',
         ownerId: user.uid,
         kind: 'preference',
@@ -66,7 +66,7 @@ export function DailyDigest({
       });
 
       // Get user goals from memory
-      const goals = await memorySDK.recall({
+      const goals = await memorySDK.current?.recall({
         scope: 'user',
         ownerId: user.uid,
         kind: 'goal',
@@ -168,7 +168,7 @@ export function DailyDigest({
     try {
       // Learn from feedback
       const delta = feedback === 'positive' ? 0.3 : -0.2;
-      await memorySDK.learn(item.id, 'user', user.uid, {
+      await memorySDK.current?.learn(item.id, 'user', user.uid, {
         delta,
         reason: `User ${feedback} feedback on digest item: ${item.title}`,
         tags: ['digest', 'feedback', feedback]

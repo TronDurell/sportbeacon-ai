@@ -33,7 +33,7 @@ export function CreatorAssist({ tenantId, initialContent = '', onContentChange, 
         if (!memorySDK || !user)
             return;
         try {
-            const styleMemories = await memorySDK.recall({
+            const styleMemories = await memorySDK.current?.recall({
                 scope: 'user',
                 ownerId: user.uid,
                 kind: 'preference',
@@ -125,7 +125,7 @@ export function CreatorAssist({ tenantId, initialContent = '', onContentChange, 
                 .filter(([key, value]) => key !== 'preferences')
                 .map(([key, value]) => `${key}:${value}`)
                 .join(', ');
-            await memorySDK.remember({
+            await memorySDK.current?.remember({
                 tenantId,
                 scope: 'user',
                 ownerId: user.uid,

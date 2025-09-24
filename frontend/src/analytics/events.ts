@@ -74,7 +74,7 @@ class AnalyticsService {
   private async emitEvent(
     eventType: AnalyticsEventType,
     data: KPIEventData,
-    memoryKind: MemoryEventKind = 'observation' as MemoryEventKind
+    memoryKind: MemoryEventKind = 'observation'
   ): Promise<void> {
     try {
       const timestamp = new Date().toISOString() as DateString;
