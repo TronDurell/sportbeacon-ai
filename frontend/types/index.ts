@@ -80,6 +80,10 @@ export interface FeedItem {
     shares: number;
     createdAt: string;
     updatedAt: string;
+    // Engagement scoring for ranking
+    engagementScore: number;
+    // SEL resilience scoring (nullable for backward compatibility)
+    resilienceScore?: number;
     stats: {
         views: number;
         likes: number;
