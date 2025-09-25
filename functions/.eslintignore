@@ -1,5 +1,0 @@
-lib/
-coverage/
-.firebase/
-node_modules/
-*.min.js

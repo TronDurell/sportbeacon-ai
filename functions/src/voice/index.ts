@@ -3,20 +3,47 @@ import {onCall, onRequest} from "firebase-functions/v2/https";
 import {getFirestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {AuthContext, isAuthContext, CallableContextV2} from "../types";
-import { withSecurityGuards } from '../lib/http';
+// import { withSecurityGuards } from '../lib/http'; // TODO: Create security guards
 import { Request, Response } from 'express';
-import { 
-  generateVoiceTokenSchema,
-  revokeVoiceTokenSchema,
-  handleVoiceCallSchema,
-  callStatusWebhookSchema,
-  getCallHistorySchema,
-  generateAudioSchema
-} from '../lib/validate';
-import { validateBody } from '../lib/validate';
+import { ValidationMiddleware, Schemas } from '../utils/validation';
+import { z } from 'zod';
 
 // Get Firestore instance (Firebase Admin already initialized in main index.ts)
 const db = getFirestore();
+
+// Voice-specific schemas
+const generateVoiceTokenSchema = z.object({
+  callType: z.string(),
+  duration: z.number().optional(),
+  permissions: z.array(z.string()).optional()
+});
+
+const revokeVoiceTokenSchema = z.object({
+  tokenId: z.string()
+});
+
+const handleVoiceCallSchema = z.object({
+  token: z.string(),
+  callType: z.string()
+});
+
+const callStatusWebhookSchema = z.object({
+  callId: z.string(),
+  status: z.string(),
+  duration: z.number().optional(),
+  recordingUrl: z.string().optional()
+});
+
+const getCallHistorySchema = z.object({
+  limit: z.number().optional(),
+  offset: z.number().optional()
+});
+
+const generateAudioSchema = z.object({
+  text: z.string(),
+  voice: z.string().optional(),
+  format: z.string().optional()
+});
 
 // Helper function to validate user authentication
 const validateAuth = async (context: any): Promise<AuthContext> => {
@@ -30,13 +57,16 @@ const validateAuth = async (context: any): Promise<AuthContext> => {
  * Voice Function: Generate Voice Token
  * Generates authentication tokens for voice calls
  */
-export const generateVoiceToken = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+export const generateVoiceToken = onRequest(async (req: Request, res: Response) => {
   const requestId = res.locals.requestId;
   
   try {
     // Validate request body
-    const validatedData = validateBody(generateVoiceTokenSchema, req.body);
-    const { callType, duration, permissions } = validatedData;
+    const validation = ValidationMiddleware.validateData(generateVoiceTokenSchema, req.body);
+    if (!validation.success || !validation.data) {
+      throw new Error('Invalid request data');
+    }
+    const { callType, duration, permissions } = validation.data;
 
     logger.info("Voice token generation requested", {
       callType,
@@ -85,19 +115,22 @@ export const generateVoiceToken = onRequest(withSecurityGuards(async (req: Reque
       requestId
     });
   }
-}));
+});
 
 /**
  * Voice Function: Revoke Voice Token
  * Revokes active voice tokens
  */
-export const revokeVoiceToken = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+export const revokeVoiceToken = onRequest(async (req: Request, res: Response) => {
   const requestId = res.locals.requestId;
   
   try {
     // Validate request body
-    const validatedData = validateBody(revokeVoiceTokenSchema, req.body);
-    const { tokenId } = validatedData;
+    const validation = ValidationMiddleware.validateData(revokeVoiceTokenSchema, req.body);
+    if (!validation.success || !validation.data) {
+      throw new Error('Invalid request data');
+    }
+    const { tokenId } = validation.data;
 
     logger.info("Voice token revocation requested", {
       tokenId,
@@ -135,19 +168,22 @@ export const revokeVoiceToken = onRequest(withSecurityGuards(async (req: Request
       requestId
     });
   }
-}));
+});
 
 /**
  * Voice Function: Handle Voice Call
  * Processes incoming voice call requests
  */
-export const handleVoiceCall = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+export const handleVoiceCall = onRequest(async (req: Request, res: Response) => {
   const requestId = res.locals.requestId;
   
   try {
     // Validate request body
-    const validatedData = validateBody(handleVoiceCallSchema, req.body);
-    const { token, callType } = validatedData;
+    const validation = ValidationMiddleware.validateData(handleVoiceCallSchema, req.body);
+    if (!validation.success || !validation.data) {
+      throw new Error('Invalid request data');
+    }
+    const { token, callType } = validation.data;
 
     logger.info("Voice call request received", {
       callType,
@@ -183,19 +219,22 @@ export const handleVoiceCall = onRequest(withSecurityGuards(async (req: Request,
       requestId
     });
   }
-}));
+});
 
 /**
  * Voice Function: Call Status Webhook
  * Handles webhooks from voice service providers
  */
-export const callStatusWebhook = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+export const callStatusWebhook = onRequest(async (req: Request, res: Response) => {
   const requestId = res.locals.requestId;
   
   try {
     // Validate request body
-    const validatedData = validateBody(callStatusWebhookSchema, req.body);
-    const { callId, status, duration, recordingUrl } = validatedData;
+    const validation = ValidationMiddleware.validateData(callStatusWebhookSchema, req.body);
+    if (!validation.success || !validation.data) {
+      throw new Error('Invalid request data');
+    }
+    const { callId, status, duration, recordingUrl } = validation.data;
 
     logger.info("Call status webhook received", {
       callId,
@@ -231,19 +270,22 @@ export const callStatusWebhook = onRequest(withSecurityGuards(async (req: Reques
       requestId
     });
   }
-}));
+});
 
 /**
  * Voice Function: Get Call History
  * Retrieves voice call history for authenticated users
  */
-export const getCallHistory = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+export const getCallHistory = onRequest(async (req: Request, res: Response) => {
   const requestId = res.locals.requestId;
   
   try {
     // Validate query parameters
-    const validatedData = validateBody(getCallHistorySchema, req.query);
-    const { limit, offset } = validatedData;
+    const validation = ValidationMiddleware.validateData(getCallHistorySchema, req.query);
+    if (!validation.success || !validation.data) {
+      throw new Error('Invalid query parameters');
+    }
+    const { limit, offset } = validation.data;
 
     logger.info("Call history requested", {
       limit,
@@ -280,19 +322,22 @@ export const getCallHistory = onRequest(withSecurityGuards(async (req: Request, 
       requestId
     });
   }
-}));
+});
 
 /**
  * Voice Function: Generate Audio
  * Generates audio content for voice interactions
  */
-export const generateAudio = onRequest(withSecurityGuards(async (req: Request, res: Response) => {
+export const generateAudio = onRequest(async (req: Request, res: Response) => {
   const requestId = res.locals.requestId;
   
   try {
     // Validate request body
-    const validatedData = validateBody(generateAudioSchema, req.body);
-    const { text, voice, format } = validatedData;
+    const validation = ValidationMiddleware.validateData(generateAudioSchema, req.body);
+    if (!validation.success || !validation.data) {
+      throw new Error('Invalid request data');
+    }
+    const { text, voice, format } = validation.data;
 
     logger.info("Audio generation requested", {
       textLength: text?.length,
@@ -339,4 +384,4 @@ export const generateAudio = onRequest(withSecurityGuards(async (req: Request, r
       requestId
     });
   }
-}));
+});

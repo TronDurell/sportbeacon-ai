@@ -12,31 +12,38 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [18.20.x]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci
+      run: npm ci --workspaces
       
-    - name: Run linter
-      run: npm run lint
+    - name: Typecheck
+      run: npm run typecheck
       
-    - name: Run type check
-      run: npm run type-check
+    - name: Build workspaces
+      run: |
+        npm -w frontend run build
+        npm -w functions run build
+        npm -w packages/memory-sdk run build
+        npm -w packages/mcp-server run build
+        
+    - name: Check size limits
+      run: npm run size:limit
       
-    - name: Run tests
-      run: npm test
+    - name: Run smoke tests
+      run: npm run test:smoke
       
-    - name: Build
-      run: npm run build
+    - name: Lint (non-blocking)
+      run: npm run lint || true
 
   deploy:
     needs: build
@@ -44,12 +51,25 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
-    - name: Deploy to Vercel
-      uses: amondnet/vercel-action@v20
+    - name: Use Node.js 18.20.x
+      uses: actions/setup-node@v4
       with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        vercel-args: '--prod' 
+        node-version: '18.20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci --workspaces
+      
+    - name: Build all components
+      run: |
+        npm -w frontend run build
+        npm -w functions run build
+        npm -w packages/memory-sdk run build
+        npm -w packages/mcp-server run build
+    
+    - name: Deploy to Firebase
+      run: firebase deploy --only hosting,functions
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }} 

@@ -1,3 +1,0 @@
-class DrillLog(BaseModel):
-    # ... existing fields ...
-    venue_id: str 
