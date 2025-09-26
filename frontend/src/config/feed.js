@@ -45,6 +45,36 @@ export function getAbAssignment(userId) {
     return 'C';
 }
 /**
+ * Get ranking configuration based on A/B variant
+ * Updated to match the specified A/B testing scaffolding
+ */
+export function getVariantConfig(variant) {
+    switch (variant) {
+        case 'A': // Highlights-heavy
+            return {
+                selWeight: 0.20,
+                engagementWeight: 0.70,
+                recencyWeight: 0.10,
+                description: 'Highlights-heavy ranking'
+            };
+        case 'B': // SEL-heavy
+            return {
+                selWeight: 0.50,
+                engagementWeight: 0.40,
+                recencyWeight: 0.10,
+                description: 'SEL-heavy ranking'
+            };
+        case 'C': // Blended (default)
+        default:
+            return {
+                selWeight: 0.35,
+                engagementWeight: 0.55,
+                recencyWeight: 0.10,
+                description: 'Blended SEL-engagement ranking'
+            };
+    }
+}
+/**
  * Check if user should see explainability chip
  */
 export function shouldShowExplainability(selContribution) {

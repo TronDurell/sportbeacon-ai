@@ -57,6 +57,42 @@ export function trackFeedMix(data: FeedMixData): void {
 }
 
 /**
+ * Track feed score breakdown for A/B cohorts
+ */
+export function trackFeedScoreBreakdown(data: {
+  userId: string;
+  postId: string;
+  variant: 'A' | 'B' | 'C';
+  breakdown: {
+    sel: number;
+    engagement: number;
+    recency: number;
+    final: number;
+  };
+  postType: string;
+  hasResilienceScore: boolean;
+}): void {
+  const event: FeedTelemetryEvent = {
+    event: 'feed_score_breakdown',
+    userId: data.userId,
+    timestamp: Date.now(),
+    data: {
+      postId: data.postId,
+      variant: data.variant,
+      selScore: data.breakdown.sel,
+      engagementScore: data.breakdown.engagement,
+      recencyScore: data.breakdown.recency,
+      finalScore: data.breakdown.final,
+      postType: data.postType,
+      hasResilienceScore: data.hasResilienceScore,
+      experiment: 'feed_ranking_v1'
+    }
+  };
+  
+  sendTelemetryEvent(event);
+}
+
+/**
  * Track content engagement for analysis
  */
 export function trackContentEngagement(data: ContentEngagementData): void {

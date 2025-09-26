@@ -24,6 +24,28 @@ export function trackFeedMix(data) {
     sendTelemetryEvent(event);
 }
 /**
+ * Track feed score breakdown for A/B cohorts
+ */
+export function trackFeedScoreBreakdown(data) {
+    const event = {
+        event: 'feed_score_breakdown',
+        userId: data.userId,
+        timestamp: Date.now(),
+        data: {
+            postId: data.postId,
+            variant: data.variant,
+            selScore: data.breakdown.sel,
+            engagementScore: data.breakdown.engagement,
+            recencyScore: data.breakdown.recency,
+            finalScore: data.breakdown.final,
+            postType: data.postType,
+            hasResilienceScore: data.hasResilienceScore,
+            experiment: 'feed_ranking_v1'
+        }
+    };
+    sendTelemetryEvent(event);
+}
+/**
  * Track content engagement for analysis
  */
 export function trackContentEngagement(data) {
@@ -89,7 +111,7 @@ export function trackExplainabilityInteraction(data) {
 function sendTelemetryEvent(event) {
     // Send to multiple analytics providers
     // 1. Custom analytics endpoint
-    if (typeof window !== 'undefined' && window.fetch) {
+    if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
         fetch('/api/analytics/telemetry', {
             method: 'POST',
             headers: {

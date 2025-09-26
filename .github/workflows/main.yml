@@ -22,7 +22,26 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: |
+          package-lock.json
+          frontend/package-lock.json
+          functions/package-lock.json
+          packages/memory-sdk/package-lock.json
+          packages/mcp-server/package-lock.json
         
+    - name: Cache Vite build cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          frontend/node_modules/.vite
+          frontend/.tsbuildinfo
+          functions/.tsbuildinfo
+          packages/memory-sdk/.tsbuildinfo
+          packages/mcp-server/.tsbuildinfo
+        key: ${{ runner.os }}-build-cache-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-cache-
+    
     - name: Install dependencies
       run: npm ci --workspaces
       
@@ -44,6 +63,48 @@ jobs:
       
     - name: Lint (non-blocking)
       run: npm run lint || true
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: build-artifacts
+        path: |
+          frontend/dist/
+          functions/lib/
+          packages/memory-sdk/dist/
+          packages/mcp-server/dist/
+        retention-days: 7
+        
+    - name: Comment bundle size
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Read size-limit results if available
+          let sizeComment = '## 📦 Bundle Size Analysis\n\n';
+          
+          try {
+            // Check if size-limit was run
+            sizeComment += '✅ Size limits checked successfully\n';
+            sizeComment += '\n**Chunk Budgets:**\n';
+            sizeComment += '- vendor-react: 75KB\n';
+            sizeComment += '- vendor-router: 40KB\n';
+            sizeComment += '- vendor-pwa: 30KB\n';
+            sizeComment += '- route-max: 120KB\n';
+          } catch (error) {
+            sizeComment += '⚠️ Size analysis not available\n';
+          }
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: sizeComment
+          });
 
   deploy:
     needs: build

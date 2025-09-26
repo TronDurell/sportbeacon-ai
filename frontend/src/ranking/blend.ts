@@ -3,6 +3,8 @@
  * Combines Social-Emotional Learning signals with engagement metrics
  */
 
+import { SEL_CONFIG, calculateBlendedScore, logSELConfig } from '../lib/env'
+
 export type Weights = { 
   sel: number; 
   engagement: number; 
@@ -11,11 +13,11 @@ export type Weights = {
 
 /**
  * Calculate time decay factor for recency scoring
- * Uses 24-hour half-life for recency decay
+ * Uses configurable half-life for recency decay
  */
 export function timeDecay(ts: number): number {
   const hours = (Date.now() - ts) / 3_600_000;
-  return Math.pow(0.5, hours / 24);
+  return Math.pow(0.5, hours / SEL_CONFIG.recencyHalfLifeHours);
 }
 
 /**
@@ -28,23 +30,32 @@ export function blendedScore(
     resilienceScore?: number;
     ts: number;
   }, 
-  weights: Weights
-): { score: number; selContribution: number } {
-  // SEL component (with null safety)
-  const sel = (post.resilienceScore ?? 0) * weights.sel;
+  weights?: Weights
+): { score: number; selContribution: number; breakdown: { sel: number; engagement: number; recency: number } } {
+  // Use environment config if no weights provided
+  const effectiveWeights = weights || {
+    sel: SEL_CONFIG.selWeight,
+    engagement: SEL_CONFIG.engagementWeight,
+    recency: 0.10
+  };
   
-  // Engagement component
-  const eng = post.engagementScore * weights.engagement;
+  const hoursSincePost = (Date.now() - post.ts) / 3_600_000;
   
-  // Recency component (default to 0 if not specified)
-  const rec = (weights.recency ?? 0) * timeDecay(post.ts);
-  
-  const totalScore = sel + eng + rec;
+  // Use environment-gated calculation
+  const result = calculateBlendedScore(
+    post.resilienceScore ?? 0,
+    post.engagementScore,
+    hoursSincePost
+  );
   
   // Calculate SEL contribution percentage for explainability
-  const selContribution = totalScore > 0 ? sel / totalScore : 0;
+  const selContribution = result.finalScore > 0 ? result.breakdown.sel / result.finalScore : 0;
   
-  return { score: totalScore, selContribution };
+  return { 
+    score: result.finalScore, 
+    selContribution,
+    breakdown: result.breakdown
+  };
 }
 
 /**
@@ -55,7 +66,10 @@ export function rankPosts<T extends {
   engagementScore: number;
   resilienceScore?: number;
   ts: number;
-}>(posts: T[], weights: Weights): T[] {
+}>(posts: T[], weights?: Weights): T[] {
+  // Log configuration for debugging
+  logSELConfig();
+  
   return [...posts].sort((a, b) => {
     const scoreA = blendedScore(a, weights).score;
     const scoreB = blendedScore(b, weights).score;

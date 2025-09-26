@@ -2,35 +2,44 @@
  * Blended Ranking System for SEL-Highlight Feed
  * Combines Social-Emotional Learning signals with engagement metrics
  */
+import { SEL_CONFIG, calculateBlendedScore, logSELConfig } from '../lib/env';
 /**
  * Calculate time decay factor for recency scoring
- * Uses 24-hour half-life for recency decay
+ * Uses configurable half-life for recency decay
  */
 export function timeDecay(ts) {
     const hours = (Date.now() - ts) / 3_600_000;
-    return Math.pow(0.5, hours / 24);
+    return Math.pow(0.5, hours / SEL_CONFIG.recencyHalfLifeHours);
 }
 /**
  * Calculate blended score for a post
  * Combines SEL resilience, engagement, and recency signals
  */
 export function blendedScore(post, weights) {
-    // SEL component (with null safety)
-    const sel = (post.resilienceScore ?? 0) * weights.sel;
-    // Engagement component
-    const eng = post.engagementScore * weights.engagement;
-    // Recency component (default to 0 if not specified)
-    const rec = (weights.recency ?? 0) * timeDecay(post.ts);
-    const totalScore = sel + eng + rec;
+    // Use environment config if no weights provided
+    const effectiveWeights = weights || {
+        sel: SEL_CONFIG.selWeight,
+        engagement: SEL_CONFIG.engagementWeight,
+        recency: 0.10
+    };
+    const hoursSincePost = (Date.now() - post.ts) / 3_600_000;
+    // Use environment-gated calculation
+    const result = calculateBlendedScore(post.resilienceScore ?? 0, post.engagementScore, hoursSincePost);
     // Calculate SEL contribution percentage for explainability
-    const selContribution = totalScore > 0 ? sel / totalScore : 0;
-    return { score: totalScore, selContribution };
+    const selContribution = result.finalScore > 0 ? result.breakdown.sel / result.finalScore : 0;
+    return {
+        score: result.finalScore,
+        selContribution,
+        breakdown: result.breakdown
+    };
 }
 /**
  * Rank posts using blended scoring
  * Sorts posts by blended score in descending order
  */
 export function rankPosts(posts, weights) {
+    // Log configuration for debugging
+    logSELConfig();
     return [...posts].sort((a, b) => {
         const scoreA = blendedScore(a, weights).score;
         const scoreB = blendedScore(b, weights).score;

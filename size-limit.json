@@ -1,0 +1,25 @@
+{
+  "size-limit": [
+    {
+      "name": "frontend:vendor-react",
+      "path": "frontend/dist/assets/vendor-react-*.js",
+      "limit": "75 KB"
+    },
+    {
+      "name": "frontend:vendor-router", 
+      "path": "frontend/dist/assets/vendor-router-*.js",
+      "limit": "40 KB"
+    },
+    {
+      "name": "frontend:vendor-pwa",
+      "path": "frontend/dist/assets/vendor-pwa-*.js", 
+      "limit": "30 KB"
+    },
+    {
+      "name": "frontend:route-max",
+      "path": "frontend/dist/assets/*.js",
+      "limit": "120 KB",
+      "ignore": ["vendor-*"]
+    }
+  ]
+}
