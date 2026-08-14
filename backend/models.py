@@ -11,6 +11,15 @@ from typing import Any, Dict, List, Literal, Optional
 from datetime import datetime
 from enum import Enum
 
+API_VERSION = "0.1.0"
+SERVICE_NAME = "sportbeacon-ai"
+
+
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+    version: str
+
 class PlayerStatRecord(BaseModel):
     player_id: int
     player_name: str

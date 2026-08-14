@@ -1,6 +1,10 @@
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, List, Optional
 from .models import (
+    API_VERSION,
+    SERVICE_NAME,
+    HealthResponse,
     PlayerStatRecord,
     PlayerAnalysisResponse,
     PlayerInsightResponse,
@@ -10,8 +14,7 @@ from .models import (
     DrillRecommendationResponse,
     DrillScheduleRequest,
     DrillScheduleResponse,
-    HighlightEvent,
-    HighlightResponse,
+HighlightResponse,
     CoachQuestion,
     CoachResponse,
     ExtendedDrillScheduleRequest
@@ -22,7 +25,33 @@ from .drill_service import DrillService
 import os
 from datetime import datetime
 
-app = FastAPI(title="SportBeacon AI API")
+DEFAULT_CORS_ORIGINS = (
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:4173",
+)
+
+
+def cors_allow_origins() -> List[str]:
+    """Local Vite origins by default. Explicit env list only; never '*'."""
+    raw = os.getenv("CORS_ALLOW_ORIGINS", "")
+    if not raw.strip():
+        return list(DEFAULT_CORS_ORIGINS)
+    origins = [item.strip() for item in raw.split(",") if item.strip()]
+    if "*" in origins:
+        raise ValueError("CORS_ALLOW_ORIGINS must list explicit origins; '*' is not allowed")
+    return origins
+
+
+app = FastAPI(title="SportBeacon AI API", version=API_VERSION)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_allow_origins(),
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+)
 insight_service = PlayerInsightService()
 matchmaking_service = MatchmakingService()
 drill_service = DrillService()
@@ -45,6 +74,16 @@ def _get_coach_assistant():
         from .coach_assistant import CoachAssistant
         _coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
     return _coach_assistant
+
+@app.get("/api/health", response_model=HealthResponse)
+async def health() -> HealthResponse:
+    """Canonical liveness check used by the Vite shell."""
+    return HealthResponse(
+        status="ok",
+        service=SERVICE_NAME,
+        version=API_VERSION,
+    )
+
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):

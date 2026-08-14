@@ -1,7 +1,7 @@
 {
   "name": "sportbeacon-backend",
   "version": "1.0.0",
-  "description": "SportBeacon Backend Server",
+  "description": "LEGACY Express package. FastAPI (backend/api.py) is the canonical backend. server.js is missing; npm ci here is an install check only, not a backend build.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
