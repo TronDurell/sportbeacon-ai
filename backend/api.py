@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Query
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List, Optional
 from .models import (
     PlayerStatRecord,
     PlayerAnalysisResponse,
@@ -19,8 +19,6 @@ from .models import (
 from .insight_service import PlayerInsightService
 from .matchmaking_service import MatchmakingService
 from .drill_service import DrillService
-from .highlight_generator import HighlightTaggingEngine
-from .coach_assistant import CoachAssistant
 import os
 from datetime import datetime
 
@@ -29,9 +27,24 @@ insight_service = PlayerInsightService()
 matchmaking_service = MatchmakingService()
 drill_service = DrillService()
 
-# Initialize services
-highlight_engine = HighlightTaggingEngine()
-coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
+_highlight_engine = None
+_coach_assistant = None
+
+
+def _get_highlight_engine():
+    global _highlight_engine
+    if _highlight_engine is None:
+        from .highlight_generator import HighlightTaggingEngine
+        _highlight_engine = HighlightTaggingEngine()
+    return _highlight_engine
+
+
+def _get_coach_assistant():
+    global _coach_assistant
+    if _coach_assistant is None:
+        from .coach_assistant import CoachAssistant
+        _coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
+    return _coach_assistant
 
 @app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
@@ -64,8 +77,15 @@ async def analyze_player_stats(stats: List[PlayerStatRecord]):
     Returns:
         PlayerAnalysisResponse containing normalized stats, top skills, and growth areas
     """
+    if not stats:
+        raise HTTPException(
+            status_code=422,
+            detail="At least one player stat record is required",
+        )
     try:
         return insight_service.analyze_player_stats(stats)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -85,6 +105,8 @@ async def create_balanced_teams(request: MatchmakingRequest):
     """
     try:
         return matchmaking_service.create_balanced_teams(request)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -98,6 +120,8 @@ async def get_drill_recommendations(
     """Get personalized drill recommendations."""
     try:
         return drill_service.get_recommendations(request)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -120,6 +144,8 @@ async def get_weekly_schedule(
     """Get a personalized weekly training schedule."""
     try:
         return drill_service.get_weekly_schedule(request)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -142,7 +168,7 @@ async def tag_game_highlights(
 ) -> HighlightResponse:
     """Tag and analyze game highlights."""
     try:
-        return highlight_engine.tag_highlights(game_id, events)
+        return _get_highlight_engine().tag_highlights(game_id, events)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -152,11 +178,11 @@ async def tag_game_highlights(
 @app.post("/api/coach/ask")
 async def ask_coach_question(
     request: CoachQuestion,
-    channel: str = Query(default="chat", regex="^(chat|email|sms|web)$")
+    channel: str = Query(default="chat", pattern="^(chat|email|sms|web)$")
 ) -> CoachResponse:
     """Get coaching advice and recommendations."""
     try:
-        return coach_assistant.answer_question(request, channel)
+        return _get_coach_assistant().answer_question(request, channel)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -166,11 +192,11 @@ async def ask_coach_question(
 @app.get("/api/coach/weekly-summary/{player_id}")
 async def get_weekly_summary(
     player_id: str,
-    channel: str = Query(default="chat", regex="^(chat|email|sms|web)$")
+    channel: str = Query(default="chat", pattern="^(chat|email|sms|web)$")
 ) -> Dict[str, Any]:
     """Get a player's weekly progress summary."""
     try:
-        summary = coach_assistant.generate_weekly_summary(player_id, channel)
+        summary = _get_coach_assistant().generate_weekly_summary(player_id, channel)
         return {
             "player_id": player_id,
             "summary": summary,
@@ -287,10 +313,10 @@ SAMPLE_MATCHMAKING_PAYLOAD = {
     ]
 }
 
-# Sample test data for drill recommendations
+# Sample test data for drill recommendations.
+# Canonical player identifier is `user_id`; `player_id` is accepted as an alias.
 SAMPLE_DRILL_REQUEST = {
-    "player_name": "John Smith",
-    "player_id": 1,
+    "user_id": "1",
     "top_skills": ["points", "assists"],
     "growth_areas": ["rebounds", "steals", "field_goal_percentage"],
     "skill_levels": {
@@ -309,10 +335,8 @@ SAMPLE_DRILL_REQUEST = {
 
 # Sample test data
 test_schedule_request = {
-    "player_name": "John Doe",
-    "player_id": "12345",
+    "user_id": "12345",
     "growth_areas": ["shooting", "dribbling", "defense"],
-    "top_skills": ["passing", "rebounds"],
     "skill_levels": {
         "shooting": 0.7,
         "dribbling": 0.5,

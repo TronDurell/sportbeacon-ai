@@ -185,3 +185,11 @@ public/feed.xml
 # Cache
 .cache/
 .next/cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
