@@ -97,11 +97,11 @@ Frontend:
 cd frontend
 npm run type-check
 npm run lint
-npm test -- --run
+npm test
 npm run build
 ```
 
-`npm run build` writes `frontend/dist`.
+`npm test` runs Vitest once. Use `npm run test:watch` for the interactive watcher. `npm run build` writes `frontend/dist`.
 
 ## Environment variables
 
@@ -124,8 +124,23 @@ Do not put production URLs, Firebase keys, cloud tokens, or other credentials in
 - The UI only verifies backend reachability. Insight, drill, and matchmaking APIs exist but are not driven from the shell.
 - Matchmaking is a prototype team-balancing endpoint, not a live product flow.
 - Coach, highlight, media, and extended-schedule paths remain incomplete and are not started with the shell.
-- GitHub Actions deploy-to-Vercel on `main` is not a verified application deploy. A successful frontend job means lint, type-check, tests, and `frontend/dist` were produced; it does not mean hosting credentials or a production runtime are configured.
 - Historical `logs/` files were removed from Git tracking. Local copies may still exist. A Firebase web API key is not automatically a secret, but Google API key restrictions, Firebase Security Rules, and App Check should still be verified. Rotate only credentials that are actually private.
+
+## Deployment
+
+Vercel’s GitHub integration owns frontend previews and production deployment. GitHub Actions does **not** deploy with a Vercel token.
+
+Required Vercel project settings:
+
+| Setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Root Directory | `frontend` |
+| Framework Preset | Vite |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+
+This Vercel project deploys only the Vite frontend. The FastAPI backend is not packaged or hosted here. Until FastAPI has its own deployment and `VITE_API_BASE_URL` points at it, the hosted shell may correctly show **Backend unreachable**. Do not set a fake backend URL in Vercel to hide that state.
 
 ## License
 

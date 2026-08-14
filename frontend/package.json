@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "type-check": "tsc -p tsconfig.app.json --noEmit",
     "lint": "eslint .",
-    "test": "vitest"
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",

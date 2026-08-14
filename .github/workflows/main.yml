@@ -35,7 +35,7 @@ jobs:
       run: npm run lint
 
     - name: Test frontend
-      run: npm test -- --run
+      run: npm test
 
     - name: Build frontend
       run: npm run build
@@ -77,19 +77,3 @@ jobs:
 
     - name: Run pytest
       run: pytest -q
-
-  deploy:
-    needs: [frontend, python]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Deploy to Vercel
-      uses: amondnet/vercel-action@v20
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        vercel-args: '--prod'
