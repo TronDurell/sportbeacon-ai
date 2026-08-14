@@ -10,30 +10,34 @@ class PlayerInsightService:
 
     def analyze_player_stats(self, stats: List[PlayerStatRecord]) -> PlayerAnalysisResponse:
         """Analyze player statistics to generate insights."""
-        # Convert stats to DataFrame
-        df = pd.DataFrame([stat.dict() for stat in stats])
-        
-        # Sort by game date to ensure chronological order
-        df = df.sort_values('game_date')
-        
-        # Generate normalized stats
+        if not stats:
+            raise ValueError("At least one player stat record is required")
+
+        records = [
+            stat.model_dump() if hasattr(stat, "model_dump") else stat.dict()
+            for stat in stats
+        ]
+        df = pd.DataFrame(records)
+        if "game_date" in df.columns:
+            df = df.sort_values("game_date")
+
         normalized_stats = self.player_engine.normalize_stats(df)
-        
-        # Get the player name from the most recent entry
-        player_name = df.iloc[-1].player_name
-        
-        # Calculate all insights
-        top_skills = self.player_engine.identify_top_skills(normalized_stats)
-        growth_areas = self.player_engine.get_growth_areas(normalized_stats)
-        recent_trends = self.player_engine.calculate_player_trends(normalized_stats)
-        
-        # Get the most recent normalized stats
-        latest_stats = {
-            col: float(normalized_stats[col].iloc[-1])
-            for col in self.player_engine._stats_columns
-            if col in normalized_stats.columns
-        }
-        
+        player_name = df.iloc[-1].player_name if "player_name" in df.columns else ""
+
+        # Skills and trends use raw statistics so recent_weight and trend
+        # direction stay meaningful. Normalized values are returned separately.
+        top_skills = self.player_engine.identify_top_skills(df)
+        growth_areas = self.player_engine.get_growth_areas(df)
+        recent_trends = self.player_engine.calculate_player_trends(df)
+
+        latest_stats = {}
+        if not normalized_stats.empty:
+            latest_stats = {
+                col: float(normalized_stats[col].iloc[-1])
+                for col in self.player_engine._stats_columns
+                if col in normalized_stats.columns
+            }
+
         return PlayerAnalysisResponse(
             player_name=player_name,
             normalized_stats=latest_stats,

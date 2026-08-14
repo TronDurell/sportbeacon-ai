@@ -1,63 +1,130 @@
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from typing import Dict, List, Optional, Tuple
-from datetime import datetime, timedelta
+
 
 class PlayerInsightEngine:
     def __init__(self):
         self.scaler = StandardScaler()
         self._stats_columns = [
-            'points', 'assists', 'rebounds', 'steals', 'blocks',
-            'field_goal_percentage', 'three_point_percentage'
+            "points",
+            "assists",
+            "rebounds",
+            "steals",
+            "blocks",
+            "field_goal_percentage",
+            "three_point_percentage",
         ]
 
+    def _available_stat_columns(self, stats_df: pd.DataFrame) -> List[str]:
+        if stats_df is None or stats_df.empty:
+            return []
+        return [col for col in self._stats_columns if col in stats_df.columns]
+
     def normalize_stats(self, stats_df: pd.DataFrame) -> pd.DataFrame:
-        """Normalize player statistics using StandardScaler."""
+        """Normalize player statistics using StandardScaler where variance exists."""
+        if stats_df is None or stats_df.empty:
+            return pd.DataFrame() if stats_df is None else stats_df.copy()
+
         normalized_stats = stats_df.copy()
-        normalized_stats[self._stats_columns] = self.scaler.fit_transform(
-            stats_df[self._stats_columns]
-        )
+        cols = self._available_stat_columns(stats_df)
+        if not cols:
+            return normalized_stats
+
+        scalable: List[str] = []
+        for col in cols:
+            series = pd.to_numeric(stats_df[col], errors="coerce")
+            if series.nunique(dropna=True) <= 1 or float(series.std(ddof=0) or 0.0) == 0.0:
+                normalized_stats[col] = 0.0
+            else:
+                scalable.append(col)
+
+        if scalable:
+            normalized_stats[scalable] = self.scaler.fit_transform(stats_df[scalable])
         return normalized_stats
 
     def calculate_player_trends(
-        self, 
-        player_stats: pd.DataFrame,
-        window_size: int = 5
+        self, player_stats: pd.DataFrame, window_size: int = 5
     ) -> Dict[str, float]:
-        """Calculate recent performance trends using rolling averages."""
-        trends = {}
-        for col in self._stats_columns:
-            if col in player_stats.columns:
-                current_avg = player_stats[col].tail(window_size).mean()
-                previous_window = player_stats[col].tail(window_size * 2).head(window_size)
-                previous_avg = previous_window.mean()
-                if previous_avg == 0 or pd.isna(previous_avg):
-                    trends[col] = float(current_avg * 100.0)
+        """Calculate recent performance trends from raw statistics, not z-scores."""
+        trends: Dict[str, float] = {}
+        if player_stats is None or player_stats.empty or window_size < 1:
+            return trends
+
+        for col in self._available_stat_columns(player_stats):
+            series = pd.to_numeric(player_stats[col], errors="coerce").dropna()
+            if len(series) == 0:
+                continue
+            if len(series) == 1:
+                trends[col] = 0.0
+                continue
+
+            current_avg = float(series.tail(window_size).mean())
+            previous_window = series.tail(window_size * 2).head(max(len(series) - window_size, 1))
+            if len(series) <= window_size:
+                previous_window = series.iloc[: max(len(series) // 2, 1)]
+            previous_avg = float(previous_window.mean()) if len(previous_window) else 0.0
+
+            if previous_avg == 0.0:
+                if current_avg == 0.0:
+                    trends[col] = 0.0
                 else:
-                    trends[col] = float(((current_avg - previous_avg) / previous_avg) * 100.0)
+                    trends[col] = 100.0 if current_avg > 0 else -100.0
+            else:
+                trends[col] = float(((current_avg - previous_avg) / abs(previous_avg)) * 100.0)
         return trends
 
+    def _unit_scale(self, stats: pd.Series) -> pd.Series:
+        """Scale a series to 0-1 so counting stats and percentages are comparable."""
+        numeric = pd.to_numeric(stats, errors="coerce").dropna()
+        if len(numeric) == 0:
+            return numeric
+        low = float(numeric.min())
+        high = float(numeric.max())
+        span = high - low
+        typical = max(abs(low), abs(high), 1.0)
+        if span <= 1e-9 or span / typical < 0.05:
+            return pd.Series(np.full(len(numeric), 0.5), index=numeric.index)
+        return (numeric - low) / span
+
+    def _robust_recent_mean(self, stats: pd.Series, window_size: int) -> float:
+        """Average the recent window while ignoring a lone outlier spike."""
+        recent = stats.tail(window_size)
+        if len(recent) >= 3:
+            q1 = float(recent.quantile(0.25))
+            q3 = float(recent.quantile(0.75))
+            iqr = q3 - q1
+            if iqr == 0:
+                mode = float(recent.mode().iloc[0]) if not recent.mode().empty else float(recent.median())
+                filtered = recent[recent == mode]
+            else:
+                lower = q1 - 1.5 * iqr
+                upper = q3 + 1.5 * iqr
+                filtered = recent[(recent >= lower) & (recent <= upper)]
+            if len(filtered):
+                return float(filtered.mean())
+        return float(recent.mean())
+
     def _calculate_weighted_skill_score(
-        self,
-        stats: pd.Series,
-        recent_weight: float = 0.7
+        self, stats: pd.Series, recent_weight: float = 0.7
     ) -> Tuple[float, float]:
         """Calculate weighted score and percentile rank of recent performance."""
         if len(stats) == 0:
             return (0.0, 0.0)
         if len(stats) == 1:
             value = float(stats.iloc[-1])
-            # Percentile rank of single value among itself is 100
             return (value, 100.0)
 
+        weight = min(1.0, max(0.0, float(recent_weight)))
         recent_window = max(1, min(5, len(stats)))
-        recent_mean = float(stats.tail(recent_window).mean())
+        recent_mean = self._robust_recent_mean(stats, recent_window)
         overall_mean = float(stats.mean())
-        weighted_value = recent_weight * recent_mean + (1.0 - recent_weight) * overall_mean
+        weighted_value = weight * recent_mean + (1.0 - weight) * overall_mean
 
-        # Percentile rank of weighted_value within the series distribution
-        values = stats.to_numpy()
+        values = stats.to_numpy(dtype=float)
         percentile_rank = float((values <= weighted_value).sum() / len(values) * 100.0)
         return (weighted_value, percentile_rank)
 
@@ -65,77 +132,93 @@ class PlayerInsightEngine:
         self,
         player_stats: pd.DataFrame,
         percentile_threshold: float = 75,
-        recent_weight: float = 0.7
+        recent_weight: float = 0.7,
     ) -> List[str]:
         """
-        Identify a player's top skills based on percentile rankings,
-        with higher weight given to recent performance.
-        
-        Args:
-            player_stats: DataFrame containing player statistics
-            percentile_threshold: Threshold to consider a skill as top skill
-            recent_weight: Weight given to recent performance (0-1)
-            
-        Returns:
-            List of top skills
+        Identify a player's top skills using a recent/overall weighted score.
+
+        `recent_weight` blends a robust recent-window mean with career mean.
+        A single final-game spike is not enough to identify a skill.
         """
-        top_skills: List[str] = []
-        for col in self._stats_columns:
-            if col in player_stats.columns:
-                values = player_stats[col].to_numpy()
-                if len(values) == 0:
-                    continue
-                last_val = float(values[-1])
-                # Percentile rank of the latest performance within the series
-                percentile_rank = float(((values <= last_val).sum() / len(values)) * 100.0)
-                if percentile_rank >= float(percentile_threshold):
-                    top_skills.append(col)
-        return top_skills
+        if player_stats is None or player_stats.empty:
+            return []
+
+        skill_scores: Dict[str, float] = {}
+        for col in self._available_stat_columns(player_stats):
+            series = pd.to_numeric(player_stats[col], errors="coerce").dropna()
+            if len(series) == 0:
+                continue
+            scaled = self._unit_scale(series)
+            weight = min(1.0, max(0.0, float(recent_weight)))
+            weighted_value, _ = self._calculate_weighted_skill_score(scaled, weight)
+            window = max(1, min(5, len(scaled)))
+            recent_mean = self._robust_recent_mean(scaled, window)
+            overall_mean = float(scaled.mean())
+            upward_trend = max(recent_mean - overall_mean, 0.0)
+            skill_scores[col] = weighted_value + weight * upward_trend
+
+        if not skill_scores:
+            return []
+
+        values = np.array(list(skill_scores.values()), dtype=float)
+        cutoff = float(np.percentile(values, percentile_threshold))
+        return [skill for skill, score in skill_scores.items() if score >= cutoff]
 
     def get_growth_areas(
-        self, 
-        player_stats: pd.DataFrame,
-        percentile_threshold: float = 25
+        self, player_stats: pd.DataFrame, percentile_threshold: float = 25
     ) -> List[str]:
         """Identify areas where a player needs improvement."""
-        growth_areas = []
-        for col in self._stats_columns:
-            if col in player_stats.columns:
-                percentile = np.percentile(player_stats[col], percentile_threshold)
-                if player_stats[col].iloc[-1] <= percentile:
-                    growth_areas.append(col)
+        if player_stats is None or player_stats.empty:
+            return []
+
+        growth_areas: List[str] = []
+        for col in self._available_stat_columns(player_stats):
+            series = pd.to_numeric(player_stats[col], errors="coerce").dropna()
+            if len(series) == 0:
+                continue
+            if len(series) == 1:
+                continue
+            percentile = np.percentile(series, percentile_threshold)
+            if series.iloc[-1] <= percentile:
+                growth_areas.append(col)
         return growth_areas
 
     def calculate_win_rate(
-        self,
-        player_stats: pd.DataFrame,
-        time_period: Optional[timedelta] = None
+        self, player_stats: pd.DataFrame, time_period: Optional[timedelta] = None
     ) -> float:
         """Calculate player's win rate for a given time period."""
-        if time_period:
-            cutoff_date = datetime.now() - time_period
-            player_stats = player_stats[player_stats['game_date'] >= cutoff_date]
-        
-        total_games = len(player_stats)
-        if total_games == 0:
+        if player_stats is None or player_stats.empty:
             return 0.0
-            
-        wins = len(player_stats[player_stats['result'] == 'win'])
+
+        filtered = player_stats
+        if time_period is not None:
+            if "game_date" not in player_stats.columns:
+                return 0.0
+            cutoff_date = datetime.now() - time_period
+            filtered = player_stats[player_stats["game_date"] >= cutoff_date]
+
+        total_games = len(filtered)
+        if total_games == 0 or "result" not in filtered.columns:
+            return 0.0
+
+        wins = len(filtered[filtered["result"] == "win"])
         return (wins / total_games) * 100
 
-    def generate_player_report(
-        self,
-        player_stats: pd.DataFrame
-    ) -> Dict[str, any]:
-        """Generate a comprehensive player performance report."""
-        normalized_stats = self.normalize_stats(player_stats)
-        
+    def generate_player_report(self, player_stats: pd.DataFrame) -> Dict[str, object]:
+        """Generate a comprehensive player performance report from raw stats."""
+        if player_stats is None or player_stats.empty:
+            return {
+                "top_skills": [],
+                "growth_areas": [],
+                "recent_trends": {},
+                "win_rate": 0.0,
+            }
+
         return {
-            'top_skills': self.identify_top_skills(normalized_stats),
-            'growth_areas': self.get_growth_areas(normalized_stats),
-            'recent_trends': self.calculate_player_trends(normalized_stats),
-            'win_rate': self.calculate_win_rate(
-                player_stats,
-                time_period=timedelta(days=30)
-            )
-        } 
+            "top_skills": self.identify_top_skills(player_stats),
+            "growth_areas": self.get_growth_areas(player_stats),
+            "recent_trends": self.calculate_player_trends(player_stats),
+            "win_rate": self.calculate_win_rate(
+                player_stats, time_period=timedelta(days=30)
+            ),
+        }

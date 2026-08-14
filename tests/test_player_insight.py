@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
 from ai.player_insight import PlayerInsightEngine
 
@@ -36,8 +37,13 @@ def test_normalize_stats_means_and_stds():
     norm = engine.normalize_stats(df)
 
     cols = [
-        'points', 'assists', 'rebounds', 'steals', 'blocks',
-        'field_goal_percentage', 'three_point_percentage'
+        "points",
+        "assists",
+        "rebounds",
+        "steals",
+        "blocks",
+        "field_goal_percentage",
+        "three_point_percentage",
     ]
 
     for col in cols:
@@ -52,11 +58,91 @@ def test_normalize_stats_means_and_stds():
 def test_identify_top_skills_points_detected():
     engine = PlayerInsightEngine()
     df = make_sample_stats()
-    norm = engine.normalize_stats(df)
+    top_skills = engine.identify_top_skills(df, percentile_threshold=60, recent_weight=0.9)
 
-    top_skills = engine.identify_top_skills(norm, percentile_threshold=90, recent_weight=0.9)
+    assert "points" in top_skills
+    assert "blocks" not in top_skills
 
-    assert 'points' in top_skills
-    # With high threshold and mild variance, blocks should generally not qualify
-    assert 'blocks' not in top_skills
 
+def test_recent_weight_changes_top_skills():
+    engine = PlayerInsightEngine()
+    df = pd.DataFrame({
+        "points": [90, 90, 90, 90, 90, 90, 90, 10, 10, 10],
+        "assists": [10, 10, 10, 10, 10, 10, 10, 90, 90, 90],
+        "rebounds": [40, 41, 40, 41, 40, 41, 40, 41, 40, 41],
+        "steals": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        "blocks": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "field_goal_percentage": [45, 45, 45, 45, 45, 45, 45, 45, 45, 45],
+        "three_point_percentage": [33, 33, 33, 33, 33, 33, 33, 33, 33, 33],
+    })
+
+    recent_focus = engine.identify_top_skills(df, percentile_threshold=90, recent_weight=0.95)
+    career_focus = engine.identify_top_skills(df, percentile_threshold=90, recent_weight=0.05)
+
+    assert recent_focus != career_focus
+    assert "assists" in recent_focus
+    assert "points" in career_focus
+    assert "points" not in recent_focus
+    assert "assists" not in career_focus
+
+
+def test_single_game_spike_is_not_enough_for_top_skill():
+    engine = PlayerInsightEngine()
+    df = pd.DataFrame({
+        "points": [20, 21, 20, 22, 21, 20, 22, 21, 20, 21],
+        "assists": [6, 6, 7, 6, 6, 7, 6, 6, 7, 6],
+        "rebounds": [8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+        "steals": [1, 1, 1, 1, 1, 1, 1, 1, 1, 40],
+        "blocks": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "field_goal_percentage": [48, 49, 48, 49, 48, 49, 48, 49, 48, 49],
+        "three_point_percentage": [35, 35, 36, 35, 35, 36, 35, 35, 36, 35],
+    })
+    top_skills = engine.identify_top_skills(df, percentile_threshold=75, recent_weight=0.7)
+    assert "steals" not in top_skills
+
+
+def test_trends_use_raw_stats_and_keep_direction():
+    engine = PlayerInsightEngine()
+    df = make_sample_stats()
+    raw_trends = engine.calculate_player_trends(df)
+    normalized_trends = engine.calculate_player_trends(engine.normalize_stats(df))
+
+    assert raw_trends["points"] > 0
+    assert raw_trends["points"] != pytest.approx(normalized_trends["points"])
+    report = engine.generate_player_report(df)
+    assert report["recent_trends"]["points"] == pytest.approx(raw_trends["points"])
+
+
+def test_empty_and_one_game_histories_are_safe():
+    engine = PlayerInsightEngine()
+    empty = pd.DataFrame()
+    assert engine.identify_top_skills(empty) == []
+    assert engine.get_growth_areas(empty) == []
+    assert engine.calculate_player_trends(empty) == {}
+    assert engine.calculate_win_rate(empty) == 0.0
+    assert engine.generate_player_report(empty)["top_skills"] == []
+
+    one_game = pd.DataFrame({
+        "points": [12],
+        "assists": [4],
+        "result": ["win"],
+    })
+    assert engine.identify_top_skills(one_game)
+    assert engine.calculate_player_trends(one_game)["points"] == 0.0
+    assert engine.get_growth_areas(one_game) == []
+    assert engine.normalize_stats(one_game)["points"].iloc[0] == 0.0
+
+
+def test_constant_stats_zero_baseline_and_missing_columns_are_safe():
+    engine = PlayerInsightEngine()
+    df = pd.DataFrame({
+        "points": [0, 0, 0, 0, 0, 8, 8, 8, 8, 8],
+        "assists": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    })
+    trends = engine.calculate_player_trends(df)
+    assert trends["assists"] == 0.0
+    assert trends["points"] > 0
+    normalized = engine.normalize_stats(df)
+    assert list(normalized["assists"].unique()) == [0.0]
+    assert "rebounds" not in engine.identify_top_skills(df)
+    assert engine.calculate_win_rate(df) == 0.0

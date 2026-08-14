@@ -1,5 +1,13 @@
-from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Literal, Any
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
+from typing import Any, Dict, List, Literal, Optional
 from datetime import datetime
 from enum import Enum
 
@@ -50,7 +58,7 @@ class TeamComposition(BaseModel):
     positions: Dict[str, int]
 
 class MatchmakingRequest(BaseModel):
-    players: List[PlayerStatRecord]
+    players: List[PlayerStatRecord] = Field(min_length=1)
     team_size: Literal[3, 5] = 3
     consider_positions: bool = True
 
@@ -63,10 +71,47 @@ class MatchmakingResponse(BaseModel):
 
 # Drill recommendation models
 class DifficultyLevel(Enum):
+    """Canonical JSON representation is the title-case name: Beginner, Intermediate, Advanced, Expert."""
     BEGINNER = 1
     INTERMEDIATE = 2
     ADVANCED = 3
     EXPERT = 4
+
+    @classmethod
+    def _missing_(cls, value: Any) -> Optional["DifficultyLevel"]:
+        parsed = _try_parse_difficulty(value)
+        if parsed is None:
+            return None
+        return parsed
+
+
+def _try_parse_difficulty(value: Any) -> Optional[DifficultyLevel]:
+    if isinstance(value, DifficultyLevel):
+        return value
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return DifficultyLevel._value2member_map_.get(value)
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        if text.isdigit():
+            return DifficultyLevel._value2member_map_.get(int(text))
+        key = text.upper().replace(" ", "_").replace("-", "_")
+        return DifficultyLevel.__members__.get(key)
+    return None
+
+
+def parse_difficulty_level(value: Any) -> DifficultyLevel:
+    parsed = _try_parse_difficulty(value)
+    if parsed is None:
+        raise ValueError(
+            "Invalid difficulty. Use Beginner, Intermediate, Advanced, Expert "
+            "(or 1-4)."
+        )
+    return parsed
+
 
 class TrainingFormat(Enum):
     SOLO = "solo"
@@ -86,10 +131,20 @@ class DrillInfo(BaseModel):
     target_skills: List[str]
     training_format: TrainingFormat
     video_url: Optional[str] = None
+
+    @field_validator("difficulty", mode="before")
+    @classmethod
+    def _coerce_difficulty(cls, value: Any) -> DifficultyLevel:
+        return parse_difficulty_level(value)
+
+    @field_serializer("difficulty")
+    def _serialize_difficulty(self, value: DifficultyLevel) -> str:
+        return value.name.title()
     
     def copy(self) -> 'DrillInfo':
         """Create a copy of the drill info."""
-        return DrillInfo(**self.dict())
+        payload = self.model_dump() if hasattr(self, "model_dump") else self.dict()
+        return DrillInfo(**payload)
 
 class ScheduledDrill(BaseModel):
     drill: DrillInfo
@@ -121,16 +176,36 @@ class WeeklyTrainingSchedule(BaseModel):
     focus_areas: List[str]
 
 class DrillScheduleRequest(BaseModel):
-    user_id: str
+    user_id: str = Field(validation_alias=AliasChoices("user_id", "player_id"))
     available_days: List[str]
     gym_access: bool
     skill_levels: Dict[str, float]
     growth_areas: List[str]
     min_difficulty: DifficultyLevel = DifficultyLevel.BEGINNER
     max_difficulty: DifficultyLevel = DifficultyLevel.EXPERT
-    max_drills_per_day: int = 4
-    max_duration_per_day: int = 120  # in minutes
+    max_drills_per_day: int = Field(default=4, ge=1)
+    max_duration_per_day: int = Field(default=120, ge=1)  # in minutes
     preferred_training_format: Optional[TrainingFormat] = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    @field_validator("user_id", mode="before")
+    @classmethod
+    def _coerce_user_id(cls, value: Any) -> str:
+        if value is None:
+            raise ValueError("user_id is required")
+        return str(value)
+
+    @field_validator("min_difficulty", "max_difficulty", mode="before")
+    @classmethod
+    def _coerce_difficulty(cls, value: Any) -> DifficultyLevel:
+        return parse_difficulty_level(value)
+
+    @model_validator(mode="after")
+    def _validate_difficulty_range(self) -> "DrillScheduleRequest":
+        if self.min_difficulty.value > self.max_difficulty.value:
+            raise ValueError("min_difficulty cannot be greater than max_difficulty")
+        return self
 
 class DrillScheduleResponse(BaseModel):
     user_id: str
@@ -148,18 +223,45 @@ class FormattedScheduleResponse(BaseModel):
     requires_gym: bool
 
 class DrillRecommendationRequest(BaseModel):
-    user_id: str
+    user_id: str = Field(validation_alias=AliasChoices("user_id", "player_id"))
     skill_levels: Dict[str, float]  # Skill name to level (0-1) mapping
     growth_areas: List[str]
     top_skills: List[str]
-    max_recommendations: int = 5
+    max_recommendations: int = Field(default=5, ge=1)
     min_difficulty: DifficultyLevel = DifficultyLevel.BEGINNER
     max_difficulty: DifficultyLevel = DifficultyLevel.EXPERT
 
+    model_config = ConfigDict(populate_by_name=True)
+
+    @field_validator("user_id", mode="before")
+    @classmethod
+    def _coerce_user_id(cls, value: Any) -> str:
+        if value is None:
+            raise ValueError("user_id is required")
+        return str(value)
+
+    @field_validator("min_difficulty", "max_difficulty", mode="before")
+    @classmethod
+    def _coerce_difficulty(cls, value: Any) -> DifficultyLevel:
+        return parse_difficulty_level(value)
+
+    @model_validator(mode="after")
+    def _validate_difficulty_range(self) -> "DrillRecommendationRequest":
+        if self.min_difficulty.value > self.max_difficulty.value:
+            raise ValueError("min_difficulty cannot be greater than max_difficulty")
+        return self
+
 class DrillRecommendationResponse(BaseModel):
-    player_id: str
+    user_id: str
     recommended_drills: List[DrillInfo]
     training_notes: List[str]
+    player_id: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _sync_ids(self) -> "DrillRecommendationResponse":
+        if not self.player_id:
+            self.player_id = self.user_id
+        return self
 
 class TrainingPreferences(BaseModel):
     days_per_week: int = Field(ge=1, le=7)
