@@ -117,3 +117,26 @@ def test_min_difficulty_greater_than_max_raises():
             min_difficulty=DifficultyLevel.ADVANCED,
             max_difficulty=DifficultyLevel.BEGINNER,
         )
+
+
+def test_available_days_are_normalized_to_lowercase():
+    request = _schedule_request(available_days=["Monday", " WEDNESDAY "])
+    assert request.available_days == ["monday", "wednesday"]
+
+
+def test_available_days_reject_empty_invalid_and_duplicates():
+    with pytest.raises(ValueError, match="at least one"):
+        _schedule_request(available_days=[])
+    with pytest.raises(ValueError, match="Monday through Sunday"):
+        _schedule_request(available_days=["funday"])
+    with pytest.raises(ValueError, match="duplicate"):
+        _schedule_request(available_days=["Monday", "monday"])
+
+
+def test_total_duration_matches_weekly_schedule():
+    engine = DrillRecommendationEngine()
+    resp = engine.create_weekly_schedule(_schedule_request())
+    scheduled_duration = sum(
+        drill.duration for drills in resp.weekly_schedule.values() for drill in drills
+    )
+    assert resp.total_duration == scheduled_duration

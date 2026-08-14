@@ -146,3 +146,25 @@ def test_constant_stats_zero_baseline_and_missing_columns_are_safe():
     assert list(normalized["assists"].unique()) == [0.0]
     assert "rebounds" not in engine.identify_top_skills(df)
     assert engine.calculate_win_rate(df) == 0.0
+
+
+def test_trend_windows_do_not_overlap_for_histories_longer_than_ten():
+    engine = PlayerInsightEngine()
+    values = list(range(1, 21))
+    series = pd.Series(values)
+    previous, current = engine._trend_windows(series, 5)
+
+    assert len(values) == 20
+    assert list(current) == [16, 17, 18, 19, 20]
+    assert list(previous) == [11, 12, 13, 14, 15]
+    assert set(previous.index).isdisjoint(set(current.index))
+
+    longer = list(range(1, 26))
+    prev_25, curr_25 = engine._trend_windows(pd.Series(longer), 5)
+    assert list(curr_25) == [21, 22, 23, 24, 25]
+    assert list(prev_25) == [16, 17, 18, 19, 20]
+    assert set(prev_25.index).isdisjoint(set(curr_25.index))
+
+    df = pd.DataFrame({"points": values})
+    expected = ((18.0 - 13.0) / 13.0) * 100.0
+    assert engine.calculate_player_trends(df, window_size=5)["points"] == pytest.approx(expected)

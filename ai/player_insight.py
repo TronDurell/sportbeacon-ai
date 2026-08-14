@@ -46,6 +46,18 @@ class PlayerInsightEngine:
             normalized_stats[scalable] = self.scaler.fit_transform(stats_df[scalable])
         return normalized_stats
 
+    @staticmethod
+    def _trend_windows(series: pd.Series, window_size: int) -> Tuple[pd.Series, pd.Series]:
+        """Split a series into non-overlapping previous and current windows.
+
+        Current is the latest `window_size` observations. Previous is the
+        `window_size` observations immediately before that, never overlapping
+        even when the history is longer than `window_size * 2`.
+        """
+        current = series.iloc[-window_size:]
+        previous = series.iloc[:-window_size].iloc[-window_size:]
+        return previous, current
+
     def calculate_player_trends(
         self, player_stats: pd.DataFrame, window_size: int = 5
     ) -> Dict[str, float]:
@@ -58,15 +70,17 @@ class PlayerInsightEngine:
             series = pd.to_numeric(player_stats[col], errors="coerce").dropna()
             if len(series) == 0:
                 continue
-            if len(series) == 1:
+            if len(series) < 2:
                 trends[col] = 0.0
                 continue
 
-            current_avg = float(series.tail(window_size).mean())
-            previous_window = series.tail(window_size * 2).head(max(len(series) - window_size, 1))
-            if len(series) <= window_size:
-                previous_window = series.iloc[: max(len(series) // 2, 1)]
-            previous_avg = float(previous_window.mean()) if len(previous_window) else 0.0
+            previous_window, current_window = self._trend_windows(series, window_size)
+            if previous_window.empty or current_window.empty:
+                trends[col] = 0.0
+                continue
+
+            current_avg = float(current_window.mean())
+            previous_avg = float(previous_window.mean())
 
             if previous_avg == 0.0:
                 if current_avg == 0.0:

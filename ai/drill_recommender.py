@@ -206,7 +206,6 @@ class DrillRecommendationEngine:
         ranked = self._rank_drills(pool, request.skill_levels, request.growth_areas)
 
         weekly_schedule: Dict[str, List[DrillInfo]] = {}
-        total_duration = 0
         skill_coverage: Dict[str, float] = {}
         intensity_distribution: Dict[str, float] = {}
 
@@ -223,8 +222,6 @@ class DrillRecommendationEngine:
                 remaining_duration -= drill.duration
 
             weekly_schedule[day_key] = day_drills
-            day_duration = sum(d.duration for d in day_drills)
-            total_duration += day_duration
             if day_drills:
                 intensity_distribution[day_key] = float(
                     sum(d.intensity for d in day_drills) / len(day_drills)
@@ -233,6 +230,11 @@ class DrillRecommendationEngine:
                 for skill in drill.target_skills:
                     skill_coverage[skill] = skill_coverage.get(skill, 0.0) + 1.0
 
+        total_duration = sum(
+            drill.duration
+            for drills in weekly_schedule.values()
+            for drill in drills
+        )
         notes = "Focus on balanced mix of skills across selected days."
         return DrillScheduleResponse(
             user_id=request.user_id,

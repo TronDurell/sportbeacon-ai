@@ -175,9 +175,20 @@ class WeeklyTrainingSchedule(BaseModel):
     equipment_needed: List[str]
     focus_areas: List[str]
 
+VALID_WEEKDAYS = (
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+)
+
+
 class DrillScheduleRequest(BaseModel):
     user_id: str = Field(validation_alias=AliasChoices("user_id", "player_id"))
-    available_days: List[str]
+    available_days: List[str] = Field(min_length=1)
     gym_access: bool
     skill_levels: Dict[str, float]
     growth_areas: List[str]
@@ -195,6 +206,31 @@ class DrillScheduleRequest(BaseModel):
         if value is None:
             raise ValueError("user_id is required")
         return str(value)
+
+    @field_validator("available_days", mode="before")
+    @classmethod
+    def _normalize_available_days(cls, value: Any) -> List[str]:
+        if value is None:
+            raise ValueError("available_days must include at least one weekday")
+        if not isinstance(value, list):
+            raise ValueError("available_days must be a list of weekday names")
+        normalized: List[str] = []
+        seen = set()
+        for day in value:
+            if not isinstance(day, str) or not day.strip():
+                raise ValueError("available_days entries must be weekday names")
+            key = day.strip().lower()
+            if key not in VALID_WEEKDAYS:
+                raise ValueError(
+                    "available_days must be Monday through Sunday weekday names"
+                )
+            if key in seen:
+                raise ValueError(f"available_days contains duplicate day: {key}")
+            seen.add(key)
+            normalized.append(key)
+        if not normalized:
+            raise ValueError("available_days must include at least one weekday")
+        return normalized
 
     @field_validator("min_difficulty", "max_difficulty", mode="before")
     @classmethod

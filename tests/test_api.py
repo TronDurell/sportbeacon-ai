@@ -87,6 +87,61 @@ def test_schedule_drills_endpoint():
     scheduled = [drill for drills in body["weekly_schedule"].values() for drill in drills]
     assert scheduled
     assert all(drill["training_format"] == "partner" for drill in scheduled)
+    represented = sum(drill["duration"] for drill in scheduled)
+    assert body["total_duration"] == represented
+
+
+def test_schedule_normalizes_days_and_rejects_invalid_days():
+    ok = client.post(
+        "/api/drills/schedule",
+        json={
+            "user_id": "player-2",
+            "available_days": ["Tuesday"],
+            "gym_access": True,
+            "skill_levels": {"shooting": 0.5},
+            "growth_areas": ["shooting"],
+            "min_difficulty": "Beginner",
+            "max_difficulty": "Advanced",
+        },
+    )
+    assert ok.status_code == 200, ok.text
+    assert "tuesday" in ok.json()["weekly_schedule"]
+
+    empty = client.post(
+        "/api/drills/schedule",
+        json={
+            "user_id": "player-2",
+            "available_days": [],
+            "gym_access": True,
+            "skill_levels": {"shooting": 0.5},
+            "growth_areas": ["shooting"],
+        },
+    )
+    assert empty.status_code == 422
+
+    invalid = client.post(
+        "/api/drills/schedule",
+        json={
+            "user_id": "player-2",
+            "available_days": ["funday"],
+            "gym_access": True,
+            "skill_levels": {"shooting": 0.5},
+            "growth_areas": ["shooting"],
+        },
+    )
+    assert invalid.status_code == 422
+
+    duplicate = client.post(
+        "/api/drills/schedule",
+        json={
+            "user_id": "player-2",
+            "available_days": ["Monday", "monday"],
+            "gym_access": True,
+            "skill_levels": {"shooting": 0.5},
+            "growth_areas": ["shooting"],
+        },
+    )
+    assert duplicate.status_code == 422
 
 
 def test_invalid_difficulty_range_returns_validation_error():
