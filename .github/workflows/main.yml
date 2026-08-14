@@ -28,7 +28,20 @@ jobs:
     - name: Install frontend dependencies
       run: npm ci
 
-  backend-node:
+    - name: Type-check frontend
+      run: npm run type-check
+
+    - name: Lint frontend
+      run: npm run lint
+
+    - name: Test frontend
+      run: npm test -- --run
+
+    - name: Build frontend
+      run: npm run build
+
+  legacy-node-backend:
+    name: legacy-node-backend (install only)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -46,7 +59,7 @@ jobs:
         cache: npm
         cache-dependency-path: backend/package-lock.json
 
-    - name: Install backend Node dependencies
+    - name: Install legacy Express package (not a backend build)
       run: npm ci
 
   python:
@@ -66,7 +79,7 @@ jobs:
       run: pytest -q
 
   deploy:
-    needs: [frontend, backend-node, python]
+    needs: [frontend, python]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 

@@ -1,7 +1,13 @@
 from fastapi.testclient import TestClient
 
 from backend.api import app
-from backend.models import DifficultyLevel, DrillRecommendationRequest, DrillScheduleRequest
+from backend.models import (
+    API_VERSION,
+    SERVICE_NAME,
+    DifficultyLevel,
+    DrillRecommendationRequest,
+    DrillScheduleRequest,
+)
 
 
 client = TestClient(app)
@@ -21,6 +27,34 @@ def _stat(player_id: int, name: str, points: float, result: str = "win"):
         "three_point_percentage": 35.0,
         "result": result,
     }
+
+
+def test_health_endpoint_contract():
+    response = client.get("/api/health")
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["status"] == "ok"
+    assert body["service"] == SERVICE_NAME
+    assert body["version"] == API_VERSION
+    assert set(body) >= {"status", "service", "version"}
+
+
+def test_health_cors_allows_local_vite_origin():
+    response = client.get(
+        "/api/health",
+        headers={"Origin": "http://localhost:5173"},
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == "http://localhost:5173"
+
+
+def test_health_cors_does_not_echo_unknown_origin():
+    response = client.get(
+        "/api/health",
+        headers={"Origin": "https://evil.example"},
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") != "https://evil.example"
 
 
 def test_recommend_drills_accepts_user_id_and_human_difficulty():
