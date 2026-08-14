@@ -150,6 +150,8 @@ This Vercel project deploys only the Vite frontend. FastAPI staging is a separat
 - Runtime identity: `sportbeacon-api-runtime@sportbeacon-ai.iam.gserviceaccount.com`
 - Staging URL: `https://sportbeacon-api-staging-104921686559.us-east1.run.app`
 
+See `docs/cloud-run-deployment.md` to recreate the staging service.
+
 Vercel Preview may set `VITE_API_BASE_URL` to that staging HTTPS origin so the preview shell can show **Connected**. Do not set Production `VITE_API_BASE_URL` until the staging API is accepted. Local development still uses `http://127.0.0.1:8000`.
 
 ## License
