@@ -14,7 +14,7 @@ from .models import (
     DrillRecommendationResponse,
     DrillScheduleRequest,
     DrillScheduleResponse,
-HighlightResponse,
+    HighlightResponse,
     CoachQuestion,
     CoachResponse,
     ExtendedDrillScheduleRequest
@@ -25,16 +25,23 @@ from .drill_service import DrillService
 import os
 from datetime import datetime
 
+PRODUCTION_ORIGIN = "https://sportbeacon-ai.vercel.app"
 DEFAULT_CORS_ORIGINS = (
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:4173",
     "http://127.0.0.1:4173",
+    PRODUCTION_ORIGIN,
 )
+# Git-integration preview hosts for this Vercel project only.
+VERCEL_PREVIEW_ORIGIN_REGEX = (
+    r"^https://sportbeacon-ai-git-[a-z0-9-]+-trondurells-projects\.vercel\.app$"
+)
+EXPERIMENTAL_ROUTE_DETAIL = "This experimental route is disabled"
 
 
 def cors_allow_origins() -> List[str]:
-    """Local Vite origins by default. Explicit env list only; never '*'."""
+    """Explicit origins only; never '*'."""
     raw = os.getenv("CORS_ALLOW_ORIGINS", "")
     if not raw.strip():
         return list(DEFAULT_CORS_ORIGINS)
@@ -44,10 +51,30 @@ def cors_allow_origins() -> List[str]:
     return origins
 
 
+def cors_allow_origin_regex() -> str:
+    raw = os.getenv("CORS_ALLOW_ORIGIN_REGEX", "").strip()
+    return raw or VERCEL_PREVIEW_ORIGIN_REGEX
+
+
+def experimental_routes_enabled() -> bool:
+    return os.getenv("ENABLE_EXPERIMENTAL_ROUTES", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def require_experimental_routes() -> None:
+    if not experimental_routes_enabled():
+        raise HTTPException(status_code=404, detail=EXPERIMENTAL_ROUTE_DETAIL)
+
+
 app = FastAPI(title="SportBeacon AI API", version=API_VERSION)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_allow_origins(),
+    allow_origin_regex=cors_allow_origin_regex(),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
@@ -206,6 +233,7 @@ async def tag_game_highlights(
     events: List[Dict]
 ) -> HighlightResponse:
     """Tag and analyze game highlights."""
+    require_experimental_routes()
     try:
         return _get_highlight_engine().tag_highlights(game_id, events)
     except Exception as e:
@@ -220,6 +248,7 @@ async def ask_coach_question(
     channel: str = Query(default="chat", pattern="^(chat|email|sms|web)$")
 ) -> CoachResponse:
     """Get coaching advice and recommendations."""
+    require_experimental_routes()
     try:
         return _get_coach_assistant().answer_question(request, channel)
     except Exception as e:
@@ -234,6 +263,7 @@ async def get_weekly_summary(
     channel: str = Query(default="chat", pattern="^(chat|email|sms|web)$")
 ) -> Dict[str, Any]:
     """Get a player's weekly progress summary."""
+    require_experimental_routes()
     try:
         summary = _get_coach_assistant().generate_weekly_summary(player_id, channel)
         return {
@@ -253,6 +283,7 @@ async def get_extended_schedule(
     request: ExtendedDrillScheduleRequest
 ) -> DrillScheduleResponse:
     """Get an extended weekly training schedule with adaptations."""
+    require_experimental_routes()
     try:
         return drill_service.get_extended_schedule(request)
     except Exception as e:

@@ -57,6 +57,59 @@ def test_health_cors_does_not_echo_unknown_origin():
     assert response.headers.get("access-control-allow-origin") != "https://evil.example"
 
 
+def test_health_cors_allows_production_origin():
+    response = client.get(
+        "/api/health",
+        headers={"Origin": "https://sportbeacon-ai.vercel.app"},
+    )
+    assert response.status_code == 200
+    assert (
+        response.headers.get("access-control-allow-origin")
+        == "https://sportbeacon-ai.vercel.app"
+    )
+
+
+def test_health_cors_allows_sportbeacon_vercel_preview_origin():
+    preview = (
+        "https://sportbeacon-ai-git-feat-cloud-run-fastapi-bridge-trondurells-projects.vercel.app"
+    )
+    response = client.get("/api/health", headers={"Origin": preview})
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == preview
+
+
+def test_experimental_routes_are_disabled_by_default():
+    highlight = client.post("/api/highlights/tag?game_id=g1", json=[])
+    coach = client.post(
+        "/api/coach/ask",
+        json={"user_id": "u1", "question": "How do I shoot?", "include_stats": False, "context": None},
+    )
+    summary = client.get("/api/coach/weekly-summary/u1")
+    extended = client.post(
+        "/api/drills/schedule/extended",
+        json={
+            "user_id": "player-2",
+            "available_days": ["monday"],
+            "gym_access": True,
+            "skill_levels": {"shooting": 0.5},
+            "growth_areas": ["shooting"],
+                "specific_goals": ["shooting"],
+                "previous_performance": None,
+                "preferences": {
+                    "days_per_week": 1,
+                    "available_days": ["monday"],
+                    "equipment_access": [],
+                    "primary_focus": ["shooting"],
+                    "format_type": "solo",
+                    "max_session_duration": 30,
+                    "preferred_time": None,
+                },
+        },
+    )
+    for response in (highlight, coach, summary, extended):
+        assert response.status_code == 404, response.text
+
+
 def test_recommend_drills_accepts_user_id_and_human_difficulty():
     response = client.post(
         "/api/drills/recommend",

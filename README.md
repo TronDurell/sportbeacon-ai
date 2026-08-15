@@ -115,7 +115,9 @@ Backend (optional):
 
 | Variable | Purpose |
 | --- | --- |
-| `CORS_ALLOW_ORIGINS` | Comma-separated explicit browser origins. Default is local Vite (`http://localhost:5173`, `http://127.0.0.1:5173`, and the matching preview ports). Do not set `*`. |
+| `CORS_ALLOW_ORIGINS` | Comma-separated explicit browser origins. Default includes local Vite and `https://sportbeacon-ai.vercel.app`. Do not set `*`. |
+| `CORS_ALLOW_ORIGIN_REGEX` | Optional override. Default allows SportBeacon Vercel git preview hosts only. |
+| `ENABLE_EXPERIMENTAL_ROUTES` | Defaults to `false`. Coach, highlight, and extended-schedule routes return 404 until explicitly enabled. |
 
 Do not put production URLs, Firebase keys, cloud tokens, or other credentials in the frontend shell. Root `env.example` still documents historical product placeholders; those services are not wired into this Phase 1 app.
 
@@ -140,7 +142,17 @@ Required Vercel project settings:
 | Build Command | `npm run build` |
 | Output Directory | `dist` |
 
-This Vercel project deploys only the Vite frontend. The FastAPI backend is not packaged or hosted here. Until FastAPI has its own deployment and `VITE_API_BASE_URL` points at it, the hosted shell may correctly show **Backend unreachable**. Do not set a fake backend URL in Vercel to hide that state.
+This Vercel project deploys only the Vite frontend. FastAPI staging is a separate Cloud Run service:
+
+- Google Cloud project: `sportbeacon-ai` (number `104921686559`)
+- Region: `us-east1`
+- Service: `sportbeacon-api-staging`
+- Runtime identity: `sportbeacon-api-runtime@sportbeacon-ai.iam.gserviceaccount.com`
+- Staging URL: `https://sportbeacon-api-staging-104921686559.us-east1.run.app`
+
+See `docs/cloud-run-deployment.md` to recreate the staging service.
+
+Vercel Preview may set `VITE_API_BASE_URL` to that staging HTTPS origin so the preview shell can show **Connected**. Do not set Production `VITE_API_BASE_URL` until the staging API is accepted. Local development still uses `http://127.0.0.1:8000`.
 
 ## License
 
