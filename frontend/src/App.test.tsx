@@ -61,6 +61,61 @@ function healthOk() {
   return jsonResponse({ status: "ok", service: "sportbeacon-ai", version: "0.1.0" });
 }
 
+async function signInToWorkspace() {
+  render(<App />);
+  await userEvent.type(screen.getByLabelText("Email"), "ada@example.com");
+  await userEvent.type(screen.getByLabelText("Password"), "secret1");
+  await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
+  expect(await screen.findByLabelText("Played at")).toBeInTheDocument();
+}
+
+async function fillBasketballStatForm(points = "8") {
+  fireEvent.change(screen.getByLabelText("Played at"), { target: { value: "2024-04-01T20:00" } });
+  await userEvent.type(screen.getByLabelText("Points"), points);
+  await userEvent.type(screen.getByLabelText("Assists"), "3");
+  await userEvent.type(screen.getByLabelText("Rebounds"), "4");
+  await userEvent.type(screen.getByLabelText("Steals"), "1");
+  await userEvent.type(screen.getByLabelText("Blocks"), "0");
+  await userEvent.type(screen.getByLabelText("FG%"), "48");
+  await userEvent.type(screen.getByLabelText("3P%"), "33");
+}
+
+function workspaceFetch(options?: {
+  onPostStat?: (init?: RequestInit) => Promise<Response> | Response;
+  stats?: Array<{ statId: string; points: number; occurredAt: string }>;
+}) {
+  const stats = options?.stats ?? [];
+  return vi.fn().mockImplementation(async (input: RequestInfo, init?: RequestInit) => {
+    const url = String(input);
+    const method = init?.method || "GET";
+    if (url.endsWith("/api/health")) {
+      return healthOk();
+    }
+    if (url.endsWith("/api/me/profile")) {
+      return jsonResponse({
+        displayName: "Ada",
+        homeArea: { city: "Richmond", region: "VA", country: "US" },
+        primarySport: "basketball",
+      });
+    }
+    if (url.endsWith("/api/me/stats/basketball") && method === "POST") {
+      if (options?.onPostStat) {
+        return options.onPostStat(init);
+      }
+      const created = { statId: `s${stats.length + 1}`, points: 8, occurredAt: "2024-04-01T20:00:00Z" };
+      stats.push(created);
+      return jsonResponse(created);
+    }
+    if (url.includes("/api/me/stats")) {
+      return jsonResponse({ items: [...stats] });
+    }
+    if (url.endsWith("/api/me/insights") && method === "POST") {
+      return jsonResponse({ top_skills: ["points"], growth_areas: ["rebounds"] });
+    }
+    return jsonResponse({}, 404);
+  });
+}
+
 beforeEach(() => {
   authState.user = null;
   authState.listeners = [];
@@ -264,6 +319,7 @@ describe("SportBeaconAI athlete workspace", () => {
     await userEvent.type(screen.getByLabelText("3P%"), "33");
     await userEvent.click(screen.getByRole("button", { name: "Save game" }));
     expect(await screen.findByText(/12 points/)).toBeInTheDocument();
+    expect(screen.queryByText(/reading 'reset'/i)).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Generate insights" }));
     expect(await screen.findByTestId("insight-state")).toHaveTextContent("Top skills: points");
@@ -318,5 +374,79 @@ describe("SportBeaconAI athlete workspace", () => {
     expect(await screen.findByTestId("drill-state")).toHaveTextContent(
       "Basketball skill levels are required before recommending drills",
     );
+  });
+
+  it("resets the basketball form after one successful save without a currentTarget exception", async () => {
+    const saved: Array<{ statId: string; points: number; occurredAt: string }> = [];
+    const fetchMock = workspaceFetch({
+      stats: saved,
+      onPostStat: () => {
+        const created = { statId: "s1", points: 8, occurredAt: "2024-04-01T20:00:00Z" };
+        saved.push(created);
+        return jsonResponse(created);
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await signInToWorkspace();
+    expect(screen.getByText("No stats yet.")).toBeInTheDocument();
+    await fillBasketballStatForm("8");
+    await userEvent.click(screen.getByRole("button", { name: "Save game" }));
+    expect(await screen.findByText("2024-04-01T20:00:00Z: 8 points")).toBeInTheDocument();
+    expect(screen.getByText("1 saved game.")).toBeInTheDocument();
+    expect(screen.queryByText(/reading 'reset'/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Cannot read properties of null/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Points")).toHaveValue(null);
+    expect(screen.getByLabelText("Played at")).toHaveValue("");
+    const postCalls = fetchMock.mock.calls.filter(
+      ([url, init]) => String(url).endsWith("/api/me/stats/basketball") && (init as RequestInit | undefined)?.method === "POST",
+    );
+    expect(postCalls).toHaveLength(1);
+    await userEvent.click(screen.getByRole("button", { name: "Generate insights" }));
+    expect(await screen.findByTestId("insight-state")).toHaveTextContent("Top skills: points");
+  });
+
+  it("ignores a second Save click while a basketball stat request is in flight", async () => {
+    let releasePost: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      releasePost = resolve;
+    });
+    const saved: Array<{ statId: string; points: number; occurredAt: string }> = [];
+    const fetchMock = workspaceFetch({
+      stats: saved,
+      onPostStat: async () => {
+        await gate;
+        const created = { statId: `s${saved.length + 1}`, points: 8, occurredAt: "2024-04-01T20:00:00Z" };
+        saved.push(created);
+        return jsonResponse(created);
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await signInToWorkspace();
+    await fillBasketballStatForm("8");
+    const saveButton = screen.getByRole("button", { name: "Save game" });
+    await userEvent.click(saveButton);
+    await userEvent.click(saveButton);
+    releasePost();
+    expect(await screen.findByText("2024-04-01T20:00:00Z: 8 points")).toBeInTheDocument();
+    expect(screen.getAllByText(/8 points/)).toHaveLength(1);
+    const postCalls = fetchMock.mock.calls.filter(
+      ([url, init]) => String(url).endsWith("/api/me/stats/basketball") && (init as RequestInit | undefined)?.method === "POST",
+    );
+    expect(postCalls).toHaveLength(1);
+  });
+
+  it("keeps entered basketball values when save fails", async () => {
+    const fetchMock = workspaceFetch({
+      onPostStat: () => jsonResponse({ detail: "Played at is required" }, 422),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await signInToWorkspace();
+    await fillBasketballStatForm("8");
+    await userEvent.click(screen.getByRole("button", { name: "Save game" }));
+    expect(await screen.findByText("Played at is required")).toBeInTheDocument();
+    expect(screen.queryByText("1 saved game.")).not.toBeInTheDocument();
+    expect(screen.queryByText(/8 points/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Points")).toHaveValue(8);
+    expect(screen.getByLabelText("Played at")).toHaveValue("2024-04-01T20:00");
   });
 });

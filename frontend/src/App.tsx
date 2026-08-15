@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch, ApiError, AuthRequiredError } from "./api/client";
 import { fetchHealth, getApiBaseUrl, type HealthPayload } from "./api/health";
 import { AuthProvider } from "./auth/AuthProvider";
@@ -220,6 +220,8 @@ function SignedInPanels() {
   const [profileState, setProfileState] = useState("Load your private profile to continue.");
   const [stats, setStats] = useState<Array<{ statId: string; points: number; occurredAt: string }>>([]);
   const [statState, setStatState] = useState("No stats yet.");
+  const [statSaving, setStatSaving] = useState(false);
+  const statSavingRef = useRef(false);
   const [insightState, setInsightState] = useState("Insights use your persisted basketball stats.");
   const [drillState, setDrillState] = useState("Drills use your persisted profile skills.");
 
@@ -311,7 +313,13 @@ function SignedInPanels() {
 
   async function saveStat(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    if (statSavingRef.current) {
+      return;
+    }
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    statSavingRef.current = true;
+    setStatSaving(true);
     try {
       await apiFetch("/api/me/stats/basketball", session, {
         method: "POST",
@@ -328,10 +336,13 @@ function SignedInPanels() {
           source: { kind: "manual" },
         }),
       });
-      event.currentTarget.reset();
+      formElement.reset();
       await loadStats();
     } catch (error: unknown) {
       setStatState(error instanceof Error ? error.message : "Unable to save stat");
+    } finally {
+      statSavingRef.current = false;
+      setStatSaving(false);
     }
   }
 
@@ -484,7 +495,9 @@ function SignedInPanels() {
             </select>
           </label>
           <p className="form-message">{statState}</p>
-          <button type="submit">Save game</button>
+          <button type="submit" disabled={statSaving}>
+            Save game
+          </button>
         </form>
         <ul className="stat-list">
           {stats.map((item) => (
