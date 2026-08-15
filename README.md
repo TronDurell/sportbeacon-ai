@@ -116,8 +116,11 @@ Backend (optional):
 | Variable | Purpose |
 | --- | --- |
 | `CORS_ALLOW_ORIGINS` | Comma-separated explicit browser origins. Default includes local Vite and `https://sportbeacon-ai.vercel.app`. Do not set `*`. |
-| `CORS_ALLOW_ORIGIN_REGEX` | Optional override. Default allows SportBeacon Vercel git preview hosts only. |
+| `CORS_ALLOW_ORIGIN_REGEX` | Optional override. Default allows SportBeacon Vercel git preview hosts only. Production sets `^$` so preview hosts are not echoed. |
 | `ENABLE_EXPERIMENTAL_ROUTES` | Defaults to `false`. Coach, highlight, and extended-schedule routes return 404 until explicitly enabled. |
+| `ENABLE_PRODUCT_ROUTES` | Defaults on outside production. Production ignores this until authenticated product APIs exist and stays health-only. |
+| `ENABLE_API_DOCS` | Defaults on outside production. Disabled when `APP_ENV=production`. |
+| `APP_ENV` | Set `production` only on the production Cloud Run service. |
 
 Do not put production URLs, Firebase keys, cloud tokens, or other credentials in the frontend shell. Root `env.example` still documents historical product placeholders; those services are not wired into this Phase 1 app.
 
@@ -142,17 +145,19 @@ Required Vercel project settings:
 | Build Command | `npm run build` |
 | Output Directory | `dist` |
 
-This Vercel project deploys only the Vite frontend. FastAPI staging is a separate Cloud Run service:
+This Vercel project deploys only the Vite frontend. FastAPI runs on separate Cloud Run services:
 
 - Google Cloud project: `sportbeacon-ai` (number `104921686559`)
 - Region: `us-east1`
-- Service: `sportbeacon-api-staging`
-- Runtime identity: `sportbeacon-api-runtime@sportbeacon-ai.iam.gserviceaccount.com`
+- Staging service: `sportbeacon-api-staging`
+- Staging runtime identity: `sportbeacon-api-runtime@sportbeacon-ai.iam.gserviceaccount.com`
 - Staging URL: `https://sportbeacon-api-staging-104921686559.us-east1.run.app`
+- Production service: `sportbeacon-api`
+- Production runtime identity: `sportbeacon-api-prod-runtime@sportbeacon-ai.iam.gserviceaccount.com`
 
-See `docs/cloud-run-deployment.md` to recreate the staging service.
+See `docs/cloud-run-deployment.md` to recreate staging or production. Production is health-only until authenticated product APIs exist.
 
-Vercel Preview may set `VITE_API_BASE_URL` to that staging HTTPS origin so the preview shell can show **Connected**. Do not set Production `VITE_API_BASE_URL` until the staging API is accepted. Local development still uses `http://127.0.0.1:8000`.
+Vercel Preview may set `VITE_API_BASE_URL` to the staging HTTPS origin. Vercel Production must use the production Cloud Run origin, never staging. Local development still uses `http://127.0.0.1:8000`.
 
 ## License
 

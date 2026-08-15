@@ -1,5 +1,8 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import APIRouter, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 from typing import Any, Dict, List, Optional
 from .models import (
     API_VERSION,
@@ -38,12 +41,54 @@ VERCEL_PREVIEW_ORIGIN_REGEX = (
     r"^https://sportbeacon-ai-git-[a-z0-9-]+-trondurells-projects\.vercel\.app$"
 )
 EXPERIMENTAL_ROUTE_DETAIL = "This experimental route is disabled"
+PRODUCT_ROUTE_DETAIL = "Not Found"
+HEALTH_PATH = "/api/health"
+HEALTH_METHODS = {"GET", "HEAD", "OPTIONS"}
+TRUE_VALUES = {"1", "true", "yes", "on"}
+FALSE_VALUES = {"0", "false", "no", "off"}
+
+
+def _env_flag(name: str) -> Optional[bool]:
+    raw = os.getenv(name)
+    if raw is None or not str(raw).strip():
+        return None
+    value = str(raw).strip().lower()
+    if value in TRUE_VALUES:
+        return True
+    if value in FALSE_VALUES:
+        return False
+    return None
+
+
+def is_production() -> bool:
+    return os.getenv("APP_ENV", "").strip().lower() == "production"
+
+
+def authenticated_product_apis_enabled() -> bool:
+    """Authenticated product APIs are not implemented yet. Always fail closed."""
+    return False
+
+
+def product_routes_enabled() -> bool:
+    """Production stays health-only until authenticated product APIs exist."""
+    if is_production() and not authenticated_product_apis_enabled():
+        return False
+    return _env_flag("ENABLE_PRODUCT_ROUTES") is not False
+
+
+def api_docs_enabled() -> bool:
+    if is_production():
+        return False
+    flag = _env_flag("ENABLE_API_DOCS")
+    return flag is not False
 
 
 def cors_allow_origins() -> List[str]:
     """Explicit origins only; never '*'."""
     raw = os.getenv("CORS_ALLOW_ORIGINS", "")
     if not raw.strip():
+        if is_production():
+            return [PRODUCTION_ORIGIN]
         return list(DEFAULT_CORS_ORIGINS)
     origins = [item.strip() for item in raw.split(",") if item.strip()]
     if "*" in origins:
@@ -51,18 +96,23 @@ def cors_allow_origins() -> List[str]:
     return origins
 
 
-def cors_allow_origin_regex() -> str:
-    raw = os.getenv("CORS_ALLOW_ORIGIN_REGEX", "").strip()
-    return raw or VERCEL_PREVIEW_ORIGIN_REGEX
+def cors_allow_origin_regex() -> Optional[str]:
+    raw = os.getenv("CORS_ALLOW_ORIGIN_REGEX")
+    if raw is not None:
+        stripped = raw.strip()
+        if stripped in {"", "^$"}:
+            return None
+        return stripped
+    if is_production():
+        return None
+    return VERCEL_PREVIEW_ORIGIN_REGEX
 
 
 def experimental_routes_enabled() -> bool:
-    return os.getenv("ENABLE_EXPERIMENTAL_ROUTES", "false").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
+    flag = _env_flag("ENABLE_EXPERIMENTAL_ROUTES")
+    if flag is True:
+        return True
+    return False
 
 
 def require_experimental_routes() -> None:
@@ -70,15 +120,19 @@ def require_experimental_routes() -> None:
         raise HTTPException(status_code=404, detail=EXPERIMENTAL_ROUTE_DETAIL)
 
 
-app = FastAPI(title="SportBeacon AI API", version=API_VERSION)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_allow_origins(),
-    allow_origin_regex=cors_allow_origin_regex(),
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
-)
+class ProductionRouteGateMiddleware(BaseHTTPMiddleware):
+    """Allowlist-only gate. Missing production config fails closed, not open."""
+
+    async def dispatch(self, request: Request, call_next):
+        if product_routes_enabled():
+            return await call_next(request)
+        path = request.url.path.rstrip("/") or "/"
+        if path == HEALTH_PATH and request.method.upper() in HEALTH_METHODS:
+            return await call_next(request)
+        return JSONResponse({"detail": PRODUCT_ROUTE_DETAIL}, status_code=404)
+
+
+router = APIRouter()
 insight_service = PlayerInsightService()
 matchmaking_service = MatchmakingService()
 drill_service = DrillService()
@@ -102,7 +156,7 @@ def _get_coach_assistant():
         _coach_assistant = CoachAssistant(os.getenv("OPENAI_API_KEY"))
     return _coach_assistant
 
-@app.get("/api/health", response_model=HealthResponse)
+@router.get("/api/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
     """Canonical liveness check used by the Vite shell."""
     return HealthResponse(
@@ -112,7 +166,7 @@ async def health() -> HealthResponse:
     )
 
 
-@app.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
+@router.get("/api/players/top-winners", response_model=List[PlayerInsightResponse])
 async def get_top_winners(time_period_days: int = 30, limit: int = 5):
     """
     Get the top players with highest win rates for the specified time period.
@@ -132,7 +186,7 @@ async def get_top_winners(time_period_days: int = 30, limit: int = 5):
             detail=f"Error calculating top winners: {str(e)}"
         )
 
-@app.post("/api/players/analyze", response_model=PlayerAnalysisResponse)
+@router.post("/api/players/analyze", response_model=PlayerAnalysisResponse)
 async def analyze_player_stats(stats: List[PlayerStatRecord]):
     """
     Analyze player statistics to generate insights.
@@ -158,7 +212,7 @@ async def analyze_player_stats(stats: List[PlayerStatRecord]):
             detail=f"Error analyzing player stats: {str(e)}"
         )
 
-@app.post("/api/matchmaking/create-teams", response_model=MatchmakingResponse)
+@router.post("/api/matchmaking/create-teams", response_model=MatchmakingResponse)
 async def create_balanced_teams(request: MatchmakingRequest):
     """
     Create balanced teams from player statistics.
@@ -179,7 +233,7 @@ async def create_balanced_teams(request: MatchmakingRequest):
             detail=f"Error creating balanced teams: {str(e)}"
         )
 
-@app.post("/api/drills/recommend")
+@router.post("/api/drills/recommend")
 async def get_drill_recommendations(
     request: DrillRecommendationRequest
 ) -> DrillRecommendationResponse:
@@ -191,7 +245,7 @@ async def get_drill_recommendations(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/drills/recommend/formatted")
+@router.post("/api/drills/recommend/formatted")
 async def get_formatted_recommendations(
     request: DrillRecommendationRequest,
     format_type: str = 'text'
@@ -203,7 +257,7 @@ async def get_formatted_recommendations(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/drills/schedule")
+@router.post("/api/drills/schedule")
 async def get_weekly_schedule(
     request: DrillScheduleRequest
 ) -> DrillScheduleResponse:
@@ -215,7 +269,7 @@ async def get_weekly_schedule(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/drills/schedule/formatted")
+@router.post("/api/drills/schedule/formatted")
 async def get_formatted_schedule(
     request: DrillScheduleRequest,
     format_type: str = 'text'
@@ -227,7 +281,7 @@ async def get_formatted_schedule(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/highlights/tag")
+@router.post("/api/highlights/tag")
 async def tag_game_highlights(
     game_id: str,
     events: List[Dict]
@@ -242,7 +296,7 @@ async def tag_game_highlights(
             detail=f"Error processing highlights: {str(e)}"
         )
 
-@app.post("/api/coach/ask")
+@router.post("/api/coach/ask")
 async def ask_coach_question(
     request: CoachQuestion,
     channel: str = Query(default="chat", pattern="^(chat|email|sms|web)$")
@@ -257,7 +311,7 @@ async def ask_coach_question(
             detail=f"Error processing coaching question: {str(e)}"
         )
 
-@app.get("/api/coach/weekly-summary/{player_id}")
+@router.get("/api/coach/weekly-summary/{player_id}")
 async def get_weekly_summary(
     player_id: str,
     channel: str = Query(default="chat", pattern="^(chat|email|sms|web)$")
@@ -278,7 +332,7 @@ async def get_weekly_summary(
             detail=f"Error generating weekly summary: {str(e)}"
         )
 
-@app.post("/api/drills/schedule/extended")
+@router.post("/api/drills/schedule/extended")
 async def get_extended_schedule(
     request: ExtendedDrillScheduleRequest
 ) -> DrillScheduleResponse:
@@ -288,6 +342,31 @@ async def get_extended_schedule(
         return drill_service.get_extended_schedule(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def create_app() -> FastAPI:
+    docs_enabled = api_docs_enabled()
+    application = FastAPI(
+        title="SportBeacon AI API",
+        version=API_VERSION,
+        docs_url="/docs" if docs_enabled else None,
+        redoc_url="/redoc" if docs_enabled else None,
+        openapi_url="/openapi.json" if docs_enabled else None,
+    )
+    application.add_middleware(ProductionRouteGateMiddleware)
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_allow_origins(),
+        allow_origin_regex=cors_allow_origin_regex(),
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"],
+    )
+    application.include_router(router)
+    return application
+
+
+app = create_app()
 
 # Sample test data for the analyze endpoint
 SAMPLE_ANALYZE_PAYLOAD = [
