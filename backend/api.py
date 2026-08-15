@@ -25,6 +25,8 @@ from .models import (
 from .insight_service import PlayerInsightService
 from .matchmaking_service import MatchmakingService
 from .drill_service import DrillService
+from .runtime_env import env_flag
+from .me_routes import me_router
 import os
 from datetime import datetime
 
@@ -49,31 +51,28 @@ FALSE_VALUES = {"0", "false", "no", "off"}
 
 
 def _env_flag(name: str) -> Optional[bool]:
-    raw = os.getenv(name)
-    if raw is None or not str(raw).strip():
-        return None
-    value = str(raw).strip().lower()
-    if value in TRUE_VALUES:
-        return True
-    if value in FALSE_VALUES:
-        return False
-    return None
+    return env_flag(name)
 
 
 def is_production() -> bool:
     return os.getenv("APP_ENV", "").strip().lower() == "production"
 
 
-def authenticated_product_apis_enabled() -> bool:
-    """Authenticated product APIs are not implemented yet. Always fail closed."""
-    return False
+def is_staging() -> bool:
+    return os.getenv("APP_ENV", "").strip().lower() == "staging"
+
+
+def authenticated_profile_routes_enabled() -> bool:
+    return env_flag("ENABLE_AUTHENTICATED_PROFILE_ROUTES") is True
 
 
 def product_routes_enabled() -> bool:
-    """Production stays health-only until authenticated product APIs exist."""
-    if is_production() and not authenticated_product_apis_enabled():
+    """Unauthenticated legacy product APIs never open in production."""
+    if is_production():
         return False
-    return _env_flag("ENABLE_PRODUCT_ROUTES") is not False
+    if is_staging():
+        return env_flag("ENABLE_PRODUCT_ROUTES") is True
+    return env_flag("ENABLE_PRODUCT_ROUTES") is not False
 
 
 def api_docs_enabled() -> bool:
@@ -120,6 +119,25 @@ def require_experimental_routes() -> None:
         raise HTTPException(status_code=404, detail=EXPERIMENTAL_ROUTE_DETAIL)
 
 
+AUTHENTICATED_PROFILE_ROUTES = {
+    ("GET", "/api/me"),
+    ("GET", "/api/me/profile"),
+    ("PUT", "/api/me/profile"),
+    ("POST", "/api/me/stats/basketball"),
+    ("GET", "/api/me/stats"),
+    ("POST", "/api/me/insights"),
+    ("POST", "/api/me/drills/recommend"),
+}
+
+
+def is_authenticated_profile_request(method: str, path: str) -> bool:
+    normalized = path.rstrip("/") or "/"
+    method = method.upper()
+    if method == "OPTIONS":
+        return any(candidate == normalized for _, candidate in AUTHENTICATED_PROFILE_ROUTES)
+    return (method, normalized) in AUTHENTICATED_PROFILE_ROUTES
+
+
 class ProductionRouteGateMiddleware(BaseHTTPMiddleware):
     """Allowlist-only gate. Missing production config fails closed, not open."""
 
@@ -127,7 +145,10 @@ class ProductionRouteGateMiddleware(BaseHTTPMiddleware):
         if product_routes_enabled():
             return await call_next(request)
         path = request.url.path.rstrip("/") or "/"
-        if path == HEALTH_PATH and request.method.upper() in HEALTH_METHODS:
+        method = request.method.upper()
+        if path == HEALTH_PATH and method in HEALTH_METHODS:
+            return await call_next(request)
+        if authenticated_profile_routes_enabled() and is_authenticated_profile_request(method, path):
             return await call_next(request)
         return JSONResponse({"detail": PRODUCT_ROUTE_DETAIL}, status_code=404)
 
@@ -363,6 +384,9 @@ def create_app() -> FastAPI:
         allow_headers=["Content-Type", "Authorization"],
     )
     application.include_router(router)
+    application.include_router(me_router)
+    application.state.insight_service = insight_service
+    application.state.drill_service = drill_service
     return application
 
 

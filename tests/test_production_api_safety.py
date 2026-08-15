@@ -183,6 +183,12 @@ def test_production_missing_configuration_fails_closed(monkeypatch):
     assert allowed.headers.get("access-control-allow-origin") == PROD_ORIGIN
 
 
+def test_production_authenticated_profile_routes_stay_closed_when_flag_false(monkeypatch):
+    client = _production_client(monkeypatch)
+    assert client.get("/api/me").status_code == 404
+    assert client.get("/api/me/profile").status_code == 404
+
+
 def test_production_ignores_product_route_flag_without_auth(monkeypatch):
     client = _production_client(
         monkeypatch,

@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // SportBeacon persists athlete profiles and stats only through FastAPI.
+    // The browser uses Firebase Authentication and must not read or write Firestore.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
