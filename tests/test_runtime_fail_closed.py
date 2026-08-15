@@ -23,7 +23,7 @@ PERMISSIVE_FLAGS = {
     "ENABLE_API_DOCS": "true",
     "ENABLE_EXPERIMENTAL_ROUTES": "true",
 }
-HIDDEN_PATHS = ("/api/me", "/api/drills/recommend", "/docs", "/openapi.json")
+HIDDEN_PATHS = ("/api/me", "/api/drills/recommend", "/docs", "/openapi.json", "/api/runs")
 STAGING_ORIGIN = "https://sportbeacon-ai.vercel.app"
 PREVIEW_ORIGIN = (
     "https://sportbeacon-ai-git-feat-firebase-au-30ec74-trondurells-projects.vercel.app"
@@ -53,6 +53,7 @@ def _assert_health_closed_surface(client: TestClient) -> None:
     assert "firebase" not in health.text.lower()
     assert client.get("/api/me").status_code == 404
     assert client.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
+    assert client.get("/api/runs").status_code == 404
     assert client.get("/docs").status_code == 404
     assert client.get("/openapi.json").status_code == 404
 
@@ -119,6 +120,7 @@ def test_recognized_development_keeps_controlled_local_behavior(monkeypatch):
     )
     assert closed.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
     assert closed.get("/api/me").status_code == 404
+    assert closed.get("/api/runs").status_code == 404
     assert closed.get("/docs").status_code == 404
     auth_only = _client(
         monkeypatch,
@@ -129,6 +131,7 @@ def test_recognized_development_keeps_controlled_local_behavior(monkeypatch):
         },
     )
     assert auth_only.get("/api/me").status_code == 401
+    assert auth_only.get("/api/runs").status_code == 401
     assert auth_only.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
 
 
@@ -146,6 +149,7 @@ def test_recognized_test_keeps_intentional_product_behavior(monkeypatch):
         },
     )
     assert gated.get("/api/me").status_code == 401
+    assert gated.get("/api/runs").status_code == 401
     assert gated.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
 
 
@@ -162,6 +166,7 @@ def test_recognized_staging_hides_legacy_even_when_product_flag_true(monkeypatch
     )
     assert client.get("/api/health").status_code == 200
     assert client.get("/api/me").status_code == 401
+    assert client.get("/api/runs").status_code == 401
     assert client.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
     assert client.get("/docs").status_code == 404
     assert client.get("/openapi.json").status_code == 404
@@ -181,6 +186,7 @@ def test_recognized_production_hides_legacy_even_when_flags_true(monkeypatch):
     )
     assert client.get("/api/health").status_code == 200
     assert client.get("/api/me").status_code == 401
+    assert client.get("/api/runs").status_code == 401
     assert client.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
     assert client.get("/docs").status_code == 404
     assert client.get("/openapi.json").status_code == 404
@@ -211,6 +217,10 @@ def test_staging_preflight_allows_enabled_me_and_hides_disabled_surfaces(monkeyp
     allowed = _preflight(client, "/api/me", STAGING_ORIGIN)
     assert allowed.status_code in {200, 204}
     assert allowed.headers.get("access-control-allow-origin") == STAGING_ORIGIN
+
+    runs = _preflight(client, "/api/runs", STAGING_ORIGIN)
+    assert runs.status_code in {200, 204}
+    assert runs.headers.get("access-control-allow-origin") == STAGING_ORIGIN
 
     preview = _preflight(client, "/api/me", PREVIEW_ORIGIN)
     assert preview.status_code in {200, 204}

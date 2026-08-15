@@ -45,13 +45,13 @@ def _http_status(url: str, token: str | None = None) -> int:
         return exc.code
 
 
-def _auth_emulator_id_token() -> str:
+def _auth_emulator_id_token(email: str = "rules-test@example.com") -> str:
     auth_host = os.getenv("FIREBASE_AUTH_EMULATOR_HOST", "127.0.0.1:9099")
     if not auth_host.startswith(("127.0.0.1", "localhost")):
         raise RuntimeError("Refusing to use a non-local Auth emulator host")
     payload = json.dumps(
         {
-            "email": "rules-test@example.com",
+            "email": email,
             "password": "test-password",
             "returnSecureToken": True,
         }
@@ -137,3 +137,95 @@ def test_backend_writes_stay_on_env_and_uid_path(monkeypatch):
         .get()
     )
     assert not other_uid.exists
+
+
+def test_anonymous_and_authenticated_direct_access_denied_for_places_and_runs():
+    token = _auth_emulator_id_token("places-rules-test@example.com")
+    for path in (
+        "environments/test/places/test-place-richmond-rec-gym",
+        "environments/test/runs/test-run-basketball-active",
+        "environments/test/runs/test-run-basketball-active/participants/user-a",
+    ):
+        assert _http_status(_firestore_url(path)) in {401, 403}
+        assert _http_status(_firestore_url(path), token=token) in {401, 403}
+
+
+def test_sports_loop_backend_writes_stay_on_env_path(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "test")
+    from google.cloud import firestore
+
+    from backend.sports_loop_fixtures import ACTIVE_RUN_ID, PLACE_ID, ensure_sports_loop_fixtures
+    from backend.sports_loop_repository import FirestoreSportsLoopRepository
+    from backend.sports_loop_models import Participation
+
+    client = firestore.Client(project="sportbeacon-ai")
+    repo = FirestoreSportsLoopRepository(client=client, app_env="test")
+    now = datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc)
+    ensure_sports_loop_fixtures(repo, now)
+    place_snap = (
+        client.collection("environments")
+        .document("test")
+        .collection("places")
+        .document(PLACE_ID)
+        .get()
+    )
+    assert place_snap.exists
+    stray_place = (
+        client.collection("environments")
+        .document("production")
+        .collection("places")
+        .document(PLACE_ID)
+        .get()
+    )
+    assert not stray_place.exists
+    joined = repo.commit_join(
+        Participation(
+            uid="user-a",
+            runId=ACTIVE_RUN_ID,
+            status="going",
+            joinedAt=now,
+            runTitle="TEST DATA — Lunch pickup run",
+            placeId=PLACE_ID,
+            placeName="TEST DATA — Richmond Rec Gym",
+            sport="basketball",
+            startsAt=now,
+            isTestData=True,
+        )
+    )
+    assert joined.status == "going"
+    participant = (
+        client.collection("environments")
+        .document("test")
+        .collection("runs")
+        .document(ACTIVE_RUN_ID)
+        .collection("participants")
+        .document("user-a")
+        .get()
+    )
+    assert participant.exists
+    history = (
+        client.collection("environments")
+        .document("test")
+        .collection("athletes")
+        .document("user-a")
+        .collection("participations")
+        .document(ACTIVE_RUN_ID)
+        .get()
+    )
+    assert history.exists
+    again = repo.commit_join(
+        Participation(
+            uid="user-a",
+            runId=ACTIVE_RUN_ID,
+            status="going",
+            joinedAt=now,
+            runTitle="changed",
+            placeId=PLACE_ID,
+            placeName="changed",
+            sport="basketball",
+            startsAt=now,
+            isTestData=True,
+        )
+    )
+    assert again.runTitle == joined.runTitle
+

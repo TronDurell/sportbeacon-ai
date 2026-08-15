@@ -187,6 +187,9 @@ def test_production_authenticated_profile_routes_stay_closed_when_flag_false(mon
     client = _production_client(monkeypatch)
     assert client.get("/api/me").status_code == 404
     assert client.get("/api/me/profile").status_code == 404
+    assert client.get("/api/runs").status_code == 404
+    assert client.post("/api/runs/test-run-basketball-active/join").status_code == 404
+    assert client.get("/api/me/participation").status_code == 404
 
 
 def test_production_ignores_product_route_flag_without_auth(monkeypatch):
