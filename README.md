@@ -62,9 +62,12 @@ npm ci
 
 ## How to start FastAPI
 
+Local development requires an explicit `APP_ENV=development`. Copy `backend/.env.example` for the other local flags, then set the environment before starting the server. Missing, blank, or unrecognized values fail closed: `/api/health` stays up, while `/api/me`, legacy product APIs, and docs return 404.
+
 From the repository root:
 
 ```powershell
+$env:APP_ENV="development"
 .\.venv\Scripts\python.exe -m uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000
 ```
 
@@ -124,10 +127,10 @@ Backend (optional):
 | `CORS_ALLOW_ORIGINS` | Comma-separated explicit browser origins. Default includes local Vite and `https://sportbeacon-ai.vercel.app`. Do not set `*`. |
 | `CORS_ALLOW_ORIGIN_REGEX` | Optional override. Default allows SportBeacon Vercel git preview hosts only. Production sets `^$` so preview hosts are not echoed. |
 | `ENABLE_EXPERIMENTAL_ROUTES` | Defaults to `false`. Coach, highlight, and extended-schedule routes return 404 until explicitly enabled. |
-| `ENABLE_PRODUCT_ROUTES` | Defaults on outside production and staging. Staging and production keep this false. |
-| `ENABLE_AUTHENTICATED_PROFILE_ROUTES` | Defaults to `false`. Staging sets `true`. Production stays `false` in this phase. |
-| `ENABLE_API_DOCS` | Defaults on outside production. Disabled when `APP_ENV=production`. |
-| `APP_ENV` | `development`, `test`, `staging`, or `production`. Unrecognized values fail closed for Firestore paths. |
+| `ENABLE_PRODUCT_ROUTES` | Defaults on only for `development` and `test`. Cannot reopen legacy product APIs in staging, production, or an invalid environment. |
+| `ENABLE_AUTHENTICATED_PROFILE_ROUTES` | Defaults to `false`. Staging sets `true`. Production stays `false` in this phase. Ignored when `APP_ENV` is missing or unrecognized. |
+| `ENABLE_API_DOCS` | Defaults on for `development`, `test`, and `staging`. Disabled for `production` and for invalid `APP_ENV`. |
+| `APP_ENV` | Required. Exactly `development`, `test`, `staging`, or `production`. Missing, blank, `prod`, `preview`, and misspellings fail closed. |
 
 Do not put production URLs, Firebase config values, cloud tokens, or other credentials in Git. Root `env.example` still documents historical product placeholders; those services are not wired into this app.
 

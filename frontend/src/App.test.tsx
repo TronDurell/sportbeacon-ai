@@ -153,6 +153,9 @@ describe("SportBeaconAI athlete workspace", () => {
 
   it("shows reset confirmation without storing a token", async () => {
     const { sendPasswordResetEmail } = await import("firebase/auth");
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(healthOk()));
     render(<App />);
     await userEvent.click(screen.getByRole("button", { name: "Forgot password?" }));
@@ -161,9 +164,50 @@ describe("SportBeaconAI athlete workspace", () => {
     expect(
       await screen.findByText("If that account exists, a reset email is on its way."),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/Firebase/i)).not.toBeInTheDocument();
     expect(sendPasswordResetEmail).toHaveBeenCalled();
     expect(window.localStorage.length).toBe(0);
     expect(window.sessionStorage.length).toBe(0);
+    const logged = [...logSpy.mock.calls, ...errorSpy.mock.calls, ...warnSpy.mock.calls]
+      .flat()
+      .map(String)
+      .join(" ");
+    expect(logged).not.toContain("ada@example.com");
+    logSpy.mockRestore();
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
+
+  it("shows the same reset confirmation when Firebase rejects", async () => {
+    const { sendPasswordResetEmail } = await import("firebase/auth");
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.mocked(sendPasswordResetEmail).mockRejectedValueOnce(
+      Object.assign(new Error("Firebase: Error (auth/user-not-found)."), {
+        code: "auth/user-not-found",
+      }),
+    );
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(healthOk()));
+    render(<App />);
+    await userEvent.click(screen.getByRole("button", { name: "Forgot password?" }));
+    await userEvent.type(screen.getByLabelText("Email"), "ada@example.com");
+    await userEvent.click(screen.getByRole("button", { name: "Send reset email" }));
+    expect(
+      await screen.findByText("If that account exists, a reset email is on its way."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/auth\/user-not-found/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Firebase: Error/i)).not.toBeInTheDocument();
+    const logged = [...logSpy.mock.calls, ...errorSpy.mock.calls, ...warnSpy.mock.calls]
+      .flat()
+      .map(String)
+      .join(" ");
+    expect(logged).not.toContain("ada@example.com");
+    expect(logged).not.toContain("auth/user-not-found");
+    expect(logged).not.toContain("Firebase: Error");
+    logSpy.mockRestore();
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 
   it("saves a profile, records a stat, and shows insight and drill results", async () => {

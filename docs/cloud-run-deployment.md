@@ -18,7 +18,7 @@ Recreate the SportBeacon FastAPI **staging** and **production** services from th
 | Runtime identity | `sportbeacon-api-runtime@sportbeacon-ai.iam.gserviceaccount.com` |
 | Staging URL | `https://sportbeacon-api-staging-104921686559.us-east1.run.app` |
 
-Staging may keep local/dev product routes available for preview testing. Experimental coach, highlight, and extended-schedule routes stay disabled. Phase 2B staging enables authenticated `/api/me` routes while leaving unauthenticated product APIs closed.
+Staging keeps unauthenticated product APIs closed even if `ENABLE_PRODUCT_ROUTES=true`. Experimental coach, highlight, and extended-schedule routes stay disabled. Phase 2B staging enables authenticated `/api/me` routes only when `APP_ENV=staging` and `ENABLE_AUTHENTICATED_PROFILE_ROUTES=true`. Missing or unrecognized `APP_ENV` values fail closed to health-only.
 
 Non-secret staging environment (also in `deploy/cloud-run-staging.env.example`):
 
@@ -54,8 +54,9 @@ When `APP_ENV=production`, the service is **health-only**:
 - `/docs`, `/redoc`, and `/openapi.json` are disabled.
 - Vercel preview origins are not echoed.
 - Unrelated origins are not echoed.
-- `ENABLE_PRODUCT_ROUTES=true` does not open unauthenticated product APIs.
-- Authenticated `/api/me` routes stay closed unless `ENABLE_AUTHENTICATED_PROFILE_ROUTES=true`. Production keeps that flag false in this phase, so production stays health-only.
+- `ENABLE_PRODUCT_ROUTES=true` does not open unauthenticated product APIs in staging or production.
+- Authenticated `/api/me` routes stay closed unless `APP_ENV` is recognized and `ENABLE_AUTHENTICATED_PROFILE_ROUTES=true`. Production keeps that flag false in this phase, so production stays health-only.
+- Missing, blank, or unrecognized `APP_ENV` values fail closed: health remains 200 and every other surface, including `/api/me` and docs, returns 404. Flags cannot reopen those surfaces.
 - `ENABLE_EXPERIMENTAL_ROUTES` remains `false`.
 
 Non-secret production environment (also in `deploy/cloud-run-production.env.example`):

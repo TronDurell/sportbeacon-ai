@@ -44,7 +44,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
-    await sendPasswordResetEmail(getFirebaseAuth(), email);
+    try {
+      await sendPasswordResetEmail(getFirebaseAuth(), email);
+    } catch {
+      // Enumeration-safe: callers must not distinguish reject from resolve.
+    }
   }, []);
 
   const signOut = useCallback(async () => {

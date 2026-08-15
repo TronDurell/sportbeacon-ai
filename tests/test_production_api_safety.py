@@ -198,7 +198,8 @@ def test_production_ignores_product_route_flag_without_auth(monkeypatch):
     assert client.get("/docs").status_code == 404
 
 
-def test_non_production_product_routes_remain_available():
+def test_non_production_product_routes_remain_available(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "test")
     client = TestClient(create_app())
     drills = client.post("/api/drills/recommend", json=DRILL_PAYLOAD)
     insights = client.post("/api/players/analyze", json=INSIGHT_PAYLOAD)

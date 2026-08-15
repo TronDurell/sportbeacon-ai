@@ -125,7 +125,11 @@ function AccountSection() {
       } else if (mode === "signin") {
         await signIn(email, password);
       } else {
-        await resetPassword(email);
+        try {
+          await resetPassword(email);
+        } catch {
+          // Unexpected client failures still use the same public message.
+        }
         setMessage("If that account exists, a reset email is on its way.");
       }
     } catch (error: unknown) {

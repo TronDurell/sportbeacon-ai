@@ -25,7 +25,7 @@ from .models import (
 from .insight_service import PlayerInsightService
 from .matchmaking_service import MatchmakingService
 from .drill_service import DrillService
-from .runtime_env import env_flag
+from .runtime_env import env_flag, parse_app_env
 from .me_routes import me_router
 import os
 from datetime import datetime
@@ -46,37 +46,29 @@ EXPERIMENTAL_ROUTE_DETAIL = "This experimental route is disabled"
 PRODUCT_ROUTE_DETAIL = "Not Found"
 HEALTH_PATH = "/api/health"
 HEALTH_METHODS = {"GET", "HEAD", "OPTIONS"}
-TRUE_VALUES = {"1", "true", "yes", "on"}
-FALSE_VALUES = {"0", "false", "no", "off"}
 
 
 def _env_flag(name: str) -> Optional[bool]:
     return env_flag(name)
 
 
-def is_production() -> bool:
-    return os.getenv("APP_ENV", "").strip().lower() == "production"
-
-
-def is_staging() -> bool:
-    return os.getenv("APP_ENV", "").strip().lower() == "staging"
-
-
 def authenticated_profile_routes_enabled() -> bool:
+    """Authenticated /api/me stays hidden unless APP_ENV is recognized and the flag is true."""
+    if parse_app_env() is None:
+        return False
     return env_flag("ENABLE_AUTHENTICATED_PROFILE_ROUTES") is True
 
 
 def product_routes_enabled() -> bool:
-    """Unauthenticated legacy product APIs never open in production."""
-    if is_production():
+    """Unauthenticated legacy product APIs never open outside development and test."""
+    if parse_app_env() not in {"development", "test"}:
         return False
-    if is_staging():
-        return env_flag("ENABLE_PRODUCT_ROUTES") is True
     return env_flag("ENABLE_PRODUCT_ROUTES") is not False
 
 
 def api_docs_enabled() -> bool:
-    if is_production():
+    env = parse_app_env()
+    if env is None or env == "production":
         return False
     flag = _env_flag("ENABLE_API_DOCS")
     return flag is not False
@@ -86,7 +78,7 @@ def cors_allow_origins() -> List[str]:
     """Explicit origins only; never '*'."""
     raw = os.getenv("CORS_ALLOW_ORIGINS", "")
     if not raw.strip():
-        if is_production():
+        if parse_app_env() in {None, "production"}:
             return [PRODUCTION_ORIGIN]
         return list(DEFAULT_CORS_ORIGINS)
     origins = [item.strip() for item in raw.split(",") if item.strip()]
@@ -102,7 +94,7 @@ def cors_allow_origin_regex() -> Optional[str]:
         if stripped in {"", "^$"}:
             return None
         return stripped
-    if is_production():
+    if parse_app_env() in {None, "production"}:
         return None
     return VERCEL_PREVIEW_ORIGIN_REGEX
 
@@ -138,15 +130,18 @@ def is_authenticated_profile_request(method: str, path: str) -> bool:
     return (method, normalized) in AUTHENTICATED_PROFILE_ROUTES
 
 
-class ProductionRouteGateMiddleware(BaseHTTPMiddleware):
-    """Allowlist-only gate. Missing production config fails closed, not open."""
+class RouteGateMiddleware(BaseHTTPMiddleware):
+    """Allowlist-only gate. Invalid or closed environments fail closed, not open.
+
+    Registered outside CORS so preflight cannot advertise disabled routes.
+    """
 
     async def dispatch(self, request: Request, call_next):
-        if product_routes_enabled():
-            return await call_next(request)
         path = request.url.path.rstrip("/") or "/"
         method = request.method.upper()
         if path == HEALTH_PATH and method in HEALTH_METHODS:
+            return await call_next(request)
+        if product_routes_enabled():
             return await call_next(request)
         if authenticated_profile_routes_enabled() and is_authenticated_profile_request(method, path):
             return await call_next(request)
@@ -374,7 +369,8 @@ def create_app() -> FastAPI:
         redoc_url="/redoc" if docs_enabled else None,
         openapi_url="/openapi.json" if docs_enabled else None,
     )
-    application.add_middleware(ProductionRouteGateMiddleware)
+    # Last added runs first. The route gate must wrap CORS so OPTIONS cannot
+    # succeed for surfaces that this application intends to hide.
     application.add_middleware(
         CORSMiddleware,
         allow_origins=cors_allow_origins(),
@@ -383,6 +379,7 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization"],
     )
+    application.add_middleware(RouteGateMiddleware)
     application.include_router(router)
     application.include_router(me_router)
     application.state.insight_service = insight_service
