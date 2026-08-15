@@ -6,6 +6,7 @@ venv
 frontend
 logs
 docs
+deploy
 *.md
 node_modules
 **/__pycache__
