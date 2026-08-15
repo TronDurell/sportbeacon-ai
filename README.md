@@ -2,38 +2,42 @@
 
 Athlete-first tools for grassroots sports: player insights, drill planning, and prototype matchmaking.
 
-This repository is a **bootable local web application** (Vite + FastAPI) plus a tested Python AI library. It is not a production-ready product. Authentication, persistence, payments, coach AI, media processing, and production matchmaking are out of scope for the current shell.
+This repository is a **bootable local web application** (Vite + FastAPI) plus a tested Python AI library. Phase 2B adds Firebase email/password authentication and a private athlete workspace. It is not a finished product. Payments, public profiles, Places, Runs, Groups, Messaging, and production matchmaking remain out of scope.
 
 ## Architecture
 
 | Layer | Canonical path | Role |
 | --- | --- | --- |
-| Frontend | `frontend/` | React 18 + TypeScript + Vite shell |
-| Backend | `backend/api.py` | FastAPI API (`GET /api/health` and existing AI endpoints) |
+| Frontend | `frontend/` | React 18 + TypeScript + Vite athlete workspace |
+| Backend | `backend/api.py` | FastAPI health check and authenticated `/api/me` routes |
+| Persistence | Firestore via FastAPI | Private athlete profiles and basketball stats, separated by `APP_ENV` |
 | AI library | `ai/` | Player insights, drill recommender, matchmaking engine |
-| Tests | `tests/` | pytest contract and engine tests |
+| Tests | `tests/` | pytest contract, engine, auth, and emulator tests |
 
 The Node package in `backend/` is **legacy**. It still installs with `npm ci`, but `server.js` is missing and Express is not the active backend. Do not treat a Node install as a backend build.
 
-Legacy React files under `frontend/components`, `frontend/pages`, `frontend/services`, and `frontend/hooks` are not part of the bootable app. The Vite entrypoint is `frontend/src/main.tsx`.
+Legacy React files under `frontend/components`, `frontend/pages`, `frontend/services`, and `frontend/hooks` are not part of the bootable app. The Vite entrypoint is `frontend/src/main.tsx`. Do not import the legacy `frontend/services/authService.ts` token design.
 
-## Project scope (current shell)
+## Project scope (Phase 2B)
 
 Included:
 
-- SportBeaconAI header and navigation
+- Firebase email/password authentication in the Vite app
+- Private athlete profile onboarding and editing
+- Manual basketball stat persistence
+- Authenticated insight generation and drill recommendations from persisted data
 - Live FastAPI health check with loading, connected, and error/retry states
-- Cards for Player Insights, Drill Planning, and prototype Matchmaking
+- Disabled roadmap labels for later modules
 - Frontend lint, type-check, unit tests, and production build
-- Python pytest suite for the AI engines and API contracts
+- Python pytest suite for the AI engines, API contracts, and authenticated routes
 
 Not included:
 
-- Firebase authentication or Firestore
-- Payments
-- Production matchmaking UI
-- Coach LLM, extended schedules, or media processing
-- Fake athlete statistics or claims that unwired features work
+- Google, Apple, phone, or anonymous authentication in the product UI
+- Runs, Places, Groups, Messaging, Beacon Alerts, heat maps, or a social feed
+- Public athlete profiles or public Firestore access
+- Payments, RecTrac, TeamSideline, Cloud Functions, Storage, or AI chat
+- Fake games, courts, people, or live municipal data
 
 ## Python setup
 
@@ -58,9 +62,12 @@ npm ci
 
 ## How to start FastAPI
 
+Local development requires an explicit `APP_ENV=development`. Copy `backend/.env.example` for the other local flags, then set the environment before starting the server. Missing, blank, or unrecognized values fail closed: `/api/health` stays up, while `/api/me`, legacy product APIs, and docs return 404.
+
 From the repository root:
 
 ```powershell
+$env:APP_ENV="development"
 .\.venv\Scripts\python.exe -m uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000
 ```
 
@@ -110,6 +117,8 @@ Frontend (`frontend/.env.example`):
 | Variable | Purpose |
 | --- | --- |
 | `VITE_API_BASE_URL` | FastAPI origin used by the shell. No trailing slash. Example: `http://127.0.0.1:8000` |
+| `VITE_FIREBASE_*` | Firebase web app placeholders. Copy `frontend/.env.example` locally. Do not commit real values. |
+| `VITE_USE_FIREBASE_EMULATORS` | Set `true` only when the local Auth emulator is running. |
 
 Backend (optional):
 
@@ -118,18 +127,27 @@ Backend (optional):
 | `CORS_ALLOW_ORIGINS` | Comma-separated explicit browser origins. Default includes local Vite and `https://sportbeacon-ai.vercel.app`. Do not set `*`. |
 | `CORS_ALLOW_ORIGIN_REGEX` | Optional override. Default allows SportBeacon Vercel git preview hosts only. Production sets `^$` so preview hosts are not echoed. |
 | `ENABLE_EXPERIMENTAL_ROUTES` | Defaults to `false`. Coach, highlight, and extended-schedule routes return 404 until explicitly enabled. |
-| `ENABLE_PRODUCT_ROUTES` | Defaults on outside production. Production ignores this until authenticated product APIs exist and stays health-only. |
-| `ENABLE_API_DOCS` | Defaults on outside production. Disabled when `APP_ENV=production`. |
-| `APP_ENV` | Set `production` only on the production Cloud Run service. |
+| `ENABLE_PRODUCT_ROUTES` | Defaults on only for `development` and `test`. Cannot reopen legacy product APIs in staging, production, or an invalid environment. |
+| `ENABLE_AUTHENTICATED_PROFILE_ROUTES` | Defaults to `false`. Staging sets `true`. Production stays `false` in this phase. Ignored when `APP_ENV` is missing or unrecognized. |
+| `ENABLE_API_DOCS` | Defaults on for `development`, `test`, and `staging`. Disabled for `production` and for invalid `APP_ENV`. |
+| `APP_ENV` | Required. Exactly `development`, `test`, `staging`, or `production`. Missing, blank, `prod`, `preview`, and misspellings fail closed. |
 
-Do not put production URLs, Firebase keys, cloud tokens, or other credentials in the frontend shell. Root `env.example` still documents historical product placeholders; those services are not wired into this Phase 1 app.
+Do not put production URLs, Firebase config values, cloud tokens, or other credentials in Git. Root `env.example` still documents historical product placeholders; those services are not wired into this app.
+
+## Firebase emulators
+
+Auth emulator: `127.0.0.1:9099`. Firestore emulator: `127.0.0.1:8088` (not 8080, which Cloud Run uses).
+
+```powershell
+npx -y firebase-tools@latest emulators:exec --only auth,firestore --project sportbeacon-ai ".\.venv\Scripts\python.exe -m pytest tests/test_firestore_emulator.py -q"
+```
 
 ## Known prototype limitations
 
-- The UI only verifies backend reachability. Insight, drill, and matchmaking APIs exist but are not driven from the shell.
-- Matchmaking is a prototype team-balancing endpoint, not a live product flow.
+- The athlete workspace authenticates with email/password and persists a private profile and basketball stats through FastAPI.
+- Matchmaking, Places, Runs, Groups, and Messaging are roadmap labels only.
 - Coach, highlight, media, and extended-schedule paths remain incomplete and are not started with the shell.
-- Historical `logs/` files were removed from Git tracking. Local copies may still exist. A Firebase web API key is not automatically a secret, but Google API key restrictions, Firebase Security Rules, and App Check should still be verified. Rotate only credentials that are actually private.
+- Historical `logs/` files were removed from Git tracking. Local copies may still exist. Do not commit Firebase config values or service-account keys.
 
 ## Deployment
 
@@ -155,7 +173,7 @@ This Vercel project deploys only the Vite frontend. FastAPI runs on separate Clo
 - Production service: `sportbeacon-api`
 - Production runtime identity: `sportbeacon-api-prod-runtime@sportbeacon-ai.iam.gserviceaccount.com`
 
-See `docs/cloud-run-deployment.md` to recreate staging or production. Production is health-only until authenticated product APIs exist.
+See `docs/cloud-run-deployment.md` to recreate staging or production. Production remains health-only in this phase. Staging may enable authenticated `/api/me` routes.
 
 Vercel Preview may set `VITE_API_BASE_URL` to the staging HTTPS origin. Vercel Production must use the production Cloud Run origin, never staging. Local development still uses `http://127.0.0.1:8000`.
 

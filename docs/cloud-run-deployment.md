@@ -18,7 +18,21 @@ Recreate the SportBeacon FastAPI **staging** and **production** services from th
 | Runtime identity | `sportbeacon-api-runtime@sportbeacon-ai.iam.gserviceaccount.com` |
 | Staging URL | `https://sportbeacon-api-staging-104921686559.us-east1.run.app` |
 
-Staging may keep local/dev product routes available for preview testing. Experimental coach, highlight, and extended-schedule routes stay disabled.
+Staging keeps unauthenticated product APIs closed even if `ENABLE_PRODUCT_ROUTES=true`. Experimental coach, highlight, and extended-schedule routes stay disabled. Phase 2B staging enables authenticated `/api/me` routes only when `APP_ENV=staging` and `ENABLE_AUTHENTICATED_PROFILE_ROUTES=true`. Missing or unrecognized `APP_ENV` values fail closed to health-only.
+
+Non-secret staging environment (also in `deploy/cloud-run-staging.env.example`):
+
+```text
+APP_ENV=staging
+ENABLE_PRODUCT_ROUTES=false
+ENABLE_AUTHENTICATED_PROFILE_ROUTES=true
+ENABLE_EXPERIMENTAL_ROUTES=false
+ENABLE_API_DOCS=false
+GOOGLE_CLOUD_PROJECT=sportbeacon-ai
+CORS_ALLOW_ORIGINS=https://sportbeacon-ai.vercel.app
+```
+
+Preview CORS continues to use the code default regex for SportBeacon Vercel git hosts. The staging runtime identity needs `roles/datastore.user` so FastAPI can persist private athlete documents. Do not grant Firestore roles to the production runtime.
 
 ## Production
 
@@ -40,7 +54,9 @@ When `APP_ENV=production`, the service is **health-only**:
 - `/docs`, `/redoc`, and `/openapi.json` are disabled.
 - Vercel preview origins are not echoed.
 - Unrelated origins are not echoed.
-- `ENABLE_PRODUCT_ROUTES=true` does not open unauthenticated product APIs. Authenticated product APIs are not implemented yet, so production stays fail closed.
+- `ENABLE_PRODUCT_ROUTES=true` does not open unauthenticated product APIs in staging or production.
+- Authenticated `/api/me` routes stay closed unless `APP_ENV` is recognized and `ENABLE_AUTHENTICATED_PROFILE_ROUTES=true`. Production keeps that flag false in this phase, so production stays health-only.
+- Missing, blank, or unrecognized `APP_ENV` values fail closed: health remains 200 and every other surface, including `/api/me` and docs, returns 404. Flags cannot reopen those surfaces.
 - `ENABLE_EXPERIMENTAL_ROUTES` remains `false`.
 
 Non-secret production environment (also in `deploy/cloud-run-production.env.example`):
@@ -126,7 +142,7 @@ gcloud run deploy sportbeacon-api-staging `
   --cpu 1 `
   --memory 1Gi `
   --port 8080 `
-  --set-env-vars "CORS_ALLOW_ORIGINS=https://sportbeacon-ai.vercel.app,ENABLE_EXPERIMENTAL_ROUTES=false"
+  --set-env-vars "APP_ENV=staging,ENABLE_AUTHENTICATED_PROFILE_ROUTES=true,ENABLE_PRODUCT_ROUTES=false,ENABLE_EXPERIMENTAL_ROUTES=false,ENABLE_API_DOCS=false,GOOGLE_CLOUD_PROJECT=sportbeacon-ai,CORS_ALLOW_ORIGINS=https://sportbeacon-ai.vercel.app"
 ```
 
 Preview CORS is the code default regex for SportBeacon Vercel git hosts:
@@ -151,7 +167,7 @@ gcloud run deploy sportbeacon-api `
   --cpu 1 `
   --memory 1Gi `
   --port 8080 `
-  --set-env-vars "APP_ENV=production,ENABLE_PRODUCT_ROUTES=false,ENABLE_EXPERIMENTAL_ROUTES=false,ENABLE_API_DOCS=false,CORS_ALLOW_ORIGINS=https://sportbeacon-ai.vercel.app,CORS_ALLOW_ORIGIN_REGEX=^$"
+  --set-env-vars "APP_ENV=production,ENABLE_PRODUCT_ROUTES=false,ENABLE_AUTHENTICATED_PROFILE_ROUTES=false,ENABLE_EXPERIMENTAL_ROUTES=false,ENABLE_API_DOCS=false,CORS_ALLOW_ORIGINS=https://sportbeacon-ai.vercel.app,CORS_ALLOW_ORIGIN_REGEX=^$"
 ```
 
 Do not set `CORS_ALLOW_ORIGINS=*`. Do not put secrets, Firebase config, or API keys in Cloud Run env for these services.

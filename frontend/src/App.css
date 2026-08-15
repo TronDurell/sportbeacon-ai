@@ -146,6 +146,47 @@ code {
   text-transform: uppercase;
 }
 
+.stack-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.stack-form label {
+  display: grid;
+  gap: 0.3rem;
+  width: 100%;
+}
+
+.stack-form input,
+.stack-form textarea,
+.stack-form select {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+}
+
+.form-message,
+.stat-list {
+  color: var(--muted);
+  margin: 0;
+}
+
+.text-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+button.linkish {
+  background: none;
+  border: 0;
+  color: var(--accent-2);
+  cursor: pointer;
+  padding: 0;
+}
+
 @media (max-width: 800px) {
   .site-header {
     flex-direction: column;

@@ -1,3 +1,7 @@
+import os
+
+os.environ.setdefault("APP_ENV", "test")
+
 from fastapi.testclient import TestClient
 
 from backend.api import app
