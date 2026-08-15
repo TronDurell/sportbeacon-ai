@@ -114,8 +114,39 @@ code {
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
+}
+
+.run-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.run-card,
+.run-detail {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.run-card h3,
+.run-detail h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.test-data-label {
+  margin: 0;
+  color: var(--accent-2);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .feature-card {
@@ -177,6 +208,16 @@ code {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
+}
+
+.text-actions button:not(.linkish) {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  background: var(--accent-2);
+  color: #08101e;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 button.linkish {

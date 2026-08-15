@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import { apiFetch, ApiError, AuthRequiredError } from "./api/client";
+import { apiFetch, ApiError, AuthRequiredError, type AuthSession } from "./api/client";
 import { fetchHealth, getApiBaseUrl, type HealthPayload } from "./api/health";
 import { AuthProvider } from "./auth/AuthProvider";
 import { useAuth } from "./auth/context";
@@ -11,11 +11,57 @@ type ConnectionState =
   | { status: "error"; message: string };
 
 const ROADMAP = [
-  { id: "runs", title: "Runs & Matches", body: "Coming later. Activities will be anchored to real Places." },
-  { id: "places", title: "Places & courts", body: "Coming later. No live court or municipal data is shown here." },
   { id: "groups", title: "Groups & messaging", body: "Coming later. Private athlete identity is the foundation first." },
   { id: "matchmaking", title: "Matchmaking", body: "Prototype engine exists, but it is not part of this athlete workspace." },
 ] as const;
+
+type PlaceSummary = {
+  id: string;
+  name: string;
+  city: string;
+  region: string;
+  country: string;
+  entranceNotes?: string | null;
+  isTestData: boolean;
+};
+
+type MyParticipation = {
+  status: "going" | "checked_in" | "completed" | "withdrawn";
+  joinedAt: string;
+  checkedInAt?: string | null;
+};
+
+type RunView = {
+  id: string;
+  sport: string;
+  title: string;
+  startsAt: string;
+  endsAt: string;
+  status: "upcoming" | "active" | "completed" | "cancelled";
+  isTestData: boolean;
+  checkInOpen: boolean;
+  place: PlaceSummary;
+  myParticipation: MyParticipation | null;
+};
+
+type HistoryItem = {
+  runId: string;
+  runTitle: string;
+  placeName: string;
+  startsAt: string;
+  status: string;
+  isTestData: boolean;
+};
+
+function formatRunTime(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 const emptyProfile = {
   displayName: "",
@@ -74,6 +120,8 @@ function AthleteWorkspace() {
         <nav aria-label="Primary">
           <a href="#status">Status</a>
           <a href="#account">Account</a>
+          <a href="#play">Play</a>
+          <a href="#history">History</a>
           <a href="#profile">Profile</a>
           <a href="#stats">Stats</a>
           <a href="#insights">Insights</a>
@@ -224,6 +272,7 @@ function SignedInPanels() {
   const statSavingRef = useRef(false);
   const [insightState, setInsightState] = useState("Insights use your persisted basketball stats.");
   const [drillState, setDrillState] = useState("Drills use your persisted profile skills.");
+  const [historyTick, setHistoryTick] = useState(0);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -375,6 +424,8 @@ function SignedInPanels() {
 
   return (
     <>
+      <PlayPanel session={session} onParticipationChange={() => setHistoryTick((value) => value + 1)} />
+      <ParticipationHistory session={session} refreshKey={historyTick} />
       <section id="profile" className="health-panel">
         <div className="health-copy">
           <h2>Private athlete profile</h2>
@@ -524,6 +575,208 @@ function SignedInPanels() {
         <p data-testid="drill-state">{drillState}</p>
       </section>
     </>
+  );
+}
+
+function PlayPanel({
+  session,
+  onParticipationChange,
+}: {
+  session: AuthSession;
+  onParticipationChange: () => void;
+}) {
+  const [runs, setRuns] = useState<RunView[]>([]);
+  const [state, setState] = useState("Looking for basketball runs…");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const joinLock = useRef(false);
+  const checkInLock = useRef(false);
+
+  const loadRuns = useCallback(async () => {
+    try {
+      const data = await apiFetch<{ items: RunView[] }>("/api/runs", session);
+      setRuns(data.items);
+      setState(
+        data.items.length
+          ? "These are SportBeacon runs, not a live municipal schedule."
+          : "No basketball runs are listed right now. SportBeacon does not invent live municipal schedules.",
+      );
+      setError("");
+    } catch (caught: unknown) {
+      if (caught instanceof AuthRequiredError) {
+        setState("Sign in required.");
+        return;
+      }
+      setError(caught instanceof Error ? caught.message : "Unable to load runs");
+    }
+  }, [session]);
+
+  useEffect(() => {
+    void loadRuns();
+  }, [loadRuns]);
+
+  function replaceRun(updated: RunView) {
+    setRuns((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+  }
+
+  async function joinRun(runId: string) {
+    if (joinLock.current) {
+      return;
+    }
+    joinLock.current = true;
+    setError("");
+    try {
+      const updated = await apiFetch<RunView>(`/api/runs/${runId}/join`, session, { method: "POST" });
+      replaceRun(updated);
+      onParticipationChange();
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Unable to join this run");
+    } finally {
+      joinLock.current = false;
+    }
+  }
+
+  async function checkIn(runId: string) {
+    if (checkInLock.current) {
+      return;
+    }
+    checkInLock.current = true;
+    setError("");
+    try {
+      const updated = await apiFetch<RunView>(`/api/runs/${runId}/check-in`, session, { method: "POST" });
+      replaceRun(updated);
+      onParticipationChange();
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Unable to check in");
+    } finally {
+      checkInLock.current = false;
+    }
+  }
+
+  const selected = runs.find((item) => item.id === selectedId) ?? null;
+
+  return (
+    <section id="play" className="health-panel">
+      <div className="health-copy">
+        <h2>Play today</h2>
+        <p>Find a basketball run, see where it is, and check in when you arrive.</p>
+      </div>
+      <p data-testid="play-state">{state}</p>
+      {error ? (
+        <p className="form-message" data-testid="play-error">
+          {error}
+        </p>
+      ) : null}
+      {runs.length === 0 ? (
+        <p data-testid="play-empty">No basketball runs are listed right now.</p>
+      ) : (
+        <ul className="run-list">
+          {runs.map((run) => (
+            <li key={run.id} className="run-card" data-testid={`run-card-${run.id}`}>
+              <div className="card-heading">
+                <h3>{run.title}</h3>
+                <span className="badge">{run.status === "active" ? "Active" : "Upcoming"}</span>
+              </div>
+              <p>
+                {run.place.name} · {run.place.city}, {run.place.region}
+              </p>
+              <p>
+                {formatRunTime(run.startsAt)} – {formatRunTime(run.endsAt)}
+              </p>
+              {run.isTestData ? <p className="test-data-label">Test data — not a live municipal listing</p> : null}
+              <p data-testid={`run-participation-${run.id}`}>
+                {run.myParticipation?.status === "checked_in"
+                  ? "Checked in"
+                  : run.myParticipation?.status === "going"
+                    ? "You're going"
+                    : "Not joined"}
+              </p>
+              <div className="text-actions">
+                <button type="button" onClick={() => setSelectedId(run.id)}>
+                  View
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {selected ? (
+        <div className="run-detail" data-testid="run-detail">
+          <h3>{selected.title}</h3>
+          <p>
+            {selected.place.name} · {selected.place.city}, {selected.place.region}
+          </p>
+          {selected.place.entranceNotes ? <p>{selected.place.entranceNotes}</p> : null}
+          <p>
+            {formatRunTime(selected.startsAt)} – {formatRunTime(selected.endsAt)}
+          </p>
+          <p>Status: {selected.status}</p>
+          {selected.myParticipation?.status === "checked_in" ? (
+            <p data-testid="checkin-complete">Checked in</p>
+          ) : (
+            <div className="text-actions">
+              {selected.myParticipation?.status === "going" ? null : (
+                <button type="button" onClick={() => void joinRun(selected.id)}>
+                  I&apos;m going
+                </button>
+              )}
+              {selected.checkInOpen ? (
+                <button type="button" onClick={() => void checkIn(selected.id)}>
+                  Check in
+                </button>
+              ) : null}
+            </div>
+          )}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function ParticipationHistory({
+  session,
+  refreshKey,
+}: {
+  session: AuthSession;
+  refreshKey: number;
+}) {
+  const [items, setItems] = useState<HistoryItem[]>([]);
+  const [state, setState] = useState("Your sports memory starts with runs you join.");
+
+  const loadHistory = useCallback(async () => {
+    try {
+      const data = await apiFetch<{ items: HistoryItem[] }>("/api/me/participation", session);
+      setItems(data.items);
+      setState(
+        data.items.length
+          ? `${data.items.length} recorded run${data.items.length === 1 ? "" : "s"}.`
+          : "No participation recorded yet.",
+      );
+    } catch (caught: unknown) {
+      setState(caught instanceof Error ? caught.message : "Unable to load participation history");
+    }
+  }, [session]);
+
+  useEffect(() => {
+    void loadHistory();
+  }, [loadHistory, refreshKey]);
+
+  return (
+    <section id="history" className="health-panel">
+      <div className="health-copy">
+        <h2>Participation history</h2>
+        <p>Runs you joined or checked into stay with your private athlete record.</p>
+      </div>
+      <p data-testid="history-state">{state}</p>
+      <ul className="stat-list">
+        {items.map((item) => (
+          <li key={item.runId} data-testid={`history-item-${item.runId}`}>
+            {item.runTitle} · {item.placeName} · {formatRunTime(item.startsAt)} · {item.status.replace("_", " ")}
+            {item.isTestData ? " · Test data" : ""}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

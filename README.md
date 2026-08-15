@@ -2,7 +2,7 @@
 
 Athlete-first tools for grassroots sports: player insights, drill planning, and prototype matchmaking.
 
-This repository is a **bootable local web application** (Vite + FastAPI) plus a tested Python AI library. Phase 2B adds Firebase email/password authentication and a private athlete workspace. It is not a finished product. Payments, public profiles, Places, Runs, Groups, Messaging, and production matchmaking remain out of scope.
+This repository is a **bootable local web application** (Vite + FastAPI) plus a tested Python AI library. Phase 3A adds a first playable sports loop: Places, Runs, join, check-in, and private participation history on top of Firebase email/password authentication. It is not a finished product. Payments, public profiles, Groups, Messaging, RecTrac, and production matchmaking remain out of scope.
 
 ## Architecture
 
@@ -10,7 +10,7 @@ This repository is a **bootable local web application** (Vite + FastAPI) plus a 
 | --- | --- | --- |
 | Frontend | `frontend/` | React 18 + TypeScript + Vite athlete workspace |
 | Backend | `backend/api.py` | FastAPI health check and authenticated `/api/me` routes |
-| Persistence | Firestore via FastAPI | Private athlete profiles and basketball stats, separated by `APP_ENV` |
+| Persistence | Firestore via FastAPI | Private athlete profiles, stats, Places, Runs, and participation, separated by `APP_ENV` |
 | AI library | `ai/` | Player insights, drill recommender, matchmaking engine |
 | Tests | `tests/` | pytest contract, engine, auth, and emulator tests |
 
@@ -18,7 +18,7 @@ The Node package in `backend/` is **legacy**. It still installs with `npm ci`, b
 
 Legacy React files under `frontend/components`, `frontend/pages`, `frontend/services`, and `frontend/hooks` are not part of the bootable app. The Vite entrypoint is `frontend/src/main.tsx`. Do not import the legacy `frontend/services/authService.ts` token design.
 
-## Project scope (Phase 2B)
+## Project scope (Phase 3A)
 
 Included:
 
@@ -26,18 +26,23 @@ Included:
 - Private athlete profile onboarding and editing
 - Manual basketball stat persistence
 - Authenticated insight generation and drill recommendations from persisted data
+- Authenticated basketball Run discovery with Place details
+- Authenticated join and check-in, persisted as one participation record per athlete and run
+- Private participation history
+- Labeled development/staging test Place and Runs (not live municipal data)
 - Live FastAPI health check with loading, connected, and error/retry states
 - Disabled roadmap labels for later modules
 - Frontend lint, type-check, unit tests, and production build
-- Python pytest suite for the AI engines, API contracts, and authenticated routes
+- Python pytest suite for the AI engines, API contracts, authenticated routes, and sports-loop behavior
 
 Not included:
 
 - Google, Apple, phone, or anonymous authentication in the product UI
-- Runs, Places, Groups, Messaging, Beacon Alerts, heat maps, or a social feed
+- Athlete-to-athlete connections, group chat, messaging, or Beacon Alerts
 - Public athlete profiles or public Firestore access
 - Payments, RecTrac, TeamSideline, Cloud Functions, Storage, or AI chat
-- Fake games, courts, people, or live municipal data
+- Maps, geofencing, continuous location, or fake live occupancy
+- Live municipal schedules presented as production data
 
 ## Python setup
 
@@ -128,7 +133,8 @@ Backend (optional):
 | `CORS_ALLOW_ORIGIN_REGEX` | Optional override. Default allows SportBeacon Vercel git preview hosts only. Production sets `^$` so preview hosts are not echoed. |
 | `ENABLE_EXPERIMENTAL_ROUTES` | Defaults to `false`. Coach, highlight, and extended-schedule routes return 404 until explicitly enabled. |
 | `ENABLE_PRODUCT_ROUTES` | Defaults on only for `development` and `test`. Cannot reopen legacy product APIs in staging, production, or an invalid environment. |
-| `ENABLE_AUTHENTICATED_PROFILE_ROUTES` | Defaults to `false`. Staging sets `true`. Production stays `false` in this phase. Ignored when `APP_ENV` is missing or unrecognized. |
+| `ENABLE_AUTHENTICATED_PROFILE_ROUTES` | Defaults to `false`. Staging sets `true`. Production stays `false` in this phase. Gates `/api/me` and the Phase 3 Play routes. Ignored when `APP_ENV` is missing or unrecognized. |
+| `ENABLE_SPORTS_LOOP_FIXTURES` | When true, FastAPI upserts labeled test Place/Run documents. Defaults on for `development` and `staging`. Always off in `production`. Test defaults off unless set. |
 | `ENABLE_API_DOCS` | Defaults on for `development`, `test`, and `staging`. Disabled for `production` and for invalid `APP_ENV`. |
 | `APP_ENV` | Required. Exactly `development`, `test`, `staging`, or `production`. Missing, blank, `prod`, `preview`, and misspellings fail closed. |
 
@@ -144,8 +150,9 @@ npx -y firebase-tools@latest emulators:exec --only auth,firestore --project spor
 
 ## Known prototype limitations
 
-- The athlete workspace authenticates with email/password and persists a private profile and basketball stats through FastAPI.
-- Matchmaking, Places, Runs, Groups, and Messaging are roadmap labels only.
+- The athlete workspace authenticates with email/password and persists a private profile, basketball stats, and Run participation through FastAPI.
+- Play Today uses labeled test Place/Run fixtures in development and staging. Those are not live municipal listings.
+- Groups, Messaging, athlete connections, and Matchmaking remain roadmap work. See `docs/phase-3-core-sports-loop.md` and `docs/phase-3b-athlete-connection.md`.
 - Coach, highlight, media, and extended-schedule paths remain incomplete and are not started with the shell.
 - Historical `logs/` files were removed from Git tracking. Local copies may still exist. Do not commit Firebase config values or service-account keys.
 
