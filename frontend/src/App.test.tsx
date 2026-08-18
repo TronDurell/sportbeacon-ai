@@ -80,14 +80,55 @@ async function fillBasketballStatForm(points = "8") {
   await userEvent.type(screen.getByLabelText("3P%"), "33");
 }
 
+function playEndpoints(
+  url: string,
+  method: string,
+  options?: {
+    runs?: Array<Record<string, unknown>>;
+    history?: Array<Record<string, unknown>>;
+    onJoin?: (runId: string) => Response | Promise<Response>;
+    onCheckIn?: (runId: string) => Response | Promise<Response>;
+  },
+): Response | Promise<Response> | null {
+  if (url.endsWith("/api/runs") && method === "GET") {
+    return jsonResponse({ items: options?.runs ?? [] });
+  }
+  if (url.endsWith("/api/me/participation") && method === "GET") {
+    return jsonResponse({ items: options?.history ?? [] });
+  }
+  const joinMatch = url.match(/\/api\/runs\/([^/]+)\/join$/);
+  if (joinMatch && method === "POST") {
+    if (options?.onJoin) {
+      return options.onJoin(joinMatch[1]);
+    }
+    return jsonResponse({ detail: "Not Found" }, 404);
+  }
+  const checkInMatch = url.match(/\/api\/runs\/([^/]+)\/check-in$/);
+  if (checkInMatch && method === "POST") {
+    if (options?.onCheckIn) {
+      return options.onCheckIn(checkInMatch[1]);
+    }
+    return jsonResponse({ detail: "Not Found" }, 404);
+  }
+  return null;
+}
+
 function workspaceFetch(options?: {
   onPostStat?: (init?: RequestInit) => Promise<Response> | Response;
   stats?: Array<{ statId: string; points: number; occurredAt: string }>;
+  runs?: Array<Record<string, unknown>>;
+  history?: Array<Record<string, unknown>>;
+  onJoin?: (runId: string) => Response | Promise<Response>;
+  onCheckIn?: (runId: string) => Response | Promise<Response>;
 }) {
   const stats = options?.stats ?? [];
   return vi.fn().mockImplementation(async (input: RequestInfo, init?: RequestInit) => {
     const url = String(input);
     const method = init?.method || "GET";
+    const play = playEndpoints(url, method, options);
+    if (play) {
+      return play;
+    }
     if (url.endsWith("/api/health")) {
       return healthOk();
     }
@@ -156,8 +197,13 @@ describe("SportBeaconAI athlete workspace", () => {
   it("transitions from signed-out to signed-in after sign-up", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation(async (input: RequestInfo) => {
+      vi.fn().mockImplementation(async (input: RequestInfo, init?: RequestInit) => {
         const url = String(input);
+        const method = init?.method || "GET";
+        const play = playEndpoints(url, method);
+        if (play) {
+          return play;
+        }
         if (url.endsWith("/api/health")) {
           return healthOk();
         }
@@ -183,8 +229,13 @@ describe("SportBeaconAI athlete workspace", () => {
     const { signOut } = await import("firebase/auth");
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation(async (input: RequestInfo) => {
+      vi.fn().mockImplementation(async (input: RequestInfo, init?: RequestInit) => {
         const url = String(input);
+        const method = init?.method || "GET";
+        const play = playEndpoints(url, method);
+        if (play) {
+          return play;
+        }
         if (url.endsWith("/api/health")) {
           return healthOk();
         }
@@ -269,6 +320,10 @@ describe("SportBeaconAI athlete workspace", () => {
     const fetchMock = vi.fn().mockImplementation(async (input: RequestInfo, init?: RequestInit) => {
       const url = String(input);
       const method = init?.method || "GET";
+      const play = playEndpoints(url, method);
+      if (play) {
+        return play;
+      }
       if (url.endsWith("/api/health")) {
         return healthOk();
       }
@@ -340,6 +395,10 @@ describe("SportBeaconAI athlete workspace", () => {
       vi.fn().mockImplementation(async (input: RequestInfo, init?: RequestInit) => {
         const url = String(input);
         const method = init?.method || "GET";
+        const play = playEndpoints(url, method);
+        if (play) {
+          return play;
+        }
         if (url.endsWith("/api/health")) {
           return healthOk();
         }
@@ -449,4 +508,188 @@ describe("SportBeaconAI athlete workspace", () => {
     expect(screen.getByLabelText("Points")).toHaveValue(8);
     expect(screen.getByLabelText("Played at")).toHaveValue("2024-04-01T20:00");
   });
+
+  it("renders active and upcoming runs with their places", async () => {
+    const fetchMock = workspaceFetch({ runs: sampleRuns() });
+    vi.stubGlobal("fetch", fetchMock);
+    await signInToWorkspace();
+    expect(await screen.findByTestId("run-card-test-run-basketball-active")).toHaveTextContent("TEST DATA — Lunch pickup run");
+    expect(screen.getByTestId("run-card-test-run-basketball-active")).toHaveTextContent("TEST DATA — Richmond Rec Gym");
+    expect(screen.getByTestId("run-card-test-run-basketball-active")).toHaveTextContent("Active");
+    expect(screen.getByTestId("run-card-test-run-basketball-upcoming")).toHaveTextContent("TEST DATA — Evening open gym");
+    expect(screen.getByTestId("run-card-test-run-basketball-upcoming")).toHaveTextContent("Upcoming");
+    expect(screen.getAllByText(/not a live municipal listing/i).length).toBeGreaterThan(0);
+  });
+
+  it("shows an intentional empty Play state", async () => {
+    vi.stubGlobal("fetch", workspaceFetch({ runs: [] }));
+    await signInToWorkspace();
+    expect(await screen.findByTestId("play-empty")).toHaveTextContent("No basketball runs are listed right now.");
+    expect(screen.getByTestId("play-state")).toHaveTextContent("does not invent live municipal schedules");
+  });
+
+  it("joins a run once and keeps the state after remount", async () => {
+    const runs = sampleRuns();
+    const history: Array<Record<string, unknown>> = [];
+    const fetchMock = workspaceFetch({
+      runs,
+      history,
+      onJoin: (runId) => {
+        const run = runs.find((item) => item.id === runId);
+        if (!run) {
+          return jsonResponse({ detail: "Run not found" }, 404);
+        }
+        run.myParticipation = { status: "going", joinedAt: "2026-08-15T18:00:00Z" };
+        history.splice(0, history.length, {
+          runId,
+          runTitle: run.title,
+          placeName: run.place.name,
+          startsAt: run.startsAt,
+          status: "going",
+          isTestData: true,
+        });
+        return jsonResponse(run);
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { unmount } = render(<App />);
+    await userEvent.type(screen.getByLabelText("Email"), "ada@example.com");
+    await userEvent.type(screen.getByLabelText("Password"), "secret1");
+    await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    expect(await screen.findByText("TEST DATA — Evening open gym")).toBeInTheDocument();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[1]);
+    await userEvent.click(screen.getByRole("button", { name: "I'm going" }));
+    expect(await screen.findByText("You're going")).toBeInTheDocument();
+    const joinCalls = fetchMock.mock.calls.filter(
+      ([url, init]) => String(url).endsWith("/join") && (init as RequestInit | undefined)?.method === "POST",
+    );
+    expect(joinCalls).toHaveLength(1);
+    unmount();
+    render(<App />);
+    expect(await screen.findByText("You're going")).toBeInTheDocument();
+    expect(await screen.findByTestId("history-item-test-run-basketball-upcoming")).toHaveTextContent("going");
+  });
+
+  it("ignores a second I'm going click while join is in flight", async () => {
+    const runs = sampleRuns();
+    let releaseJoin: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      releaseJoin = resolve;
+    });
+    const fetchMock = workspaceFetch({
+      runs,
+      onJoin: async (runId) => {
+        await gate;
+        const run = runs.find((item) => item.id === runId)!;
+        run.myParticipation = { status: "going", joinedAt: "2026-08-15T18:00:00Z" };
+        return jsonResponse(run);
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[1]);
+    const joinButton = screen.getByRole("button", { name: "I'm going" });
+    await userEvent.click(joinButton);
+    await userEvent.click(joinButton);
+    releaseJoin();
+    expect(await screen.findByText("You're going")).toBeInTheDocument();
+    const joinCalls = fetchMock.mock.calls.filter(
+      ([url, init]) => String(url).endsWith("/join") && (init as RequestInit | undefined)?.method === "POST",
+    );
+    expect(joinCalls).toHaveLength(1);
+  });
+
+  it("checks in once when eligible and guards a repeated click", async () => {
+    const runs = sampleRuns();
+    runs[0].myParticipation = { status: "going", joinedAt: "2026-08-15T17:30:00Z" };
+    let releaseCheckIn: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      releaseCheckIn = resolve;
+    });
+    const fetchMock = workspaceFetch({
+      runs,
+      onCheckIn: async (runId) => {
+        await gate;
+        const run = runs.find((item) => item.id === runId)!;
+        run.myParticipation = {
+          status: "checked_in",
+          joinedAt: "2026-08-15T17:30:00Z",
+          checkedInAt: "2026-08-15T18:01:00Z",
+        };
+        return jsonResponse(run);
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[0]);
+    const checkInButton = screen.getByRole("button", { name: "Check in" });
+    await userEvent.click(checkInButton);
+    await userEvent.click(checkInButton);
+    releaseCheckIn();
+    expect(await screen.findByTestId("checkin-complete")).toHaveTextContent("Checked in");
+    expect(screen.queryByRole("button", { name: "Check in" })).not.toBeInTheDocument();
+    const checkInCalls = fetchMock.mock.calls.filter(
+      ([url, init]) => String(url).endsWith("/check-in") && (init as RequestInit | undefined)?.method === "POST",
+    );
+    expect(checkInCalls).toHaveLength(1);
+  });
+
+  it("does not show Check in before the window and shows a safe join error", async () => {
+    const runs = sampleRuns();
+    const fetchMock = workspaceFetch({
+      runs,
+      onJoin: () => jsonResponse({ detail: "This run is not open to join" }, 409),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[1]);
+    expect(screen.queryByRole("button", { name: "Check in" })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "I'm going" }));
+    expect(await screen.findByTestId("play-error")).toHaveTextContent("This run is not open to join");
+    expect(screen.queryByText(/traceback/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/firestore/i)).not.toBeInTheDocument();
+  });
 });
+
+function sampleRuns() {
+  return [
+    {
+      id: "test-run-basketball-active",
+      sport: "basketball",
+      title: "TEST DATA — Lunch pickup run",
+      startsAt: "2026-08-15T17:15:00Z",
+      endsAt: "2026-08-15T19:15:00Z",
+      status: "active",
+      isTestData: true,
+      checkInOpen: true,
+      place: {
+        id: "test-place-richmond-rec-gym",
+        name: "TEST DATA — Richmond Rec Gym",
+        city: "Richmond",
+        region: "VA",
+        country: "US",
+        isTestData: true,
+      },
+      myParticipation: null as { status: string; joinedAt: string; checkedInAt?: string } | null,
+    },
+    {
+      id: "test-run-basketball-upcoming",
+      sport: "basketball",
+      title: "TEST DATA — Evening open gym",
+      startsAt: "2026-08-15T21:00:00Z",
+      endsAt: "2026-08-15T23:00:00Z",
+      status: "upcoming",
+      isTestData: true,
+      checkInOpen: false,
+      place: {
+        id: "test-place-richmond-rec-gym",
+        name: "TEST DATA — Richmond Rec Gym",
+        city: "Richmond",
+        region: "VA",
+        country: "US",
+        isTestData: true,
+      },
+      myParticipation: null as { status: string; joinedAt: string; checkedInAt?: string } | null,
+    },
+  ];
+}

@@ -4,6 +4,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from typing import Any, Dict, List, Optional
+import re
 from .models import (
     API_VERSION,
     SERVICE_NAME,
@@ -27,6 +28,7 @@ from .matchmaking_service import MatchmakingService
 from .drill_service import DrillService
 from .runtime_env import env_flag, parse_app_env
 from .me_routes import me_router
+from .sports_loop_routes import sports_router
 import os
 from datetime import datetime
 
@@ -119,7 +121,14 @@ AUTHENTICATED_PROFILE_ROUTES = {
     ("GET", "/api/me/stats"),
     ("POST", "/api/me/insights"),
     ("POST", "/api/me/drills/recommend"),
+    ("GET", "/api/me/participation"),
 }
+
+_RUN_ID = r"[A-Za-z0-9_-]{8,80}"
+_SPORTS_LOOP_GET_RUNS = re.compile(r"^/api/runs$")
+_SPORTS_LOOP_GET_RUN = re.compile(rf"^/api/runs/{_RUN_ID}$")
+_SPORTS_LOOP_JOIN = re.compile(rf"^/api/runs/{_RUN_ID}/join$")
+_SPORTS_LOOP_CHECK_IN = re.compile(rf"^/api/runs/{_RUN_ID}/check-in$")
 
 
 def is_authenticated_profile_request(method: str, path: str) -> bool:
@@ -128,6 +137,27 @@ def is_authenticated_profile_request(method: str, path: str) -> bool:
     if method == "OPTIONS":
         return any(candidate == normalized for _, candidate in AUTHENTICATED_PROFILE_ROUTES)
     return (method, normalized) in AUTHENTICATED_PROFILE_ROUTES
+
+
+def is_authenticated_sports_loop_request(method: str, path: str) -> bool:
+    """Allowlisted Place/Run participation routes. Invalid run ids fail closed to 404."""
+    normalized = path.rstrip("/") or "/"
+    method = method.upper()
+    if method in {"GET", "OPTIONS"} and (
+        _SPORTS_LOOP_GET_RUNS.fullmatch(normalized) or _SPORTS_LOOP_GET_RUN.fullmatch(normalized)
+    ):
+        return True
+    if method in {"POST", "OPTIONS"} and (
+        _SPORTS_LOOP_JOIN.fullmatch(normalized) or _SPORTS_LOOP_CHECK_IN.fullmatch(normalized)
+    ):
+        return True
+    return False
+
+
+def is_authenticated_athlete_request(method: str, path: str) -> bool:
+    return is_authenticated_profile_request(method, path) or is_authenticated_sports_loop_request(
+        method, path
+    )
 
 
 class RouteGateMiddleware(BaseHTTPMiddleware):
@@ -143,7 +173,7 @@ class RouteGateMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         if product_routes_enabled():
             return await call_next(request)
-        if authenticated_profile_routes_enabled() and is_authenticated_profile_request(method, path):
+        if authenticated_profile_routes_enabled() and is_authenticated_athlete_request(method, path):
             return await call_next(request)
         return JSONResponse({"detail": PRODUCT_ROUTE_DETAIL}, status_code=404)
 
@@ -382,6 +412,7 @@ def create_app() -> FastAPI:
     application.add_middleware(RouteGateMiddleware)
     application.include_router(router)
     application.include_router(me_router)
+    application.include_router(sports_router)
     application.state.insight_service = insight_service
     application.state.drill_service = drill_service
     return application

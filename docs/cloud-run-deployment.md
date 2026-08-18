@@ -18,7 +18,7 @@ Recreate the SportBeacon FastAPI **staging** and **production** services from th
 | Runtime identity | `sportbeacon-api-runtime@sportbeacon-ai.iam.gserviceaccount.com` |
 | Staging URL | `https://sportbeacon-api-staging-104921686559.us-east1.run.app` |
 
-Staging keeps unauthenticated product APIs closed even if `ENABLE_PRODUCT_ROUTES=true`. Experimental coach, highlight, and extended-schedule routes stay disabled. Phase 2B staging enables authenticated `/api/me` routes only when `APP_ENV=staging` and `ENABLE_AUTHENTICATED_PROFILE_ROUTES=true`. Missing or unrecognized `APP_ENV` values fail closed to health-only.
+Staging keeps unauthenticated product APIs closed even if `ENABLE_PRODUCT_ROUTES=true`. Experimental coach, highlight, and extended-schedule routes stay disabled. Phase 3A staging enables authenticated `/api/me` and Play routes (`/api/runs`, join, check-in, participation history) when `APP_ENV=staging` and `ENABLE_AUTHENTICATED_PROFILE_ROUTES=true`. Labeled test Place/Run fixtures default on in staging. Missing or unrecognized `APP_ENV` values fail closed to health-only.
 
 Non-secret staging environment (also in `deploy/cloud-run-staging.env.example`):
 
