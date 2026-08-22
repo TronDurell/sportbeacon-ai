@@ -29,6 +29,7 @@ from .drill_service import DrillService
 from .runtime_env import env_flag, parse_app_env
 from .me_routes import me_router
 from .sports_loop_routes import sports_router
+from .connections_routes import connections_router
 import os
 from datetime import datetime
 
@@ -59,6 +60,18 @@ def authenticated_profile_routes_enabled() -> bool:
     if parse_app_env() is None:
         return False
     return env_flag("ENABLE_AUTHENTICATED_PROFILE_ROUTES") is True
+
+
+def athlete_connection_routes_enabled() -> bool:
+    """Phase 3B needs its own explicit opt-in on top of the athlete gate.
+
+    Enabling the Phase 2B/3A athlete surface must never silently publish the social
+    surface with it, so `ENABLE_ATHLETE_CONNECTIONS` has to be set to true rather
+    than merely left unset.
+    """
+    if not authenticated_profile_routes_enabled():
+        return False
+    return env_flag("ENABLE_ATHLETE_CONNECTIONS") is True
 
 
 def product_routes_enabled() -> bool:
@@ -125,10 +138,20 @@ AUTHENTICATED_PROFILE_ROUTES = {
 }
 
 _RUN_ID = r"[A-Za-z0-9_-]{8,80}"
+_CONNECTION_ID = r"[a-f0-9]{32}"
 _SPORTS_LOOP_GET_RUNS = re.compile(r"^/api/runs$")
 _SPORTS_LOOP_GET_RUN = re.compile(rf"^/api/runs/{_RUN_ID}$")
 _SPORTS_LOOP_JOIN = re.compile(rf"^/api/runs/{_RUN_ID}/join$")
 _SPORTS_LOOP_CHECK_IN = re.compile(rf"^/api/runs/{_RUN_ID}/check-in$")
+
+_CONNECTION_CONSENT = re.compile(rf"^/api/runs/{_RUN_ID}/me/connection-consent$")
+_CONNECTION_CO_PLAYERS = re.compile(rf"^/api/runs/{_RUN_ID}/co-players$")
+_CONNECTION_REQUESTS = re.compile(rf"^/api/runs/{_RUN_ID}/connection-requests$")
+_CONNECTION_LIST = re.compile(r"^/api/me/connections$")
+_CONNECTION_TRANSITION = re.compile(
+    rf"^/api/me/connections/{_CONNECTION_ID}/(?:accept|decline|remove|block)$"
+)
+_SAFETY_REPORTS = re.compile(r"^/api/me/safety-reports$")
 
 
 def is_authenticated_profile_request(method: str, path: str) -> bool:
@@ -154,6 +177,25 @@ def is_authenticated_sports_loop_request(method: str, path: str) -> bool:
     return False
 
 
+def is_authenticated_connection_request(method: str, path: str) -> bool:
+    """Allowlisted Phase 3B connection routes. Unknown shapes fail closed to 404."""
+    normalized = path.rstrip("/") or "/"
+    method = method.upper()
+    if method in {"PUT", "OPTIONS"} and _CONNECTION_CONSENT.fullmatch(normalized):
+        return True
+    if method in {"GET", "OPTIONS"} and (
+        _CONNECTION_CO_PLAYERS.fullmatch(normalized) or _CONNECTION_LIST.fullmatch(normalized)
+    ):
+        return True
+    if method in {"POST", "OPTIONS"} and (
+        _CONNECTION_REQUESTS.fullmatch(normalized)
+        or _CONNECTION_TRANSITION.fullmatch(normalized)
+        or _SAFETY_REPORTS.fullmatch(normalized)
+    ):
+        return True
+    return False
+
+
 def is_authenticated_athlete_request(method: str, path: str) -> bool:
     return is_authenticated_profile_request(method, path) or is_authenticated_sports_loop_request(
         method, path
@@ -173,6 +215,10 @@ class RouteGateMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         if product_routes_enabled():
             return await call_next(request)
+        if is_authenticated_connection_request(method, path):
+            if athlete_connection_routes_enabled():
+                return await call_next(request)
+            return JSONResponse({"detail": PRODUCT_ROUTE_DETAIL}, status_code=404)
         if authenticated_profile_routes_enabled() and is_authenticated_athlete_request(method, path):
             return await call_next(request)
         return JSONResponse({"detail": PRODUCT_ROUTE_DETAIL}, status_code=404)
@@ -413,6 +459,7 @@ def create_app() -> FastAPI:
     application.include_router(router)
     application.include_router(me_router)
     application.include_router(sports_router)
+    application.include_router(connections_router)
     application.state.insight_service = insight_service
     application.state.drill_service = drill_service
     return application
