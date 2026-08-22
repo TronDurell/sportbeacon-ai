@@ -84,6 +84,12 @@ const VISIBILITY_CHOICES: Array<{
 const PRIVACY_NOTE =
   "SportBeacon never shares your email, phone number, exact location, or home area. Only athletes who checked into this same run can ever see you here.";
 
+const DECLINE_NOTE =
+  "Declining ends this request. That athlete can ask once more only after you both check into a later run together. Blocking is permanent and cannot be undone.";
+
+const REMOVE_NOTE =
+  "Removing ends the connection for both athletes. Neither of you can send a new request until you both check into a later run together. Blocking is permanent and cannot be undone.";
+
 /** Never trust the shape of a response body: a stale backend must not blank the app. */
 function asList<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
@@ -121,6 +127,33 @@ function stateLabel(state: CoPlayerConnectionState): string {
       return "Connection removed";
     default:
       return "Not connected";
+  }
+}
+
+const ENDED_STATES: CoPlayerConnectionState[] = ["declined", "removed"];
+
+/** A request here would reopen an earlier connection the two athletes already ended. */
+function isReconnect(item: CoPlayer): boolean {
+  return item.canRequest && ENDED_STATES.includes(item.connectionState);
+}
+
+/**
+ * Why this athlete cannot be asked right now.
+ *
+ * The server decides; this only puts the decision in plain language. A declined or
+ * removed athlete is never described as reconnectable until the server says so,
+ * because playing the same run again is what earns a new request.
+ */
+function unavailableReason(item: CoPlayer): string {
+  switch (item.connectionState) {
+    case "declined":
+      return `${item.displayName} declined your last request. You can ask once more only after you both check into a later run together.`;
+    case "removed":
+      return `Your connection with ${item.displayName} ended. You can ask again only after you both check into a later run together.`;
+    case "none":
+      return `${item.displayName} is visible but not open to requests.`;
+    default:
+      return stateLabel(item.connectionState);
   }
 }
 
@@ -239,21 +272,27 @@ export function RunConnectionPanel({
               {item.isTestData ? (
                 <p className="test-data-label">Test data — staging fixture athlete</p>
               ) : null}
+              {isReconnect(item) ? (
+                <p className="choice-description" data-testid={`reconnect-note-${item.candidateId}`}>
+                  You played this run together after your last connection ended, so you can send
+                  one new request. {item.displayName} still chooses whether to accept.
+                </p>
+              ) : null}
               <div className="text-actions">
                 {item.canRequest ? (
                   <button
                     type="button"
                     onClick={() => void sendRequest(item)}
-                    aria-label={`Send a connection request to ${item.displayName}`}
+                    aria-label={
+                      isReconnect(item)
+                        ? `Send a new connection request to ${item.displayName} after playing together again`
+                        : `Send a connection request to ${item.displayName}`
+                    }
                   >
-                    Connect
+                    {isReconnect(item) ? "Reconnect" : "Connect"}
                   </button>
                 ) : (
-                  <span className="choice-description">
-                    {item.connectionState === "none"
-                      ? `${item.displayName} is visible but not open to requests.`
-                      : stateLabel(item.connectionState)}
-                  </span>
+                  <span className="choice-description">{unavailableReason(item)}</span>
                 )}
               </div>
               <SafetyReportForm
@@ -338,6 +377,7 @@ export function ConnectionsPanel({
       <ConnectionGroup
         heading="Incoming requests"
         testId="connections-incoming"
+        note={DECLINE_NOTE}
         items={lists.incoming}
         emptyLabel="No incoming requests."
         renderActions={(item) => (
@@ -386,6 +426,7 @@ export function ConnectionsPanel({
       <ConnectionGroup
         heading="Connected athletes"
         testId="connections-accepted"
+        note={REMOVE_NOTE}
         items={lists.accepted}
         emptyLabel="No accepted connections yet."
         renderActions={(item) => (
@@ -415,6 +456,7 @@ export function ConnectionsPanel({
 function ConnectionGroup({
   heading,
   testId,
+  note,
   items,
   emptyLabel,
   renderActions,
@@ -422,6 +464,7 @@ function ConnectionGroup({
 }: {
   heading: string;
   testId: string;
+  note?: string;
   items: Connection[];
   emptyLabel: string;
   renderActions: (item: Connection) => JSX.Element;
@@ -430,6 +473,7 @@ function ConnectionGroup({
   return (
     <div className="connection-group" data-testid={testId}>
       <h3>{heading}</h3>
+      {note ? <p className="choice-description">{note}</p> : null}
       {items.length === 0 ? (
         <p className="form-message">{emptyLabel}</p>
       ) : (
