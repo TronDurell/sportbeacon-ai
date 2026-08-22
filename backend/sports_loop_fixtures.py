@@ -7,6 +7,13 @@ from .sports_loop_repository import SportsLoopRepository
 
 PLACE_ID = "test-place-richmond-rec-gym"
 ACTIVE_RUN_ID = "test-run-basketball-active"
+# Two further check-in-open sessions at the same place. Reconnecting after a decline
+# or a removal requires a *later* run both athletes checked into, so a two-account
+# acceptance run needs more than one open session to exercise the lifecycle without
+# hand-editing Firestore. They are ordinary labeled TEST DATA runs: no athlete is
+# invented, nobody is auto-joined, and consent still starts hidden on each of them.
+SECOND_ACTIVE_RUN_ID = "test-run-basketball-active-second"
+THIRD_ACTIVE_RUN_ID = "test-run-basketball-active-third"
 UPCOMING_RUN_ID = "test-run-basketball-upcoming"
 COMPLETED_RUN_ID = "test-run-basketball-completed"
 CANCELLED_RUN_ID = "test-run-basketball-cancelled"
@@ -40,6 +47,34 @@ def build_test_runs(now: datetime, place_id: str = PLACE_ID) -> list[Run]:
             title="TEST DATA — Lunch pickup run",
             startsAt=stamp - timedelta(minutes=45),
             endsAt=stamp + timedelta(minutes=75),
+            status="scheduled",
+            createdBy=FIXTURE_CREATED_BY,
+            visibility="authenticated",
+            isTestData=True,
+            createdAt=stamp,
+            updatedAt=stamp,
+        ),
+        Run(
+            id=SECOND_ACTIVE_RUN_ID,
+            sport="basketball",
+            placeId=place_id,
+            title="TEST DATA — Second pickup run (later session)",
+            startsAt=stamp - timedelta(minutes=30),
+            endsAt=stamp + timedelta(minutes=90),
+            status="scheduled",
+            createdBy=FIXTURE_CREATED_BY,
+            visibility="authenticated",
+            isTestData=True,
+            createdAt=stamp,
+            updatedAt=stamp,
+        ),
+        Run(
+            id=THIRD_ACTIVE_RUN_ID,
+            sport="basketball",
+            placeId=place_id,
+            title="TEST DATA — Third pickup run (latest session)",
+            startsAt=stamp - timedelta(minutes=15),
+            endsAt=stamp + timedelta(minutes=105),
             status="scheduled",
             createdBy=FIXTURE_CREATED_BY,
             visibility="authenticated",
