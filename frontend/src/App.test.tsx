@@ -1077,6 +1077,139 @@ describe("Phase 3B athlete connections", () => {
     expect(screen.queryByTestId("connection-conn-12")).not.toBeInTheDocument();
   });
 
+  it("offers a reconnect request only after the athletes played together again", async () => {
+    const runs = checkedInRuns();
+    const requested: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs,
+        coPlayers: {
+          myVisibility: "open_to_connect",
+          discoverable: true,
+          items: [
+            sampleCoPlayer({
+              candidateId: "cand-removed-1",
+              displayName: "Blake",
+              connectionState: "removed",
+              canRequest: true,
+            }),
+          ],
+        },
+        onConnectionRequest: (candidateId) => {
+          requested.push(candidateId);
+          return jsonResponse({
+            connectionId: "conn-20",
+            displayName: "Blake",
+            status: "pending",
+            direction: "outgoing",
+            runId: runs[0].id,
+            placeId: "test-place-richmond-rec-gym",
+            isTestData: true,
+          });
+        },
+      }),
+    );
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[0]);
+    const card = await screen.findByTestId("co-player-cand-removed-1");
+    expect(within(card).getByTestId("reconnect-note-cand-removed-1")).toHaveTextContent(
+      "You played this run together after your last connection ended, so you can send one new request.",
+    );
+    await userEvent.click(
+      within(card).getByRole("button", {
+        name: "Send a new connection request to Blake after playing together again",
+      }),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("co-player-state")).toHaveTextContent(
+        "Connection request sent to Blake.",
+      );
+    });
+    expect(requested).toEqual(["cand-removed-1"]);
+  });
+
+  it("does not offer reconnection on the run the connection already ended on", async () => {
+    const runs = checkedInRuns();
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs,
+        coPlayers: {
+          myVisibility: "open_to_connect",
+          discoverable: true,
+          items: [
+            sampleCoPlayer({
+              candidateId: "cand-removed-2",
+              displayName: "Blake",
+              connectionState: "removed",
+              canRequest: false,
+            }),
+            sampleCoPlayer({
+              candidateId: "cand-declined-3",
+              displayName: "Casey",
+              connectionState: "declined",
+              canRequest: false,
+            }),
+          ],
+        },
+      }),
+    );
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[0]);
+    const removed = await screen.findByTestId("co-player-cand-removed-2");
+    expect(removed).toHaveTextContent(
+      "Your connection with Blake ended. You can ask again only after you both check into a later run together.",
+    );
+    const declined = screen.getByTestId("co-player-cand-declined-3");
+    expect(declined).toHaveTextContent(
+      "Casey declined your last request. You can ask once more only after you both check into a later run together.",
+    );
+    expect(screen.queryByRole("button", { name: /connection request/i })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("reconnect-note-cand-removed-2")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("reconnect-note-cand-declined-3")).not.toBeInTheDocument();
+  });
+
+  it("separates a reversible removal from a permanent block", async () => {
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs: sampleRuns(),
+        connections: {
+          incoming: [sampleConnection({ connectionId: "conn-21", displayName: "Casey" })],
+          outgoing: [],
+          accepted: [
+            sampleConnection({
+              connectionId: "conn-22",
+              displayName: "Blake",
+              status: "accepted",
+              direction: "mutual",
+            }),
+          ],
+        },
+      }),
+    );
+    await signInToWorkspace();
+    const acceptedGroup = await screen.findByTestId("connections-accepted");
+    expect(acceptedGroup).toHaveTextContent(
+      "Removing ends the connection for both athletes. Neither of you can send a new request until you both check into a later run together. Blocking is permanent and cannot be undone.",
+    );
+    const incomingGroup = screen.getByTestId("connections-incoming");
+    expect(incomingGroup).toHaveTextContent(
+      "Declining ends this request. That athlete can ask once more only after you both check into a later run together. Blocking is permanent and cannot be undone.",
+    );
+    expect(
+      within(acceptedGroup).getByRole("button", { name: "Remove your connection with Blake" }),
+    ).toBeInTheDocument();
+    expect(
+      within(acceptedGroup).getByRole("button", { name: "Block Blake" }),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(
+      /can (reconnect|connect again|send a new request) (right away|immediately|now)/i,
+    );
+    expect(document.body.textContent).not.toMatch(/unblock/i);
+  });
+
   it("confirms a safety report without echoing the stored report", async () => {
     const accepted = sampleConnection({
       connectionId: "conn-13",

@@ -29,6 +29,8 @@ from backend.connection_service import AthleteConnectionService
 from backend.sports_loop_fixtures import (
     ACTIVE_RUN_ID,
     PLACE_ID,
+    SECOND_ACTIVE_RUN_ID,
+    THIRD_ACTIVE_RUN_ID,
     UPCOMING_RUN_ID,
     ensure_sports_loop_fixtures,
 )
@@ -77,6 +79,26 @@ class FakeVerifier:
         return uid
 
 
+class MovingClock:
+    """Server clock the tests advance explicitly.
+
+    Reconnecting after a decline or a removal is gated on check-in evidence
+    recorded *after* that ending, so a frozen clock cannot express the sequence
+    at all. Advancing it also lets a test prove that a same-instant check-in is
+    not "later".
+    """
+
+    def __init__(self, start: datetime) -> None:
+        self.now = start
+
+    def __call__(self) -> datetime:
+        return self.now
+
+    def advance(self, **delta: int) -> datetime:
+        self.now = self.now + timedelta(**delta)
+        return self.now
+
+
 def _auth(token: str = "header.user-a.sig") -> Dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
@@ -97,7 +119,7 @@ def _app_client(monkeypatch, extra=None, now=NOW):
     app.state.athlete_repository = athletes
     app.state.sports_loop_repository = sports
     app.state.connection_repository = connections
-    app.state.sports_loop_clock = lambda: now
+    app.state.sports_loop_clock = MovingClock(now)
     ensure_sports_loop_fixtures(sports, now)
     sports.upsert_run(
         Run(
@@ -143,6 +165,10 @@ def _gate_client(monkeypatch, env: Dict[str, Optional[str]]) -> TestClient:
     app.state.sports_loop_repository = InMemorySportsLoopRepository()
     app.state.connection_repository = InMemoryConnectionRepository()
     return TestClient(app)
+
+
+def _clock(client: TestClient) -> MovingClock:
+    return client.app.state.sports_loop_clock
 
 
 def _check_in(client: TestClient, token: str, run_id: str = ACTIVE_RUN_ID) -> None:
@@ -698,7 +724,7 @@ def test_both_athletes_see_the_accepted_connection(monkeypatch):
     assert listing["canRequest"] is False
 
 
-def test_only_the_recipient_can_decline_and_decline_is_terminal(monkeypatch):
+def test_only_the_recipient_can_decline_and_the_same_run_cannot_retry(monkeypatch):
     client, _, _, _ = _app_client(monkeypatch)
     candidates = _open_pair(client)
     connection_id = _request(client, "header.user-a.sig", candidates["b_candidate"]).json()[
@@ -859,6 +885,543 @@ def test_blocking_twice_is_safe_and_no_unblock_route_exists(monkeypatch):
             f"/api/me/connections/{connection_id}/{path}", headers=_auth("header.user-b.sig")
         )
         assert response.status_code == 404
+
+
+# ------------------------------------------------ reconnection after later play
+
+
+def _connect_and_accept(client: TestClient, run_id: str = ACTIVE_RUN_ID) -> str:
+    """The accepted state the two-account checklist reaches before a removal."""
+    candidates = _open_pair(client, run_id)
+    connection_id = _request(
+        client, "header.user-a.sig", candidates["b_candidate"], run_id
+    ).json()["connectionId"]
+    accepted = client.post(
+        f"/api/me/connections/{connection_id}/accept", headers=_auth("header.user-b.sig")
+    )
+    assert accepted.status_code == 200, accepted.text
+    return connection_id
+
+
+def _seed_participation_without_check_in(
+    sports: InMemorySportsLoopRepository, run_id: str, uid: str
+) -> None:
+    """A completed record carrying no server check-in stamp.
+
+    Eligible to be seen, but no proof of *when* the athlete played, so it can
+    never satisfy the later-shared-play gate.
+    """
+    run = sports.get_run(run_id)
+    place = sports.get_place(run.placeId)
+    sports.commit_join(
+        Participation(
+            uid=uid,
+            runId=run_id,
+            status="completed",
+            joinedAt=run.startsAt,
+            checkedInAt=None,
+            runTitle=run.title,
+            placeId=place.id,
+            placeName=place.name,
+            sport=run.sport,
+            startsAt=run.startsAt,
+            isTestData=True,
+        )
+    )
+
+
+def test_removed_connection_cannot_reopen_on_the_same_run(monkeypatch):
+    client, sports, connections, _ = _app_client(monkeypatch)
+    connection_id = _connect_and_accept(client)
+    _clock(client).advance(minutes=1)
+    removed = client.post(
+        f"/api/me/connections/{connection_id}/remove", headers=_auth("header.user-a.sig")
+    )
+    assert removed.json()["status"] == "removed"
+    entry = _co_players(client, "header.user-a.sig").json()["items"][0]
+    assert entry["connectionState"] == "removed"
+    assert entry["canRequest"] is False, "the run they already used cannot reopen it"
+    retry = _request(client, "header.user-a.sig", _candidate_id(sports, ACTIVE_RUN_ID, "user-b"))
+    assert retry.status_code == 403
+    assert retry.json()["detail"] == "That athlete is not available to connect from this run"
+    record = connections.get_connection(canonical_pair_key("user-a", "user-b"))
+    assert record.status == "removed"
+    assert record.requestCycle == 1
+
+
+def test_declined_request_cannot_reopen_on_the_same_run(monkeypatch):
+    client, sports, connections, _ = _app_client(monkeypatch)
+    candidates = _open_pair(client)
+    connection_id = _request(client, "header.user-a.sig", candidates["b_candidate"]).json()[
+        "connectionId"
+    ]
+    _clock(client).advance(minutes=1)
+    client.post(f"/api/me/connections/{connection_id}/decline", headers=_auth("header.user-b.sig"))
+    assert _co_players(client, "header.user-a.sig").json()["items"][0]["canRequest"] is False
+    retry = _request(client, "header.user-a.sig", _candidate_id(sports, ACTIVE_RUN_ID, "user-b"))
+    assert retry.status_code == 403
+    assert connections.get_connection(canonical_pair_key("user-a", "user-b")).requestCycle == 1
+
+
+def test_a_run_played_before_the_ending_cannot_reopen_a_relationship(monkeypatch):
+    """A different run is not enough: it has to be a run they played *afterwards*."""
+    client, sports, connections, _ = _app_client(monkeypatch)
+    _open_both_on_run(client, SECOND_RUN_ID)
+    connection_id = _connect_and_accept(client)
+    _clock(client).advance(minutes=5)
+    client.post(f"/api/me/connections/{connection_id}/remove", headers=_auth("header.user-a.sig"))
+    older = _co_players(client, "header.user-a.sig", SECOND_RUN_ID).json()["items"][0]
+    assert older["canRequest"] is False
+    retry = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, SECOND_RUN_ID, "user-b"),
+        SECOND_RUN_ID,
+    )
+    assert retry.status_code == 403
+    assert connections.get_connection(canonical_pair_key("user-a", "user-b")).status == "removed"
+
+
+def test_removed_connection_reopens_after_a_later_verified_shared_run(monkeypatch):
+    client, sports, connections, _ = _app_client(monkeypatch)
+    connection_id = _connect_and_accept(client)
+    pair_key = canonical_pair_key("user-a", "user-b")
+    original = connections.get_connection(pair_key)
+    _clock(client).advance(minutes=1)
+    client.post(f"/api/me/connections/{connection_id}/remove", headers=_auth("header.user-a.sig"))
+    removed_at = connections.get_connection(pair_key).removedAt
+
+    _clock(client).advance(minutes=10)
+    _open_both_on_run(client, SECOND_ACTIVE_RUN_ID)
+    listing = _co_players(client, "header.user-a.sig", SECOND_ACTIVE_RUN_ID).json()["items"][0]
+    assert listing["connectionState"] == "removed"
+    assert listing["canRequest"] is True, "playing together again earns one new request"
+
+    reopened = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+        SECOND_ACTIVE_RUN_ID,
+    )
+    assert reopened.status_code == 200, reopened.text
+    body = reopened.json()
+    assert body["status"] == "pending"
+    assert body["direction"] == "outgoing"
+    assert body["connectionId"] == connection_id, "the opaque client id survives a new cycle"
+    assert body["runId"] == SECOND_ACTIVE_RUN_ID, "the new qualifying run is recorded"
+    assert body["acceptedAt"] is None
+    _assert_no_private_material(body)
+
+    record = connections.get_connection(pair_key)
+    assert record.status == "pending"
+    assert record.requestCycle == 2
+    assert record.lastRequestedAt == _clock(client).now
+    assert record.previousStatus == "removed"
+    assert record.previousStatusAt == removed_at
+    assert record.removedAt is None and record.acceptedAt is None
+    assert record.qualifyingRunId == SECOND_ACTIVE_RUN_ID
+    assert record.qualifyingPlaceId == PLACE_ID
+    assert record.pairKey == pair_key, "the pair document is reused, never recreated"
+    assert record.connectionId == original.connectionId
+    assert record.createdAt == original.createdAt
+    assert len(connections.list_connections_for_member("user-a")) == 1
+
+    accepted = client.post(
+        f"/api/me/connections/{connection_id}/accept", headers=_auth("header.user-b.sig")
+    )
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()["status"] == "accepted"
+
+
+def test_declined_request_reopens_with_the_reversed_requester(monkeypatch):
+    """The athlete who declined may be the one who asks on the next cycle."""
+    client, sports, connections, _ = _app_client(monkeypatch)
+    candidates = _open_pair(client)
+    connection_id = _request(client, "header.user-a.sig", candidates["b_candidate"]).json()[
+        "connectionId"
+    ]
+    _clock(client).advance(minutes=1)
+    client.post(f"/api/me/connections/{connection_id}/decline", headers=_auth("header.user-b.sig"))
+
+    _clock(client).advance(minutes=10)
+    _open_both_on_run(client, SECOND_ACTIVE_RUN_ID)
+    reopened = _request(
+        client,
+        "header.user-b.sig",
+        _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-a"),
+        SECOND_ACTIVE_RUN_ID,
+    )
+    assert reopened.status_code == 200, reopened.text
+    assert reopened.json()["direction"] == "outgoing"
+    assert reopened.json()["displayName"] == "Ada"
+    assert reopened.json()["connectionId"] == connection_id
+
+    record = connections.get_connection(canonical_pair_key("user-a", "user-b"))
+    assert record.requesterUid == "user-b"
+    assert record.recipientUid == "user-a"
+    assert record.previousStatus == "declined"
+    assert record.requestCycle == 2
+    assert set(record.members) == {"user-a", "user-b"}
+
+    lists_a = client.get("/api/me/connections", headers=_auth("header.user-a.sig")).json()
+    assert len(lists_a["incoming"]) == 1 and lists_a["outgoing"] == []
+    assert (
+        client.post(
+            f"/api/me/connections/{connection_id}/accept", headers=_auth("header.user-b.sig")
+        ).status_code
+        == 403
+    ), "the athlete who asked this time cannot answer their own request"
+    assert (
+        client.post(
+            f"/api/me/connections/{connection_id}/accept", headers=_auth("header.user-a.sig")
+        ).status_code
+        == 200
+    )
+
+
+def test_reopening_needs_a_server_check_in_stamp_on_both_sides(monkeypatch):
+    client, sports, connections, _ = _app_client(monkeypatch)
+    connection_id = _connect_and_accept(client)
+    _clock(client).advance(minutes=1)
+    client.post(f"/api/me/connections/{connection_id}/remove", headers=_auth("header.user-a.sig"))
+    _clock(client).advance(minutes=10)
+
+    for uid in ("user-a", "user-b"):
+        _seed_participation_without_check_in(sports, THIRD_ACTIVE_RUN_ID, uid)
+    for token in ("header.user-a.sig", "header.user-b.sig"):
+        assert (
+            _set_visibility(client, token, "open_to_connect", THIRD_ACTIVE_RUN_ID).status_code == 200
+        )
+    assert _co_players(client, "header.user-a.sig", THIRD_ACTIVE_RUN_ID).json()["items"][0][
+        "canRequest"
+    ] is False
+    neither = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, THIRD_ACTIVE_RUN_ID, "user-b"),
+        THIRD_ACTIVE_RUN_ID,
+    )
+    assert neither.status_code == 403
+
+    # One real later check-in is still not enough: both athletes must prove it.
+    _seed_participation_without_check_in(sports, SECOND_ACTIVE_RUN_ID, "user-b")
+    _check_in(client, "header.user-a.sig", SECOND_ACTIVE_RUN_ID)
+    for token in ("header.user-a.sig", "header.user-b.sig"):
+        assert (
+            _set_visibility(client, token, "open_to_connect", SECOND_ACTIVE_RUN_ID).status_code
+            == 200
+        )
+    one_sided = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+        SECOND_ACTIVE_RUN_ID,
+    )
+    assert one_sided.status_code == 403
+    assert connections.get_connection(canonical_pair_key("user-a", "user-b")).status == "removed"
+
+
+def test_a_check_in_recorded_before_the_removal_never_becomes_later(monkeypatch):
+    """Check-in is stamped once, so replaying it cannot manufacture new evidence."""
+    client, sports, connections, _ = _app_client(monkeypatch)
+    connection_id = _connect_and_accept(client)
+    _clock(client).advance(minutes=1)
+    _open_both_on_run(client, SECOND_ACTIVE_RUN_ID)
+    stamped_at = sports.get_participation(SECOND_ACTIVE_RUN_ID, "user-a").checkedInAt
+    # The connection ends in the same instant the pair checked into the later run.
+    client.post(f"/api/me/connections/{connection_id}/remove", headers=_auth("header.user-a.sig"))
+    same_instant = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+        SECOND_ACTIVE_RUN_ID,
+    )
+    assert same_instant.status_code == 403, "evidence has to be newer, not simultaneous"
+
+    _clock(client).advance(minutes=5)
+    _check_in(client, "header.user-a.sig", SECOND_ACTIVE_RUN_ID)
+    _check_in(client, "header.user-b.sig", SECOND_ACTIVE_RUN_ID)
+    assert sports.get_participation(SECOND_ACTIVE_RUN_ID, "user-a").checkedInAt == stamped_at
+    assert (
+        _request(
+            client,
+            "header.user-a.sig",
+            _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+            SECOND_ACTIVE_RUN_ID,
+        ).status_code
+        == 403
+    )
+
+    _open_both_on_run(client, THIRD_ACTIVE_RUN_ID)
+    genuinely_later = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, THIRD_ACTIVE_RUN_ID, "user-b"),
+        THIRD_ACTIVE_RUN_ID,
+    )
+    assert genuinely_later.status_code == 200, genuinely_later.text
+    assert connections.get_connection(canonical_pair_key("user-a", "user-b")).requestCycle == 2
+
+
+def test_going_on_a_later_run_never_reopens_a_removed_connection(monkeypatch):
+    client, sports, connections, _ = _app_client(monkeypatch)
+    connection_id = _connect_and_accept(client)
+    _clock(client).advance(minutes=1)
+    client.post(f"/api/me/connections/{connection_id}/remove", headers=_auth("header.user-a.sig"))
+    _clock(client).advance(minutes=10)
+    _join(client, "header.user-a.sig", THIRD_ACTIVE_RUN_ID)
+    _join(client, "header.user-b.sig", THIRD_ACTIVE_RUN_ID)
+    assert (
+        _set_visibility(
+            client, "header.user-a.sig", "open_to_connect", THIRD_ACTIVE_RUN_ID
+        ).status_code
+        == 403
+    )
+    # Force consent onto both going records to prove status, not data shape, gates it.
+    for uid in ("user-a", "user-b"):
+        record = sports.get_participation(THIRD_ACTIVE_RUN_ID, uid)
+        sports._participants[(THIRD_ACTIVE_RUN_ID, uid)] = record.model_copy(
+            update={"connectionVisibility": "open_to_connect", "candidateId": new_opaque_id()}
+        )
+    forced = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, THIRD_ACTIVE_RUN_ID, "user-b"),
+        THIRD_ACTIVE_RUN_ID,
+    )
+    assert forced.status_code == 403
+    assert connections.get_connection(canonical_pair_key("user-a", "user-b")).status == "removed"
+
+
+def test_reopening_still_requires_the_target_to_be_open_to_connect(monkeypatch):
+    client, sports, connections, _ = _app_client(monkeypatch)
+    connection_id = _connect_and_accept(client)
+    _clock(client).advance(minutes=1)
+    client.post(f"/api/me/connections/{connection_id}/remove", headers=_auth("header.user-a.sig"))
+    _clock(client).advance(minutes=10)
+    _check_in(client, "header.user-a.sig", SECOND_ACTIVE_RUN_ID)
+    _check_in(client, "header.user-b.sig", SECOND_ACTIVE_RUN_ID)
+    assert (
+        _set_visibility(
+            client, "header.user-a.sig", "open_to_connect", SECOND_ACTIVE_RUN_ID
+        ).status_code
+        == 200
+    )
+    assert (
+        _set_visibility(
+            client, "header.user-b.sig", "visible_to_run", SECOND_ACTIVE_RUN_ID
+        ).status_code
+        == 200
+    )
+    listed = _co_players(client, "header.user-a.sig", SECOND_ACTIVE_RUN_ID).json()["items"][0]
+    assert listed["canRequest"] is False
+    refused = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+        SECOND_ACTIVE_RUN_ID,
+    )
+    assert refused.status_code == 403
+    assert connections.get_connection(canonical_pair_key("user-a", "user-b")).status == "removed"
+
+    assert (
+        _set_visibility(
+            client, "header.user-b.sig", "open_to_connect", SECOND_ACTIVE_RUN_ID
+        ).status_code
+        == 200
+    )
+    allowed = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+        SECOND_ACTIVE_RUN_ID,
+    )
+    assert allowed.status_code == 200, allowed.text
+
+
+def test_duplicate_and_concurrent_later_run_requests_stay_idempotent(monkeypatch):
+    client, sports, connections, athletes = _app_client(monkeypatch)
+    connection_id = _connect_and_accept(client)
+    _clock(client).advance(minutes=1)
+    client.post(f"/api/me/connections/{connection_id}/remove", headers=_auth("header.user-a.sig"))
+    _clock(client).advance(minutes=10)
+    _open_both_on_run(client, SECOND_ACTIVE_RUN_ID)
+
+    def _send(uid: str, candidate_id: str):
+        service = AthleteConnectionService(
+            sports, connections, athletes, clock=_clock(client)
+        )
+        return service.request_connection(uid, SECOND_ACTIVE_RUN_ID, candidate_id)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [
+            pool.submit(_send, "user-a", _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b")),
+            pool.submit(_send, "user-b", _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-a")),
+        ]
+        views = [future.result() for future in futures]
+    assert views[0].connectionId == views[1].connectionId == connection_id
+    record = connections.get_connection(canonical_pair_key("user-a", "user-b"))
+    assert record.status == "pending"
+    assert record.requestCycle == 2, "two reversed requests are one new cycle, not two"
+    assert len(connections.list_connections_for_member("user-a")) == 1
+    assert len(connections.list_connections_for_member("user-b")) == 1
+
+    repeat = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+        SECOND_ACTIVE_RUN_ID,
+    )
+    assert repeat.status_code == 200
+    assert repeat.json()["connectionId"] == connection_id
+    assert connections.get_connection(canonical_pair_key("user-a", "user-b")).requestCycle == 2
+
+
+def test_blocked_relationship_cannot_reopen_on_any_later_run(monkeypatch):
+    client, sports, connections, _ = _app_client(monkeypatch)
+    connection_id = _connect_and_accept(client)
+    _clock(client).advance(minutes=1)
+    blocked = client.post(
+        f"/api/me/connections/{connection_id}/block", headers=_auth("header.user-b.sig")
+    )
+    assert blocked.json()["status"] == "blocked"
+    for run_id in (SECOND_ACTIVE_RUN_ID, THIRD_ACTIVE_RUN_ID):
+        _clock(client).advance(minutes=10)
+        _open_both_on_run(client, run_id)
+        assert _co_players(client, "header.user-a.sig", run_id).json()["items"] == []
+        assert _co_players(client, "header.user-b.sig", run_id).json()["items"] == []
+        for token, other in (("header.user-a.sig", "user-b"), ("header.user-b.sig", "user-a")):
+            retry = _request(client, token, _candidate_id(sports, run_id, other), run_id)
+            assert retry.status_code == 403
+            assert (
+                retry.json()["detail"] == "That athlete is not available to connect from this run"
+            )
+    record = connections.get_connection(canonical_pair_key("user-a", "user-b"))
+    assert record.status == "blocked"
+    assert record.requestCycle == 1
+    assert record.previousStatus is None
+
+
+def test_a_declined_relationship_can_still_be_blocked_before_it_reopens(monkeypatch):
+    client, sports, connections, _ = _app_client(monkeypatch)
+    candidates = _open_pair(client)
+    connection_id = _request(client, "header.user-a.sig", candidates["b_candidate"]).json()[
+        "connectionId"
+    ]
+    _clock(client).advance(minutes=1)
+    client.post(f"/api/me/connections/{connection_id}/decline", headers=_auth("header.user-b.sig"))
+    blocked = client.post(
+        f"/api/me/connections/{connection_id}/block", headers=_auth("header.user-b.sig")
+    )
+    assert blocked.status_code == 200
+    assert blocked.json()["status"] == "blocked"
+    _clock(client).advance(minutes=10)
+    _open_both_on_run(client, SECOND_ACTIVE_RUN_ID)
+    retry = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+        SECOND_ACTIVE_RUN_ID,
+    )
+    assert retry.status_code == 403
+    assert connections.get_connection(canonical_pair_key("user-a", "user-b")).status == "blocked"
+
+
+def test_documents_written_before_reconnection_existed_stay_compatible(monkeypatch):
+    """A Phase 3B document has no cycle fields, so it loads as an untouched first cycle."""
+    legacy = AthleteConnection.model_validate(
+        {
+            "pairKey": canonical_pair_key("user-a", "user-b"),
+            "connectionId": new_opaque_id(),
+            "members": sorted(["user-a", "user-b"]),
+            "requesterUid": "user-a",
+            "recipientUid": "user-b",
+            "status": "removed",
+            "qualifyingRunId": ACTIVE_RUN_ID,
+            "qualifyingPlaceId": PLACE_ID,
+            "createdAt": NOW,
+            "updatedAt": NOW,
+            "acceptedAt": NOW,
+            "isTestData": True,
+        }
+    )
+    assert legacy.requestCycle == 1
+    assert legacy.lastRequestedAt is None
+    assert legacy.previousStatus is None
+    assert legacy.previousStatusAt is None
+    assert legacy.removedAt is None, "the old document never recorded one"
+
+    client, sports, connections, _ = _app_client(monkeypatch)
+    connections.apply_connection_transition(legacy.pairKey, lambda _current: legacy)
+    _clock(client).advance(minutes=10)
+    _open_both_on_run(client, SECOND_ACTIVE_RUN_ID)
+    reopened = _request(
+        client,
+        "header.user-a.sig",
+        _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+        SECOND_ACTIVE_RUN_ID,
+    )
+    assert reopened.status_code == 200, reopened.text
+    assert reopened.json()["connectionId"] == legacy.connectionId
+    record = connections.get_connection(legacy.pairKey)
+    assert record.requestCycle == 2
+    assert record.previousStatus == "removed"
+    # With no removedAt to measure against, updatedAt is the boundary that stood.
+    assert record.previousStatusAt == legacy.updatedAt
+    assert len(connections.list_connections_for_member("user-a")) == 1
+
+
+def test_a_blocked_cycle_can_never_be_recorded_as_a_previous_state():
+    with pytest.raises(ValueError):
+        AthleteConnection(
+            pairKey=canonical_pair_key("user-a", "user-b"),
+            connectionId=new_opaque_id(),
+            members=sorted(["user-a", "user-b"]),
+            requesterUid="user-a",
+            recipientUid="user-b",
+            status="pending",
+            qualifyingRunId=ACTIVE_RUN_ID,
+            qualifyingPlaceId=PLACE_ID,
+            createdAt=NOW,
+            updatedAt=NOW,
+            requestCycle=2,
+            previousStatus="blocked",
+        )
+
+
+def test_a_reopened_cycle_leaks_no_private_material_or_audit_fields(monkeypatch, caplog):
+    client, sports, connections, _ = _app_client(monkeypatch)
+    connection_id = _connect_and_accept(client)
+    with caplog.at_level(logging.DEBUG):
+        _clock(client).advance(minutes=1)
+        client.post(
+            f"/api/me/connections/{connection_id}/remove", headers=_auth("header.user-a.sig")
+        )
+        _clock(client).advance(minutes=10)
+        _open_both_on_run(client, SECOND_ACTIVE_RUN_ID)
+        listing = _co_players(client, "header.user-a.sig", SECOND_ACTIVE_RUN_ID).json()
+        reopened = _request(
+            client,
+            "header.user-a.sig",
+            _candidate_id(sports, SECOND_ACTIVE_RUN_ID, "user-b"),
+            SECOND_ACTIVE_RUN_ID,
+        ).json()
+        lists = client.get("/api/me/connections", headers=_auth("header.user-b.sig")).json()
+    for payload in (listing, reopened, lists):
+        _assert_no_private_material(payload)
+        blob = json.dumps(payload)
+        for audit_field in ("requestCycle", "lastRequestedAt", "previousStatus", "previousStatusAt"):
+            assert audit_field not in blob, f"{audit_field} is server-only"
+    record = connections.get_connection(canonical_pair_key("user-a", "user-b"))
+    assert record.requestCycle == 2
+    blob = " ".join(
+        entry.getMessage() + " " + " ".join(str(value) for value in entry.__dict__.values())
+        for entry in caplog.records
+    )
+    for forbidden in list(TOKENS.values()) + list(TOKENS) + list(EMAILS.values()):
+        assert forbidden not in blob
+    for name in DISPLAY_NAMES.values():
+        assert name not in blob
 
 
 # ------------------------------------------------------------------ safety path
