@@ -18,7 +18,7 @@ The Node package in `backend/` is **legacy**. It still installs with `npm ci`, b
 
 Legacy React files under `frontend/components`, `frontend/pages`, `frontend/services`, and `frontend/hooks` are not part of the bootable app. The Vite entrypoint is `frontend/src/main.tsx`. Do not import the legacy `frontend/services/authService.ts` token design.
 
-## Project scope (Phase 3A)
+## Project scope (Phase 3A + 3B)
 
 Included:
 
@@ -29,6 +29,9 @@ Included:
 - Authenticated basketball Run discovery with Place details
 - Authenticated join and check-in, persisted as one participation record per athlete and run
 - Private participation history
+- Per-run connection visibility consent that starts hidden for every athlete
+- "People you played with" limited to co-players from a run both athletes checked into
+- Private connection requests, acceptance, decline, removal, blocking, and safety reporting
 - Labeled development/staging test Place and Runs (not live municipal data)
 - Live FastAPI health check with loading, connected, and error/retry states
 - Disabled roadmap labels for later modules
@@ -38,7 +41,8 @@ Included:
 Not included:
 
 - Google, Apple, phone, or anonymous authentication in the product UI
-- Athlete-to-athlete connections, group chat, messaging, or Beacon Alerts
+- Group chat, messaging, Beacon Alerts, notifications, or contact-detail exchange
+- Public people search, public rosters, follower counts, or friend suggestions
 - Public athlete profiles or public Firestore access
 - Payments, RecTrac, TeamSideline, Cloud Functions, Storage, or AI chat
 - Maps, geofencing, continuous location, or fake live occupancy
@@ -134,6 +138,7 @@ Backend (optional):
 | `ENABLE_EXPERIMENTAL_ROUTES` | Defaults to `false`. Coach, highlight, and extended-schedule routes return 404 until explicitly enabled. |
 | `ENABLE_PRODUCT_ROUTES` | Defaults on only for `development` and `test`. Cannot reopen legacy product APIs in staging, production, or an invalid environment. |
 | `ENABLE_AUTHENTICATED_PROFILE_ROUTES` | Defaults to `false`. Staging sets `true`. Production stays `false` in this phase. Gates `/api/me` and the Phase 3 Play routes. Ignored when `APP_ENV` is missing or unrecognized. |
+| `ENABLE_ATHLETE_CONNECTIONS` | Defaults to `false`. Must be explicitly `true` on top of `ENABLE_AUTHENTICATED_PROFILE_ROUTES` before the Phase 3B connection and safety-report routes answer. Turning the athlete surface on never publishes the social surface with it. |
 | `ENABLE_SPORTS_LOOP_FIXTURES` | When true, FastAPI upserts labeled test Place/Run documents. Defaults on for `development` and `staging`. Always off in `production`. Test defaults off unless set. |
 | `ENABLE_API_DOCS` | Defaults on for `development`, `test`, and `staging`. Disabled for `production` and for invalid `APP_ENV`. |
 | `APP_ENV` | Required. Exactly `development`, `test`, `staging`, or `production`. Missing, blank, `prod`, `preview`, and misspellings fail closed. |
@@ -152,7 +157,8 @@ npx -y firebase-tools@latest emulators:exec --only auth,firestore --project spor
 
 - The athlete workspace authenticates with email/password and persists a private profile, basketball stats, and Run participation through FastAPI.
 - Play Today uses labeled test Place/Run fixtures in development and staging. Those are not live municipal listings.
-- Groups, Messaging, athlete connections, and Matchmaking remain roadmap work. See `docs/phase-3-core-sports-loop.md` and `docs/phase-3b-athlete-connection.md`.
+- Private athlete connections come only from runs both athletes checked into, are hidden by default, and never exchange contact details. See `docs/phase-3b-athlete-connections.md`.
+- Groups, Messaging, and Matchmaking remain roadmap work. See `docs/phase-3-core-sports-loop.md` and `docs/phase-3b-athlete-connection.md`.
 - Coach, highlight, media, and extended-schedule paths remain incomplete and are not started with the shell.
 - Historical `logs/` files were removed from Git tracking. Local copies may still exist. Do not commit Firebase config values or service-account keys.
 
