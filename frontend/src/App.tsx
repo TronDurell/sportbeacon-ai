@@ -3,6 +3,8 @@ import { apiFetch, ApiError, AuthRequiredError, type AuthSession } from "./api/c
 import { fetchHealth, getApiBaseUrl, type HealthPayload } from "./api/health";
 import { AuthProvider } from "./auth/AuthProvider";
 import { useAuth } from "./auth/context";
+import { ConnectionsPanel, RunConnectionPanel } from "./connections/AthleteConnections";
+import { connectionsAreAvailable } from "./connections/eligibility";
 import "./App.css";
 
 type ConnectionState =
@@ -121,6 +123,7 @@ function AthleteWorkspace() {
           <a href="#status">Status</a>
           <a href="#account">Account</a>
           <a href="#play">Play</a>
+          <a href="#connections">Connections</a>
           <a href="#history">History</a>
           <a href="#profile">Profile</a>
           <a href="#stats">Stats</a>
@@ -273,6 +276,7 @@ function SignedInPanels() {
   const [insightState, setInsightState] = useState("Insights use your persisted basketball stats.");
   const [drillState, setDrillState] = useState("Drills use your persisted profile skills.");
   const [historyTick, setHistoryTick] = useState(0);
+  const [connectionTick, setConnectionTick] = useState(0);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -424,7 +428,12 @@ function SignedInPanels() {
 
   return (
     <>
-      <PlayPanel session={session} onParticipationChange={() => setHistoryTick((value) => value + 1)} />
+      <PlayPanel
+        session={session}
+        onParticipationChange={() => setHistoryTick((value) => value + 1)}
+        onConnectionsChanged={() => setConnectionTick((value) => value + 1)}
+      />
+      <ConnectionsPanel session={session} refreshKey={connectionTick} />
       <ParticipationHistory session={session} refreshKey={historyTick} />
       <section id="profile" className="health-panel">
         <div className="health-copy">
@@ -581,9 +590,11 @@ function SignedInPanels() {
 function PlayPanel({
   session,
   onParticipationChange,
+  onConnectionsChanged,
 }: {
   session: AuthSession;
   onParticipationChange: () => void;
+  onConnectionsChanged: () => void;
 }) {
   const [runs, setRuns] = useState<RunView[]>([]);
   const [state, setState] = useState("Looking for basketball runs…");
@@ -726,6 +737,17 @@ function PlayPanel({
                 </button>
               ) : null}
             </div>
+          )}
+          {connectionsAreAvailable(selected) ? (
+            <RunConnectionPanel
+              session={session}
+              run={selected}
+              onConnectionsChanged={onConnectionsChanged}
+            />
+          ) : (
+            <p className="choice-description" data-testid="connections-locked">
+              Check in on this run to see who you played with.
+            </p>
           )}
         </div>
       ) : null}
