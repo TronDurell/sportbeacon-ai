@@ -33,6 +33,18 @@ class SportsLoopRepository(Protocol):
 
     def list_participations(self, uid: str, *, limit: int = 50) -> List[Participation]: ...
 
+    def list_run_participants(self, run_id: str, *, limit: int = 200) -> List[Participation]: ...
+
+    def commit_connection_consent(
+        self,
+        uid: str,
+        run_id: str,
+        visibility: str,
+        now: datetime,
+        candidate_id_factory: Callable[[], str],
+    ) -> Optional[Participation]:
+        """Atomically set the caller's per-run visibility and backfill a candidate id."""
+
 
 class InMemorySportsLoopRepository:
     def __init__(self) -> None:
@@ -96,6 +108,35 @@ class InMemorySportsLoopRepository:
         items = [item for item in self._participants.values() if item.uid == uid]
         items.sort(key=lambda item: item.startsAt, reverse=True)
         return items[:limit]
+
+    def list_run_participants(self, run_id: str, *, limit: int = 200) -> List[Participation]:
+        items = [item for item in self._participants.values() if item.runId == run_id]
+        items.sort(key=lambda item: item.joinedAt)
+        return items[:limit]
+
+    def commit_connection_consent(
+        self,
+        uid: str,
+        run_id: str,
+        visibility: str,
+        now: datetime,
+        candidate_id_factory: Callable[[], str],
+    ) -> Optional[Participation]:
+        with self._lock:
+            existing = self._participants.get((run_id, uid))
+            if existing is None:
+                return None
+            updated = existing.model_copy(
+                update={
+                    "connectionVisibility": visibility,
+                    "connectionVisibilityUpdatedAt": now,
+                    "candidateId": _resolved_candidate_id(
+                        existing.candidateId, visibility, candidate_id_factory
+                    ),
+                }
+            )
+            self._participants[(run_id, uid)] = updated
+            return updated
 
 
 class FirestoreSportsLoopRepository:
@@ -222,3 +263,57 @@ class FirestoreSportsLoopRepository:
             .limit(limit)
         )
         return [Participation.model_validate(doc.to_dict()) for doc in query.stream()]
+
+    def list_run_participants(self, run_id: str, *, limit: int = 200) -> List[Participation]:
+        """Server-only roster read. This is never proxied to a client as a roster."""
+        query = self._run_ref(run_id).collection("participants").limit(limit)
+        items = [Participation.model_validate(doc.to_dict()) for doc in query.stream()]
+        items.sort(key=lambda item: item.joinedAt)
+        return items
+
+    def commit_connection_consent(
+        self,
+        uid: str,
+        run_id: str,
+        visibility: str,
+        now: datetime,
+        candidate_id_factory: Callable[[], str],
+    ) -> Optional[Participation]:
+        from google.cloud import firestore
+
+        participant_ref = self._participant_ref(run_id, uid)
+        athlete_ref = self._athlete_participation_ref(uid, run_id)
+        transaction = self._client.transaction()
+
+        @firestore.transactional
+        def _txn(txn):
+            snapshot = participant_ref.get(transaction=txn)
+            if not snapshot.exists:
+                return None
+            existing = Participation.model_validate(snapshot.to_dict())
+            updated = existing.model_copy(
+                update={
+                    "connectionVisibility": visibility,
+                    "connectionVisibilityUpdatedAt": now,
+                    "candidateId": _resolved_candidate_id(
+                        existing.candidateId, visibility, candidate_id_factory
+                    ),
+                }
+            )
+            payload = updated.model_dump()
+            txn.set(participant_ref, payload)
+            txn.set(athlete_ref, payload)
+            return updated
+
+        return _txn(transaction)
+
+
+def _resolved_candidate_id(
+    current: Optional[str], visibility: str, factory: Callable[[], str]
+) -> Optional[str]:
+    """Lazily mint the opaque per-run id the first time an athlete leaves hidden."""
+    if current is not None:
+        return current
+    if visibility == "hidden":
+        return None
+    return factory()

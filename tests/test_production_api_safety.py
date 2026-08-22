@@ -192,6 +192,43 @@ def test_production_authenticated_profile_routes_stay_closed_when_flag_false(mon
     assert client.get("/api/me/participation").status_code == 404
 
 
+CONNECTION_ID = "0" * 32
+
+
+def test_production_athlete_connection_routes_stay_closed(monkeypatch):
+    client = _production_client(monkeypatch)
+    assert client.get("/api/runs/test-run-basketball-active/co-players").status_code == 404
+    assert client.get("/api/me/connections").status_code == 404
+    assert (
+        client.put(
+            "/api/runs/test-run-basketball-active/me/connection-consent",
+            json={"visibility": "open_to_connect"},
+        ).status_code
+        == 404
+    )
+    for path in (
+        "/api/runs/test-run-basketball-active/connection-requests",
+        f"/api/me/connections/{CONNECTION_ID}/accept",
+        f"/api/me/connections/{CONNECTION_ID}/decline",
+        f"/api/me/connections/{CONNECTION_ID}/remove",
+        f"/api/me/connections/{CONNECTION_ID}/block",
+        "/api/me/safety-reports",
+    ):
+        assert client.post(path, json={}).status_code == 404, path
+
+
+def test_production_connection_routes_stay_closed_even_with_athlete_flag(monkeypatch):
+    """Authorizing the Phase 2B/3A surface must not publish the Phase 3B surface."""
+    client = _production_client(
+        monkeypatch, extra={"ENABLE_AUTHENTICATED_PROFILE_ROUTES": "true"}
+    )
+    assert client.get("/api/me").status_code == 401
+    assert client.get("/api/runs").status_code == 401
+    assert client.get("/api/runs/test-run-basketball-active/co-players").status_code == 404
+    assert client.get("/api/me/connections").status_code == 404
+    assert client.post("/api/me/safety-reports", json={}).status_code == 404
+
+
 def test_production_ignores_product_route_flag_without_auth(monkeypatch):
     client = _production_client(
         monkeypatch,

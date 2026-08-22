@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
@@ -80,6 +80,106 @@ async function fillBasketballStatForm(points = "8") {
   await userEvent.type(screen.getByLabelText("3P%"), "33");
 }
 
+type CoPlayerFixture = {
+  candidateId: string;
+  displayName: string;
+  connectionState: string;
+  canRequest: boolean;
+  connectionId: string | null;
+  runId: string;
+  placeId: string;
+  placeName: string;
+  isTestData: boolean;
+};
+
+type ConnectionFixture = {
+  connectionId: string;
+  displayName: string;
+  status: string;
+  direction: string;
+  runId: string;
+  placeId: string;
+  isTestData: boolean;
+};
+
+type ConnectionOptions = {
+  coPlayers?: {
+    myVisibility?: string;
+    discoverable?: boolean;
+    items?: CoPlayerFixture[];
+  };
+  connections?: {
+    incoming?: ConnectionFixture[];
+    outgoing?: ConnectionFixture[];
+    accepted?: ConnectionFixture[];
+  };
+  onConsent?: (visibility: string) => Response | Promise<Response>;
+  onConnectionRequest?: (candidateId: string) => Response | Promise<Response>;
+  onTransition?: (
+    connectionId: string,
+    action: string,
+  ) => Response | Promise<Response>;
+  onSafetyReport?: (body: Record<string, unknown>) => Response | Promise<Response>;
+};
+
+function connectionEndpoints(
+  url: string,
+  method: string,
+  init?: RequestInit,
+  options?: ConnectionOptions,
+): Response | Promise<Response> | null {
+  const coPlayerMatch = url.match(/\/api\/runs\/([^/]+)\/co-players$/);
+  if (coPlayerMatch && method === "GET") {
+    return jsonResponse({
+      runId: coPlayerMatch[1],
+      myVisibility: options?.coPlayers?.myVisibility ?? "hidden",
+      discoverable: options?.coPlayers?.discoverable ?? false,
+      items: options?.coPlayers?.items ?? [],
+      isTestData: true,
+    });
+  }
+  const consentMatch = url.match(/\/api\/runs\/([^/]+)\/me\/connection-consent$/);
+  if (consentMatch && method === "PUT") {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { visibility?: string };
+    if (options?.onConsent) {
+      return options.onConsent(String(body.visibility));
+    }
+    return jsonResponse({ runId: consentMatch[1], visibility: body.visibility });
+  }
+  const requestMatch = url.match(/\/api\/runs\/([^/]+)\/connection-requests$/);
+  if (requestMatch && method === "POST") {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { candidateId?: string };
+    if (options?.onConnectionRequest) {
+      return options.onConnectionRequest(String(body.candidateId));
+    }
+    return jsonResponse({ detail: "Not Found" }, 404);
+  }
+  if (url.endsWith("/api/me/connections") && method === "GET") {
+    return jsonResponse({
+      incoming: options?.connections?.incoming ?? [],
+      outgoing: options?.connections?.outgoing ?? [],
+      accepted: options?.connections?.accepted ?? [],
+    });
+  }
+  const transitionMatch = url.match(
+    /\/api\/me\/connections\/([^/]+)\/(accept|decline|remove|block)$/,
+  );
+  if (transitionMatch && method === "POST") {
+    if (options?.onTransition) {
+      return options.onTransition(transitionMatch[1], transitionMatch[2]);
+    }
+    return jsonResponse({ detail: "Not Found" }, 404);
+  }
+  if (url.endsWith("/api/me/safety-reports") && method === "POST") {
+    const body = JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>;
+    if (options?.onSafetyReport) {
+      return options.onSafetyReport(body);
+    }
+    return jsonResponse({ status: "received" });
+  }
+  return null;
+}
+
 function playEndpoints(
   url: string,
   method: string,
@@ -88,8 +188,13 @@ function playEndpoints(
     history?: Array<Record<string, unknown>>;
     onJoin?: (runId: string) => Response | Promise<Response>;
     onCheckIn?: (runId: string) => Response | Promise<Response>;
-  },
+  } & ConnectionOptions,
+  init?: RequestInit,
 ): Response | Promise<Response> | null {
+  const connections = connectionEndpoints(url, method, init, options);
+  if (connections) {
+    return connections;
+  }
   if (url.endsWith("/api/runs") && method === "GET") {
     return jsonResponse({ items: options?.runs ?? [] });
   }
@@ -113,19 +218,21 @@ function playEndpoints(
   return null;
 }
 
-function workspaceFetch(options?: {
-  onPostStat?: (init?: RequestInit) => Promise<Response> | Response;
-  stats?: Array<{ statId: string; points: number; occurredAt: string }>;
-  runs?: Array<Record<string, unknown>>;
-  history?: Array<Record<string, unknown>>;
-  onJoin?: (runId: string) => Response | Promise<Response>;
-  onCheckIn?: (runId: string) => Response | Promise<Response>;
-}) {
+function workspaceFetch(
+  options?: {
+    onPostStat?: (init?: RequestInit) => Promise<Response> | Response;
+    stats?: Array<{ statId: string; points: number; occurredAt: string }>;
+    runs?: Array<Record<string, unknown>>;
+    history?: Array<Record<string, unknown>>;
+    onJoin?: (runId: string) => Response | Promise<Response>;
+    onCheckIn?: (runId: string) => Response | Promise<Response>;
+  } & ConnectionOptions,
+) {
   const stats = options?.stats ?? [];
   return vi.fn().mockImplementation(async (input: RequestInfo, init?: RequestInit) => {
     const url = String(input);
     const method = init?.method || "GET";
-    const play = playEndpoints(url, method, options);
+    const play = playEndpoints(url, method, options, init);
     if (play) {
       return play;
     }
@@ -651,6 +758,399 @@ describe("SportBeaconAI athlete workspace", () => {
   });
 });
 
+describe("Phase 3B athlete connections", () => {
+  it("keeps the connection surface locked until the athlete checks in", async () => {
+    const runs = sampleRuns();
+    runs[0].myParticipation = { status: "going", joinedAt: "2026-08-15T17:30:00Z" };
+    vi.stubGlobal("fetch", workspaceFetch({ runs }));
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[0]);
+    expect(screen.getByTestId("connections-locked")).toHaveTextContent(
+      "Check in on this run to see who you played with.",
+    );
+    expect(screen.queryByTestId("run-connection-panel")).not.toBeInTheDocument();
+  });
+
+  it("starts hidden after check-in and says nobody can find the athlete", async () => {
+    const runs = checkedInRuns();
+    vi.stubGlobal("fetch", workspaceFetch({ runs }));
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[0]);
+    expect(await screen.findByTestId("run-connection-panel")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("co-player-state")).toHaveTextContent(
+        "You are hidden on this run. No co-player can find you here.",
+      );
+    });
+    expect(screen.getByRole("radio", { name: /^Hidden/ })).toBeChecked();
+    expect(screen.getByRole("radio", { name: /^Open to connect/ })).not.toBeChecked();
+    expect(
+      screen.getByText(/never shares your email, phone number, exact location, or home area/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Send a connection request/ })).not.toBeInTheDocument();
+  });
+
+  it("opens to connect, shows only safe identity, and sends exactly one request", async () => {
+    const runs = checkedInRuns();
+    const openCandidate = sampleCoPlayer({ candidateId: "cand-open-1", displayName: "Blake" });
+    const visibleOnly = sampleCoPlayer({
+      candidateId: "cand-visible-2",
+      displayName: "Casey",
+      canRequest: false,
+    });
+    const coPlayers = {
+      myVisibility: "hidden",
+      discoverable: false,
+      items: [] as CoPlayerFixture[],
+    };
+    const requested: string[] = [];
+    const fetchMock = workspaceFetch({
+      runs,
+      coPlayers,
+      onConsent: (visibility) => {
+        coPlayers.myVisibility = visibility;
+        coPlayers.discoverable = visibility !== "hidden";
+        coPlayers.items = visibility === "hidden" ? [] : [openCandidate, visibleOnly];
+        return jsonResponse({ runId: runs[0].id, visibility });
+      },
+      onConnectionRequest: (candidateId) => {
+        requested.push(candidateId);
+        coPlayers.items = [
+          {
+            ...openCandidate,
+            connectionState: "pending_outgoing",
+            canRequest: false,
+            connectionId: "conn-1",
+          },
+          visibleOnly,
+        ];
+        return jsonResponse({
+          connectionId: "conn-1",
+          displayName: "Blake",
+          status: "pending",
+          direction: "outgoing",
+          runId: runs[0].id,
+          placeId: "test-place-richmond-rec-gym",
+          isTestData: true,
+        });
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[0]);
+    expect(await screen.findByTestId("run-connection-panel")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("radio", { name: /^Open to connect/ }));
+    await waitFor(() => {
+      expect(screen.getByTestId("co-player-state")).toHaveTextContent(
+        "2 co-players from this run chose to be visible.",
+      );
+    });
+    const consentCalls = fetchMock.mock.calls.filter(
+      ([url, init]) =>
+        String(url).endsWith("/me/connection-consent") &&
+        (init as RequestInit | undefined)?.method === "PUT",
+    );
+    expect(consentCalls).toHaveLength(1);
+    expect(JSON.parse(String(consentCalls[0][1]?.body))).toEqual({ visibility: "open_to_connect" });
+
+    const casey = screen.getByTestId("co-player-cand-visible-2");
+    expect(casey).toHaveTextContent("Casey is visible but not open to requests.");
+    expect(
+      within(casey).queryByRole("button", { name: /Send a connection request/ }),
+    ).not.toBeInTheDocument();
+
+    const blake = screen.getByTestId("co-player-cand-open-1");
+    await userEvent.click(
+      within(blake).getByRole("button", { name: "Send a connection request to Blake" }),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("co-player-state")).toHaveTextContent(
+        "Connection request sent to Blake.",
+      );
+    });
+    expect(requested).toEqual(["cand-open-1"]);
+    expect(screen.getByTestId("co-player-cand-open-1")).toHaveTextContent("Request sent");
+    expect(document.body.textContent).not.toMatch(/@example\.com/);
+    expect(document.body.textContent).not.toMatch(/user-[ab]\b/);
+  });
+
+  it("explains that hidden co-players are still playing the game", async () => {
+    const runs = checkedInRuns();
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs,
+        coPlayers: { myVisibility: "visible_to_run", discoverable: true, items: [] },
+      }),
+    );
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[0]);
+    await waitFor(() => {
+      expect(screen.getByTestId("co-player-state")).toHaveTextContent(
+        "No co-player from this run has chosen to be visible yet. Hidden athletes are still playing.",
+      );
+    });
+    expect(screen.getByRole("radio", { name: /^Visible to this run/ })).toBeChecked();
+  });
+
+  it("surfaces a safe server refusal when a request is not permitted", async () => {
+    const runs = checkedInRuns();
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs,
+        coPlayers: {
+          myVisibility: "open_to_connect",
+          discoverable: true,
+          items: [sampleCoPlayer({ candidateId: "cand-open-1", displayName: "Blake" })],
+        },
+        onConnectionRequest: () =>
+          jsonResponse({ detail: "That athlete is not available to connect" }, 409),
+      }),
+    );
+    await signInToWorkspace();
+    await userEvent.click(screen.getAllByRole("button", { name: "View" })[0]);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Send a connection request to Blake" }),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("co-player-state")).toHaveTextContent(
+        "That athlete is not available to connect",
+      );
+    });
+    expect(screen.queryByText(/traceback/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/uid/i)).not.toBeInTheDocument();
+  });
+
+  it("accepts an incoming request and shows the connection on Play", async () => {
+    const pending = sampleConnection({ connectionId: "conn-9", displayName: "Blake" });
+    const connections = {
+      incoming: [pending],
+      outgoing: [] as ConnectionFixture[],
+      accepted: [] as ConnectionFixture[],
+    };
+    const transitions: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs: sampleRuns(),
+        connections,
+        onTransition: (connectionId, action) => {
+          transitions.push(`${action}:${connectionId}`);
+          if (action === "accept") {
+            connections.incoming = [];
+            connections.accepted = [{ ...pending, status: "accepted", direction: "mutual" }];
+          }
+          return jsonResponse({ ...pending, status: "accepted", direction: "mutual" });
+        },
+      }),
+    );
+    await signInToWorkspace();
+    await waitFor(() => {
+      expect(screen.getByTestId("connections-state")).toHaveTextContent(
+        "0 connected · 1 incoming · 0 sent.",
+      );
+    });
+    const incoming = screen.getByTestId("connections-incoming");
+    expect(within(incoming).getByTestId("connection-conn-9")).toHaveTextContent("Pending");
+    await userEvent.click(
+      within(incoming).getByRole("button", {
+        name: "Accept the connection request from Blake",
+      }),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("connections-accepted")).toHaveTextContent("Connected");
+    });
+    expect(transitions).toEqual(["accept:conn-9"]);
+    expect(screen.getByTestId("connections-state")).toHaveTextContent(
+      "1 connected · 0 incoming · 0 sent.",
+    );
+    expect(screen.getByTestId("connections-incoming")).toHaveTextContent("No incoming requests.");
+  });
+
+  it("declines an incoming request without creating a connection", async () => {
+    const pending = sampleConnection({ connectionId: "conn-10", displayName: "Blake" });
+    const connections = {
+      incoming: [pending],
+      outgoing: [] as ConnectionFixture[],
+      accepted: [] as ConnectionFixture[],
+    };
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs: sampleRuns(),
+        connections,
+        onTransition: (_connectionId, action) => {
+          if (action === "decline") {
+            connections.incoming = [];
+          }
+          return jsonResponse({ ...pending, status: "declined" });
+        },
+      }),
+    );
+    await signInToWorkspace();
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Decline the connection request from Blake" }),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("connections-state")).toHaveTextContent(
+        "No connections yet. Check into a run and choose to be visible to start.",
+      );
+    });
+    expect(screen.getByTestId("connections-accepted")).toHaveTextContent(
+      "No accepted connections yet.",
+    );
+  });
+
+  it("removes an accepted connection", async () => {
+    const accepted = sampleConnection({
+      connectionId: "conn-11",
+      displayName: "Blake",
+      status: "accepted",
+      direction: "mutual",
+    });
+    const connections = {
+      incoming: [] as ConnectionFixture[],
+      outgoing: [] as ConnectionFixture[],
+      accepted: [accepted],
+    };
+    const transitions: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs: sampleRuns(),
+        connections,
+        onTransition: (connectionId, action) => {
+          transitions.push(`${action}:${connectionId}`);
+          connections.accepted = [];
+          return jsonResponse({ ...accepted, status: "removed" });
+        },
+      }),
+    );
+    await signInToWorkspace();
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Remove your connection with Blake" }),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("connections-accepted")).toHaveTextContent(
+        "No accepted connections yet.",
+      );
+    });
+    expect(transitions).toEqual(["remove:conn-11"]);
+  });
+
+  it("blocks an athlete and drops them from every list", async () => {
+    const accepted = sampleConnection({
+      connectionId: "conn-12",
+      displayName: "Blake",
+      status: "accepted",
+      direction: "mutual",
+    });
+    const connections = {
+      incoming: [] as ConnectionFixture[],
+      outgoing: [] as ConnectionFixture[],
+      accepted: [accepted],
+    };
+    const transitions: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs: sampleRuns(),
+        connections,
+        onTransition: (connectionId, action) => {
+          transitions.push(`${action}:${connectionId}`);
+          connections.accepted = [];
+          return jsonResponse({ ...accepted, status: "blocked" });
+        },
+      }),
+    );
+    await signInToWorkspace();
+    const acceptedGroup = await screen.findByTestId("connections-accepted");
+    await userEvent.click(within(acceptedGroup).getByRole("button", { name: "Block Blake" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("connections-state")).toHaveTextContent(
+        "No connections yet. Check into a run and choose to be visible to start.",
+      );
+    });
+    expect(transitions).toEqual(["block:conn-12"]);
+    expect(screen.queryByTestId("connection-conn-12")).not.toBeInTheDocument();
+  });
+
+  it("confirms a safety report without echoing the stored report", async () => {
+    const accepted = sampleConnection({
+      connectionId: "conn-13",
+      displayName: "Blake",
+      status: "accepted",
+      direction: "mutual",
+    });
+    const reports: Array<Record<string, unknown>> = [];
+    vi.stubGlobal(
+      "fetch",
+      workspaceFetch({
+        runs: sampleRuns(),
+        connections: { incoming: [], outgoing: [], accepted: [accepted] },
+        onSafetyReport: (body) => {
+          reports.push(body);
+          return jsonResponse({ status: "received" });
+        },
+      }),
+    );
+    await signInToWorkspace();
+    const card = await screen.findByTestId("connection-conn-13");
+    await userEvent.click(within(card).getByText("Report a safety concern"));
+    await userEvent.selectOptions(
+      within(card).getByLabelText("Reason for reporting Blake"),
+      "harassment",
+    );
+    await userEvent.type(
+      within(card).getByLabelText("What happened with Blake (optional)"),
+      "Kept following me after the run.",
+    );
+    await userEvent.click(within(card).getByRole("button", { name: "Send report" }));
+    expect(
+      await within(card).findByText("Report received. Our safety team reviews reports privately."),
+    ).toBeInTheDocument();
+    expect(reports).toEqual([
+      {
+        connectionId: "conn-13",
+        reasonCode: "harassment",
+        details: "Kept following me after the run.",
+      },
+    ]);
+    expect(document.body.textContent).not.toContain("reportId");
+  });
+
+  it("keeps the connections panel usable when the API returns an unexpected shape", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async (input: RequestInfo, init?: RequestInit) => {
+        const url = String(input);
+        const method = init?.method || "GET";
+        if (url.endsWith("/api/health")) {
+          return healthOk();
+        }
+        if (url.endsWith("/api/me/profile")) {
+          return jsonResponse({ displayName: "Ada", primarySport: "basketball" });
+        }
+        if (url.endsWith("/api/me/connections") && method === "GET") {
+          return jsonResponse({});
+        }
+        return jsonResponse({ items: [] });
+      }),
+    );
+    await signInToWorkspace();
+    await waitFor(() => {
+      expect(screen.getByTestId("connections-state")).toHaveTextContent(
+        "No connections yet. Check into a run and choose to be visible to start.",
+      );
+    });
+    expect(screen.getByTestId("connections-incoming")).toHaveTextContent("No incoming requests.");
+    expect(screen.getByRole("heading", { name: "Athlete connections" })).toBeInTheDocument();
+    expect(screen.getByText(/No public search, no follower counts/i)).toBeInTheDocument();
+  });
+});
+
 function sampleRuns() {
   return [
     {
@@ -692,4 +1192,42 @@ function sampleRuns() {
       myParticipation: null as { status: string; joinedAt: string; checkedInAt?: string } | null,
     },
   ];
+}
+
+function checkedInRuns() {
+  const runs = sampleRuns();
+  runs[0].myParticipation = {
+    status: "checked_in",
+    joinedAt: "2026-08-15T17:30:00Z",
+    checkedInAt: "2026-08-15T18:01:00Z",
+  };
+  return runs;
+}
+
+function sampleCoPlayer(overrides: Partial<CoPlayerFixture> = {}): CoPlayerFixture {
+  return {
+    candidateId: "cand-open-1",
+    displayName: "Blake",
+    connectionState: "none",
+    canRequest: true,
+    connectionId: null,
+    runId: "test-run-basketball-active",
+    placeId: "test-place-richmond-rec-gym",
+    placeName: "TEST DATA — Richmond Rec Gym",
+    isTestData: true,
+    ...overrides,
+  };
+}
+
+function sampleConnection(overrides: Partial<ConnectionFixture> = {}): ConnectionFixture {
+  return {
+    connectionId: "conn-1",
+    displayName: "Blake",
+    status: "pending",
+    direction: "incoming",
+    runId: "test-run-basketball-active",
+    placeId: "test-place-richmond-rec-gym",
+    isTestData: true,
+    ...overrides,
+  };
 }

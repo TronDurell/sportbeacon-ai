@@ -2,7 +2,8 @@
 
 Phase 3A proved `Place → Run → Join → Check In → Participation History`.
 
-Do not implement this document in the current PR.
+Superseded. This is the original candidate design note, kept for history. The implemented slice and the
+decisions that diverged from this note are recorded in `docs/phase-3b-athlete-connections.md`.
 
 ## Product intent
 
