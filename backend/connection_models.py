@@ -29,6 +29,9 @@ SafetyReasonCode = Literal[
 DEFAULT_CONNECTION_VISIBILITY: ConnectionVisibility = "hidden"
 DISCOVERABLE_VISIBILITIES = frozenset({"visible_to_run", "open_to_connect"})
 ELIGIBLE_PARTICIPATION_STATUSES = frozenset({"checked_in", "completed"})
+# Only these two states can start a new request cycle, and only on later verified
+# shared play. "blocked" is permanently terminal in this phase.
+REOPENABLE_STATUSES = frozenset({"declined", "removed"})
 OPAQUE_ID_PATTERN = r"^[a-f0-9]{32}$"
 PAIR_KEY_PATTERN = r"^[a-f0-9]{64}$"
 SAFE_DISPLAY_NAME_FALLBACK = "SportBeacon athlete"
@@ -76,6 +79,12 @@ class AthleteConnection(BaseModel):
     removedAt: Optional[datetime] = None
     blockedAt: Optional[datetime] = None
     blockedBy: Optional[str] = None
+    # Request-cycle audit. A Phase 3B document written before reconnection existed
+    # has none of these, so it deserializes as a first cycle with no prior state.
+    requestCycle: int = Field(default=1, ge=1)
+    lastRequestedAt: Optional[datetime] = None
+    previousStatus: Optional[ConnectionStatus] = None
+    previousStatusAt: Optional[datetime] = None
     isTestData: bool = False
 
     @field_validator("members")
@@ -98,6 +107,8 @@ class AthleteConnection(BaseModel):
             raise ValueError("pairKey must be canonical for the member pair")
         if self.blockedBy is not None and self.blockedBy not in self.members:
             raise ValueError("blockedBy must be a member")
+        if self.previousStatus is not None and self.previousStatus not in REOPENABLE_STATUSES:
+            raise ValueError("only a declined or removed cycle can precede a new request")
         return self
 
     def other_member(self, uid: str) -> str:

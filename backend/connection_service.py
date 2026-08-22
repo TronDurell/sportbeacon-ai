@@ -9,6 +9,7 @@ from .connection_models import (
     DEFAULT_CONNECTION_VISIBILITY,
     DISCOVERABLE_VISIBILITIES,
     ELIGIBLE_PARTICIPATION_STATUSES,
+    REOPENABLE_STATUSES,
     SAFE_DISPLAY_NAME_FALLBACK,
     AthleteConnection,
     ConnectionConsentView,
@@ -62,6 +63,36 @@ def utc_now() -> datetime:
 def participation_is_eligible(record: Optional[Participation]) -> bool:
     """Only a verified check-in or a completed run proves shared play."""
     return record is not None and record.status in ELIGIBLE_PARTICIPATION_STATUSES
+
+
+def as_utc(value: datetime) -> datetime:
+    if value.tzinfo is None or value.utcoffset() is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def terminal_boundary(record: AthleteConnection) -> datetime:
+    """The instant the current declined/removed cycle ended.
+
+    Falls back to ``updatedAt`` so a document written before the marker existed
+    still gets a server timestamp to measure new shared play against, rather than
+    an absent boundary that anything could clear.
+    """
+    marker = record.declinedAt if record.status == "declined" else record.removedAt
+    return as_utc(marker or record.updatedAt)
+
+
+def check_in_is_newer_than(record: Participation, boundary: datetime) -> bool:
+    """Server-authoritative proof that this athlete played again after the boundary.
+
+    ``checkedInAt`` is stamped from the server clock inside the check-in
+    transaction and is never accepted from a request body, so a client cannot
+    move it. A ``completed`` record carrying no check-in evidence proves nothing
+    and does not qualify.
+    """
+    if record.checkedInAt is None:
+        return False
+    return as_utc(record.checkedInAt) > boundary
 
 
 class AthleteConnectionService:
@@ -141,8 +172,11 @@ class AthleteConnectionService:
                     displayName=self._safe_display_name(other.uid),
                     connectionState=state,
                     canRequest=(
-                        relationship is None
-                        and other.connectionVisibility == "open_to_connect"
+                        other.connectionVisibility == "open_to_connect"
+                        and (
+                            relationship is None
+                            or self._may_reopen(relationship, run_id, mine, other)
+                        )
                     ),
                     connectionId=relationship.connectionId if relationship else None,
                     runId=run_id,
@@ -172,23 +206,55 @@ class AthleteConnectionService:
         is_test_data = run.isTestData or place.isTestData
 
         def _mutate(current: Optional[AthleteConnection]) -> Optional[AthleteConnection]:
-            if current is not None:
-                # Duplicate, reversed, and concurrent requests all converge on the
-                # single canonical document, so no second relationship can appear.
+            if current is None:
+                return AthleteConnection(
+                    pairKey=pair_key,
+                    connectionId=self._new_id(),
+                    members=canonical_members(uid, target.uid),
+                    requesterUid=uid,
+                    recipientUid=target.uid,
+                    status="pending",
+                    qualifyingRunId=run.id,
+                    qualifyingPlaceId=place.id,
+                    createdAt=now,
+                    updatedAt=now,
+                    requestCycle=1,
+                    lastRequestedAt=now,
+                    isTestData=is_test_data,
+                )
+            if current.status not in REOPENABLE_STATUSES:
+                # Blocked stays blocked, and a live pending or accepted relationship
+                # absorbs duplicate, reversed, and concurrent requests. All of them
+                # converge on the single canonical document, so no second
+                # relationship and no second pending cycle can appear.
                 return None
-            return AthleteConnection(
-                pairKey=pair_key,
-                connectionId=self._new_id(),
-                members=canonical_members(uid, target.uid),
-                requesterUid=uid,
-                recipientUid=target.uid,
-                status="pending",
-                qualifyingRunId=run.id,
-                qualifyingPlaceId=place.id,
-                createdAt=now,
-                updatedAt=now,
-                isTestData=is_test_data,
+            if not self._may_reopen(current, run.id, mine, target):
+                # The previous cycle's run, an older run, or missing check-in
+                # evidence never reopens a relationship.
+                raise AthleteConnectionError(403, CANDIDATE_UNAVAILABLE)
+            reopened = current.model_copy(
+                update={
+                    "status": "pending",
+                    # Roles follow the athlete who asked this time, so a reversed
+                    # reconnection is a genuine new request, not a revived old one.
+                    "requesterUid": uid,
+                    "recipientUid": target.uid,
+                    "qualifyingRunId": run.id,
+                    "qualifyingPlaceId": place.id,
+                    "requestCycle": current.requestCycle + 1,
+                    "lastRequestedAt": now,
+                    "previousStatus": current.status,
+                    "previousStatusAt": terminal_boundary(current),
+                    # The new cycle carries no outcome yet.
+                    "acceptedAt": None,
+                    "declinedAt": None,
+                    "removedAt": None,
+                    "updatedAt": now,
+                    "isTestData": current.isTestData or is_test_data,
+                }
             )
+            # Rewriting the roles must never break the pair identity they belong to.
+            return AthleteConnection.model_validate(reopened.model_dump())
 
         stored = self._connections.apply_connection_transition(pair_key, _mutate)
         if stored is None:
@@ -387,6 +453,28 @@ class AthleteConnectionService:
                 return record
         logger.info("connection_candidate_unresolved", extra={"run_id": run_id})
         raise AthleteConnectionError(404, CANDIDATE_UNAVAILABLE)
+
+    def _may_reopen(
+        self,
+        record: AthleteConnection,
+        run_id: str,
+        mine: Participation,
+        theirs: Participation,
+    ) -> bool:
+        """New verified shared play: a later run both athletes provably played again.
+
+        Callers have already established mutual visibility, eligible participation,
+        that the target chose ``open_to_connect``, and that neither athlete blocked
+        the other. This adds the anti-harassment gate on top: a genuinely later run,
+        proven by server-stamped check-in evidence on both sides.
+        """
+        if record.status not in REOPENABLE_STATUSES:
+            return False
+        if run_id == record.qualifyingRunId:
+            # The run that produced the previous cycle can never reopen it.
+            return False
+        boundary = terminal_boundary(record)
+        return check_in_is_newer_than(mine, boundary) and check_in_is_newer_than(theirs, boundary)
 
     def _is_blocked_pair(self, uid_a: str, uid_b: str) -> bool:
         record = self._connections.get_connection(canonical_pair_key(uid_a, uid_b))

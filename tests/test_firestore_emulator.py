@@ -402,3 +402,85 @@ def test_connection_consent_persists_on_both_participation_documents(monkeypatch
         is None
     )
 
+
+def test_a_reopened_cycle_reuses_the_same_stored_relationship(monkeypatch):
+    """A second request cycle rewrites one document; it never adds a second one."""
+    monkeypatch.setenv("APP_ENV", "test")
+    from datetime import timedelta
+
+    from google.cloud import firestore
+
+    from backend.connection_models import (
+        AthleteConnection,
+        canonical_members,
+        canonical_pair_key,
+        new_opaque_id,
+    )
+    from backend.connection_repository import FirestoreConnectionRepository
+    from backend.sports_loop_fixtures import ACTIVE_RUN_ID, PLACE_ID, SECOND_ACTIVE_RUN_ID
+
+    client = firestore.Client(project="sportbeacon-ai")
+    repo = FirestoreConnectionRepository(client=client, app_env="test")
+    now = datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc)
+    pair_key = canonical_pair_key("cycle-a", "cycle-b")
+    collection = (
+        client.collection("environments").document("test").collection("athleteConnections")
+    )
+    collection.document(pair_key).delete()
+
+    # A document shaped the way Phase 3B wrote it, with no request-cycle audit fields.
+    legacy = {
+        "pairKey": pair_key,
+        "connectionId": new_opaque_id(),
+        "members": canonical_members("cycle-a", "cycle-b"),
+        "requesterUid": "cycle-a",
+        "recipientUid": "cycle-b",
+        "status": "removed",
+        "qualifyingRunId": ACTIVE_RUN_ID,
+        "qualifyingPlaceId": PLACE_ID,
+        "createdAt": now,
+        "updatedAt": now,
+        "acceptedAt": now,
+        "removedAt": now,
+        "isTestData": True,
+    }
+    collection.document(pair_key).set(legacy)
+    loaded = repo.get_connection(pair_key)
+    assert loaded is not None
+    assert loaded.requestCycle == 1
+    assert loaded.lastRequestedAt is None
+    assert loaded.previousStatus is None
+
+    later = now + timedelta(hours=2)
+
+    def _reopen(current):
+        assert current is not None and current.status == "removed"
+        return current.model_copy(
+            update={
+                "status": "pending",
+                "requesterUid": "cycle-b",
+                "recipientUid": "cycle-a",
+                "qualifyingRunId": SECOND_ACTIVE_RUN_ID,
+                "requestCycle": current.requestCycle + 1,
+                "lastRequestedAt": later,
+                "previousStatus": "removed",
+                "previousStatusAt": current.removedAt,
+                "acceptedAt": None,
+                "removedAt": None,
+                "updatedAt": later,
+            }
+        )
+
+    reopened = repo.apply_connection_transition(pair_key, _reopen)
+    assert reopened.requestCycle == 2
+    assert reopened.connectionId == legacy["connectionId"]
+    stored = collection.document(pair_key).get().to_dict()
+    assert stored["requestCycle"] == 2
+    assert stored["previousStatus"] == "removed"
+    assert stored["removedAt"] is None
+    assert stored["qualifyingRunId"] == SECOND_ACTIVE_RUN_ID
+    assert AthleteConnection.model_validate(stored).status == "pending"
+    for uid in ("cycle-a", "cycle-b"):
+        assert [item.pairKey for item in repo.list_connections_for_member(uid)] == [pair_key]
+    collection.document(pair_key).delete()
+
