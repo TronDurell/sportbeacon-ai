@@ -32,6 +32,8 @@ Included:
 - Per-run connection visibility consent that starts hidden for every athlete
 - "People you played with" limited to co-players from a run both athletes checked into
 - Private connection requests, acceptance, decline, removal, blocking, and safety reporting
+- Reconnection after a decline or a removal, allowed only once both athletes check into a later run
+  together, and never after a block
 - Labeled development/staging test Place and Runs (not live municipal data)
 - Live FastAPI health check with loading, connected, and error/retry states
 - Disabled roadmap labels for later modules
@@ -157,7 +159,7 @@ npx -y firebase-tools@latest emulators:exec --only auth,firestore --project spor
 
 - The athlete workspace authenticates with email/password and persists a private profile, basketball stats, and Run participation through FastAPI.
 - Play Today uses labeled test Place/Run fixtures in development and staging. Those are not live municipal listings.
-- Private athlete connections come only from runs both athletes checked into, are hidden by default, and never exchange contact details. See `docs/phase-3b-athlete-connections.md`.
+- Private athlete connections come only from runs both athletes checked into, are hidden by default, and never exchange contact details. A declined or removed pair can start over only after a later run they both checked into; a block is permanent. See `docs/phase-3b-athlete-connections.md`.
 - Groups, Messaging, and Matchmaking remain roadmap work. See `docs/phase-3-core-sports-loop.md` and `docs/phase-3b-athlete-connection.md`.
 - Coach, highlight, media, and extended-schedule paths remain incomplete and are not started with the shell.
 - Historical `logs/` files were removed from Git tracking. Local copies may still exist. Do not commit Firebase config values or service-account keys.
