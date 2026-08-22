@@ -20,10 +20,19 @@ INVALID_APP_ENVS = (None, "", "   ", "preview", "prodction", "prod")
 PERMISSIVE_FLAGS = {
     "ENABLE_PRODUCT_ROUTES": "true",
     "ENABLE_AUTHENTICATED_PROFILE_ROUTES": "true",
+    "ENABLE_ATHLETE_CONNECTIONS": "true",
     "ENABLE_API_DOCS": "true",
     "ENABLE_EXPERIMENTAL_ROUTES": "true",
 }
-HIDDEN_PATHS = ("/api/me", "/api/drills/recommend", "/docs", "/openapi.json", "/api/runs")
+HIDDEN_PATHS = (
+    "/api/me",
+    "/api/drills/recommend",
+    "/docs",
+    "/openapi.json",
+    "/api/runs",
+    "/api/me/connections",
+    "/api/runs/test-run-basketball-active/co-players",
+)
 STAGING_ORIGIN = "https://sportbeacon-ai.vercel.app"
 PREVIEW_ORIGIN = (
     "https://sportbeacon-ai-git-feat-firebase-au-30ec74-trondurells-projects.vercel.app"
@@ -54,6 +63,9 @@ def _assert_health_closed_surface(client: TestClient) -> None:
     assert client.get("/api/me").status_code == 404
     assert client.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
     assert client.get("/api/runs").status_code == 404
+    assert client.get("/api/me/connections").status_code == 404
+    assert client.get("/api/runs/test-run-basketball-active/co-players").status_code == 404
+    assert client.post("/api/me/safety-reports", json={}).status_code == 404
     assert client.get("/docs").status_code == 404
     assert client.get("/openapi.json").status_code == 404
 
@@ -121,6 +133,7 @@ def test_recognized_development_keeps_controlled_local_behavior(monkeypatch):
     assert closed.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
     assert closed.get("/api/me").status_code == 404
     assert closed.get("/api/runs").status_code == 404
+    assert closed.get("/api/me/connections").status_code == 404
     assert closed.get("/docs").status_code == 404
     auth_only = _client(
         monkeypatch,
@@ -132,7 +145,20 @@ def test_recognized_development_keeps_controlled_local_behavior(monkeypatch):
     )
     assert auth_only.get("/api/me").status_code == 401
     assert auth_only.get("/api/runs").status_code == 401
+    # Phase 3B needs its own flag even when the athlete surface is open.
+    assert auth_only.get("/api/me/connections").status_code == 404
     assert auth_only.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
+    with_connections = _client(
+        monkeypatch,
+        "development",
+        extra={
+            "ENABLE_PRODUCT_ROUTES": "false",
+            "ENABLE_AUTHENTICATED_PROFILE_ROUTES": "true",
+            "ENABLE_ATHLETE_CONNECTIONS": "true",
+        },
+    )
+    assert with_connections.get("/api/me/connections").status_code == 401
+    assert with_connections.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
 
 
 def test_recognized_test_keeps_intentional_product_behavior(monkeypatch):
@@ -167,6 +193,7 @@ def test_recognized_staging_hides_legacy_even_when_product_flag_true(monkeypatch
     assert client.get("/api/health").status_code == 200
     assert client.get("/api/me").status_code == 401
     assert client.get("/api/runs").status_code == 401
+    assert client.get("/api/me/connections").status_code == 404
     assert client.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
     assert client.get("/docs").status_code == 404
     assert client.get("/openapi.json").status_code == 404
@@ -187,6 +214,7 @@ def test_recognized_production_hides_legacy_even_when_flags_true(monkeypatch):
     assert client.get("/api/health").status_code == 200
     assert client.get("/api/me").status_code == 401
     assert client.get("/api/runs").status_code == 401
+    assert client.get("/api/me/connections").status_code == 404
     assert client.post("/api/drills/recommend", json=DRILL_PAYLOAD).status_code == 404
     assert client.get("/docs").status_code == 404
     assert client.get("/openapi.json").status_code == 404
@@ -234,10 +262,28 @@ def test_staging_preflight_allows_enabled_me_and_hides_disabled_surfaces(monkeyp
         ("/docs", "GET"),
         ("/openapi.json", "GET"),
         ("/api/definitely-missing", "GET"),
+        ("/api/me/connections", "GET"),
+        ("/api/me/safety-reports", "POST"),
     ):
         response = _preflight(client, path, STAGING_ORIGIN, method)
         assert response.status_code == 404, path
         assert response.headers.get("access-control-allow-origin") != STAGING_ORIGIN
+
+    connections = _client(
+        monkeypatch,
+        "staging",
+        extra={
+            "ENABLE_PRODUCT_ROUTES": "false",
+            "ENABLE_AUTHENTICATED_PROFILE_ROUTES": "true",
+            "ENABLE_ATHLETE_CONNECTIONS": "true",
+            "ENABLE_API_DOCS": "false",
+            "CORS_ALLOW_ORIGINS": STAGING_ORIGIN,
+        },
+    )
+    for path, method in (("/api/me/connections", "GET"), ("/api/me/safety-reports", "POST")):
+        response = _preflight(connections, path, STAGING_ORIGIN, method)
+        assert response.status_code in {200, 204}, path
+        assert response.headers.get("access-control-allow-origin") == STAGING_ORIGIN
 
 
 def test_production_preflight_hides_disabled_surfaces(monkeypatch):

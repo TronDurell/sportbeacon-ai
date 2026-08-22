@@ -229,3 +229,176 @@ def test_sports_loop_backend_writes_stay_on_env_path(monkeypatch):
     )
     assert again.runTitle == joined.runTitle
 
+
+def test_direct_access_denied_for_connection_and_report_collections():
+    token = _auth_emulator_id_token("connections-rules-test@example.com")
+    pair_key = "a" * 64
+    for path in (
+        "environments/test/athleteConnections",
+        f"environments/test/athleteConnections/{pair_key}",
+        "environments/test/safetyReports",
+        f"environments/test/safetyReports/{'b' * 32}",
+    ):
+        assert _http_status(_firestore_url(path)) in {401, 403}
+        assert _http_status(_firestore_url(path), token=token) in {401, 403}
+
+
+def test_connection_writes_stay_on_the_environment_path(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "test")
+    from google.cloud import firestore
+
+    from backend.connection_models import (
+        AthleteConnection,
+        SafetyReport,
+        canonical_members,
+        canonical_pair_key,
+        new_opaque_id,
+    )
+    from backend.connection_repository import FirestoreConnectionRepository
+    from backend.sports_loop_fixtures import ACTIVE_RUN_ID, PLACE_ID
+
+    client = firestore.Client(project="sportbeacon-ai")
+    repo = FirestoreConnectionRepository(client=client, app_env="test")
+    now = datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc)
+    pair_key = canonical_pair_key("user-a", "user-b")
+
+    def _create(current):
+        assert current is None
+        return AthleteConnection(
+            pairKey=pair_key,
+            connectionId=new_opaque_id(),
+            members=canonical_members("user-a", "user-b"),
+            requesterUid="user-a",
+            recipientUid="user-b",
+            status="pending",
+            qualifyingRunId=ACTIVE_RUN_ID,
+            qualifyingPlaceId=PLACE_ID,
+            createdAt=now,
+            updatedAt=now,
+            isTestData=True,
+        )
+
+    created = repo.apply_connection_transition(pair_key, _create)
+    assert created is not None and created.status == "pending"
+
+    def _idempotent(current):
+        assert current is not None
+        return None
+
+    assert repo.apply_connection_transition(pair_key, _idempotent).connectionId == (
+        created.connectionId
+    )
+    stored = (
+        client.collection("environments")
+        .document("test")
+        .collection("athleteConnections")
+        .document(pair_key)
+        .get()
+    )
+    assert stored.exists
+    stray = (
+        client.collection("environments")
+        .document("production")
+        .collection("athleteConnections")
+        .document(pair_key)
+        .get()
+    )
+    assert not stray.exists
+    assert [item.connectionId for item in repo.list_connections_for_member("user-a")] == [
+        created.connectionId
+    ]
+    assert repo.list_connections_for_member("user-c") == []
+
+    report = SafetyReport(
+        reportId=new_opaque_id(),
+        reporterUid="user-b",
+        subjectUid="user-a",
+        reasonCode="unwanted_contact",
+        details="emulator test only",
+        connectionPairKey=pair_key,
+        runId=ACTIVE_RUN_ID,
+        placeId=PLACE_ID,
+        createdAt=now,
+        isTestData=True,
+    )
+    repo.add_safety_report(report)
+    report_snap = (
+        client.collection("environments")
+        .document("test")
+        .collection("safetyReports")
+        .document(report.reportId)
+        .get()
+    )
+    assert report_snap.exists
+    stray_report = (
+        client.collection("environments")
+        .document("production")
+        .collection("safetyReports")
+        .document(report.reportId)
+        .get()
+    )
+    assert not stray_report.exists
+
+
+def test_connection_consent_persists_on_both_participation_documents(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "test")
+    from google.cloud import firestore
+
+    from backend.connection_models import new_opaque_id
+    from backend.sports_loop_fixtures import (
+        ACTIVE_RUN_ID,
+        PLACE_ID,
+        ensure_sports_loop_fixtures,
+    )
+    from backend.sports_loop_models import Participation
+    from backend.sports_loop_repository import FirestoreSportsLoopRepository
+
+    client = firestore.Client(project="sportbeacon-ai")
+    repo = FirestoreSportsLoopRepository(client=client, app_env="test")
+    now = datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc)
+    ensure_sports_loop_fixtures(repo, now)
+    repo.commit_join(
+        Participation(
+            uid="user-consent",
+            runId=ACTIVE_RUN_ID,
+            status="checked_in",
+            joinedAt=now,
+            checkedInAt=now,
+            runTitle="TEST DATA — Lunch pickup run",
+            placeId=PLACE_ID,
+            placeName="TEST DATA — Richmond Rec Gym",
+            sport="basketball",
+            startsAt=now,
+            isTestData=True,
+        )
+    )
+    stored = repo.get_participation(ACTIVE_RUN_ID, "user-consent")
+    assert stored.connectionVisibility == "hidden"
+    assert stored.candidateId is None
+
+    updated = repo.commit_connection_consent(
+        "user-consent", ACTIVE_RUN_ID, "open_to_connect", now, new_opaque_id
+    )
+    assert updated is not None
+    assert updated.connectionVisibility == "open_to_connect"
+    assert updated.candidateId is not None
+    mirrored = (
+        client.collection("environments")
+        .document("test")
+        .collection("athletes")
+        .document("user-consent")
+        .collection("participations")
+        .document(ACTIVE_RUN_ID)
+        .get()
+    )
+    assert mirrored.to_dict()["candidateId"] == updated.candidateId
+    roster = repo.list_run_participants(ACTIVE_RUN_ID)
+    assert any(item.uid == "user-consent" for item in roster)
+    # Consent for an athlete with no participation cannot be forged.
+    assert (
+        repo.commit_connection_consent(
+            "user-never-played", ACTIVE_RUN_ID, "open_to_connect", now, new_opaque_id
+        )
+        is None
+    )
+
