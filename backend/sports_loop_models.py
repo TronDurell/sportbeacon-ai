@@ -6,6 +6,11 @@ from typing import Any, Dict, List, Literal, Optional, Protocol
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .athlete_models import CANONICAL_SPORTS, FORBIDDEN_IDENTITY_FIELDS
+from .connection_models import (
+    DEFAULT_CONNECTION_VISIBILITY,
+    OPAQUE_ID_PATTERN,
+    ConnectionVisibility,
+)
 
 RunStoredStatus = Literal["scheduled", "cancelled"]
 RunComputedStatus = Literal["upcoming", "active", "completed", "cancelled"]
@@ -113,6 +118,13 @@ class Participation(BaseModel):
     sport: str
     startsAt: datetime
     isTestData: bool = False
+    # Phase 3B consent. Absent on Phase 3A documents, so every stored record and
+    # every new record starts hidden until the athlete explicitly opts in.
+    connectionVisibility: ConnectionVisibility = DEFAULT_CONNECTION_VISIBILITY
+    connectionVisibilityUpdatedAt: Optional[datetime] = None
+    # Random per-run identifier assigned lazily the first time the athlete leaves
+    # hidden. Never derived from the uid, so co-players cannot reverse it.
+    candidateId: Optional[str] = Field(default=None, pattern=OPAQUE_ID_PATTERN)
 
     @field_validator("runId", "placeId")
     @classmethod
